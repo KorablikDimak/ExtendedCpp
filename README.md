@@ -133,10 +133,10 @@ target_link_libraries(MyExec PRIVATE
 Assemblies tested using g++ and MSVC (CLang does not fully support C++20, so you can not build all of this)
 Testing and benchmarks also require appropriate libraries.
 Build CMake options:
--ExtendedCpp_SHARED_LIBS
--BUILD_ALL_TESTS
--LINQ_BUILD_TESTS
--Events_BUILD_TESTS
--Json_BUILD_TESTS
--InfoLog_BUILD_TESTS
--LINQ_BUILD_BENCHMARKS
+- ExtendedCpp_SHARED_LIBS
+- BUILD_ALL_TESTS
+- LINQ_BUILD_TESTS
+- Events_BUILD_TESTS
+- Json_BUILD_TESTS
+- InfoLog_BUILD_TESTS
+- LINQ_BUILD_BENCHMARKS
