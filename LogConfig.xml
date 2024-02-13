@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<logger>
+    <targets>
+        <!--
+        Example of logger configuration. 'logsender' and 'layout' are required attributes for base senders.
+        'filepath' is required attribute for FileSender.
+        Attributes: 'minlevel' is optional for base senders.
+        Parameters provided by base senders:
+        {level}, {message}, {hour}, {minute}, {second}, {millisecond}, {basedir}
+        {dd} or {day}, {mm} or {month}, {yyyy} or {year}, {yy} (short year format)
+        {tag} filters certain senders, if it is specified, then this sender will be used only if the {tag} matches
+        the second parameter. passed to logger methods.
+        -->
+
+        <!--
+        FileSender:
+        Saves the string in its original form, replacing {param name} with param value.
+        You can use the same parameters in the 'filepath' as in 'layout'.
+        -->
+        <target logsender="File" minlevel="Warning" tag="your tag" filepath="{basedir}\logs\{dd}-{mm}-{yyyy}.txt"
+                layout="{hour}:{minute}:{second}:{millisecond} | {level} | {message}"/>
+
+        <!--
+        ConsoleSender:
+        Saves the string in its original form, replacing {param name} with param value.
+        -->
+        <target logsender="Console" minlevel="Warning" tag="your tag"
+                layout="{hour}:{minute}:{second}:{millisecond} | {level} | {message}"/>
+    </targets>
+</logger>
