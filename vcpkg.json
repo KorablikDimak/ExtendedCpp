@@ -1,6 +1,9 @@
 {
   "name" : "extendedcpp",
   "version-string" : "1.0.0",
+  "homepage" : "https://github.com/KorablikDimak/ExtendedCpp",
+  "description" : "A set of libraries that extend standard C++ functionality.",
+  "license" : "MIT",
   "builtin-baseline" : "345ac44ab8d6a16239d3af55df9608bf725e7a48",
   "dependencies" : [ {
     "name" : "benchmark",
