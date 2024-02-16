@@ -32,6 +32,5 @@ if(NOT TARGET ExtendedCpp::LINQ
     endif()
 
     import_targets(${type})
-    check_required_components(ExtendedCpp)
     message("-- Found ${type} ExtendedCpp (version ${${CMAKE_FIND_PACKAGE_NAME}_VERSION})")
 endif()
