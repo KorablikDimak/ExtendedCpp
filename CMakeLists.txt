@@ -30,7 +30,7 @@ option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
-        "${CMAKE_INSTALL_LIBDIR}/cmake/ExtendedCpp" CACHE STRING
+        "${CMAKE_INSTALL_LIBDIR}/cmake/extendedcpp" CACHE STRING
         "Install path for ExtendedCpp package-related CMake files")
 
 if(DEFINED ExtendedCpp_SHARED_LIBS)
@@ -199,10 +199,10 @@ set_target_properties(Common PROPERTIES
 target_link_libraries(InfoLog PUBLIC Xml)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
-    configure_package_config_file(cmake/ExtendedCpp-config.cmake.in ExtendedCpp-config.cmake
+    configure_package_config_file(cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
             INSTALL_DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
 
-    write_basic_package_version_file(ExtendedCpp-config-version.cmake
+    write_basic_package_version_file(extendedcpp-config-version.cmake
             COMPATIBILITY SameMajorVersion)
 
     install(TARGETS LINQ EXPORT LINQ_export
@@ -245,9 +245,9 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             TYPE INCLUDE
             COMPONENT ExtendedCpp-dev)
 
-    set(targets_file "ExtendedCpp-shared-targets.cmake")
+    set(targets_file "extendedcpp-shared-targets.cmake")
     if(NOT BUILD_SHARED_LIBS)
-        set(targets_file "ExtendedCpp-static-targets.cmake")
+        set(targets_file "extendedcpp-static-targets.cmake")
     endif()
 
     install(EXPORT LINQ_export
@@ -287,8 +287,8 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             NAMESPACE ExtendedCpp::)
 
     install(FILES
-            "${CMAKE_CURRENT_BINARY_DIR}/ExtendedCpp-config.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/ExtendedCpp-config-version.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
             COMPONENT ExtendedCpp-dev
             DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
 endif()
