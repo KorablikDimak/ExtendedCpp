@@ -136,8 +136,6 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
         ${Common_INCLUDES}
         ${Common_SOURCE})
 
-include(CMakePackageConfigHelpers)
-
 target_sources(LINQ PRIVATE ${LINQ_INCLUDES})
 target_sources(Events PRIVATE ${Events_INCLUDES})
 target_sources(Json PRIVATE ${Json_INCLUDES})
@@ -199,98 +197,35 @@ set_target_properties(Common PROPERTIES
 target_link_libraries(InfoLog PUBLIC Xml)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
+    include(CMakePackageConfigHelpers)
     configure_package_config_file(cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
             INSTALL_DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
-
     write_basic_package_version_file(extendedcpp-config-version.cmake
             COMPATIBILITY SameMajorVersion)
 
-    install(TARGETS LINQ EXPORT LINQ_export
-            RUNTIME COMPONENT LINQ
-            LIBRARY COMPONENT LINQ NAMELINK_COMPONENT LINQ-dev
-            ARCHIVE COMPONENT LINQ-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-    install(TARGETS Events EXPORT Events_export
-            RUNTIME COMPONENT Events
-            LIBRARY COMPONENT Events NAMELINK_COMPONENT Events-dev
-            ARCHIVE COMPONENT Events-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-    install(TARGETS Json EXPORT Json_export
-            RUNTIME COMPONENT Json
-            LIBRARY COMPONENT Json NAMELINK_COMPONENT Json-dev
-            ARCHIVE COMPONENT Json-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-    install(TARGETS Xml EXPORT Xml_export
-            RUNTIME COMPONENT Xml
-            LIBRARY COMPONENT Xml NAMELINK_COMPONENT Xml-dev
-            ARCHIVE COMPONENT Xml-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-    install(TARGETS InfoLog EXPORT InfoLog_export
-            RUNTIME COMPONENT InfoLog
-            LIBRARY COMPONENT InfoLog NAMELINK_COMPONENT InfoLog-dev
-            ARCHIVE COMPONENT InfoLog-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
-    install(TARGETS Common EXPORT Common_export
-            RUNTIME COMPONENT Common
-            LIBRARY COMPONENT Common NAMELINK_COMPONENT Common-dev
-            ARCHIVE COMPONENT Common-dev
-            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-
     install(DIRECTORY include/
             TYPE INCLUDE
-            COMPONENT ExtendedCpp-dev)
+            COMPONENT ExtendedCpp)
 
     set(targets_file "extendedcpp-shared-targets.cmake")
     if(NOT BUILD_SHARED_LIBS)
         set(targets_file "extendedcpp-static-targets.cmake")
     endif()
 
-    install(EXPORT LINQ_export
-            COMPONENT LINQ-dev
+    install(EXPORT ExtendedCpp_export
+            COMPONENT "${PROJECT_NAME}"
             FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
-
-    install(EXPORT Events_export
-            COMPONENT Events-dev
-            FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
-
-    install(EXPORT Json_export
-            COMPONENT Json-dev
-            FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
-
-    install(EXPORT Xml_export
-            COMPONENT Xml-dev
-            FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
-
-    install(EXPORT InfoLog_export
-            COMPONENT InfoLog-dev
-            FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
-
-    install(EXPORT Common_export
-            COMPONENT Common-dev
-            FILE "${targets_file}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
-            NAMESPACE ExtendedCpp::)
+            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR}
+            NAMESPACE ${PROJECT_NAME}::)
 
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
-            COMPONENT ExtendedCpp-dev
+            COMPONENT "${PROJECT_NAME}"
             DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
+
+    include(cmake/utils.cmake)
+    install_projects(LINQ Events Json Xml InfoLog Common)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
