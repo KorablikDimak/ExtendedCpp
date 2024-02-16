@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.0.0
+        VERSION 1.1.0
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -11,8 +11,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
-
-include(GNUInstallDirs)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
@@ -59,6 +57,9 @@ add_library(ExtendedCpp::Xml ALIAS Xml)
 add_library(InfoLog)
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 
+add_library(Common)
+add_library(ExtendedCpp::Common ALIAS Common)
+
 set(LINQ_INCLUDES
         include/LINQ/LINQ.h
         include/LINQ/OrderType.h
@@ -69,6 +70,7 @@ set(LINQ_INCLUDES
         include/LINQ/Aggregate.h)
 
 set(Events_INCLUDES
+        include/Events/Events.h
         include/Events/Event.h
         include/Events/FunctionHandler.h
         include/Events/IEventHandler.h
@@ -76,10 +78,10 @@ set(Events_INCLUDES
         include/Events/StaticMethodHandler.h)
 
 set(Json_INCLUDES
+        include/Json/Json.h
         include/Json/json.hpp
         include/Json/json_fwd.hpp
-        include/Json/JsonMacros.h
-        include/Json/Json.h)
+        include/Json/JsonMacros.h)
 
 set(Xml_INCLUDES
     include/Xml/Xml.h
@@ -90,6 +92,7 @@ set(Xml_SOURCE
         src/Xml/pugixml.cpp)
 
 set(InfoLog_INCLUDES
+        include/InfoLog/InfoLog.h
         include/InfoLog/Configuration.h
         include/InfoLog/FileSender.h
         include/InfoLog/ISender.h
@@ -98,8 +101,7 @@ set(InfoLog_INCLUDES
         include/InfoLog/LogLevel.h
         include/InfoLog/Parser.h
         include/InfoLog/Converter.h
-        include/InfoLog/ConsoleSender.h
-        include/InfoLog/CInfoLog.h)
+        include/InfoLog/ConsoleSender.h)
 
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
@@ -110,6 +112,19 @@ set(InfoLog_SOURCE
         src/InfoLog/Parser.cpp
         src/InfoLog/ConsoleSender.cpp)
 
+set(Common_INCLUDES
+        include/Common/CancellationToken.h
+        include/Common/CancellationTokenSource.h
+        include/Common/ErrorCode.h
+        include/Common/ErrorInfo.h
+        include/Common/ErrorTrace.h)
+
+set(Common_SOURCE
+        src/Common/CancellationToken.cpp
+        src/Common/CancellationTokenSource.cpp
+        src/Common/ErrorInfo.cpp
+        src/Common/ErrorTrace.cpp)
+
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
         ${LINQ_INCLUDES}
         ${Events_INCLUDES}
@@ -117,7 +132,9 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
         ${Xml_INCLUDES}
         ${Xml_SOURCE}
         ${InfoLog_INCLUDES}
-        ${InfoLog_SOURCE})
+        ${InfoLog_SOURCE}
+        ${Common_INCLUDES}
+        ${Common_SOURCE})
 
 include(CMakePackageConfigHelpers)
 
@@ -126,6 +143,7 @@ target_sources(Events PRIVATE ${Events_INCLUDES})
 target_sources(Json PRIVATE ${Json_INCLUDES})
 target_sources(Xml PRIVATE ${Xml_INCLUDES} ${Xml_SOURCE})
 target_sources(InfoLog PRIVATE ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
+target_sources(Common PRIVATE ${Common_INCLUDES} ${Common_SOURCE})
 
 target_include_directories(LINQ INTERFACE
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -149,6 +167,11 @@ target_include_directories(InfoLog PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/InfoLog")
 
+target_include_directories(Common PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
+        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/Common")
+
 set_target_properties(LINQ PROPERTIES
         SOVERSION ${PROJECT_VERSION_MAJOR}
         VERSION ${PROJECT_VERSION})
@@ -166,6 +189,10 @@ set_target_properties(Xml PROPERTIES
         VERSION ${PROJECT_VERSION})
 
 set_target_properties(InfoLog PROPERTIES
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+        VERSION ${PROJECT_VERSION})
+
+set_target_properties(Common PROPERTIES
         SOVERSION ${PROJECT_VERSION_MAJOR}
         VERSION ${PROJECT_VERSION})
 
@@ -208,6 +235,12 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             ARCHIVE COMPONENT InfoLog-dev
             INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+    install(TARGETS Common EXPORT Common_export
+            RUNTIME COMPONENT Common
+            LIBRARY COMPONENT Common NAMELINK_COMPONENT Common-dev
+            ARCHIVE COMPONENT Common-dev
+            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
     install(DIRECTORY include/
             TYPE INCLUDE
             COMPONENT ExtendedCpp-dev)
@@ -243,6 +276,12 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
 
     install(EXPORT InfoLog_export
             COMPONENT InfoLog-dev
+            FILE "${targets_file}"
+            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
+            NAMESPACE ExtendedCpp::)
+
+    install(EXPORT Common_export
+            COMPONENT Common-dev
             FILE "${targets_file}"
             DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}"
             NAMESPACE ExtendedCpp::)

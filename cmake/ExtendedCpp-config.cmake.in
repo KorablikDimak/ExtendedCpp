@@ -13,7 +13,8 @@ if(NOT TARGET ExtendedCpp::LINQ
         OR NOT TARGET ExtendedCpp::Events
         OR NOT TARGET ExtendedCpp::Json
         OR NOT TARGET ExtendedCpp::Xml
-        OR NOT TARGET ExtendedCpp::InfoLog)
+        OR NOT TARGET ExtendedCpp::InfoLog
+        OR NOT TARGET ExtendedCpp::Common)
     set(type "")
 
     if(DEFINED ExtendedCpp_SHARED_LIBS)
