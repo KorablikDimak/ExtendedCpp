@@ -117,13 +117,15 @@ set(Common_INCLUDES
         include/Common/CancellationTokenSource.h
         include/Common/ErrorCode.h
         include/Common/ErrorInfo.h
-        include/Common/ErrorTrace.h)
+        include/Common/ErrorTrace.h
+        include/Common/Random.h)
 
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
         src/Common/CancellationTokenSource.cpp
         src/Common/ErrorInfo.cpp
-        src/Common/ErrorTrace.cpp)
+        src/Common/ErrorTrace.cpp
+        src/Common/Random.cpp)
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
         ${LINQ_INCLUDES}
