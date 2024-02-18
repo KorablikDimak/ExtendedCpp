@@ -28,7 +28,7 @@ option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
-        "${CMAKE_INSTALL_LIBDIR}" CACHE STRING
+        "${CMAKE_INSTALL_LIBDIR}/extendedcpp" CACHE STRING
         "Install path for ExtendedCpp package-related CMake files")
 
 set(LINQ_INCLUDES
