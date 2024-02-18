@@ -7,6 +7,11 @@ project(ExtendedCpp
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(cmake/utils.cmake)
 
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -14,51 +19,17 @@ endif()
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
-macro(set_if_undefined variable)
-    if(NOT DEFINED "${variable}")
-        set("${variable}" ${ARGN})
-    endif()
-endmacro()
-
-option(ExtendedCpp_SHARED_LIBS "Build libs as shared" OFF)
+option(BUILD_SHARED_LIBS "Build libs as shared" ON)
 option(BUILD_ALL_TESTS "Build all tests for ExtendedCpp" OFF)
 option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
 option(Events_BUILD_TESTS "Build Events library tests" OFF)
 option(Json_BUILD_TESTS "Build Json library tests" OFF)
 option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
-
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
         "${CMAKE_INSTALL_LIBDIR}/cmake/extendedcpp" CACHE STRING
         "Install path for ExtendedCpp package-related CMake files")
-
-if(DEFINED ExtendedCpp_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS ${ExtendedCpp_SHARED_LIBS})
-endif()
-
-if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-add_library(LINQ INTERFACE)
-add_library(ExtendedCpp::LINQ ALIAS LINQ)
-
-add_library(Events INTERFACE)
-add_library(ExtendedCpp::Events ALIAS Events)
-
-add_library(Json INTERFACE)
-add_library(ExtendedCpp::Json ALIAS Json)
-
-add_library(Xml)
-add_library(ExtendedCpp::Xml ALIAS Xml)
-
-add_library(InfoLog)
-add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
-
-add_library(Common)
-add_library(ExtendedCpp::Common ALIAS Common)
 
 set(LINQ_INCLUDES
         include/LINQ/LINQ.h
@@ -84,9 +55,9 @@ set(Json_INCLUDES
         include/Json/JsonMacros.h)
 
 set(Xml_INCLUDES
-    include/Xml/Xml.h
-    include/Xml/pugixml.hpp
-    include/Xml/pugiconfig.hpp)
+        include/Xml/Xml.h
+        include/Xml/pugixml.hpp
+        include/Xml/pugiconfig.hpp)
 
 set(Xml_SOURCE
         src/Xml/pugixml.cpp)
@@ -127,106 +98,51 @@ set(Common_SOURCE
         src/Common/ErrorTrace.cpp
         src/Common/Random.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES
-        ${LINQ_INCLUDES}
-        ${Events_INCLUDES}
-        ${Json_INCLUDES}
-        ${Xml_INCLUDES}
-        ${Xml_SOURCE}
-        ${InfoLog_INCLUDES}
-        ${InfoLog_SOURCE}
-        ${Common_INCLUDES}
-        ${Common_SOURCE})
+add_library(LINQ INTERFACE ${LINQ_INCLUDES})
+add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
-target_sources(LINQ PRIVATE ${LINQ_INCLUDES})
-target_sources(Events PRIVATE ${Events_INCLUDES})
-target_sources(Json PRIVATE ${Json_INCLUDES})
-target_sources(Xml PRIVATE ${Xml_INCLUDES} ${Xml_SOURCE})
-target_sources(InfoLog PRIVATE ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
-target_sources(Common PRIVATE ${Common_INCLUDES} ${Common_SOURCE})
+add_library(Events INTERFACE ${Events_INCLUDES})
+add_library(ExtendedCpp::Events ALIAS Events)
 
-target_include_directories(LINQ INTERFACE
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+add_library(Json INTERFACE ${Json_INCLUDES})
+add_library(ExtendedCpp::Json ALIAS Json)
 
-target_include_directories(Events INTERFACE
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+add_library(Xml ${Xml_INCLUDES} ${Xml_SOURCE})
+add_library(ExtendedCpp::Xml ALIAS Xml)
 
-target_include_directories(Json INTERFACE
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
+add_library(InfoLog ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
+add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 
-target_include_directories(Xml PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/Xml")
+add_library(Common ${Common_INCLUDES} ${Common_SOURCE})
+add_library(ExtendedCpp::Common ALIAS Common)
 
-target_include_directories(InfoLog PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/InfoLog")
-
-target_include_directories(Common PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>"
-        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/Common")
-
-set_target_properties(LINQ PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-set_target_properties(Events PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-set_target_properties(Json PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-set_target_properties(Xml PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-set_target_properties(InfoLog PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-set_target_properties(Common PROPERTIES
-        SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION})
-
-target_link_libraries(InfoLog PUBLIC Xml)
+set_interface_include_directories(LINQ Events Json)
+set_public_include_directories(Xml InfoLog Common)
+set_targets_version(LINQ Events Json Xml InfoLog Common)
+target_link_libraries(InfoLog PRIVATE Xml)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
-    include(CMakePackageConfigHelpers)
-    configure_package_config_file(cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
+    configure_package_config_file(
+            cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
             INSTALL_DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
-    write_basic_package_version_file(extendedcpp-config-version.cmake
+
+    write_basic_package_version_file(
+            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
+            VERSION ${PROJECT_VERSION}
             COMPATIBILITY SameMajorVersion)
 
     install(DIRECTORY include/
-            TYPE INCLUDE
-            COMPONENT ExtendedCpp)
-
-    set(targets_file "extendedcpp-shared-targets.cmake")
-    if(NOT BUILD_SHARED_LIBS)
-        set(targets_file "extendedcpp-static-targets.cmake")
-    endif()
+            TYPE INCLUDE)
 
     install(EXPORT ExtendedCpp_export
-            COMPONENT "${PROJECT_NAME}"
-            FILE "${targets_file}"
-            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR}
-            NAMESPACE ${PROJECT_NAME}::)
+            NAMESPACE ExtendedCpp::
+            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
 
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
-            COMPONENT "${PROJECT_NAME}"
-            DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
+            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR}/cmake/extendedcpp)
 
-    include(cmake/utils.cmake)
     install_projects(LINQ Events Json Xml InfoLog Common)
 endif()
 

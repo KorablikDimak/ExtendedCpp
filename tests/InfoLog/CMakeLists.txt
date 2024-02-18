@@ -19,6 +19,6 @@ set(SOURCES
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 
 add_executable(InfoLog-tests)
-target_sources(InfoLog-tests PRIVATE ${HEADERS} ${SOURCES})
+target_sources(InfoLog-tests PRIVATE ${SOURCES})
 
-target_link_libraries(InfoLog-tests PRIVATE ExtendedCpp::InfoLog GTest::gtest GTest::gtest_main)
+target_link_libraries(InfoLog-tests PRIVATE ExtendedCpp::InfoLog ExtendedCpp::Xml GTest::gtest GTest::gtest_main)
