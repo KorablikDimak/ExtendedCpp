@@ -136,6 +136,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
 
     install(EXPORT ExtendedCpp_export
             NAMESPACE ExtendedCpp::
+            FILE "extendedcpp-targets.cmake"
             DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
 
     install(FILES
