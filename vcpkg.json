@@ -1,6 +1,6 @@
 {
   "name" : "extendedcpp",
-  "version" : "1.1.1",
+  "version" : "1.2.0",
   "port-version": 2,
   "homepage": "https://github.com/KorablikDimak/ExtendedCpp",
   "description" : "A set of libraries that extend standard C++ functionality.",
