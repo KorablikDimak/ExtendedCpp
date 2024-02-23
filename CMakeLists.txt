@@ -25,6 +25,7 @@ option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
 option(Events_BUILD_TESTS "Build Events library tests" OFF)
 option(Json_BUILD_TESTS "Build Json library tests" OFF)
 option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
+option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
@@ -86,16 +87,12 @@ set(InfoLog_SOURCE
 set(Common_INCLUDES
         include/Common/CancellationToken.h
         include/Common/CancellationTokenSource.h
-        include/Common/ErrorCode.h
-        include/Common/ErrorInfo.h
-        include/Common/ErrorTrace.h
-        include/Common/Random.h)
+        include/Common/Random.h
+        include/Common/Matrix.h)
 
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
         src/Common/CancellationTokenSource.cpp
-        src/Common/ErrorInfo.cpp
-        src/Common/ErrorTrace.cpp
         src/Common/Random.cpp)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
@@ -189,4 +186,9 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX}
                 ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif()
+endif()
+
+if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/Common)
 endif()

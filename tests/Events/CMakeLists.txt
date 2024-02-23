@@ -11,16 +11,12 @@ endif()
 
 find_package(GTest REQUIRED)
 
-set(HEADERS
+set(Events_TESTS_HEADERS
         Events_Tests.h)
 
-set(SOURCES
+set(Events_TESTS_SOURCES
         main.cpp
         Events_Tests.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADERS} ${SOURCES})
-
-add_executable(Events-tests)
-target_sources(Events-tests PRIVATE ${HEADERS} ${SOURCES})
-
+add_executable(Events-tests ${Events_TESTS_HEADERS} ${Events_TESTS_SOURCES})
 target_link_libraries(Events-tests PRIVATE ExtendedCpp::Events GTest::gtest GTest::gtest_main)

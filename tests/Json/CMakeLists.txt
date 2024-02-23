@@ -11,19 +11,15 @@ endif()
 
 find_package(GTest REQUIRED)
 
-set(HEADERS
+set(Json_TESTS_HEADERS
         ValueObject.h
         ValuesObject.h
         ObjectObject.h
         ObjectsObject.h)
 
-set(SOURCES
+set(Json_TESTS_SOURCES
         main.cpp
         Json_Tests.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADERS} ${SOURCES})
-
-add_executable(Json-tests)
-target_sources(Json-tests PRIVATE ${HEADERS} ${SOURCES})
-
+add_executable(Json-tests ${Json_TESTS_HEADERS} ${Json_TESTS_SOURCES})
 target_link_libraries(Json-tests PRIVATE ExtendedCpp::Json GTest::gtest GTest::gtest_main)

@@ -11,18 +11,14 @@ endif()
 
 find_package(GTest REQUIRED)
 
-set(HEADERS
+set(LINQ_TESTS_HEADERS
         LINQ_Tests.h)
 
-set(SOURCES
+set(LINQ_TESTS_SOURCES
         main.cpp
         AlgorithmTests.cpp
         SortTests.cpp
         LINQ_Tests.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${HEADERS} ${SOURCES})
-
-add_executable(LINQ-tests)
-target_sources(LINQ-tests PRIVATE ${HEADERS} ${SOURCES})
-
+add_executable(LINQ-tests ${LINQ_TESTS_HEADERS} ${LINQ_TESTS_SOURCES})
 target_link_libraries(LINQ-tests PRIVATE ExtendedCpp::LINQ GTest::gtest GTest::gtest_main)

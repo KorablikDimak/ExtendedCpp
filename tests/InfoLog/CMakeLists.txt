@@ -11,14 +11,10 @@ endif()
 
 find_package(GTest REQUIRED)
 
-set(SOURCES
+set(InfoLog_TESTS_SOURCES
         main.cpp
         ParserTests.cpp
         SenderTests.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
-
-add_executable(InfoLog-tests)
-target_sources(InfoLog-tests PRIVATE ${SOURCES})
-
+add_executable(InfoLog-tests ${InfoLog_TESTS_SOURCES})
 target_link_libraries(InfoLog-tests PRIVATE ExtendedCpp::InfoLog ExtendedCpp::Xml GTest::gtest GTest::gtest_main)
