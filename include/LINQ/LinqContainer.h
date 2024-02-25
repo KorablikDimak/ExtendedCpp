@@ -18,7 +18,7 @@
 namespace LINQ
 {
     template<typename TSource>
-    class LinqContainer
+    class LinqContainer final
     {
     private:
         std::vector<TSource> _collection;

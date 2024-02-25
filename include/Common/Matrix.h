@@ -9,7 +9,7 @@
 namespace Common
 {
     template<typename T>
-    class Matrix
+    class Matrix final
     {
     private:
         std::vector<std::vector<T>> _table;

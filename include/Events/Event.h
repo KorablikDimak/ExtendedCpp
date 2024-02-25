@@ -10,7 +10,7 @@
 namespace Events
 {
     template<typename ...TParams>
-    class Event
+    class Event final
     {
     private:
         using EventHandler = std::shared_ptr<IEventHandler<TParams...>>;

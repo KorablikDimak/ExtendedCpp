@@ -8,7 +8,7 @@
 
 namespace InfoLog
 {
-    class Parser
+    class Parser final
     {
     public:
         Parser() = default;

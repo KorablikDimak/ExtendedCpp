@@ -5,7 +5,7 @@
 
 namespace Common
 {
-    class CancellationTokenSource
+    class CancellationTokenSource final
     {
     private:
         std::atomic<bool*> _cancellationRequest;

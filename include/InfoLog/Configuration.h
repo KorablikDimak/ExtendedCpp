@@ -13,7 +13,7 @@
 
 namespace InfoLog
 {
-    class Configuration
+    class Configuration final
     {
     private:
         std::vector<std::map<std::string, std::string>> _configs;

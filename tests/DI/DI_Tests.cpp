@@ -53,8 +53,7 @@ TEST(DI_Tests, DI_RegisterTest)
 
     // Act
     serviceProvider.AddSingleton<IService, Service>();
-    const DI::Register<Target(IService)> container(serviceProvider);
 
     // Assert
-    ASSERT_NO_THROW(auto target = container.CreateRequired());
+    ASSERT_NO_THROW(auto target = DI::Register<Target(IService)>::CreateRequired(serviceProvider));
 }

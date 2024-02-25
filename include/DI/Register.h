@@ -12,358 +12,50 @@ namespace DI
     class Register<TTarget(TDependencies...)>
     {
     private:
-        ServiceProvider _serviceProvider;
+        template<std::size_t Index = 0>
+        static auto CreateDependencyTuple(const ServiceProvider& provider, auto dependencyTuple)
+        {
+            if constexpr (Index == sizeof...(TDependencies))
+                return dependencyTuple;
+            else
+            {
+                using TDependency = std::tuple_element_t<Index, std::tuple<TDependencies...>>;
+                auto dependency = provider.GetService<TDependency>();
+                return CreateDependencyTuple<Index + 1>(provider, std::tuple_cat(std::move(dependencyTuple), std::make_tuple(std::move(dependency))));
+            }
+        }
+
+        template<std::size_t Index = 0>
+        static auto CreateDependencyTupleRequired(const ServiceProvider& provider, auto dependencyTuple)
+        {
+            if constexpr (Index == sizeof...(TDependencies))
+                return dependencyTuple;
+            else
+            {
+                using TDependency = std::tuple_element_t<Index, std::tuple<TDependencies...>>;
+                auto dependency = provider.GetServiceRequired<TDependency>();
+                return CreateDependencyTupleRequired<Index + 1>(provider, std::tuple_cat(std::move(dependencyTuple), std::make_tuple(std::move(dependency))));
+            }
+        }
 
     public:
-        explicit Register(const ServiceProvider& serviceProvider)
+        static auto Create(const ServiceProvider& provider)
         {
-            _serviceProvider = serviceProvider;
+            auto dependencyTuple = CreateDependencyTuple(provider, std::make_tuple());
+            return CallConstructor(std::make_index_sequence<sizeof...(TDependencies)>{}, std::move(dependencyTuple));
         }
 
-        auto Create() const
+        static auto CreateRequired(const ServiceProvider& provider)
         {
-            constexpr std::size_t N = sizeof...(TDependencies);
-
-            if constexpr (N == 0)
-                return TTarget();
-            if constexpr (N == 1)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>());
-            }
-            if constexpr (N == 2)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>());
-            }
-            if constexpr (N == 3)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>());
-            }
-            if constexpr (N == 4)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>());
-            }
-            if constexpr (N == 5)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>());
-            }
-            if constexpr (N == 6)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>());
-            }
-            if constexpr (N == 7)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>(),
-                    _serviceProvider.GetService<TDependency6>());
-            }
-            if constexpr (N == 8)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>(),
-                    _serviceProvider.GetService<TDependency6>(),
-                    _serviceProvider.GetService<TDependency7>());
-            }
-            if constexpr (N == 9)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>(),
-                    _serviceProvider.GetService<TDependency6>(),
-                    _serviceProvider.GetService<TDependency7>(),
-                    _serviceProvider.GetService<TDependency8>());
-            }
-            if constexpr (N == 10)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                using TDependency9 = std::tuple_element_t<9, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>(),
-                    _serviceProvider.GetService<TDependency6>(),
-                    _serviceProvider.GetService<TDependency7>(),
-                    _serviceProvider.GetService<TDependency8>(),
-                    _serviceProvider.GetService<TDependency9>());
-            }
-            if constexpr (N == 11)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                using TDependency9 = std::tuple_element_t<9, std::tuple<TDependencies...>>;
-                using TDependency10 = std::tuple_element_t<10, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetService<TDependency0>(),
-                    _serviceProvider.GetService<TDependency1>(),
-                    _serviceProvider.GetService<TDependency2>(),
-                    _serviceProvider.GetService<TDependency3>(),
-                    _serviceProvider.GetService<TDependency4>(),
-                    _serviceProvider.GetService<TDependency5>(),
-                    _serviceProvider.GetService<TDependency6>(),
-                    _serviceProvider.GetService<TDependency7>(),
-                    _serviceProvider.GetService<TDependency8>(),
-                    _serviceProvider.GetService<TDependency9>(),
-                    _serviceProvider.GetService<TDependency10>());
-            }
+            auto dependencyTuple = CreateDependencyTupleRequired(provider, std::make_tuple());
+            return CallConstructor(std::make_index_sequence<sizeof...(TDependencies)>{}, std::move(dependencyTuple));
         }
 
-        auto CreateRequired() const
+    private:
+        template<std::size_t ...Indexes>
+        static auto CallConstructor(std::index_sequence<Indexes...>, auto&& dependencyTuple)
         {
-            constexpr std::size_t N = sizeof...(TDependencies);
-
-            if constexpr (N == 0)
-                return TTarget();
-            if constexpr (N == 1)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>());
-            }
-            if constexpr (N == 2)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>());
-            }
-            if constexpr (N == 3)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>());
-            }
-            if constexpr (N == 4)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>());
-            }
-            if constexpr (N == 5)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>());
-            }
-            if constexpr (N == 6)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>());
-            }
-            if constexpr (N == 7)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>(),
-                    _serviceProvider.GetServiceRequired<TDependency6>());
-            }
-            if constexpr (N == 8)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>(),
-                    _serviceProvider.GetServiceRequired<TDependency6>(),
-                    _serviceProvider.GetServiceRequired<TDependency7>());
-            }
-            if constexpr (N == 9)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>(),
-                    _serviceProvider.GetServiceRequired<TDependency6>(),
-                    _serviceProvider.GetServiceRequired<TDependency7>(),
-                    _serviceProvider.GetServiceRequired<TDependency8>());
-            }
-            if constexpr (N == 10)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                using TDependency9 = std::tuple_element_t<9, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>(),
-                    _serviceProvider.GetServiceRequired<TDependency6>(),
-                    _serviceProvider.GetServiceRequired<TDependency7>(),
-                    _serviceProvider.GetServiceRequired<TDependency8>(),
-                    _serviceProvider.GetServiceRequired<TDependency9>());
-            }
-            if constexpr (N == 11)
-            {
-                using TDependency0 = std::tuple_element_t<0, std::tuple<TDependencies...>>;
-                using TDependency1 = std::tuple_element_t<1, std::tuple<TDependencies...>>;
-                using TDependency2 = std::tuple_element_t<2, std::tuple<TDependencies...>>;
-                using TDependency3 = std::tuple_element_t<3, std::tuple<TDependencies...>>;
-                using TDependency4 = std::tuple_element_t<4, std::tuple<TDependencies...>>;
-                using TDependency5 = std::tuple_element_t<5, std::tuple<TDependencies...>>;
-                using TDependency6 = std::tuple_element_t<6, std::tuple<TDependencies...>>;
-                using TDependency7 = std::tuple_element_t<7, std::tuple<TDependencies...>>;
-                using TDependency8 = std::tuple_element_t<8, std::tuple<TDependencies...>>;
-                using TDependency9 = std::tuple_element_t<9, std::tuple<TDependencies...>>;
-                using TDependency10 = std::tuple_element_t<10, std::tuple<TDependencies...>>;
-                return TTarget(_serviceProvider.GetServiceRequired<TDependency0>(),
-                    _serviceProvider.GetServiceRequired<TDependency1>(),
-                    _serviceProvider.GetServiceRequired<TDependency2>(),
-                    _serviceProvider.GetServiceRequired<TDependency3>(),
-                    _serviceProvider.GetServiceRequired<TDependency4>(),
-                    _serviceProvider.GetServiceRequired<TDependency5>(),
-                    _serviceProvider.GetServiceRequired<TDependency6>(),
-                    _serviceProvider.GetServiceRequired<TDependency7>(),
-                    _serviceProvider.GetServiceRequired<TDependency8>(),
-                    _serviceProvider.GetServiceRequired<TDependency9>(),
-                    _serviceProvider.GetServiceRequired<TDependency10>());
-            }
+            return TTarget(std::get<Indexes>(dependencyTuple)...);
         }
     };
 }

@@ -15,7 +15,7 @@ typedef std::vector<InfoLog::ISender::Ptr> Senders;
 
 namespace InfoLog
 {
-    class Logger
+    class Logger final
     {
     private:
         std::unique_ptr<Senders> _senders;

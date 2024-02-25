@@ -12,7 +12,7 @@
 
 namespace DI
 {
-    class ServiceProvider
+    class ServiceProvider final
     {
     private:
         std::map<std::type_index, std::pair<std::any, LifeTime>> _factories;

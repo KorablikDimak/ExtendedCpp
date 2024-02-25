@@ -5,7 +5,7 @@
 
 namespace InfoLog
 {
-    class LoggerFactory
+    class LoggerFactory final
     {
     private:
         std::unique_ptr<Configuration> _configuration;
