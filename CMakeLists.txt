@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.3.0
+        VERSION 1.4.0
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -26,6 +26,7 @@ option(Events_BUILD_TESTS "Build Events library tests" OFF)
 option(Json_BUILD_TESTS "Build Json library tests" OFF)
 option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(Common_BUILD_TESTS "Build Common library tests" OFF)
+option(DI_BUILD_TESTS "Build DI library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
@@ -95,6 +96,10 @@ set(Common_SOURCE
         src/Common/CancellationTokenSource.cpp
         src/Common/Random.cpp)
 
+set(DI_INCLUDES
+        include/DI/ServiceProvider.h
+        include/DI/LifeTime.h)
+
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
@@ -113,9 +118,12 @@ add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 add_library(Common ${Common_INCLUDES} ${Common_SOURCE})
 add_library(ExtendedCpp::Common ALIAS Common)
 
-set_interface_include_directories(LINQ Events Json)
+add_library(DI INTERFACE ${DI_INCLUDES})
+add_library(ExtendedCpp::DI ALIAS DI)
+
+set_interface_include_directories(LINQ Events Json DI)
 set_public_include_directories(Xml InfoLog Common)
-set_targets_version(LINQ Events Json Xml InfoLog Common)
+set_targets_version(LINQ Events Json Xml InfoLog Common DI)
 target_link_libraries(InfoLog PRIVATE Xml)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
@@ -141,7 +149,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
             DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
 
-    install_projects(LINQ Events Json Xml InfoLog Common)
+    install_projects(LINQ Events Json Xml InfoLog Common DI)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
@@ -191,4 +199,9 @@ endif()
 if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Common)
+endif()
+
+if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/DI)
 endif()
