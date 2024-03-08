@@ -98,6 +98,7 @@ set(Common_SOURCE
 
 set(DI_INCLUDES
         include/DI/ServiceProvider.h
+        include/DI/Register.h
         include/DI/LifeTime.h)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
