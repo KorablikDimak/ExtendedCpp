@@ -11,127 +11,150 @@
 namespace LINQ::Sort
 {
     template<Comparable T>
-    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end) noexcept
+    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T smallest = collection[i];
-            std::size_t smallestIndex = i;
-
-            for (std::size_t j = i; j <= end; ++j)
+            for (std::size_t i = start; i <= end; ++i)
             {
-                if (collection[j] < smallest)
-                {
-                    smallest = collection[j];
-                    smallestIndex = j;
-                }
-            }
+                std::size_t smallestIndex = i;
 
-            collection[smallestIndex] = std::move(collection[i]);
-            collection[i] = std::move(smallest);
+                for (std::size_t j = i; j <= end; ++j)
+                    if (collection[j] < collection[smallestIndex])
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
+        }
+        else
+        {
+            for (std::size_t i = start; i <= end; ++i)
+            {
+                std::size_t smallestIndex = i;
+
+                for (std::size_t j = i; j <= end; ++j)
+                    if (collection[j] > collection[smallestIndex])
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
         }
     }
 
     template<Comparable T>
-    void SelectionSort(T* *const collection, const std::size_t start, const std::size_t end) noexcept
+    void SelectionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T* smallest = collection[i];
-            std::size_t smallestIndex = i;
-
-            for (std::size_t j = i; j <= end; ++j)
+            for (std::size_t i = start; i <= end; ++i)
             {
-                if (*collection[j] < *smallest)
-                {
-                    smallest = collection[j];
-                    smallestIndex = j;
-                }
-            }
+                std::size_t smallestIndex = i;
 
-            collection[smallestIndex] = std::move(collection[i]);
-            collection[i] = std::move(smallest);
+                for (std::size_t j = i; j <= end; ++j)
+                    if (*collection[j] < *collection[smallestIndex])
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
+        }
+        else
+        {
+            for (std::size_t i = start; i <= end; ++i)
+            {
+                std::size_t smallestIndex = i;
+
+                for (std::size_t j = i; j <= end; ++j)
+                    if (*collection[j] > *collection[smallestIndex])
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
         }
     }
 
     template<typename T, typename TSelector>
     requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector) noexcept
+    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T smallest = collection[i];
-            std::size_t smallestIndex = i;
-
-            for (std::size_t j = i; j <= end; ++j)
+            for (std::size_t i = start; i <= end; ++i)
             {
-                if (selector(collection[j]) < selector(smallest))
-                {
-                    smallest = collection[j];
-                    smallestIndex = j;
-                }
-            }
+                std::size_t smallestIndex = i;
 
-            collection[smallestIndex] = std::move(collection[i]);
-            collection[i] = std::move(smallest);
+                for (std::size_t j = i; j <= end; ++j)
+                    if (selector(collection[j]) < selector(collection[smallestIndex]))
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
+        }
+        else
+        {
+            for (std::size_t i = start; i <= end; ++i)
+            {
+                std::size_t smallestIndex = i;
+
+                for (std::size_t j = i; j <= end; ++j)
+                    if (selector(collection[j]) > selector(collection[smallestIndex]))
+                        smallestIndex = j;
+
+                std::swap(collection[smallestIndex], collection[i]);
+            }
         }
     }
 
     template<Comparable T>
     void InsertionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start + 1; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T select = collection[i];
-            long long j = static_cast<long long>(i) - 1;
-
-            if (orderType == OrderType::ASC)
-            {
-                while (j >= 0 && select < collection[j])
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (collection[j] < collection[j - 1])
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-            else
-            {
-                while (j >= 0 && collection[j] < select)
+        }
+        else
+        {
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (collection[j] > collection[j - 1])
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-
-            collection[j + 1] = select;
         }
     }
 
     template<Comparable T>
     void InsertionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start + 1; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T* select = collection[i];
-            long long j = static_cast<long long>(i) - 1;
-
-            if (orderType == OrderType::ASC)
-            {
-                while (j >= 0 && *select < *collection[j])
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (*collection[j] < *collection[j - 1])
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-            else
-            {
-                while (j >= 0 && *collection[j] < *select)
+        }
+        else
+        {
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (*collection[j] > *collection[j - 1])
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-
-            collection[j + 1] = select;
         }
     }
 
@@ -140,29 +163,27 @@ namespace LINQ::Sort
     void InsertionSort(T *const collection, const std::size_t start, const std::size_t end,
                        TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
-        for (std::size_t i = start + 1; i <= end; ++i)
+        if (orderType == OrderType::ASC)
         {
-            T select = collection[i];
-            long long j = static_cast<long long>(i) - 1;
-
-            if (orderType == OrderType::ASC)
-            {
-                while (j >= 0 && selector(select) < selector(collection[j]))
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (selector(collection[j]) < selector(collection[j - 1]))
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-            else
-            {
-                while (j >= 0 && selector(collection[j]) < selector(select))
+        }
+        else
+        {
+            for (std::size_t i = start + 1; i <= end; ++i)
+                for(std::size_t j = i; j > 0; --j)
                 {
-                    collection[j + 1] = collection[j];
-                    --j;
+                    if (selector(collection[j]) > selector(collection[j - 1]))
+                        std::swap(collection[j], collection[j - 1]);
+                    else
+                        break;
                 }
-            }
-
-            collection[j + 1] = select;
         }
     }
 
@@ -676,55 +697,32 @@ namespace LINQ::Sort
     }
 
     template<Comparable T>
-    std::pair<std::size_t, std::size_t> Partition(T *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
+    std::size_t Partition(T *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
     {
-        std::size_t mid = start;
-        const T pivot = collection[end];
+        const T pivot = collection[start];
+        std::size_t i = start + 1;
 
         if (orderType == OrderType::ASC)
         {
-            while (mid <= end)
-            {
-                if (collection[mid] < pivot)
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (collection[j] < pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (pivot < collection[mid])
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
         else
         {
-            while (mid <= end)
-            {
-                if (pivot < collection[mid])
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (collection[j] > pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (collection[mid] < pivot)
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
 
-        return std::make_pair(start - 1, mid);
+        std::swap(collection[start], collection[i - 1]);
+        return i - 1;
     }
 
     template<Comparable T>
@@ -738,71 +736,49 @@ namespace LINQ::Sort
                 return;
             }
 
-            const std::pair<std::size_t, std::size_t> mid = Partition(collection, start, end, orderType);
+            const std::size_t mid = Partition(collection, start, end, orderType);
+            if (mid == 0) return;
 
-            if (mid.first - start < end - mid.first)
+            if (mid - start < end - mid)
             {
-                QuickSort(collection, start, mid.first, orderType);
-                start = mid.second + 1;
+                QuickSort(collection, start, mid - 1, orderType);
+                start = mid + 1;
             }
             else
             {
-                QuickSort(collection, mid.second, end, orderType);
-                end = mid.first - 1;
+                QuickSort(collection, mid + 1, end, orderType);
+                end = mid - 1;
             }
         }
     }
 
     template<Comparable T>
-    std::pair<std::size_t, std::size_t> Partition(T* *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
+    std::size_t Partition(T* *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
     {
-        std::size_t mid = start;
-        const T pivot = *collection[end];
+        const T* pivot = collection[start];
+        std::size_t i = start + 1;
 
         if (orderType == OrderType::ASC)
         {
-            while (mid <= end)
-            {
-                if (*collection[mid] < pivot)
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (*collection[j] < *pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (pivot < *collection[mid])
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
         else
         {
-            while (mid <= end)
-            {
-                if (pivot < *collection[mid])
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (*collection[j] > *pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (*collection[mid] < pivot)
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
 
-        return std::make_pair(start - 1, mid);
+        std::swap(collection[start], collection[i - 1]);
+        return i - 1;
     }
 
     template<Comparable T>
@@ -816,75 +792,53 @@ namespace LINQ::Sort
                 return;
             }
 
-            const std::pair<std::size_t, std::size_t> mid = Partition(collection, start, end, orderType);
+            const std::size_t mid = Partition(collection, start, end, orderType);
+            if (mid == 0) return;
 
-            if (mid.first - start < end - mid.first)
+            if (mid - start < end - mid)
             {
-                QuickSort(collection, start, mid.first, orderType);
-                start = mid.second + 1;
+                QuickSort(collection, start, mid - 1, orderType);
+                start = mid + 1;
             }
             else
             {
-                QuickSort(collection, mid.second, end, orderType);
-                end = mid.first - 1;
+                QuickSort(collection, mid + 1, end, orderType);
+                end = mid - 1;
             }
         }
     }
 
     template<typename T, typename TSelector>
     requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    std::pair<std::size_t, std::size_t> Partition(T *const collection, std::size_t start, std::size_t end,
+    std::size_t Partition(T *const collection, std::size_t start, std::size_t end,
                                                   TSelector&& selector, const OrderType orderType) noexcept
     {
         using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
 
-        std::size_t mid = start;
-        const TSelect pivot = selector(collection[end]);
+        const TSelect pivot = selector(collection[start]);
+        std::size_t i = start + 1;
 
         if (orderType == OrderType::ASC)
         {
-            while (mid <= end)
-            {
-                if (selector(collection[mid]) < pivot)
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (selector(collection[j]) < pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (pivot < selector(collection[mid]))
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
         else
         {
-            while (mid <= end)
-            {
-                if (pivot < selector(collection[mid]))
+            for (std::size_t j = start + 1; j <= end; ++j)
+                if (selector(collection[j]) > pivot)
                 {
-                    std::swap(collection[start], collection[mid]);
-                    ++start;
-                    ++mid;
+                    std::swap(collection[i], collection[j]);
+                    ++i;
                 }
-                else if (selector(collection[mid]) < pivot)
-                {
-                    std::swap(collection[mid], collection[end]);
-                    --end;
-                }
-                else
-                {
-                    ++mid;
-                }
-            }
         }
 
-        return std::make_pair(start - 1, mid);
+        std::swap(collection[start], collection[i - 1]);
+        return i - 1;
     }
 
     template<typename T, typename TSelector>
@@ -900,17 +854,18 @@ namespace LINQ::Sort
                 return;
             }
 
-            const std::pair<std::size_t, std::size_t> mid = Partition(collection, start, end, selector, orderType);
+            const std::size_t mid = Partition(collection, start, end, selector, orderType);
+            if (mid == 0) return;
 
-            if (mid.first - start < end - mid.first)
+            if (mid - start < end - mid)
             {
-                QuickSort(collection, start, mid.first, selector, orderType);
-                start = mid.second + 1;
+                QuickSort(collection, start, mid - 1, selector, orderType);
+                start = mid + 1;
             }
             else
             {
-                QuickSort(collection, mid.second, end, selector, orderType);
-                end = mid.first - 1;
+                QuickSort(collection, mid + 1, end, selector, orderType);
+                end = mid - 1;
             }
         }
     }

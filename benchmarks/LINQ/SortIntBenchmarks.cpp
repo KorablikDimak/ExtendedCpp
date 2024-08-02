@@ -27,7 +27,8 @@ BENCHMARK_CAPTURE(QuickSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(QuickSortBenchmark, intSize100, GenerateInts(100));
 BENCHMARK_CAPTURE(QuickSortBenchmark, intSize1000, GenerateInts(1000));
 BENCHMARK_CAPTURE(QuickSortBenchmark, intSize10000, GenerateInts(10000));
-BENCHMARK_CAPTURE(QuickSortBenchmark, intSize50000, GenerateInts(50000));
+BENCHMARK_CAPTURE(QuickSortBenchmark, intSize100000, GenerateInts(100000));
+BENCHMARK_CAPTURE(QuickSortBenchmark, intSize1000000, GenerateInts(1000000));
 
 template<typename ...Args>
 void SelectionSortBenchmark(benchmark::State& state, Args&&... args)

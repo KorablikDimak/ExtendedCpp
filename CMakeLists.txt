@@ -40,7 +40,10 @@ set(LINQ_INCLUDES
         include/LINQ/LinqContainer.h
         include/LINQ/TypeTraits.h
         include/LINQ/Sort.h
-        include/LINQ/Aggregate.h)
+        include/LINQ/Aggregate.h
+        include/LINQ/LinqGenerator.h
+        include/LINQ/Future.h
+        include/LINQ/YieldForeach.h)
 
 set(Events_INCLUDES
         include/Events/Events.h

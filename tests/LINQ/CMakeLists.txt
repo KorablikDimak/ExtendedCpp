@@ -18,7 +18,8 @@ set(LINQ_TESTS_SOURCES
         main.cpp
         AlgorithmTests.cpp
         SortTests.cpp
-        LINQ_Tests.cpp)
+        LINQ_Tests.cpp
+        LINQ_Generator_Tests.cpp)
 
 add_executable(LINQ-tests ${LINQ_TESTS_HEADERS} ${LINQ_TESTS_SOURCES})
 target_link_libraries(LINQ-tests PRIVATE ExtendedCpp::LINQ GTest::gtest GTest::gtest_main)

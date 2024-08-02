@@ -1501,13 +1501,13 @@ PUGI__NS_BEGIN
 			if (ch < 0x800)
 			{
 				result[0] = static_cast<uint8_t>(0xC0 | ch >> 6);
-				result[1] = static_cast<uint8_t>(0x80 | ch & 0x3F);
+				result[1] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 				return result + 2;
 			}
 			// U+0800..U+FFFF
 			result[0] = static_cast<uint8_t>(0xE0 | ch >> 12);
-			result[1] = static_cast<uint8_t>(0x80 | ch >> 6 & 0x3F);
-			result[2] = static_cast<uint8_t>(0x80 | ch & 0x3F);
+			result[1] = static_cast<uint8_t>(0x80 | (ch >> 6 & 0x3F));
+			result[2] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 			return result + 3;
 		}
 
@@ -1515,9 +1515,9 @@ PUGI__NS_BEGIN
 		{
 			// U+10000..U+10FFFF
 			result[0] = static_cast<uint8_t>(0xF0 | ch >> 18);
-			result[1] = static_cast<uint8_t>(0x80 | ch >> 12 & 0x3F);
-			result[2] = static_cast<uint8_t>(0x80 | ch >> 6 & 0x3F);
-			result[3] = static_cast<uint8_t>(0x80 | ch & 0x3F);
+			result[1] = static_cast<uint8_t>(0x80 | (ch >> 12 & 0x3F));
+			result[2] = static_cast<uint8_t>(0x80 | (ch >> 6 & 0x3F));
+			result[3] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 			return result + 4;
 		}
 
@@ -1670,7 +1670,7 @@ PUGI__NS_BEGIN
 				// 110xxxxx -> U+0080..U+07FF
 				else if (static_cast<unsigned int>(lead - 0xC0) < 0x20 && size >= 2 && (data[1] & 0xc0) == 0x80)
 				{
-					result = Traits::low(result, (lead & ~0xC0) << 6 | data[1] & utf8_byte_mask);
+					result = Traits::low(result, (lead & ~0xC0) << 6 | (data[1] & utf8_byte_mask));
 					data += 2;
 					size -= 2;
 				}

@@ -1,0 +1,129 @@
+----------------------------------------------------------------------------------
+Benchmark                                        Time             CPU   Iterations
+----------------------------------------------------------------------------------
+QuickSortBenchmark/stringSize20               93.9 ns         82.0 ns      8960000 | best of 20
+QuickSortBenchmark/stringSize100               292 ns          276 ns     11200000 | best of 100
+QuickSortBenchmark/stringSize1000             2531 ns         2455 ns       280000 | best of 1000
+QuickSortBenchmark/stringSize10000           29659 ns        30134 ns        24889 | best of 10000
+QuickSortBenchmark/stringSize100000         427389 ns       414994 ns         1619 | best of 100000
+
+InsertionSortBenchmark/stringSize20           52.4 ns         53.1 ns     10000000 | best of 20
+InsertionSortBenchmark/stringSize100           274 ns          237 ns      2635294 | best of 100
+InsertionSortBenchmark/stringSize1000         2712 ns         2686 ns       448000 | best of 1000
+InsertionSortBenchmark/stringSize10000       40780 ns        37438 ns        14190 | best of 10000
+
+CombSortBenchmark/stringSize20                 340 ns          338 ns      2036364
+CombSortBenchmark/stringSize100               3188 ns         3247 ns       235789
+CombSortBenchmark/stringSize1000             55070 ns        56054 ns        13380
+CombSortBenchmark/stringSize10000          1008116 ns       952148 ns          640
+CombSortBenchmark/stringSize100000        19495838 ns     19761029 ns           34
+
+MergeSortBenchmark/stringSize20               5682 ns         5580 ns       112000
+MergeSortBenchmark/stringSize100             38392 ns        38504 ns        18667
+MergeSortBenchmark/stringSize1000           528142 ns       515625 ns         1000
+MergeSortBenchmark/stringSize10000         7627467 ns      7638889 ns           90
+MergeSortBenchmark/stringSize100000       94174267 ns     91145833 ns            6
+
+TimSortBenchmark/stringSize20                 58.4 ns         57.8 ns     10000000 | best of 20
+TimSortBenchmark/stringSize100                4863 ns         4813 ns       149333
+TimSortBenchmark/stringSize1000             183289 ns       181370 ns         3446
+TimSortBenchmark/stringSize10000           4014333 ns      4087936 ns          172
+TimSortBenchmark/stringSize100000        126580475 ns    128906250 ns            4
+
+StdSortBenchmark/stringSize20                  214 ns          213 ns      3446154
+StdSortBenchmark/stringSize100                1902 ns         1542 ns       344615
+StdSortBenchmark/stringSize1000              28550 ns        26681 ns        29867
+StdSortBenchmark/stringSize10000            444293 ns       449219 ns         1600
+StdSortBenchmark/stringSize100000          6977317 ns      6423611 ns           90
+
+----------------------------------------------------------------------------------
+QuickSortBenchmark/intSize20                  10.7 ns         8.79 ns     64000000 | best of 20
+QuickSortBenchmark/intSize100                 50.3 ns         47.4 ns     11200000 | best of 100
+QuickSortBenchmark/intSize1000                 461 ns          348 ns      1659259 | best of 1000
+QuickSortBenchmark/intSize10000               4531 ns         4450 ns       154483 | best of 10000
+QuickSortBenchmark/intSize100000             45906 ns        45898 ns        16000 | best of 100000
+QuickSortBenchmark/intSize1000000           575486 ns       575374 ns          869 | best of 1000000
+
+InsertionSortBenchmark/intSize20              13.9 ns         13.8 ns     49777778 | best of 20
+InsertionSortBenchmark/intSize100             72.1 ns         72.5 ns     11200000 | best of 100
+InsertionSortBenchmark/intSize1000             688 ns          663 ns       896000 | best of 1000
+InsertionSortBenchmark/intSize10000           9527 ns         9574 ns        52227
+InsertionSortBenchmark/intSize100000    1.4227e+10 ns   1.3219e+10 ns            1
+
+CombSortBenchmark/intSize20                   77.2 ns         76.7 ns      8960000
+CombSortBenchmark/intSize100                   635 ns          628 ns       896000
+CombSortBenchmark/intSize1000                10079 ns        10010 ns        64000
+CombSortBenchmark/intSize10000              149025 ns       149972 ns         4480
+CombSortBenchmark/intSize100000            1968764 ns      1856884 ns          345
+CombSortBenchmark/intSize1000000          25568760 ns     25520833 ns           30
+CombSortBenchmark/intSize10000000        809419900 ns    812500000 ns            1
+
+MergeSortBenchmark/intSize20                  77.1 ns         75.0 ns      8960000
+MergeSortBenchmark/intSize100                  635 ns          628 ns      1120000
+MergeSortBenchmark/intSize1000               10101 ns         8789 ns        74667
+MergeSortBenchmark/intSize10000             149212 ns       139509 ns         5600
+MergeSortBenchmark/intSize100000           1956630 ns      1811594 ns          345
+MergeSortBenchmark/intSize1000000         25636238 ns     25240385 ns           26
+MergeSortBenchmark/intSize10000000       809614500 ns    828125000 ns            1
+
+TimSortBenchmark/intSize20                    15.1 ns         15.1 ns     49777778 | best of 20
+TimSortBenchmark/intSize100                    236 ns          230 ns      2986667
+TimSortBenchmark/intSize1000                  4595 ns         4688 ns       160000
+TimSortBenchmark/intSize10000                72408 ns        72307 ns         9292
+TimSortBenchmark/intSize100000           118729640 ns    112500000 ns            5
+TimSortBenchmark/intSize1000000         3210355500 ns   2750000000 ns            1
+TimSortBenchmark/intSize10000000        3.2481e+10 ns   3.0188e+10 ns            1
+
+StdSortBenchmark/intSize20                    26.0 ns         24.6 ns     40727273
+StdSortBenchmark/intSize100                    279 ns          220 ns      3772632
+StdSortBenchmark/intSize1000                  3715 ns         3404 ns       280000
+StdSortBenchmark/intSize10000                55152 ns        54688 ns        10000
+StdSortBenchmark/intSize100000              640453 ns       641741 ns         1120
+StdSortBenchmark/intSize1000000            7638954 ns      6993007 ns          143
+StdSortBenchmark/intSize10000000         327675050 ns    265625000 ns            2
+
+----------------------------------------------------------------------------------
+QuickSortBenchmark/doubleSize20               13.2 ns         12.6 ns     49777778 | best of 20
+QuickSortBenchmark/doubleSize100              78.6 ns         61.4 ns     11200000 | best of 100
+QuickSortBenchmark/doubleSize1000              697 ns          670 ns      1120000 | best of 1000
+QuickSortBenchmark/doubleSize10000            7268 ns         6906 ns        74667 | best of 10000
+QuickSortBenchmark/doubleSize100000          69174 ns        70416 ns        14867 | best of 100000
+QuickSortBenchmark/doubleSize1000000        864441 ns       817716 ns          707 | best of 1000000
+
+InsertionSortBenchmark/doubleSize20           13.6 ns         12.6 ns     49777778 | best of 20
+InsertionSortBenchmark/doubleSize100          71.0 ns         71.1 ns     11200000 | best of 100
+InsertionSortBenchmark/doubleSize1000          688 ns          575 ns       896000 | best of 1000
+InsertionSortBenchmark/doubleSize10000        8891 ns         8967 ns        74930 | best of 10000
+InsertionSortBenchmark/doubleSize100000 1.5415e+10 ns   1.4094e+10 ns            1
+
+CombSortBenchmark/doubleSize20                82.6 ns         76.7 ns      8960000
+CombSortBenchmark/doubleSize100                656 ns          663 ns       896000
+CombSortBenchmark/doubleSize1000             10164 ns         9626 ns        74667
+CombSortBenchmark/doubleSize10000           150229 ns       139509 ns         4480
+CombSortBenchmark/doubleSize100000         1990110 ns      1819779 ns          498
+CombSortBenchmark/doubleSize1000000       25705247 ns     25347222 ns           45
+CombSortBenchmark/doubleSize10000000    1092911000 ns   1046875000 ns            1
+
+MergeSortBenchmark/doubleSize20               81.3 ns         83.7 ns      8960000
+MergeSortBenchmark/doubleSize100               654 ns          656 ns      1120000
+MergeSortBenchmark/doubleSize1000            10168 ns         9766 ns        64000
+MergeSortBenchmark/doubleSize10000          151058 ns       122070 ns         4480
+MergeSortBenchmark/doubleSize100000        1974638 ns      1630435 ns          345
+MergeSortBenchmark/doubleSize1000000      26952536 ns     23125000 ns           25
+MergeSortBenchmark/doubleSize10000000   1095782300 ns   1031250000 ns            1
+
+TimSortBenchmark/doubleSize20                 14.3 ns         14.4 ns     49777778 | best of 20
+TimSortBenchmark/doubleSize100                 201 ns          201 ns      3733333
+TimSortBenchmark/doubleSize1000               4238 ns         4238 ns       165926
+TimSortBenchmark/doubleSize10000             66575 ns        68011 ns         8960
+TimSortBenchmark/doubleSize100000         95987400 ns     93750000 ns            6
+TimSortBenchmark/doubleSize1000000      3200627400 ns   3187500000 ns            1
+TimSortBenchmark/doubleSize10000000     3.5356e+10 ns   3.4047e+10 ns            1
+
+StdSortBenchmark/doubleSize20                 33.4 ns         30.5 ns     23578947
+StdSortBenchmark/doubleSize100                 237 ns          183 ns      2986667
+StdSortBenchmark/doubleSize1000               3894 ns         2563 ns       213333
+StdSortBenchmark/doubleSize10000             52452 ns        51896 ns        14452
+StdSortBenchmark/doubleSize100000           638778 ns       578125 ns         1000
+StdSortBenchmark/doubleSize1000000         8188584 ns      6868132 ns           91
+StdSortBenchmark/doubleSize10000000      780482400 ns    718750000 ns            1

@@ -38,6 +38,7 @@ BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize20, GenerateStrings(20));
 BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize100, GenerateStrings(100));
 BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize1000, GenerateStrings(1000));
 BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize10000, GenerateStrings(10000));
+BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize100000, GenerateStrings(100000));
 
 template<typename ...Args>
 void InsertionSortBenchmark(benchmark::State& state, Args&&... args)
