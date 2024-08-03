@@ -344,7 +344,7 @@ namespace LINQ
             for (auto& element : otherCollection)
                 newCollection.insert(std::move(element));
 
-            return LinqContainer(std::move(newCollection));
+            return LinqGenerator(std::move(newCollection));
         }
 
         template<typename TResult>
@@ -505,17 +505,9 @@ namespace LINQ
         requires IsFunctor<TKeySelector, TSource>
         LinqGenerator<std::pair<TKey, std::vector<TSource>>> GroupBy(TKeySelector&& keySelector) noexcept
         {
-            std::map<TKey, std::vector<TSource>> result;
-
-            while (_yieldContext)
-            {
-                auto element = _yieldContext.Next();
-                if (!result.contains(keySelector(element)))
-                    result.insert(std::pair<TKey, std::vector<TSource>>(keySelector(element), std::vector<TSource>()));
-                result.at(keySelector(element)).push_back(element);
-            }
-
-            return LinqGenerator<std::pair<TKey, std::vector<TSource>>>(std::move(result));
+            return LinqGenerator<std::pair<TKey, std::vector<TSource>>>([this](TKeySelector&& keySelector_)
+                { return GroupByGenerator(std::forward<TKeySelector>(keySelector_)); },
+                                          std::forward<TKeySelector>(keySelector));
         }
 
         template<ConstIterable TOtherCollection,
@@ -781,52 +773,80 @@ namespace LINQ
                 _yieldContext.Next();
         }
 
+        template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
+        requires IsFunctor<TKeySelector, TSource>
+        Future<std::pair<TKey, std::vector<TSource>>> GroupByGenerator(TKeySelector&& keySelector) noexcept
+        {
+            std::map<TKey, std::vector<TSource>> result;
+
+            while (_yieldContext)
+            {
+                auto element = _yieldContext.Next();
+                if (!result.contains(keySelector(element)))
+                    result.insert(std::pair<TKey, std::vector<TSource>>(keySelector(element), std::vector<TSource>()));
+                result.at(keySelector(element)).push_back(std::move(element));
+            }
+
+            for (auto& kv : result)
+                co_yield std::move(kv);
+        }
+
         template<ConstIterable TOtherCollection,
-                 typename TInnerKeySelector,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
+                typename TInnerKeySelector,
+                typename TOtherKeySelector,
+                typename TResultSelector,
+                typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
         requires IsFunctor<TInnerKeySelector, TSource> &&
                  IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
                  IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
                  std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Equalable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         Future<TResult> JoinGenerator(const TOtherCollection& otherCollection,
-                                    TInnerKeySelector&& innerKeySelector,
-                                    TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) noexcept
+                                      TInnerKeySelector&& innerKeySelector,
+                                      TOtherKeySelector&& otherKeySelector,
+                                      TResultSelector&& resultSelector) noexcept
         {
+            std::vector<TResult> result;
+
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
                 for (const auto& otherElement : otherCollection)
                     if (innerKeySelector(element) == otherKeySelector(otherElement))
-                        co_yield resultSelector(std::move(element), otherElement);
+                        result.push_back(resultSelector(std::move(element), otherElement));
             }
+
+            for (auto& element : result)
+                co_yield std::move(element);
         }
 
         template<Iterable TOtherCollection,
-                 typename TInnerKeySelector,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
+                typename TInnerKeySelector,
+                typename TOtherKeySelector,
+                typename TResultSelector,
+                typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
         requires IsFunctor<TInnerKeySelector, TSource> &&
                  IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
                  IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
                  std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Equalable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         Future<TResult> JoinGenerator(TOtherCollection&& otherCollection,
-                                    TInnerKeySelector&& innerKeySelector,
-                                    TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) noexcept
+                                      TInnerKeySelector&& innerKeySelector,
+                                      TOtherKeySelector&& otherKeySelector,
+                                      TResultSelector&& resultSelector) noexcept
         {
+            std::vector<TResult> result;
+
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
                 for (auto& otherElement : otherCollection)
                     if (innerKeySelector(element) == otherKeySelector(otherElement))
-                        co_yield resultSelector(std::move(element), std::move(otherElement));
+                        result.push_back(resultSelector(std::move(element), std::move(otherElement)));
             }
+
+            for (auto& element : result)
+                co_yield std::move(element);
         }
 
         template<ConstIterable TOtherCollection,
@@ -840,19 +860,23 @@ namespace LINQ
                  IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
                  std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         Future<TResult> GroupJoinGenerator(const TOtherCollection& otherCollection,
-                                         TInnerKeySelector&& innerKeySelector,
-                                         TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) noexcept
+                                           TInnerKeySelector&& innerKeySelector,
+                                           TOtherKeySelector&& otherKeySelector,
+                                           TResultSelector&& resultSelector) noexcept
         {
             auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
+            std::vector<TResult> result;
 
             while (groups)
             {
                 auto&& [key, group] = groups.Next();
                 for (const auto& element : otherCollection)
                     if (std::move(key) == otherKeySelector(element))
-                        co_yield resultSelector(std::move(group), element);
+                        result.push_back(resultSelector(std::move(group), element));
             }
+
+            for (auto& element : result)
+                co_yield std::move(element);
         }
 
         template<Iterable TOtherCollection,
@@ -866,16 +890,23 @@ namespace LINQ
                  IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
                  std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         Future<TResult> GroupJoinGenerator(TOtherCollection&& otherCollection,
-                                         TInnerKeySelector&& innerKeySelector,
-                                         TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) noexcept
+                                           TInnerKeySelector&& innerKeySelector,
+                                           TOtherKeySelector&& otherKeySelector,
+                                           TResultSelector&& resultSelector) noexcept
         {
-            std::map<TKey, std::vector<TSource>> groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
+            auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
+            std::vector<TResult> result;
 
-            for (auto& [key, group] : groups)
-                for (auto& element : otherCollection)
+            while (groups)
+            {
+                auto&& [key, group] = groups.Next();
+                for (const auto& element : otherCollection)
                     if (std::move(key) == otherKeySelector(element))
-                        co_yield resultSelector(std::move(group), std::move(element));
+                        result.push_back(resultSelector(std::move(group), std::move(element)));
+            }
+
+            for (auto& element : result)
+                co_yield std::move(element);
         }
 
         template<typename TOtherCollection,

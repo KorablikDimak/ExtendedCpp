@@ -112,9 +112,19 @@ namespace LINQ
             return _collection.begin();
         }
 
+        const_iterator begin() const noexcept
+        {
+            return _collection.cbegin();
+        }
+
         iterator end() noexcept
         {
             return _collection.end();
+        }
+
+        const_iterator end() const noexcept
+        {
+            return _collection.cend();
         }
 
         const_iterator cbegin() const noexcept
@@ -132,9 +142,19 @@ namespace LINQ
             return _collection.rbegin();
         }
 
+        const_reverse_iterator rbegin() const noexcept
+        {
+            return _collection.crbegin();
+        }
+
         reverse_iterator rend() noexcept
         {
             return _collection.rend();
+        }
+
+        const_reverse_iterator rend() const noexcept
+        {
+            return _collection.crend();
         }
 
         const_reverse_iterator crbegin() const noexcept
@@ -148,6 +168,11 @@ namespace LINQ
         }
 
         TSource* data() noexcept
+        {
+            return _data;
+        }
+
+        const TSource* data() const noexcept
         {
             return _data;
         }

@@ -34,9 +34,9 @@ namespace LINQ
                 return Future(handle_type::from_promise(*this));
             }
 
-            TSource Value() noexcept
+            TSource Value() const noexcept
             {
-                return std::move(_value);
+                return _value;
             }
 
         private:
@@ -47,19 +47,29 @@ namespace LINQ
 
         ~Future()
         {
-            _handle.destroy();
+            if (_handle) _handle.destroy();
         }
 
-        explicit operator bool() noexcept
+        explicit operator bool() const noexcept
         {
             return !_handle.done();
         }
 
+        TSource Value() const noexcept
+        {
+            if (!_handle.done()) return _handle.promise().Value();
+            else return {};
+        }
+
         TSource Next() noexcept
         {
-            TSource value = std::move(_handle.promise().Value());
-            _handle.resume();
-            return value;
+            if (!_handle.done())
+            {
+                TSource value = _handle.promise().Value();
+                _handle.resume();
+                return value;
+            }
+            else return {};
         }
 
     private:

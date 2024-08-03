@@ -1086,3 +1086,20 @@ TEST(LINQ_Tests, EraseTest)
     for (int i = 0; i < checkVector2.size(); ++i)
         ASSERT_EQ(checkVector2[i], result2[i]);
 }
+
+TEST(LINQ_Tests, ForeachTest)
+{
+    // Average
+    const std::vector numbers { 8, 7, 1, 9, 50, 6, 3 };
+
+    // Act
+    const auto clinq = LINQ::From(numbers);
+    auto linq = LINQ::From(numbers);
+
+    // Assert
+    for (const auto& element : clinq)
+        ASSERT_TRUE(element > 0);
+
+    for (auto& element : linq)
+        ASSERT_TRUE(element > 0);
+}

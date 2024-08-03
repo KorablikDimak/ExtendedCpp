@@ -147,8 +147,8 @@ TEST(LINQ_Generator_Tests, OrderByTest)
     ASSERT_EQ(1, sortedNumbers[5]);
     ASSERT_EQ(0, sortedNumbers[6]);
 }
-// TODO OrderByWithSelectorTest
-/*TEST(LINQ_Generator_Tests, OrderByWithSelectorTest)
+
+TEST(LINQ_Generator_Tests, OrderByWithSelectorTest)
 {
     // Average
     Person person1("Tom", 23);
@@ -180,9 +180,9 @@ TEST(LINQ_Generator_Tests, OrderByTest)
     ASSERT_EQ(24, sortedAges[1]);
     ASSERT_EQ(27, sortedAges[2]);
     ASSERT_EQ(29, sortedAges[3]);
-}*/
+}
 
-TEST(LINQ_Generator_Tests, ExceptTest)
+TEST(LINQ_Generator_Tests, ExceptTest1)
 {
     // Average
     const std::vector numbers1 { 4, 3, 6, 1, 5 };
@@ -197,7 +197,22 @@ TEST(LINQ_Generator_Tests, ExceptTest)
     ASSERT_EQ(2, result.size());
 }
 
-TEST(LINQ_Generator_Tests, IntersectTest)
+TEST(LINQ_Generator_Tests, ExceptTest2)
+{
+    // Average
+    const std::vector numbers1 { 4, 3, 6, 1, 5 };
+    std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+    // Act
+    const std::vector result = LINQ::Generator(numbers1)
+            .Except(std::move(numbers2))
+            .ToVector();
+
+    // Assert
+    ASSERT_EQ(2, result.size());
+}
+
+TEST(LINQ_Generator_Tests, IntersectTest1)
 {
     // Average
     const std::vector numbers1 { 4, 3, 6, 1, 5 };
@@ -206,6 +221,21 @@ TEST(LINQ_Generator_Tests, IntersectTest)
     // Act
     const std::vector result = LINQ::Generator(numbers1)
             .Intersect(numbers2)
+            .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, result.size());
+}
+
+TEST(LINQ_Generator_Tests, IntersectTest2)
+{
+    // Average
+    const std::vector numbers1 { 4, 3, 6, 1, 5 };
+    std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+    // Act
+    const std::vector result = LINQ::Generator(numbers1)
+            .Intersect(std::move(numbers2))
             .ToVector();
 
     // Assert
@@ -225,8 +255,8 @@ TEST(LINQ_Generator_Tests, DistinctTest)
     // Assert
     ASSERT_EQ(4, result.size());
 }
-// TODO UnionTest
-/*TEST(LINQ_Generator_Tests, UnionTest)
+
+TEST(LINQ_Generator_Tests, UnionTest1)
 {
     // Average
     const std::vector numbers1 { 4, 3, 6, 1, 5 };
@@ -239,7 +269,22 @@ TEST(LINQ_Generator_Tests, DistinctTest)
 
     // Assert
     ASSERT_EQ(7, result.size());
-}*/
+}
+
+TEST(LINQ_Generator_Tests, UnionTest2)
+{
+    // Average
+    const std::vector numbers1 { 4, 3, 6, 1, 5 };
+    std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+    // Act
+    const std::vector result = LINQ::Generator(numbers1)
+            .Union(std::move(numbers2))
+            .ToVector();
+
+    // Assert
+    ASSERT_EQ(7, result.size());
+}
 
 TEST(LINQ_Generator_Tests, AggregateTest)
 {
@@ -458,8 +503,8 @@ TEST(LINQ_Generator_Tests, TakeWhileTest)
     ASSERT_EQ(2, result[1]);
     ASSERT_EQ(3, result[2]);
 }
-// TODO GroupByTest
-/*TEST(LINQ_Generator_Tests, GroupByTest)
+
+TEST(LINQ_Generator_Tests, GroupByTest)
 {
     // Average
     Employer person1("Tom", "Microsoft");
@@ -479,9 +524,9 @@ TEST(LINQ_Generator_Tests, TakeWhileTest)
     ASSERT_EQ(2, companies.size());
     ASSERT_EQ(2, companies["Microsoft"].size());
     ASSERT_EQ(3, companies["Google"].size());
-}*/
-// TODO JoinTest
-/*TEST(LINQ_Generator_Tests, JoinTest)
+}
+
+TEST(LINQ_Generator_Tests, JoinTest1)
 {
     // Average
     Employer person1("Tom", "Microsoft");
@@ -506,14 +551,48 @@ TEST(LINQ_Generator_Tests, TakeWhileTest)
             .ToVector();
 
     // Asset
+    ASSERT_EQ(employees.size(), 5);
     ASSERT_EQ("C#", employees[0].Language);
     ASSERT_EQ("C++", employees[1].Language);
     ASSERT_EQ("C#", employees[2].Language);
     ASSERT_EQ("C++", employees[3].Language);
     ASSERT_EQ("C++", employees[4].Language);
-}*/
-// TODO GroupJoinTest
-/*TEST(LINQ_Generator_Tests, GroupJoinTest)
+}
+
+TEST(LINQ_Generator_Tests, JoinTest2)
+{
+    // Average
+    Employer person1("Tom", "Microsoft");
+    Employer person2("Bob", "Google");
+    Employer person3("Sam", "Microsoft");
+    Employer person4("Alice", "Google");
+    Employer person5("Jon", "Google");
+
+    std::vector people { person1, person2, person3, person4, person5 };
+
+    ItCompany company1("Microsoft", "C#");
+    ItCompany company2("Google", "C++");
+
+    std::vector companies { company1, company2 };
+
+    // Act
+    const std::vector employees = LINQ::Generator(people)
+            .Join(std::move(companies),
+                  [](const Employer& employer){ return employer.CompanyName; },
+                  [](const ItCompany& company){ return company.Name; },
+                  [](const Employer& employer, const ItCompany& company){ return Employer(employer.Name, company.Name, company.Language); })
+            .ToVector();
+
+    // Asset
+    ASSERT_EQ(employees.size(), 5);
+    ASSERT_EQ("C#", employees[0].Language);
+    ASSERT_EQ("C++", employees[1].Language);
+    ASSERT_EQ("C#", employees[2].Language);
+    ASSERT_EQ("C++", employees[3].Language);
+    ASSERT_EQ("C++", employees[4].Language);
+}
+
+TEST(LINQ_Generator_Tests, GroupJoinTest1)
 {
     // Average
     Employer person1("Tom", "Microsoft");
@@ -540,9 +619,38 @@ TEST(LINQ_Generator_Tests, TakeWhileTest)
     ASSERT_EQ(2, result.size());
     ASSERT_EQ(3, result[0].People.size());
     ASSERT_EQ(2, result[1].People.size());
-}*/
+}
 
-TEST(LINQ_Generator_Tests, ZipTest)
+TEST(LINQ_Generator_Tests, GroupJoinTest2)
+{
+    // Average
+    Employer person1("Tom", "Microsoft");
+    Employer person2("Bob", "Google");
+    Employer person3("Sam", "Microsoft");
+    Employer person4("Alice", "Google");
+    Employer person5("Jon", "Google");
+
+    std::vector people{person1, person2, person3, person4, person5};
+
+    ItCompany company1("Microsoft", "C#");
+    ItCompany company2("Google", "C++");
+
+    std::vector companies{company1, company2};
+
+    // Act
+    const std::vector result = LINQ::Generator(people)
+            .GroupJoin(std::move(companies),
+                       [](const Employer& employer) { return employer.CompanyName; },
+                       [](const ItCompany& company) { return company.Name; },
+                       [](const std::vector<Employer>& emps, const ItCompany &company){ return ItCompany(company.Name, emps); })
+            .ToVector();
+
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(3, result[0].People.size());
+    ASSERT_EQ(2, result[1].People.size());
+}
+
+TEST(LINQ_Generator_Tests, ZipTest1)
 {
     // Average
     const std::vector numbers1 { 4, 3, 6, 1, 5 };
@@ -552,6 +660,25 @@ TEST(LINQ_Generator_Tests, ZipTest)
     const std::vector result = LINQ::Generator(numbers1)
         .Zip(numbers2)
         .ToVector();
+
+    // Assert
+    ASSERT_EQ(4, result[0].first);
+    ASSERT_EQ(3, result[0].second);
+
+    ASSERT_EQ(3, result[1].first);
+    ASSERT_EQ(2, result[1].second);
+}
+
+TEST(LINQ_Generator_Tests, ZipTest2)
+{
+    // Average
+    const std::vector numbers1 { 4, 3, 6, 1, 5 };
+    std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+    // Act
+    const std::vector result = LINQ::Generator(numbers1)
+            .Zip(std::move(numbers2))
+            .ToVector();
 
     // Assert
     ASSERT_EQ(4, result[0].first);
@@ -671,8 +798,7 @@ TEST(LINQ_Generator_Tests, FromContainerTest)
     auto linq9 = LINQ::Generator(numbersSet);
     auto linq10 = LINQ::Generator(numbersUnorderedSet);
     auto linq11 = LINQ::Generator(numbersMap);
-    //auto linq12 = LINQ::Generator(numbersUnorderedMap);
-    // TODO unordered_map LINQ::Generator
+    auto linq12 = LINQ::Generator(numbersUnorderedMap);
 
     std::vector result1 = linq1.ToVector();
     std::vector result2 = linq2.ToVector();
@@ -685,8 +811,7 @@ TEST(LINQ_Generator_Tests, FromContainerTest)
     std::vector result9 = linq9.ToVector();
     std::vector result10 = linq10.ToVector();
     std::vector result11 = linq11.ToVector();
-    //std::vector result12 = linq12.ToVector();
-    // TODO
+    std::vector result12 = linq12.ToVector();
 
     // Assert
     for (int i = 0; i < 7; ++i)

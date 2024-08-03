@@ -181,6 +181,24 @@ namespace LINQ
     }
 
     template<typename TKey, typename TValue>
+    LinqGenerator<std::pair<TKey, TValue>> Generator(const std::unordered_map<TKey, TValue>& collection) noexcept
+    {
+        std::vector<std::pair<TKey, TValue>> pairs;
+        for (const auto& kv : collection)
+            pairs.push_back(kv);
+        return LinqGenerator<std::pair<TKey, TValue>>(std::move(pairs));
+    }
+
+    template<typename TKey, typename TValue>
+    LinqGenerator<std::pair<TKey, TValue>> Generator(std::unordered_map<TKey, TValue>&& collection) noexcept
+    {
+        std::vector<std::pair<TKey, TValue>> pairs;
+        for (auto& kv : collection)
+            pairs.push_back(std::move(kv));
+        return LinqGenerator<std::pair<TKey, TValue>>(std::move(pairs));
+    }
+
+    template<typename TKey, typename TValue>
     LinqGenerator<std::pair<TKey, TValue>> Generator(const std::map<TKey, TValue>& collection) noexcept
     {
         return LinqGenerator<std::pair<TKey, TValue>>(collection);
