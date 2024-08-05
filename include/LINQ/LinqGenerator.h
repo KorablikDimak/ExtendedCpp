@@ -9,6 +9,43 @@ namespace LINQ
     template<typename TSource>
     class LinqGenerator final
     {
+        class Iterator
+        {
+        public:
+            Iterator(Future<TSource>& yieldContext, bool isEnd) noexcept : _yieldContext(yieldContext), _isEnd(isEnd)
+            {
+                if (_yieldContext) _value = _yieldContext.Value();
+                else _isEnd = true;
+            }
+
+            TSource& operator*() noexcept
+            {
+                return _value;
+            }
+
+            TSource operator*() const noexcept
+            {
+                return _value;
+            }
+
+            Iterator& operator++() noexcept
+            {
+                if (_yieldContext) _value = _yieldContext.Next();
+                else _isEnd = true;
+                return *this;
+            }
+
+            bool operator!=(const Iterator& other) const noexcept
+            {
+                return _isEnd != other._isEnd;
+            }
+
+        private:
+            Future<TSource>& _yieldContext;
+            TSource _value;
+            bool _isEnd;
+        };
+
     private:
         Future<TSource> _yieldContext;
 
@@ -50,6 +87,16 @@ namespace LINQ
         TSource Next() noexcept
         {
             return _yieldContext.Next();
+        }
+
+        Iterator begin() noexcept
+        {
+            return Iterator(_yieldContext, false);
+        }
+
+        Iterator end() noexcept
+        {
+            return Iterator(_yieldContext, true);
         }
 
         std::vector<TSource> ToVector() noexcept
@@ -329,7 +376,9 @@ namespace LINQ
             for (const auto& element : otherCollection)
                 newCollection.insert(element);
 
-            return LinqGenerator(std::move(newCollection));
+            std::vector<TSource> assignCollection;
+            assignCollection.assign(newCollection.cbegin(), newCollection.cend());
+            return LinqGenerator(std::move(assignCollection));
         }
 
         template<Iterable TOtherCollection>
@@ -344,7 +393,9 @@ namespace LINQ
             for (auto& element : otherCollection)
                 newCollection.insert(std::move(element));
 
-            return LinqGenerator(std::move(newCollection));
+            std::vector<TSource> assignCollection;
+            assignCollection.assign(newCollection.cbegin(), newCollection.cend());
+            return LinqGenerator(std::move(assignCollection));
         }
 
         template<typename TResult>

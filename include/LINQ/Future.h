@@ -48,6 +48,7 @@ namespace LINQ
         ~Future()
         {
             if (_handle) _handle.destroy();
+            _handle = nullptr;
         }
 
         explicit operator bool() const noexcept

@@ -897,3 +897,24 @@ TEST(LINQ_Generator_Tests, ReverseTest)
     for (std::size_t i = 0, j = reverseNumbers.size() - 1; i < numbers.size(); ++i, --j)
         ASSERT_EQ(numbers[i], reverseNumbers[j]);
 }
+
+TEST(LINQ_Generator_Tests, ForeachTest)
+{
+    // Average
+    const std::vector numbers { 8, 8, 8, 8, 8 };
+
+    // Act
+    auto linq1 = LINQ::Generator(numbers);
+    auto linq2 = LINQ::Generator(numbers);
+    auto linq3 = LINQ::Generator(numbers);
+
+    // Assert
+    for (const auto& element : linq1)
+        ASSERT_EQ(element, 8);
+
+    for (auto& element : linq2)
+        ASSERT_EQ(element, 8);
+
+    for (auto element : linq3)
+        ASSERT_EQ(element, 8);
+}

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.5.0
+        VERSION 1.5.1
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -43,7 +43,8 @@ set(LINQ_INCLUDES
         include/LINQ/Aggregate.h
         include/LINQ/LinqGenerator.h
         include/LINQ/Future.h
-        include/LINQ/YieldForeach.h)
+        include/LINQ/YieldForeach.h
+)
 
 set(Events_INCLUDES
         include/Events/Events.h
