@@ -237,6 +237,12 @@ namespace LINQ
                 { return WhereGenerator(std::move(predicate_)); }, std::move(predicate));
         }
 
+        LinqGenerator RemoveWhere(std::function<bool(TSource)> predicate) noexcept
+        {
+            return LinqGenerator([this](std::function<bool(TSource)> predicate_)
+                { return RemoveWhereGenerator(std::move(predicate_)); }, std::move(predicate));
+        }
+
         LinqGenerator Order(OrderType orderType = OrderType::ASC) noexcept
         requires Comparable<TSource>
         {
@@ -766,6 +772,16 @@ namespace LINQ
                 auto element = _yieldContext.Next();
                 if (predicate(element))
                     co_yield std::move(element);
+            }
+        }
+
+        Future<TSource> RemoveWhereGenerator(std::function<bool(TSource)> predicate) noexcept
+        {
+            while (_yieldContext)
+            {
+                auto element = _yieldContext.Next();
+                if (predicate(element)) continue;
+                else co_yield std::move(element);
             }
         }
 

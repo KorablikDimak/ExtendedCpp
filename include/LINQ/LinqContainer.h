@@ -333,6 +333,19 @@ namespace LINQ
             return LinqContainer(std::move(newCollection));
         }
 
+        LinqContainer RemoveWhere(std::function<bool(TSource)> predicate) const noexcept
+        {
+            std::vector<TSource> newCollection;
+
+            for (std::size_t i = 0; i < _size; ++i)
+            {
+                if (predicate(_data[i])) continue;
+                else newCollection.push_back(_data[i]);
+            }
+
+            return LinqContainer(std::move(newCollection));
+        }
+
         LinqContainer Order(OrderType orderType = OrderType::ASC) const noexcept
         requires Comparable<TSource>
         {

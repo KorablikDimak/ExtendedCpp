@@ -16,7 +16,7 @@ namespace DI
     {
     private:
         std::map<std::type_index, std::pair<std::any, LifeTime>> _factories;
-        mutable std::map<std::type_index, std::any> _instanses;
+        mutable std::map<std::type_index, std::any> _instances;
 
     public:
         template<typename TService, typename TImplementation>
@@ -141,17 +141,17 @@ namespace DI
             switch (lifeTime)
             {
                 case LifeTime::Singleton:
-                    if (!_instanses.contains(typeid(TService)))
-                        _instanses.insert(std::make_pair<std::type_index, std::any>(typeid(TService), factory(*this)));
-                    return std::any_cast<std::shared_ptr<TService>>(_instanses.at(typeid(TService)));
+                    if (!_instances.contains(typeid(TService)))
+                        _instances.insert(std::make_pair<std::type_index, std::any>(typeid(TService), factory(*this)));
+                    return std::any_cast<std::shared_ptr<TService>>(_instances.at(typeid(TService)));
                 case LifeTime::Transient:
                     return factory(*this);
                 case LifeTime::Scoped:
-                    if (_instanses.contains(typeid(TService)) && std::any_cast<std::shared_ptr<TService>>(_instanses.at(typeid(TService))).use_count() == 1)
-                        _instanses.erase(_instanses.find(typeid(TService)));
-                    if (!_instanses.contains(typeid(TService)))
-                        _instanses.insert(std::make_pair<std::type_index, std::any>(typeid(TService), factory(*this)));
-                    return std::any_cast<std::shared_ptr<TService>>(_instanses.at(typeid(TService)));
+                    if (_instances.contains(typeid(TService)) && std::any_cast<std::shared_ptr<TService>>(_instances.at(typeid(TService))).use_count() == 1)
+                        _instances.erase(_instances.find(typeid(TService)));
+                    if (!_instances.contains(typeid(TService)))
+                        _instances.insert(std::make_pair<std::type_index, std::any>(typeid(TService), factory(*this)));
+                    return std::any_cast<std::shared_ptr<TService>>(_instances.at(typeid(TService)));
             }
             return nullptr;
         }

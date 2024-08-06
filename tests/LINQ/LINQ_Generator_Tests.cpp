@@ -128,6 +128,20 @@ TEST(LINQ_Generator_Tests, WhereTest)
     ASSERT_EQ(4, selectedNames.size());
 }
 
+TEST(LINQ_Generator_Tests, RemoveWhereTest)
+{
+    // Average
+    const std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
+
+    // Act
+    const std::vector selectedNames = LINQ::Generator(names)
+            .RemoveWhere([](const std::string& name){ return name.size() == 3; })
+            .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, selectedNames.size());
+}
+
 TEST(LINQ_Generator_Tests, OrderByTest)
 {
     // Average
