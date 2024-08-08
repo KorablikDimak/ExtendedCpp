@@ -4,22 +4,6 @@
 #include <string>
 #include <vector>
 
-class Person;
-
-class Company
-{
-public:
-    std::string Name;
-    std::vector<Person> People;
-
-    explicit Company(const std::string& name)
-    {
-        Name = name;
-    }
-
-    Company() = default;
-};
-
 class Person
 {
 public:
@@ -33,6 +17,20 @@ public:
     }
 
     Person() = default;
+};
+
+class Company
+{
+public:
+    std::string Name;
+    std::vector<Person> People;
+
+    explicit Company(const std::string& name)
+    {
+        Name = name;
+    }
+
+    Company() = default;
 };
 
 class Employer
