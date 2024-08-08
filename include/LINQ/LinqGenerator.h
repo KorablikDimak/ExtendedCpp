@@ -252,7 +252,9 @@ namespace LINQ
             if (newCollection.empty()) return *this;
 
             Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1, orderType);
-            return LinqGenerator(std::move(newCollection));
+
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<typename TSelector>
@@ -265,15 +267,19 @@ namespace LINQ
             if (newCollection.empty()) return *this;
 
             Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1, std::forward<TSelector>(selector), orderType);
-            return LinqGenerator(std::move(newCollection));
+
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         LinqGenerator Reverse() noexcept
         {
-            std::vector<TSource> newCollection;
+            std::vector<TSource> collection;
             while (_yieldContext)
-                newCollection.push_back(_yieldContext.Next());
-            return LinqGenerator(std::move(std::vector<TSource>(newCollection.crbegin(), newCollection.crend())));
+                collection.push_back(_yieldContext.Next());
+
+            return LinqGenerator([this, collection = std::move(collection)]()
+                { return ReverseGenerator(collection); });
         }
 
         template<typename TOtherCollection>
@@ -295,7 +301,8 @@ namespace LINQ
                 }
             }
 
-            return LinqGenerator(std::move(newCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<typename TOtherCollection>
@@ -317,7 +324,8 @@ namespace LINQ
                 }
             }
 
-            return LinqGenerator(std::move(newCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<ConstIterable TOtherCollection>
@@ -337,7 +345,8 @@ namespace LINQ
                     }
             }
 
-            return LinqGenerator(std::move(newCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<Iterable TOtherCollection>
@@ -357,7 +366,8 @@ namespace LINQ
                     }
             }
 
-            return LinqGenerator(std::move(newCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         LinqGenerator Distinct() noexcept
@@ -367,7 +377,8 @@ namespace LINQ
             while (_yieldContext)
                 newCollection.insert(_yieldContext.Next());
 
-            return LinqGenerator(std::move(newCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<ConstIterable TOtherCollection>
@@ -382,9 +393,8 @@ namespace LINQ
             for (const auto& element : otherCollection)
                 newCollection.insert(element);
 
-            std::vector<TSource> assignCollection;
-            assignCollection.assign(newCollection.cbegin(), newCollection.cend());
-            return LinqGenerator(std::move(assignCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<Iterable TOtherCollection>
@@ -399,9 +409,8 @@ namespace LINQ
             for (auto& element : otherCollection)
                 newCollection.insert(std::move(element));
 
-            std::vector<TSource> assignCollection;
-            assignCollection.assign(newCollection.cbegin(), newCollection.cend());
-            return LinqGenerator(std::move(assignCollection));
+            return LinqGenerator([this, newCollection = std::move(newCollection)]()
+                { return Generator(newCollection); });
         }
 
         template<typename TResult>
@@ -728,6 +737,20 @@ namespace LINQ
         }
 
     private:
+        template<Iterable TCollection>
+        Future<TSource> Generator(TCollection collection) noexcept
+        {
+            for (auto& element : collection)
+                co_yield std::move(element);
+        }
+
+        template<Iterable TCollection>
+        Future<TSource> ReverseGenerator(TCollection collection) noexcept
+        {
+            for (auto it = collection.rbegin(); it != collection.rend(); ++it)
+                co_yield std::move(*it);
+        }
+
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires IsFunctor<TSelector, TSource>
         Future<TResult> SelectGenerator(TSelector&& selector) noexcept
@@ -981,9 +1004,14 @@ namespace LINQ
         requires ConstIterable<TOtherCollection> && HasSize<TOtherCollection>
         Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(const TOtherCollection& otherCollection) noexcept
         {
+            std::vector<std::pair<TSource, TOtherCollectionValueType>> pairs;
+
             for (const auto& element : otherCollection)
                 if (_yieldContext)
-                    co_yield std::make_pair(_yieldContext.Next(), element);
+                    pairs.push_back(std::make_pair(_yieldContext.Next(), element));
+
+            for (auto& pair : pairs)
+                co_yield std::move(pair);
         }
 
         template<typename TOtherCollection,
@@ -991,9 +1019,14 @@ namespace LINQ
         requires Iterable<TOtherCollection> && HasSize<TOtherCollection>
         Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(TOtherCollection&& otherCollection) noexcept
         {
+            std::vector<std::pair<TSource, TOtherCollectionValueType>> pairs;
+
             for (auto& element : otherCollection)
                 if (_yieldContext)
-                    co_yield std::make_pair(_yieldContext.Next(), std::move(element));
+                    pairs.push_back(std::make_pair(_yieldContext.Next(), std::move(element)));
+
+            for (auto& pair : pairs)
+                co_yield std::move(pair);
         }
     };
 }

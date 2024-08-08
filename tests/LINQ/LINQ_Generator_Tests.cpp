@@ -905,7 +905,9 @@ TEST(LINQ_Generator_Tests, ReverseTest)
     const std::vector numbers { 8, 7, 1, 9, 50, 0, 3 };
 
     // Act
-    const std::vector reverseNumbers = LINQ::Generator(numbers).Reverse().ToVector();
+    const std::vector reverseNumbers = LINQ::Generator(numbers)
+            .Reverse()
+            .ToVector();
 
     // Assert
     for (std::size_t i = 0, j = reverseNumbers.size() - 1; i < numbers.size(); ++i, --j)
