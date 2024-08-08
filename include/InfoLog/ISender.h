@@ -14,16 +14,18 @@ namespace InfoLog
     public:
         typedef std::shared_ptr<ISender> Ptr;
 
-        ISender() = default;
+        ISender() noexcept = default;
         virtual ~ISender() = default;
 
-        virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) = 0;
+        virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) noexcept = 0;
 
     protected:
         std::map<std::string, std::string> Config;
 
-        bool ValidateLogLevel(LogLevel logLevel) const;
-        bool ValidateTag(const std::string& tag) const;
+        [[nodiscard]]
+        bool ValidateLogLevel(LogLevel logLevel) const noexcept;
+        [[nodiscard]]
+        bool ValidateTag(const std::string& tag) const noexcept;
     };
 }
 

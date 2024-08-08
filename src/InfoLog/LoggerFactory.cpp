@@ -1,16 +1,16 @@
 #include <InfoLog/LoggerFactory.h>
 
-InfoLog::LoggerFactory::LoggerFactory(std::unique_ptr<Configuration>& configuration)
+InfoLog::LoggerFactory::LoggerFactory(std::unique_ptr<Configuration>& configuration) noexcept
 {
     _configuration.swap(configuration);
 }
 
-void InfoLog::LoggerFactory::SetConfiguration(std::unique_ptr<Configuration>& configuration)
+void InfoLog::LoggerFactory::SetConfiguration(std::unique_ptr<Configuration>& configuration) noexcept
 {
     _configuration.swap(configuration);
 }
 
-InfoLog::Logger::Ptr InfoLog::LoggerFactory::CreateLogger() const
+InfoLog::Logger::Ptr InfoLog::LoggerFactory::CreateLogger() const noexcept
 {
     auto logger = std::make_shared<Logger>();
 

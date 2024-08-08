@@ -11,11 +11,11 @@ namespace Common
         std::atomic<bool*> _isCancellationRequested;
 
     public:
-        explicit CancellationToken(bool* cancellationRequest);
+        explicit CancellationToken(bool* cancellationRequest) noexcept;
         ~CancellationToken() = default;
 
         [[nodiscard]]
-        bool IsCancellationRequested() const;
+        bool IsCancellationRequested() const noexcept;
     };
 }
 

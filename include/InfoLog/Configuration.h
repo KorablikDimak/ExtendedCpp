@@ -39,7 +39,7 @@ namespace InfoLog
                     for (pugi::xml_attribute attribute : target.attributes())
                     {
                         std::string attributeName = attribute.name();
-                        ToLowerCase(std::move(attributeName));
+                        ToLowerCase(attributeName);
                         config.insert(std::make_pair(std::move(attributeName), attribute.value()));
                     }
 
@@ -55,7 +55,7 @@ namespace InfoLog
 
         ~Configuration() = default;
 
-        std::vector<std::map<std::string, std::string>> GetConfigs();
+        std::vector<std::map<std::string, std::string>> GetConfigs() noexcept;
     };
 }
 

@@ -19,7 +19,7 @@ namespace Events
         std::list<EventHandler> _handlers;
         mutable std::shared_mutex _listMutex;
         EventHandlerIterator _currentIterator;
-        bool _currentRemoved;
+        bool _currentRemoved = false;
 
     public:
         Event() = default;

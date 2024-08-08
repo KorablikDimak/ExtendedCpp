@@ -27,7 +27,7 @@ namespace InfoLog
         Logger();
 
         template<typename T>
-        explicit Logger(const T& fileName)
+        explicit Logger(const T& fileName) noexcept
         {
             auto configuration = std::make_unique<Configuration>(fileName);
             _senders = std::make_unique<Senders>();
@@ -36,16 +36,16 @@ namespace InfoLog
                 AddSender(config);
         }
 
-        explicit Logger(const Configuration::Ptr& configuration);
+        explicit Logger(const Configuration::Ptr& configuration) noexcept;
 
         ~Logger() = default;
 
-        void AddSender(const std::map<std::string, std::string>& config) const;
-        void AddSender(const ISender::Ptr& sender) const;
-        void RemoveSender(const ISender::Ptr& sender) const;
+        void AddSender(const std::map<std::string, std::string>& config) noexcept;
+        void AddSender(const ISender::Ptr& sender) noexcept;
+        void RemoveSender(const ISender::Ptr& sender) noexcept;
 
         template<typename T>
-        void Trace(const T& message, const std::string& tag = "")
+        void Trace(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {
@@ -55,7 +55,7 @@ namespace InfoLog
         }
 
         template<typename T>
-        void Debug(const T& message, const std::string& tag = "")
+        void Debug(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {
@@ -65,7 +65,7 @@ namespace InfoLog
         }
 
         template<typename T>
-        void Info(const T& message, const std::string& tag = "")
+        void Info(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {
@@ -75,7 +75,7 @@ namespace InfoLog
         }
 
         template<typename T>
-        void Warning(const T& message, const std::string& tag = "")
+        void Warning(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {
@@ -85,7 +85,7 @@ namespace InfoLog
         }
 
         template<typename T>
-        void Error(const T& message, const std::string& tag = "")
+        void Error(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {
@@ -95,7 +95,7 @@ namespace InfoLog
         }
 
         template<typename T>
-        void Critical(const T& message, const std::string& tag = "")
+        void Critical(const T& message, const std::string& tag = "") noexcept
         {
             for (const ISender::Ptr& sender : *_senders)
             {

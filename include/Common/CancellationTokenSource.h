@@ -12,12 +12,12 @@ namespace Common
         CancellationToken* _token;
 
     public:
-        CancellationTokenSource();
+        CancellationTokenSource() noexcept;
         ~CancellationTokenSource();
 
         [[nodiscard]]
-        CancellationToken* Token() const;
-        void Cancel() const;
+        CancellationToken* Token() const noexcept;
+        void Cancel() const noexcept;
     };
 }
 

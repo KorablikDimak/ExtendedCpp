@@ -16,7 +16,7 @@ namespace InfoLog
         ~FileSender() override = default;
 
     protected:
-        void Send(const std::string& message, LogLevel logLevel, const std::string& tag) override;
+        void Send(const std::string& message, LogLevel logLevel, const std::string& tag) noexcept override;
     };
 }
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.5.2
+        VERSION 1.5.3
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -43,8 +43,7 @@ set(LINQ_INCLUDES
         include/LINQ/Aggregate.h
         include/LINQ/LinqGenerator.h
         include/LINQ/Future.h
-        include/LINQ/YieldForeach.h
-)
+        include/LINQ/YieldForeach.h)
 
 set(Events_INCLUDES
         include/Events/Events.h
@@ -93,7 +92,8 @@ set(Common_INCLUDES
         include/Common/CancellationToken.h
         include/Common/CancellationTokenSource.h
         include/Common/Random.h
-        include/Common/Matrix.h)
+        include/Common/Matrix.h
+        include/Common/Common.h)
 
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
@@ -103,7 +103,8 @@ set(Common_SOURCE
 set(DI_INCLUDES
         include/DI/ServiceProvider.h
         include/DI/Register.h
-        include/DI/LifeTime.h)
+        include/DI/LifeTime.h
+        include/DI/DI.h)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)

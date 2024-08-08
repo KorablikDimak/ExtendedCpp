@@ -7,7 +7,7 @@
 namespace InfoLog
 {
     template<typename TSource>
-    std::string ToString(const TSource& source)
+    std::string ToString(const TSource& source) noexcept
     {
         std::stringstream stream;
         stream << source;
@@ -15,7 +15,7 @@ namespace InfoLog
     }
 
     template<typename T>
-    T FromString(const std::string& source)
+    T FromString(const std::string& source) noexcept
     {
         std::stringstream stream(source);
         T result;
@@ -23,22 +23,24 @@ namespace InfoLog
         return result;
     }
 
-    inline std::string ToLowerCase(const std::string& string)
+    inline std::string ToLowerCase(const std::string& string) noexcept
     {
         std::string copy = string;
-        std::ranges::transform(std::move(copy), copy.begin(),
+        std::ranges::transform(copy, copy.begin(),
             [](const unsigned char c){ return std::tolower(c); });
         return copy;
     }
 
-    inline void ToLowerCase(std::string&& string)
+    inline void ToLowerCase(std::string&& string) noexcept
     {
         std::ranges::transform(std::forward<std::string>(string), string.begin(),
             [](const unsigned char c){ return std::tolower(c); });
     }
 
-    inline void ReplaceAll(std::string& str, const std::string& from, const std::string& to)
+    inline void ReplaceAll(std::string& str, const std::string& from, const std::string& to) noexcept
     {
+        if (str.empty() || from.empty() || to.empty()) return;
+
         size_t startPosition = 0;
         while((startPosition = str.find(from, startPosition)) != std::string::npos)
         {

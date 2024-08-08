@@ -12,24 +12,25 @@ namespace InfoLog
 
     public:
         template<typename T>
-        explicit LoggerFactory(const T& fileName)
+        explicit LoggerFactory(const T& fileName) noexcept
         {
             _configuration = std::make_unique<Configuration>(fileName);
         }
 
-        explicit LoggerFactory(std::unique_ptr<Configuration>& configuration);
+        explicit LoggerFactory(std::unique_ptr<Configuration>& configuration) noexcept;
 
         ~LoggerFactory() = default;
 
         template<typename T>
-        void SetConfiguration(const T& fileName)
+        void SetConfiguration(const T& fileName) noexcept
         {
             _configuration = std::make_unique<Configuration>(fileName);
         }
 
-        void SetConfiguration(std::unique_ptr<Configuration>& configuration);
+        void SetConfiguration(std::unique_ptr<Configuration>& configuration) noexcept;
 
-        Logger::Ptr CreateLogger() const;
+        [[nodiscard]]
+        Logger::Ptr CreateLogger() const noexcept;
     };
 }
 

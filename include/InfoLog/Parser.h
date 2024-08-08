@@ -11,10 +11,10 @@ namespace InfoLog
     class Parser final
     {
     public:
-        Parser() = default;
+        Parser() noexcept = default;
         ~Parser() = default;
 
-        static void ParseLayout(std::string& layout, const std::string& message, LogLevel logLevel, const std::string& tag);
+        static void ParseLayout(std::string& layout, const std::string& message, LogLevel logLevel, const std::string& tag) noexcept;
     };
 }
 
