@@ -9,7 +9,7 @@ namespace LINQ
     template<typename TSource>
     class LinqGenerator final
     {
-        class Iterator
+        class Iterator final
         {
         public:
             Iterator(Future<TSource>& yieldContext, bool isEnd) noexcept : _yieldContext(yieldContext), _isEnd(isEnd)

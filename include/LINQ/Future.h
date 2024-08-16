@@ -20,7 +20,7 @@ namespace LINQ
 
             void unhandled_exception()
             {
-                std::rethrow_exception(std::move(std::current_exception()));
+                std::rethrow_exception(std::current_exception());
             }
 
             std::suspend_always yield_value(TSource value) noexcept

@@ -27,6 +27,7 @@ option(Json_BUILD_TESTS "Build Json library tests" OFF)
 option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(DI_BUILD_TESTS "Build DI library tests" OFF)
+option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
@@ -106,6 +107,9 @@ set(DI_INCLUDES
         include/DI/LifeTime.h
         include/DI/DI.h)
 
+set(Reflection_INCLUDES
+        include/Reflection/Reflection.h)
+
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
@@ -127,9 +131,12 @@ add_library(ExtendedCpp::Common ALIAS Common)
 add_library(DI INTERFACE ${DI_INCLUDES})
 add_library(ExtendedCpp::DI ALIAS DI)
 
-set_interface_include_directories(LINQ Events Json DI)
+add_library(Reflection INTERFACE ${Reflection_INCLUDES})
+add_library(ExtendedCpp::Reflection ALIAS Reflection)
+
+set_interface_include_directories(LINQ Events Json DI Reflection)
 set_public_include_directories(Xml InfoLog Common)
-set_targets_version(LINQ Events Json Xml InfoLog Common DI)
+set_targets_version(LINQ Events Json Xml InfoLog Common DI Reflection)
 target_link_libraries(InfoLog PRIVATE Xml)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
@@ -155,7 +162,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
             DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
 
-    install_projects(LINQ Events Json Xml InfoLog Common DI)
+    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
@@ -210,4 +217,9 @@ endif()
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/DI)
+endif()
+
+if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/Reflection)
 endif()
