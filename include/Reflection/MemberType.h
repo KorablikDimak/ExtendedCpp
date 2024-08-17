@@ -7,7 +7,8 @@ namespace Reflection
     {
         Unknown,
         Field,
-        Method
+        Method,
+        Constructor
     };
 }
 

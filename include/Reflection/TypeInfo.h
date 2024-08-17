@@ -5,13 +5,14 @@
 
 #include <Reflection/FieldInfo.h>
 #include <Reflection/MethodInfo.h>
+#include <Reflection/ConstructorInfo.h>
 
 namespace Reflection
 {
     #define META(...) \
-    TypeInfo meta = TypeInfo({__VA_ARGS__});
+    TypeInfo MetaInfo = TypeInfo({__VA_ARGS__});
 
-    class TypeInfo
+    class TypeInfo final
     {
     private:
         std::vector<std::shared_ptr<MemberInfo>> _members;
@@ -26,6 +27,8 @@ namespace Reflection
         std::vector<std::shared_ptr<FieldInfo>> GetFields() const noexcept;
         [[nodiscard]]
         std::vector<std::shared_ptr<MethodInfo>> GetMethods() const noexcept;
+        [[nodiscard]]
+        std::vector<std::shared_ptr<ConstructorInfo>> GetConstructors() const noexcept;
 
         [[nodiscard]]
         std::vector<std::shared_ptr<MemberInfo>> GetMembers(const std::string_view& name) const noexcept;

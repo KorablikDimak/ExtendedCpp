@@ -11,12 +11,16 @@ struct TestStruct
     std::string StringField;
     int IntPtrField{};
 
+    TestStruct() noexcept = default;
+    explicit TestStruct(const std::string& str) noexcept;
+
     [[nodiscard]]
     int TestMethodInt() const noexcept;
     [[nodiscard]]
     double TestMethodDouble(double a, double b) const noexcept;
 
-    META(FIELD(IntField), FIELD(StringField), FIELD(IntPtrField),
+    META(CONSTRUCTOR(), CONSTRUCTOR(const std::string&),
+         FIELD(IntField), FIELD(StringField), FIELD(IntPtrField),
          METHOD(TestMethodInt), METHOD(TestMethodDouble, double, double))
 };
 

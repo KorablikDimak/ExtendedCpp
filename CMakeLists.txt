@@ -114,7 +114,8 @@ set(Reflection_INCLUDES
         include/Reflection/TypeInfo.h
         include/Reflection/Reflection.h
         include/Reflection/MethodTraits.h
-        include/Reflection/MemberType.h)
+        include/Reflection/MemberType.h
+        include/Reflection/ConstructorInfo.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp

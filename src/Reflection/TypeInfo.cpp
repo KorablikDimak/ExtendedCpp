@@ -41,6 +41,18 @@ Reflection::TypeInfo::GetMethods() const noexcept
     return result;
 }
 
+std::vector<std::shared_ptr<Reflection::ConstructorInfo>>
+Reflection::TypeInfo::GetConstructors() const noexcept
+{
+    std::vector<std::shared_ptr<Reflection::ConstructorInfo>> result;
+
+    for (const auto& member : _members)
+        if (member->MemberType() == MemberType::Constructor)
+            result.push_back(std::dynamic_pointer_cast<Reflection::ConstructorInfo>(member));
+
+    return result;
+}
+
 std::vector<std::shared_ptr<Reflection::MemberInfo>>
 Reflection::TypeInfo::GetMembers(const std::string_view& name) const noexcept
 {

@@ -6,14 +6,17 @@ TEST(ReflectionTests, GetMetaInfoTest)
 {
     TestStruct testStruct;
 
-    auto members = testStruct.meta.GetMembers();
-    auto fields = testStruct.meta.GetFields();
-    auto methods = testStruct.meta.GetMethods();
+    auto members = testStruct.MetaInfo.GetMembers();
+    auto fields = testStruct.MetaInfo.GetFields();
+    auto methods = testStruct.MetaInfo.GetMethods();
+    auto constructors = testStruct.MetaInfo.GetConstructors();
 
-    auto testFields = testStruct.meta.GetField("IntField");
+    auto constructor = std::any_cast<TestStruct>(constructors[0]->Create());
+
+    auto testFields = testStruct.MetaInfo.GetField("IntField");
     int* fieldPtr = (int*) testFields->Value();
     *fieldPtr = 5;
 
-    auto testMethods = testStruct.meta.GetMethods("TestMethodInt");
+    auto testMethods = testStruct.MetaInfo.GetMethods("TestMethodInt");
     auto result = std::any_cast<int>(testMethods[0]->Invoke());
 }

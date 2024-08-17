@@ -7,7 +7,7 @@ template<typename TObject, typename TFunctor>
 struct MethodTraits;
 
 template<typename TObject, typename TFunctor, typename... Args>
-struct MethodTraits<TObject, TFunctor(Args...)>
+struct MethodTraits<TObject, TFunctor(Args...)> final
 {
     using ReturnType = decltype((std::declval<TObject>().*std::declval<TFunctor>())(std::declval<Args>()...));
 };

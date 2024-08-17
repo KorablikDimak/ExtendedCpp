@@ -1,7 +1,6 @@
 #ifndef Reflection_MethodInfo_H
 #define Reflection_MethodInfo_H
 
-#include <functional>
 #include <any>
 
 #include <Reflection/MemberInfo.h>
@@ -15,7 +14,7 @@ namespace Reflection
     decltype(&std::remove_pointer_t<decltype(this)>::methodName) __VA_OPT__(,) __VA_ARGS__> \
     (this, &std::remove_pointer_t<decltype(this)>::methodName))
 
-    class MethodInfo : public MemberInfo
+    class MethodInfo final : public MemberInfo
     {
     private:
         std::any _methodHelper;
@@ -23,7 +22,7 @@ namespace Reflection
 
     public:
         template<typename TObject, typename TMethod, typename... TArgs>
-        struct Helper
+        struct Helper final
         {
             using TuppleArgs = std::tuple<TArgs...>;
             using ReturnType = MethodTraits<TObject, TMethod(TArgs...)>::ReturnType;
@@ -56,6 +55,12 @@ namespace Reflection
                 }
             }
         };
+
+        template<typename THelper>
+        MethodInfo(const std::string& methodName, THelper methodHelper) noexcept :
+            _methodHelper(methodHelper),
+            _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+            MemberInfo(methodName) {}
 
         template<typename THelper>
         MethodInfo(std::string&& methodName, THelper methodHelper) noexcept :

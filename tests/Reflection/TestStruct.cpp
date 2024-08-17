@@ -1,5 +1,10 @@
 #include "TestStruct.h"
 
+TestStruct::TestStruct(const std::string& str) noexcept
+{
+    StringField = str;
+}
+
 int TestStruct::TestMethodInt() const noexcept
 {
     return IntField;
