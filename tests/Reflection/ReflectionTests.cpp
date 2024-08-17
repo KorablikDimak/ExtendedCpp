@@ -1,35 +1,19 @@
 #include <gtest/gtest.h>
 
-#include "Reflection/Reflection.h"
+#include "TestStruct.h"
 
-using namespace Common;
-
-struct TestStruct
-{
-    int IntField{};
-    std::string StringField;
-    int IntPtrField{};
-
-    META(FIELD(IntField), FIELD(StringField), FIELD(IntPtrField))
-};
-
-TEST(ReflectionTests, GetFieldTest)
+TEST(ReflectionTests, GetMetaInfoTest)
 {
     TestStruct testStruct;
 
-    auto fieldMeta = testStruct.Meta.GetFieldMeta<0>();
-    using FieldType = decltype(fieldMeta)::Type;
+    auto members = testStruct.meta.GetMembers();
+    auto fields = testStruct.meta.GetFields();
+    auto methods = testStruct.meta.GetMethods();
 
-    FieldType& fieldRef = fieldMeta.Field();
-    const FieldType& fieldRefConst = fieldMeta.Field();
-    FieldType field = fieldMeta.Field();
+    auto testFields = testStruct.meta.GetField("IntField");
+    int* fieldPtr = (int*) testFields->Value();
+    *fieldPtr = 5;
 
-    auto& autoFieldRef = fieldMeta.Field();
-    const auto& autoFieldRefConst = fieldMeta.Field();
-    auto autoField = fieldMeta.Field();
-
-    const std::string& fieldNameRef = fieldMeta.Name();
-    std::string fieldName = fieldMeta.Name();
-
-    testStruct.Meta.ForeachFields([](const auto& fieldMeta){ ASSERT_FALSE(fieldMeta.Name().empty()); });
+    auto testMethods = testStruct.meta.GetMethods("TestMethodInt");
+    auto result = std::any_cast<int>(testMethods[0]->Invoke());
 }

@@ -11,9 +11,13 @@ endif()
 
 find_package(GTest REQUIRED)
 
+set(Reflection_TESTS_HEADERS
+        TestStruct.h)
+
 set(Reflection_TESTS_SOURCES
         main.cpp
-        ReflectionTests.cpp)
+        ReflectionTests.cpp
+        TestStruct.cpp)
 
-add_executable(Reflection-tests ${Reflection_TESTS_SOURCES})
+add_executable(Reflection-tests ${Reflection_TESTS_HEADERS} ${Reflection_TESTS_SOURCES})
 target_link_libraries(Reflection-tests PRIVATE ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)

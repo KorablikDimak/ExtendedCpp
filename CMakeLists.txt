@@ -99,7 +99,8 @@ set(Common_INCLUDES
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
         src/Common/CancellationTokenSource.cpp
-        src/Common/Random.cpp)
+        src/Common/Random.cpp
+        include/Reflection/MethodInfo.h)
 
 set(DI_INCLUDES
         include/DI/ServiceProvider.h
@@ -108,7 +109,17 @@ set(DI_INCLUDES
         include/DI/DI.h)
 
 set(Reflection_INCLUDES
-        include/Reflection/Reflection.h)
+        include/Reflection/MemberInfo.h
+        include/Reflection/FieldInfo.h
+        include/Reflection/TypeInfo.h
+        include/Reflection/Reflection.h
+        include/Reflection/MethodTraits.h
+        include/Reflection/MemberType.h)
+
+set(Reflection_SOURCE
+        src/Reflection/MemberInfo.cpp
+        src/Reflection/FieldInfo.cpp
+        src/Reflection/TypeInfo.cpp)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
@@ -131,11 +142,11 @@ add_library(ExtendedCpp::Common ALIAS Common)
 add_library(DI INTERFACE ${DI_INCLUDES})
 add_library(ExtendedCpp::DI ALIAS DI)
 
-add_library(Reflection INTERFACE ${Reflection_INCLUDES})
+add_library(Reflection ${Reflection_SOURCE} ${Reflection_INCLUDES})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 
-set_interface_include_directories(LINQ Events Json DI Reflection)
-set_public_include_directories(Xml InfoLog Common)
+set_interface_include_directories(LINQ Events Json DI)
+set_public_include_directories(Xml InfoLog Common Reflection)
 set_targets_version(LINQ Events Json Xml InfoLog Common DI Reflection)
 target_link_libraries(InfoLog PRIVATE Xml)
 
