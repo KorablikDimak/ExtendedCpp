@@ -2,16 +2,15 @@
 
 #include <utility>
 
-Reflection::FieldInfo::FieldInfo(const std::string& fieldName, void* field) noexcept
-    : MemberInfo(fieldName)
-{
-    _field = field;
-}
+Reflection::FieldInfo::FieldInfo(const std::string& fieldName, std::type_index typeIndex, void* field) noexcept
+    : _typeIndex(typeIndex), _field(field), MemberInfo(fieldName) {}
 
-Reflection::FieldInfo::FieldInfo(std::string&& fieldName, void* field) noexcept
-    : MemberInfo(std::move(fieldName))
+Reflection::FieldInfo::FieldInfo(std::string&& fieldName, std::type_index typeIndex, void* field) noexcept
+    : _typeIndex(typeIndex), _field(field), MemberInfo(std::move(fieldName)) {}
+
+std::type_index Reflection::FieldInfo::TypeIndex() const noexcept
 {
-    _field = field;
+    return _typeIndex;
 }
 
 void* Reflection::FieldInfo::Value() noexcept

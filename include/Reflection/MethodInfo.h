@@ -4,7 +4,7 @@
 #include <any>
 
 #include <Reflection/MemberInfo.h>
-#include <Reflection/MethodTraits.h>
+#include <Reflection/TypeTraits.h>
 
 namespace Reflection
 {
@@ -12,13 +12,14 @@ namespace Reflection
     std::make_shared<MethodInfo>(#methodName, \
     MethodInfo::Helper<std::remove_pointer_t<decltype(this)>, \
     decltype(&std::remove_pointer_t<decltype(this)>::methodName) __VA_OPT__(,) __VA_ARGS__> \
-    (this, &std::remove_pointer_t<decltype(this)>::methodName))
+    (this, &std::remove_pointer_t<decltype(this)>::methodName), ToTypeIndexes<__VA_ARGS__>())
 
     class MethodInfo final : public MemberInfo
     {
     private:
         std::any _methodHelper;
         std::any (*_method)(std::any&, std::any args);
+        std::vector<std::type_index> _parameters{};
 
     public:
         template<typename TObject, typename TMethod, typename... TArgs>
@@ -57,15 +58,17 @@ namespace Reflection
         };
 
         template<typename THelper>
-        MethodInfo(const std::string& methodName, THelper methodHelper) noexcept :
+        MethodInfo(const std::string& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
             _methodHelper(methodHelper),
             _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+            _parameters(parameters),
             MemberInfo(methodName) {}
 
         template<typename THelper>
-        MethodInfo(std::string&& methodName, THelper methodHelper) noexcept :
+        MethodInfo(std::string&& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
             _methodHelper(methodHelper),
             _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+            _parameters(parameters),
             MemberInfo(std::move(methodName)) {}
 
         ~MethodInfo() override = default;
@@ -77,6 +80,12 @@ namespace Reflection
         inline Reflection::MemberType MemberType() const noexcept override
         {
             return MemberType::Method;
+        }
+
+        [[nodiscard]]
+        inline std::vector<std::type_index> Parameters() const noexcept
+        {
+            return _parameters;
         }
     };
 }
