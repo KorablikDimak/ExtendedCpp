@@ -2,31 +2,41 @@
 #define Reflection_TypeInfo_H
 
 #include <vector>
+#include <memory>
 
 #include <Reflection/FieldInfo.h>
 #include <Reflection/MethodInfo.h>
 #include <Reflection/ConstructorInfo.h>
+#include <Reflection/StaticMethodInfo.h>
+#include <Reflection/StaticFieldInfo.h>
 
 namespace Reflection
 {
     #define META(...) \
-    TypeInfo MetaInfo = TypeInfo({__VA_ARGS__});
+    TypeInfo MetaInfo = TypeInfo(typeid(this), {__VA_ARGS__});
 
     class TypeInfo final
     {
     private:
+        std::type_index _typeIndex;
         std::vector<std::shared_ptr<MemberInfo>> _members;
 
     public:
-        TypeInfo(std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
+        TypeInfo(std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
         ~TypeInfo() = default;
 
+        [[nodiscard]]
+        std::type_index TypeIndex() const noexcept;
         [[nodiscard]]
         std::vector<std::shared_ptr<MemberInfo>> GetMembers() const noexcept;
         [[nodiscard]]
         std::vector<std::shared_ptr<FieldInfo>> GetFields() const noexcept;
         [[nodiscard]]
+        std::vector<std::shared_ptr<StaticFieldInfo>> GetStaticFields() const noexcept;
+        [[nodiscard]]
         std::vector<std::shared_ptr<MethodInfo>> GetMethods() const noexcept;
+        [[nodiscard]]
+        std::vector<std::shared_ptr<StaticMethodInfo>> GetStaticMethods() const noexcept;
         [[nodiscard]]
         std::vector<std::shared_ptr<ConstructorInfo>> GetConstructors() const noexcept;
 
@@ -35,7 +45,11 @@ namespace Reflection
         [[nodiscard]]
         std::shared_ptr<FieldInfo> GetField(const std::string_view& name) const noexcept;
         [[nodiscard]]
+        std::shared_ptr<StaticFieldInfo> GetStaticField(const std::string_view& name) const noexcept;
+        [[nodiscard]]
         std::vector<std::shared_ptr<MethodInfo>> GetMethods(const std::string_view& name) const noexcept;
+        [[nodiscard]]
+        std::vector<std::shared_ptr<StaticMethodInfo>> GetStaticMethods(const std::string_view& name) const noexcept;
     };
 }
 

@@ -14,3 +14,18 @@ double TestStruct::TestMethodDouble(double a, double b) const noexcept
 {
     return IntField + a + b;
 }
+
+double TestStruct::TestMethodDouble(double a, double b, double c) const noexcept
+{
+    return IntField + a + b + c;
+}
+
+int TestStruct::TestMethodStatic() noexcept
+{
+    return 10;
+}
+
+int TestStruct::TestMethodStatic(int a) noexcept
+{
+    return 10 + a;
+}

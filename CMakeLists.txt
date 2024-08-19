@@ -116,12 +116,15 @@ set(Reflection_INCLUDES
         include/Reflection/TypeTraits.h
         include/Reflection/MemberType.h
         include/Reflection/ConstructorInfo.h
-)
+        include/Reflection/Assembly.h
+        include/Reflection/StaticMethodInfo.h
+        include/Reflection/StaticFieldInfo.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
         src/Reflection/FieldInfo.cpp
-        src/Reflection/TypeInfo.cpp)
+        src/Reflection/TypeInfo.cpp
+        src/Reflection/StaticFieldInfo.cpp)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
@@ -235,4 +238,12 @@ endif()
 if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Reflection)
+
+    if(BUILD_SHARED_LIBS)
+        add_custom_command(
+                TARGET Reflection POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Reflection/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif()
 endif()

@@ -8,7 +8,9 @@
 namespace Reflection
 {
     #define FIELD(name) \
-    std::make_shared<FieldInfo>(#name, typeid(name), &(name))
+    [this]{ \
+        return std::make_shared<FieldInfo>(#name, typeid(name), &(name)); \
+    }()
 
     class FieldInfo final : public MemberInfo
     {

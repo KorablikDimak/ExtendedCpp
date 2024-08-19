@@ -8,7 +8,9 @@ namespace Reflection
         Unknown,
         Field,
         Method,
-        Constructor
+        Constructor,
+        StaticMethod,
+        StaticField
     };
 }
 

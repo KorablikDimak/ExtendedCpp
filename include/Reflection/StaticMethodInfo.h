@@ -1,8 +1,9 @@
-#ifndef Reflection_MethodInfo_H
-#define Reflection_MethodInfo_H
+#ifndef Reflection_StaticMethodInfo_H
+#define Reflection_StaticMethodInfo_H
 
 #include <any>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include <Reflection/MemberInfo.h>
@@ -10,7 +11,7 @@
 
 namespace Reflection
 {
-    #define METHOD(methodName, ...) \
+    #define STATIC_METHOD(methodName, ...) \
     [this]{ \
         using ReturnType = decltype(std::apply([&](auto&&... args) \
             { return methodName(args...); }, std::declval<std::tuple<__VA_ARGS__>>())); \
@@ -25,7 +26,7 @@ namespace Reflection
             (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
     }()
 
-    class MethodInfo final : public MemberInfo
+    class StaticMethodInfo final : public MemberInfo
     {
     private:
         std::any _methodHelper;
@@ -47,20 +48,20 @@ namespace Reflection
         };
 
         template<typename THelper>
-        MethodInfo(const std::string& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
+        StaticMethodInfo(const std::string& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
             _methodHelper(methodHelper),
             _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
             _parameters(std::move(parameters)),
             MemberInfo(methodName) {}
 
         template<typename THelper>
-        MethodInfo(std::string&& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
+        StaticMethodInfo(std::string&& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
             _methodHelper(methodHelper),
             _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
             _parameters(std::move(parameters)),
             MemberInfo(std::move(methodName)) {}
 
-        ~MethodInfo() override = default;
+        ~StaticMethodInfo() override = default;
 
         template<typename... TArgs>
         auto Invoke(TArgs... args){ return _method(_methodHelper, std::make_tuple(args...)); }
@@ -68,7 +69,7 @@ namespace Reflection
         [[nodiscard]]
         inline Reflection::MemberType MemberType() const noexcept override
         {
-            return MemberType::Method;
+            return MemberType::StaticMethod;
         }
 
         [[nodiscard]]

@@ -9,7 +9,9 @@ struct TestStruct
 {
     int IntField{};
     std::string StringField;
-    int IntPtrField{};
+    int* IntPtrField{};
+
+    inline static double StaticDoubleField{};
 
     TestStruct() noexcept = default;
     explicit TestStruct(const std::string& str) noexcept;
@@ -18,10 +20,23 @@ struct TestStruct
     int TestMethodInt() const noexcept;
     [[nodiscard]]
     double TestMethodDouble(double a, double b) const noexcept;
+    [[nodiscard]]
+    double TestMethodDouble(double a, double b, double c) const noexcept;
 
-    META(CONSTRUCTOR(), CONSTRUCTOR(const std::string&),
-         FIELD(IntField), FIELD(StringField), FIELD(IntPtrField),
-         METHOD(TestMethodInt), METHOD(TestMethodDouble, double, double))
+    static int TestMethodStatic() noexcept;
+    static int TestMethodStatic(int a) noexcept;
+
+    META(FIELD(IntField),
+         FIELD(StringField),
+         FIELD(IntPtrField),
+         STATIC_FIELD(StaticDoubleField),
+         CONSTRUCTOR(),
+         CONSTRUCTOR(const std::string&),
+         METHOD(TestMethodInt),
+         METHOD(TestMethodDouble, double, double),
+         METHOD(TestMethodDouble, double, double, double),
+         STATIC_METHOD(TestMethodStatic),
+         STATIC_METHOD(TestMethodStatic, int))
 };
 
 #endif

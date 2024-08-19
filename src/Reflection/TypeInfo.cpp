@@ -1,8 +1,16 @@
 #include <Reflection/TypeInfo.h>
 
-Reflection::TypeInfo::TypeInfo(std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept
+#include <Reflection/Assembly.h>
+
+Reflection::TypeInfo::TypeInfo(std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
+    _typeIndex(typeIndex), _members(members)
 {
-    _members = members;
+    Assembly::AddType(*this);
+}
+
+std::type_index Reflection::TypeInfo::TypeIndex() const noexcept
+{
+    return _typeIndex;
 }
 
 std::vector<std::shared_ptr<Reflection::MemberInfo>>
@@ -29,6 +37,18 @@ Reflection::TypeInfo::GetFields() const noexcept
     return result;
 }
 
+std::vector<std::shared_ptr<Reflection::StaticFieldInfo>>
+Reflection::TypeInfo::GetStaticFields() const noexcept
+{
+    std::vector<std::shared_ptr<Reflection::StaticFieldInfo>> result;
+
+    for (const auto& member : _members)
+        if (member->MemberType() == MemberType::StaticField)
+            result.push_back(std::dynamic_pointer_cast<Reflection::StaticFieldInfo>(member));
+
+    return result;
+}
+
 std::vector<std::shared_ptr<Reflection::MethodInfo>>
 Reflection::TypeInfo::GetMethods() const noexcept
 {
@@ -37,6 +57,17 @@ Reflection::TypeInfo::GetMethods() const noexcept
     for (const auto& member : _members)
         if (member->MemberType() == MemberType::Method)
             result.push_back(std::dynamic_pointer_cast<Reflection::MethodInfo>(member));
+
+    return result;
+}
+
+std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> Reflection::TypeInfo::GetStaticMethods() const noexcept
+{
+    std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> result;
+
+    for (const auto& member : _members)
+        if (member->MemberType() == MemberType::StaticMethod)
+            result.push_back(std::dynamic_pointer_cast<Reflection::StaticMethodInfo>(member));
 
     return result;
 }
@@ -76,6 +107,16 @@ Reflection::TypeInfo::GetField(const std::string_view& name) const noexcept
     return {nullptr};
 }
 
+std::shared_ptr<Reflection::StaticFieldInfo>
+Reflection::TypeInfo::GetStaticField(const std::string_view& name) const noexcept
+{
+    for (const auto& member : _members)
+        if (member->MemberType() == MemberType::StaticField && member->Name() == name)
+            return std::dynamic_pointer_cast<Reflection::StaticFieldInfo>(member);
+
+    return {nullptr};
+}
+
 std::vector<std::shared_ptr<Reflection::MethodInfo>>
 Reflection::TypeInfo::GetMethods(const std::string_view& name) const noexcept
 {
@@ -84,6 +125,18 @@ Reflection::TypeInfo::GetMethods(const std::string_view& name) const noexcept
     for (const auto& member : _members)
         if (member->MemberType() == MemberType::Method && member->Name() == name)
             result.push_back(std::dynamic_pointer_cast<Reflection::MethodInfo>(member));
+
+    return result;
+}
+
+std::vector<std::shared_ptr<Reflection::StaticMethodInfo>>
+Reflection::TypeInfo::GetStaticMethods(const std::string_view &name) const noexcept
+{
+    std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> result;
+
+    for (const auto& member : _members)
+        if (member->MemberType() == MemberType::StaticMethod && member->Name() == name)
+            result.push_back(std::dynamic_pointer_cast<Reflection::StaticMethodInfo>(member));
 
     return result;
 }

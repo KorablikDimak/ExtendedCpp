@@ -7,6 +7,15 @@
 
 namespace Reflection
 {
+    template<typename TFunctor>
+    struct FunctorTraits;
+
+    template<typename TFunctor, typename... Args>
+    struct FunctorTraits<TFunctor(Args...)>
+    {
+        using ReturnType = decltype(std::declval<TFunctor>()(std::declval<Args>()...));
+    };
+
     template<typename TObject, typename TFunctor>
     struct MethodTraits;
 
@@ -14,6 +23,15 @@ namespace Reflection
     struct MethodTraits<TObject, TFunctor(Args...)> final
     {
         using ReturnType = decltype((std::declval<TObject>().*std::declval<TFunctor>())(std::declval<Args>()...));
+    };
+
+    template<typename TFunctor>
+    struct StaticMethodTraits;
+
+    template<typename TFunctor, typename... Args>
+    struct StaticMethodTraits<TFunctor(Args...)> final
+    {
+        using ReturnType = decltype((*std::declval<TFunctor>())(std::declval<Args>()...));
     };
 
     template<typename... TParams>

@@ -8,9 +8,11 @@
 namespace Reflection
 {
     #define CONSTRUCTOR(...) \
-    std::make_shared<ConstructorInfo>(std::string(typeid(*this).name()), \
-    ConstructorInfo::Helper<std::remove_pointer_t<decltype(this)> __VA_OPT__(,) __VA_ARGS__>(), \
-    ToTypeIndexes<__VA_ARGS__>())
+    [this]{ \
+        return std::make_shared<ConstructorInfo>(std::string(typeid(*this).name()), \
+        ConstructorInfo::Helper<std::remove_pointer_t<decltype(this)> __VA_OPT__(,) __VA_ARGS__>(), \
+        ToTypeIndexes<__VA_ARGS__>()); \
+    }()
 
     class ConstructorInfo final : public MemberInfo
     {
