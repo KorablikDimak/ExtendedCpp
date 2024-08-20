@@ -8,7 +8,7 @@ TEST(ReflectionTests, MetaFieldTest)
     TestStruct testStruct;
 
     // Act
-    int* fieldPtr = (int*) testStruct.MetaInfo.GetField("IntField")->Value();
+    int* fieldPtr = std::any_cast<int*>(TestStruct::MetaInfo.GetField("IntField")->GetField(&testStruct));
     *fieldPtr = 5;
 
     // Assert
@@ -22,11 +22,11 @@ TEST(ReflectionTests, MetaMethodTest)
     testStruct.IntField = 7;
 
     // Act
-    auto result = std::any_cast<int>(testStruct.MetaInfo.GetMethods("TestMethodInt")[0]->Invoke());
+    auto result = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
 
     // Assert
     ASSERT_EQ(result, 7);
-    ASSERT_TRUE(testStruct.MetaInfo.GetMethods("TestMethodDouble")[0]->Parameters()[0] == typeid(double));
+    ASSERT_TRUE(TestStruct::MetaInfo.GetMethods("TestMethodDouble")[0]->Parameters()[0] == typeid(double));
 }
 
 TEST(ReflectionTests, MetaConstructorTest)
@@ -35,11 +35,24 @@ TEST(ReflectionTests, MetaConstructorTest)
     TestStruct testStruct;
 
     // Act
-    auto createdStruct = std::any_cast<TestStruct>(testStruct.MetaInfo.GetConstructors()[0]->Create());
-    auto newStruct = std::any_cast<TestStruct*>(testStruct.MetaInfo.GetConstructors()[0]->New());
+    auto createdStruct = std::any_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->Create());
+    auto newStruct = std::any_cast<TestStruct*>(TestStruct::MetaInfo.GetConstructors()[0]->New());
 
     // Assert
     ASSERT_TRUE(newStruct != nullptr);
     delete newStruct;
     newStruct = nullptr;
+}
+
+TEST(ReflectionTests, GetTypeTest)
+{
+    // Average
+    auto typeInfo = Reflection::GetType<TestStruct>();
+
+    // Act
+    auto staticField = std::any_cast<double*>(typeInfo.GetStaticFields()[0]->GetField());
+    *staticField = 6;
+
+    // Assert
+    ASSERT_TRUE(std::abs(TestStruct::StaticDoubleField - *staticField) < 0.001);
 }

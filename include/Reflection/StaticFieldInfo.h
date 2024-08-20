@@ -1,31 +1,70 @@
 #ifndef Reflection_StaticFieldInfo_H
 #define Reflection_StaticFieldInfo_H
 
+#include <any>
 #include <typeindex>
+#include <functional>
 
 #include <Reflection/MemberInfo.h>
 
 namespace Reflection
 {
     #define STATIC_FIELD(name) \
-    [this]{ \
-        return std::make_shared<StaticFieldInfo>(#name, typeid(name), &(name)); \
+    []()->std::shared_ptr<MemberInfo> \
+    { \
+        using FieldType = decltype(name); \
+        return std::make_shared<StaticFieldInfo>(#name, typeid(FieldType), \
+            StaticFieldInfo::Helper<FieldType>([]()->FieldType* \
+            { \
+                return &(name); \
+            })); \
     }()
 
     class StaticFieldInfo final : public MemberInfo
     {
     private:
         std::type_index _typeIndex;
-        void* _field;
+        std::any _fieldHelper;
+        std::any (*_fieldGetter)(std::any&);
 
     public:
-        StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, void* field) noexcept;
-        StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, void* field) noexcept;
-        ~StaticFieldInfo() override = default;
+        template<typename TField>
+        struct Helper final
+        {
+            std::function<TField*()> _fieldGetter;
+
+            explicit Helper(std::function<TField*()>&& fieldGetter)
+                    : _fieldGetter(std::move(fieldGetter)) {}
+
+            TField* GetField()
+            {
+                return _fieldGetter();
+            }
+        };
+
+        template<typename THelper>
+        StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+            _typeIndex(typeIndex),
+            _fieldHelper(std::forward<THelper>(fieldHelper)),
+            _fieldGetter([](std::any& helper)
+                { return std::any(std::any_cast<THelper&>(helper).GetField()); }),
+            MemberInfo(fieldName) {}
+
+        template<typename THelper>
+        StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+            _typeIndex(typeIndex),
+            _fieldHelper(std::forward<THelper>(fieldHelper)),
+            _fieldGetter([](std::any& helper)
+                { return std::any(std::any_cast<THelper&>(helper).GetField()); }),
+            MemberInfo(std::move(fieldName)) {}
+
+        auto GetField()
+        {
+            return _fieldGetter(_fieldHelper);
+        }
 
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;
-        void* Value() noexcept;
         [[nodiscard]]
         Reflection::MemberType MemberType() const noexcept override;
     };

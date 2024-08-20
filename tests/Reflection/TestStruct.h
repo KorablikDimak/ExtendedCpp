@@ -26,17 +26,7 @@ struct TestStruct
     static int TestMethodStatic() noexcept;
     static int TestMethodStatic(int a) noexcept;
 
-    META(FIELD(IntField),
-         FIELD(StringField),
-         FIELD(IntPtrField),
-         STATIC_FIELD(StaticDoubleField),
-         CONSTRUCTOR(),
-         CONSTRUCTOR(const std::string&),
-         METHOD(TestMethodInt),
-         METHOD(TestMethodDouble, double, double),
-         METHOD(TestMethodDouble, double, double, double),
-         STATIC_METHOD(TestMethodStatic),
-         STATIC_METHOD(TestMethodStatic, int))
+    META_DECL;
 };
 
 #endif

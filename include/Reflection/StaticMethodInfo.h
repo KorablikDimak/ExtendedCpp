@@ -12,17 +12,17 @@
 namespace Reflection
 {
     #define STATIC_METHOD(methodName, ...) \
-    [this]{ \
-        using ReturnType = decltype(std::apply([&](auto&&... args) \
-            { return methodName(args...); }, std::declval<std::tuple<__VA_ARGS__>>())); \
-        auto methodLambda = [&](std::any& tupleArgs) \
+    []{ \
+        using ReturnType = decltype(std::apply([](auto&&... args) \
+            { return ThisClassType::methodName(args...); }, std::declval<std::tuple<__VA_ARGS__>>())); \
+        auto methodLambda = [](std::any& tupleArgs) \
         { \
-            return std::apply([&](auto&&... args) \
-                { return methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
+            return std::apply([](auto&&... args) \
+                { return ThisClassType::methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
         }; \
         using MethodType = decltype(methodLambda); \
-        return std::make_shared<MethodInfo>(#methodName, \
-            MethodInfo::Helper<MethodType, ReturnType> \
+        return std::make_shared<StaticMethodInfo>(#methodName, \
+            StaticMethodInfo::Helper<MethodType, ReturnType> \
             (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
     }()
 
@@ -30,7 +30,7 @@ namespace Reflection
     {
     private:
         std::any _methodHelper;
-        std::any (*_method)(std::any&, std::any args);
+        std::any (*_method)(std::any&, std::any& args);
         std::vector<std::type_index> _parameters{};
 
     public:
@@ -39,7 +39,7 @@ namespace Reflection
         {
             TMethod _method;
 
-            explicit Helper(TMethod&& method) : _method(method) {}
+            explicit Helper(TMethod&& method) : _method(std::move(method)) {}
 
             TReturnType Invoke(std::any& args)
             {
@@ -48,23 +48,23 @@ namespace Reflection
         };
 
         template<typename THelper>
-        StaticMethodInfo(const std::string& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
-            _methodHelper(methodHelper),
-            _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+        StaticMethodInfo(const std::string& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            _methodHelper(std::forward<THelper>(methodHelper)),
+            _method([](std::any& helper, std::any& args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
             _parameters(std::move(parameters)),
             MemberInfo(methodName) {}
 
         template<typename THelper>
-        StaticMethodInfo(std::string&& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
-            _methodHelper(methodHelper),
-            _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+        StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            _methodHelper(std::forward<THelper>(methodHelper)),
+            _method([](std::any& helper, std::any& args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
             _parameters(std::move(parameters)),
             MemberInfo(std::move(methodName)) {}
 
         ~StaticMethodInfo() override = default;
 
         template<typename... TArgs>
-        auto Invoke(TArgs... args){ return _method(_methodHelper, std::make_tuple(args...)); }
+        auto Invoke(TArgs... args){ return _method(_methodHelper, std::make_tuple(std::forward(args)...)); }
 
         [[nodiscard]]
         inline Reflection::MemberType MemberType() const noexcept override

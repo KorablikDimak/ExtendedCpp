@@ -11,59 +11,68 @@
 namespace Reflection
 {
     #define METHOD(methodName, ...) \
-    [this]{ \
-        using ReturnType = decltype(std::apply([&](auto&&... args) \
-            { return methodName(args...); }, std::declval<std::tuple<__VA_ARGS__>>())); \
-        auto methodLambda = [&](std::any& tupleArgs) \
+    []()->std::shared_ptr<MemberInfo> \
+    { \
+        return std::apply([](auto&&... args) \
         { \
-            return std::apply([&](auto&&... args) \
-                { return methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
-        }; \
-        using MethodType = decltype(methodLambda); \
-        return std::make_shared<MethodInfo>(#methodName, \
-            MethodInfo::Helper<MethodType, ReturnType> \
-            (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
+            using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
+            auto methodLambda = [](ThisClassType* object, std::any& tupleArgs) \
+            { \
+                return std::apply([object](auto&&... args) \
+                    { return object->methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
+            }; \
+            using MethodType = decltype(methodLambda); \
+            return std::make_shared<MethodInfo>(#methodName, \
+                MethodInfo::Helper<ThisClassType, MethodType, ReturnType> \
+                (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
+        }, std::tuple<__VA_ARGS__>()); \
     }()
 
     class MethodInfo final : public MemberInfo
     {
     private:
         std::any _methodHelper;
-        std::any (*_method)(std::any&, std::any args);
+        std::any (*_method)(std::any& helper, std::any&& object, std::any&& args);
         std::vector<std::type_index> _parameters{};
 
     public:
-        template<typename TMethod, typename TReturnType>
+        template<typename TObject, typename TMethod, typename TReturnType>
         struct Helper final
         {
             TMethod _method;
 
-            explicit Helper(TMethod&& method) : _method(method) {}
+            explicit Helper(TMethod&& method)
+                : _method(std::move(method)) {}
 
-            TReturnType Invoke(std::any& args)
+            TReturnType Invoke(std::any&& object, std::any&& args)
             {
-                return _method(args);
+                return _method(std::any_cast<TObject*>(object), args);
             }
         };
 
         template<typename THelper>
-        MethodInfo(const std::string& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
-            _methodHelper(methodHelper),
-            _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+        MethodInfo(const std::string& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            _methodHelper(std::forward<THelper>(methodHelper)),
+            _method([](std::any& helper, std::any&& object, std::any&& args)
+                { return std::any(std::any_cast<THelper&>(helper).Invoke(std::move(object), std::move(args))); }),
             _parameters(std::move(parameters)),
             MemberInfo(methodName) {}
 
         template<typename THelper>
-        MethodInfo(std::string&& methodName, THelper methodHelper, std::vector<std::type_index> parameters) noexcept :
-            _methodHelper(methodHelper),
-            _method([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Invoke(args)); }),
+        MethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            _methodHelper(std::forward<THelper>(methodHelper)),
+            _method([](std::any& helper, std::any&& object, std::any&& args)
+                { return std::any(std::any_cast<THelper&>(helper).Invoke(std::move(object), std::move(args))); }),
             _parameters(std::move(parameters)),
             MemberInfo(std::move(methodName)) {}
 
         ~MethodInfo() override = default;
 
-        template<typename... TArgs>
-        auto Invoke(TArgs... args){ return _method(_methodHelper, std::make_tuple(args...)); }
+        template<typename TObject, typename... TArgs>
+        auto Invoke(TObject* object, TArgs... args)
+        {
+            return _method(_methodHelper, object, std::make_tuple(std::forward(args)...));
+        }
 
         [[nodiscard]]
         inline Reflection::MemberType MemberType() const noexcept override
