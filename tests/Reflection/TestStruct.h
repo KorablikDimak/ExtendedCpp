@@ -23,6 +23,7 @@ struct TestStruct
     [[nodiscard]]
     double TestMethodDouble(double a, double b, double c) const noexcept;
 
+    static std::string TestMethodStaticString() noexcept;
     static int TestMethodStatic() noexcept;
     static int TestMethodStatic(int a) noexcept;
 

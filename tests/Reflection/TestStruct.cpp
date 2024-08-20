@@ -33,6 +33,11 @@ double TestStruct::TestMethodDouble(double a, double b, double c) const noexcept
     return IntField + a + b + c;
 }
 
+std::string TestStruct::TestMethodStaticString() noexcept
+{
+    return "test";
+}
+
 int TestStruct::TestMethodStatic() noexcept
 {
     return 10;

@@ -25,7 +25,7 @@ namespace Reflection
     private:
         std::type_index _typeIndex;
         std::any _fieldHelper;
-        std::any (*_fieldGetter)(std::any&);
+        std::any (*_fieldGetter)(std::any& helper);
 
     public:
         template<typename TField>
