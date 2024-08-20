@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.6.0
+        VERSION 1.6.1
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
