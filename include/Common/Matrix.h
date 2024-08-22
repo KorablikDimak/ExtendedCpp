@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 
 namespace Common
 {
@@ -17,15 +18,15 @@ namespace Common
         std::size_t _columnCount;
 
     public:
-        Matrix(const std::size_t rowCount, const std::size_t columnCount)
+        Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
         {
-            if (rowCount == 0 || columnCount == 0)
-                throw std::invalid_argument("rowCount and columnCount must be positive integer");
-
             _rowCount = rowCount;
             _columnCount = columnCount;
 
+            if (_rowCount == 0) return;
             _table.resize(_rowCount);
+
+            if (_columnCount == 0) return;
             for (std::size_t i = 0; i < _rowCount; ++i)
                 _table[i].resize(_columnCount);
         }
@@ -35,7 +36,10 @@ namespace Common
             _rowCount = matrix._rowCount;
             _columnCount = matrix._columnCount;
 
+            if (_rowCount == 0) return;
             _table.resize(_rowCount);
+
+            if (_columnCount == 0) return;
             for (std::size_t i = 0; i < _rowCount; ++i)
                 _table[i] = matrix[i];
         }
@@ -44,109 +48,120 @@ namespace Common
         {
             _rowCount = matrix._rowCount;
             _columnCount = matrix._columnCount;
-
-            _table.resize(_rowCount);
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i] = std::move(matrix[i]);
+            _table = std::move(matrix._table);
         }
 
-        explicit Matrix(const std::vector<std::vector<T>>& matrix)
+        explicit Matrix(const std::vector<std::vector<T>>& matrix) noexcept
         {
-            if (matrix.empty() || matrix[0].empty())
-                throw std::invalid_argument("matrix must not be empty");
+            if (matrix.size() == 0)
+            {
+                _rowCount = 0;
+                _columnCount = 0;
+                return;
+            }
+
+            std::size_t maxColumnColumn = 0;
+            for (std::size_t i = 0; i < matrix.size(); ++i)
+                if (maxColumnColumn < matrix[i].size())
+                    maxColumnColumn = matrix[i].size();
 
             _rowCount = matrix.size();
-            _columnCount = matrix[0].size();
+            _columnCount = maxColumnColumn;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
             {
                 _table[i].resize(_columnCount);
-                for (std::size_t j = 0; j < _columnCount; ++j)
-                {
-                    if (matrix[i].size() != _columnCount)
-                        throw std::invalid_argument("matrix must be a rectangle");
+                for (std::size_t j = 0; j < matrix[i].size(); ++j)
                     _table[i][j] = matrix[i][j];
-                }
             }
         }
 
-        explicit Matrix(std::vector<std::vector<T>>&& matrix)
+        explicit Matrix(std::vector<std::vector<T>>&& matrix) noexcept
         {
-            if (matrix.empty() || matrix[0].empty())
-                throw std::invalid_argument("matrix must not be empty");
+            if (matrix.size() == 0)
+            {
+                _rowCount = 0;
+                _columnCount = 0;
+                return;
+            }
+
+            std::size_t maxColumnColumn = 0;
+            for (std::size_t i = 0; i < matrix.size(); ++i)
+                if (maxColumnColumn < matrix[i].size())
+                    maxColumnColumn = matrix[i].size();
 
             _rowCount = matrix.size();
-            _columnCount = matrix[0].size();
+            _columnCount = maxColumnColumn;
+            _table = std::move(matrix);
 
             for (std::size_t i = 0; i < _rowCount; ++i)
-                if (matrix[i].size() != _columnCount)
-                    throw std::invalid_argument("matrix must be a rectangle");
-
-            _table = matrix;
+                _table[i].resize(_columnCount);
         }
 
-        ~Matrix() noexcept = default;
+        ~Matrix() = default;
 
-        Matrix& operator=(const Matrix& matrix) noexcept
-        {
-            _rowCount = matrix._rowCount;
-            _columnCount = matrix._columnCount;
-
-            _table.resize(_rowCount);
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i] = matrix[i];
-
-            return *this;
-        }
+        Matrix& operator=(const Matrix& matrix) noexcept = default;
 
         Matrix& operator=(Matrix&& matrix) noexcept
         {
             _rowCount = matrix._rowCount;
             _columnCount = matrix._columnCount;
-
-            _table.resize(_rowCount);
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i] = std::move(matrix[i]);
-
+            _table = std::move(matrix._table);
             return *this;
         }
 
-        Matrix& operator=(const std::vector<std::vector<T>>& matrix)
+        Matrix& operator=(const std::vector<std::vector<T>>& matrix) noexcept
         {
-            if (matrix.empty() || matrix[0].empty())
-                throw std::invalid_argument("matrix must not be empty");
+            if (matrix.size() == 0)
+            {
+                _rowCount = 0;
+                _columnCount = 0;
+                _table.resize(0);
+                return *this;
+            }
+
+            std::size_t maxColumnColumn = 0;
+            for (std::size_t i = 0; i < matrix.size(); ++i)
+                if (maxColumnColumn < matrix[i].size())
+                    maxColumnColumn = matrix[i].size();
 
             _rowCount = matrix.size();
-            _columnCount = matrix[0].size();
+            _columnCount = maxColumnColumn;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
             {
                 _table[i].resize(_columnCount);
-                for (std::size_t j = 0; j < _columnCount; ++j)
-                {
-                    if (matrix[i].size() != _columnCount)
-                        throw std::invalid_argument("matrix must be a rectangle");
+                for (std::size_t j = 0; j < matrix[i].size(); ++j)
                     _table[i][j] = matrix[i][j];
-                }
             }
+
             return *this;
         }
 
-        Matrix& operator=(std::vector<std::vector<T>>&& matrix)
+        Matrix& operator=(std::vector<std::vector<T>>&& matrix) noexcept
         {
-            if (matrix.empty() || matrix[0].empty())
-                throw std::invalid_argument("matrix must not be empty");
+            if (matrix.size() == 0)
+            {
+                _rowCount = 0;
+                _columnCount = 0;
+                _table.resize(0);
+                return *this;
+            }
+
+            std::size_t maxColumnColumn = 0;
+            for (std::size_t i = 0; i < matrix.size(); ++i)
+                if (maxColumnColumn < matrix[i].size())
+                    maxColumnColumn = matrix[i].size();
 
             _rowCount = matrix.size();
-            _columnCount = matrix[0].size();
+            _columnCount = maxColumnColumn;
+            _table = std::move(matrix);
 
             for (std::size_t i = 0; i < _rowCount; ++i)
-                if (matrix[i].size() != _columnCount)
-                    throw std::invalid_argument("matrix must be a rectangle");
+                _table[i].resize(_columnCount);
 
-            _table = matrix;
             return *this;
         }
 
@@ -174,10 +189,10 @@ namespace Common
             return true;
         }
 
-        Matrix operator+(const Matrix& matrix) const
+        std::optional<Matrix> operator+(const Matrix& matrix) const noexcept
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
-                throw std::invalid_argument("Size of matrix must be equal");
+                return std::nullopt;
 
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -187,10 +202,10 @@ namespace Common
             return std::move(result);
         }
 
-        Matrix operator-(const Matrix& matrix) const
+        std::optional<Matrix> operator-(const Matrix& matrix) const noexcept
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
-                throw std::invalid_argument("Size of matrix must be equal");
+                return std::nullopt;
 
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -200,10 +215,10 @@ namespace Common
             return std::move(result);
         }
 
-        Matrix operator*(const Matrix& matrix) const
+        std::optional<Matrix> operator*(const Matrix& matrix) const noexcept
         {
             if (_columnCount != matrix._rowCount)
-                throw std::invalid_argument("Column size of left matrix must be equal to row size of right matrix");
+                return std::nullopt;
 
             Matrix result(_rowCount, matrix._columnCount);
 
@@ -260,53 +275,36 @@ namespace Common
             return std::move(result);
         }
 
-        void EraseRow(std::size_t rowNumber)
+        void EraseRow(std::size_t rowNumber) noexcept
         {
-            if (_rowCount == 1)
-                throw std::invalid_argument("You cannot erase a row from a matrix that has only one row");
-
+            if (_rowCount == 0) return;
             _table.erase(_table.cbegin() + rowNumber);
             --_rowCount;
         }
 
-        void EraseColumn(std::size_t columnNumber)
+        void EraseColumn(std::size_t columnNumber) noexcept
         {
-            if (_columnCount == 1)
-                throw std::invalid_argument("You cannot erase a column from a matrix that has only one column");
-
+            if (_columnCount == 0) return;
             for (std::size_t i = 0; i < _rowCount; ++i)
                 _table[i].erase(_table[i].cbegin() + columnNumber);
             --_columnCount;
         }
 
-        T AlgebraicComplement(const std::size_t i, const std::size_t j) const
+        std::optional<T> Det() const noexcept
         {
-            Matrix minorMatrix(*this);
-            minorMatrix.EraseRow(i);
-            minorMatrix.EraseColumn(j);
-            return std::pow(-1, i + j + 2) * minorMatrix.Det();
+            if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
+                return std::nullopt;
+            return DetHelper();
         }
 
-        T Det() const
+        std::optional<Matrix> Inverse() const noexcept
         {
-            if (_rowCount != _columnCount)
-                throw std::range_error("The matrix must be square");
+            if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
+                return std::nullopt;
+            const T det = DetHelper();
 
-            if (_rowCount == 1)
-                return _table[0][0];
-
-            T result{};
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                result += _table[i][0] * AlgebraicComplement(i, 0);
-
-            return std::move(result);
-        }
-
-        Matrix Inverse() const
-        {
-            const T det = Det();
             if (det == 0)
-                throw std::logic_error("Det must not be zero");
+                return std::nullopt;
             const T k = 1 / det;
 
             Matrix inverseMatrix(_rowCount, _columnCount);
@@ -320,7 +318,7 @@ namespace Common
             return std::move(inverseMatrix);
         }
 
-        Matrix operator~() const
+        std::optional<Matrix> operator~() const noexcept
         {
             return Inverse();
         }
@@ -348,6 +346,9 @@ namespace Common
         [[nodiscard]]
         std::size_t Rank() const noexcept
         {
+            if (_rowCount == 0 || _columnCount == 0)
+                return 0;
+
             std::size_t rank = _columnCount;
             Matrix copy(*this);
 
@@ -405,20 +406,18 @@ namespace Common
             return _table[rowNumber];
         }
 
-        void SetRow(const std::vector<T>& newRow, std::size_t rowNumber)
+        void SetRow(const std::vector<T>& newRow, std::size_t rowNumber) noexcept
         {
             if (newRow.size() != _columnCount)
-                throw std::invalid_argument("Incorrect newRow size");
-
+                return;
             _table[rowNumber] = newRow;
         }
 
-        void SetRow(std::vector<T>&& newRow, std::size_t rowNumber)
+        void SetRow(std::vector<T>&& newRow, std::size_t rowNumber) noexcept
         {
             if (newRow.size() != _columnCount)
-                throw std::invalid_argument("Incorrect newRow size");
-
-            _table[rowNumber] = newRow;
+                return;
+            _table[rowNumber] = std::move(newRow);
         }
 
         std::vector<T> GetColumn(std::size_t columnNumber) const noexcept
@@ -429,20 +428,18 @@ namespace Common
             return column;
         }
 
-        void SetColumn(const std::vector<T>& newColumn, std::size_t columnNumber)
+        void SetColumn(const std::vector<T>& newColumn, std::size_t columnNumber) noexcept
         {
             if (newColumn.size() != _rowCount)
-                throw std::invalid_argument("Incorrect newColumn size");
-
+                return;
             for (std::size_t i = 0; i < _rowCount; ++i)
                 _table[i][columnNumber] = newColumn[i];
         }
 
-        void SetColumn(std::vector<T>&& newColumn, std::size_t columnNumber)
+        void SetColumn(std::vector<T>&& newColumn, std::size_t columnNumber) noexcept
         {
             if (newColumn.size() != _rowCount)
-                throw std::invalid_argument("Incorrect newColumn size");
-
+                return;
             for (std::size_t i = 0; i < _rowCount; ++i)
                 _table[i][columnNumber] = std::move(newColumn[i]);
         }
@@ -472,17 +469,14 @@ namespace Common
             _table[i][j] = std::move(newValue);
         }
 
-        void Resize(std::size_t rowCount, std::size_t columnCount)
+        void Resize(std::size_t rowCount, std::size_t columnCount) noexcept
         {
-            if (rowCount == 0 || columnCount == 0)
-                throw std::invalid_argument("Matrix must not be empty");
-
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i].resize(columnCount);
-            _table.resize(rowCount);
-
             _rowCount = rowCount;
             _columnCount = columnCount;
+
+            _table.resize(rowCount);
+            for (std::size_t i = 0; i < _rowCount; ++i)
+                _table[i].resize(columnCount);
         }
 
         [[nodiscard]]
@@ -498,6 +492,27 @@ namespace Common
             }
 
             return std::move(matrixString);
+        }
+
+    private:
+        T AlgebraicComplement(const std::size_t i, const std::size_t j) const noexcept
+        {
+            Matrix minorMatrix(*this);
+            minorMatrix.EraseRow(i);
+            minorMatrix.EraseColumn(j);
+            return std::pow(-1, i + j + 2) * minorMatrix.DetHelper();
+        }
+
+        T DetHelper() const noexcept
+        {
+            if (_rowCount == 1 && _columnCount == 1)
+                return _table[0][0];
+
+            T result{};
+            for (std::size_t i = 0; i < _rowCount; ++i)
+                result += _table[i][0] * AlgebraicComplement(i, 0);
+
+            return std::move(result);
         }
     };
 
@@ -549,7 +564,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixF64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -558,7 +573,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixF32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -567,7 +582,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixI64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -576,7 +591,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixI32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -585,7 +600,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixI16 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -594,7 +609,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixI8 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -603,7 +618,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixU64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -612,7 +627,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixU32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -621,7 +636,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixU16 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \
@@ -630,7 +645,7 @@ Common::MatrixU8(rowCount, columnCount)
 []() \
 { \
     Common::MatrixU8 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+    for (std::size_t i = 0, j = 0; i < (rowCount) && j < (columnCount); ++i, ++j) \
         matrix[i][j] = 1; \
     return matrix; \
 }() \

@@ -18,7 +18,7 @@ TEST(MatrixTests, SumMatrixTest)
     matrix2[2] = { 1, 2, 3 };
 
     // Act
-    const Matrix matrix3 = matrix1 + matrix2;
+    const Matrix matrix3 = (matrix1 + matrix2).value();
 
     // Assert
     Matrix matrix4(3, 3);
@@ -38,7 +38,7 @@ TEST(MatrixTests, DetTest)
     matrix[2] = { 7, 8, 9 };
 
     // Act
-    const double det = matrix.Det();
+    const double det = matrix.Det().value();
 
     // Assert
     ASSERT_EQ(det, 0);
@@ -57,7 +57,7 @@ TEST(MatrixTests, MultiplyMatrix)
     matrix2[2] = { 2, 0 };
 
     // Act
-    const Matrix matrix3 = matrix1 * matrix2;
+    const Matrix matrix3 = (matrix1 * matrix2).value();
 
     // Assert
     Matrix matrix4(2, 2);
@@ -74,7 +74,7 @@ TEST(MatrixTests, BigMatrix)
     const Matrix matrix2 = E_MATRIX_F64(100, 100);
 
     // Act
-    const Matrix matrix3 = matrix1 * matrix2;
+    const Matrix matrix3 = (matrix1 * matrix2).value();
 
     // Assert
     ASSERT_TRUE(matrix3.RowCount() == 100);

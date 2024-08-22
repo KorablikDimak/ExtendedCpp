@@ -42,7 +42,7 @@ void MultiplyBenchmarkDouble(benchmark::State& state, Args&&... args)
     const Common::MatrixF64 matrix2(std::move(std::get<1>(argsTuple)));
 
     for (auto _ : state)
-        const Common::MatrixF64 result = matrix1 * matrix2;
+        const Common::MatrixF64 result = (matrix1 * matrix2).value();
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize20, GenerateDoubles(20), GenerateDoubles(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize100, GenerateDoubles(100), GenerateDoubles(100));
@@ -57,7 +57,7 @@ void MultiplyBenchmarkInts(benchmark::State& state, Args&&... args)
     const Common::MatrixI32 matrix2(std::move(std::get<1>(argsTuple)));
 
     for (auto _ : state)
-        const Common::MatrixI32 result = matrix1 * matrix2;
+        const Common::MatrixI32 result = (matrix1 * matrix2).value();
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize20, GenerateInts(20), GenerateInts(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize100, GenerateInts(100), GenerateInts(100));
