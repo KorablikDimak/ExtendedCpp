@@ -7,14 +7,6 @@
 
 namespace Reflection
 {
-    #define CONSTRUCTOR(...) \
-    []()->std::shared_ptr<MemberInfo> \
-    { \
-        return std::make_shared<ConstructorInfo>(std::string(typeid(ThisClassType).name()), \
-        ConstructorInfo::Helper<ThisClassType __VA_OPT__(,) __VA_ARGS__>(), \
-        ToTypeIndexes<__VA_ARGS__>()); \
-    }()
-
     class ConstructorInfo final : public MemberInfo
     {
     private:
@@ -85,5 +77,13 @@ namespace Reflection
         }
     };
 }
+
+#define CONSTRUCTOR(...) \
+[]()->std::shared_ptr<Reflection::MemberInfo> \
+{ \
+    return std::make_shared<Reflection::ConstructorInfo>(std::string(typeid(ThisClassType).name()), \
+        Reflection::ConstructorInfo::Helper<ThisClassType __VA_OPT__(,) __VA_ARGS__>(), \
+        Reflection::ToTypeIndexes<__VA_ARGS__>()); \
+}()
 
 #endif

@@ -29,6 +29,7 @@ option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(DI_BUILD_TESTS "Build DI library tests" OFF)
 option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
+option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
         "${CMAKE_INSTALL_LIBDIR}/extendedcpp" CACHE STRING
@@ -228,6 +229,10 @@ endif()
 if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Common)
+endif()
+
+if(Common_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks/Common)
 endif()
 
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)

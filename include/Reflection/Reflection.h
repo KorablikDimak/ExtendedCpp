@@ -1,6 +1,8 @@
 #ifndef Reflection_Reflection_H
 #define Reflection_Reflection_H
 
+#include <optional>
+
 #include <Reflection/Assembly.h>
 
 namespace Reflection
@@ -11,20 +13,20 @@ namespace Reflection
     typedef std::vector<std::shared_ptr<MethodInfo>> Methods;
     typedef std::vector<std::shared_ptr<StaticMethodInfo>> StaticMethods;
 
-    inline TypeInfo GetType(const std::string& typeName)
+    inline std::optional<TypeInfo> GetType(const std::string& typeName) noexcept
     {
         for (const auto& type : Assembly::GetTypes())
             if (std::string_view(type.TypeIndex().name()) == typeName)
                 return type;
-        throw std::invalid_argument("Assembly doesnt contain type " + typeName);
+        return std::nullopt;
     }
 
-    inline TypeInfo GetType(std::type_index typeIndex)
+    inline std::optional<TypeInfo> GetType(std::type_index typeIndex) noexcept
     {
         for (const auto& type : Assembly::GetTypes())
             if (type.TypeIndex() == typeIndex)
                 return type;
-        throw std::invalid_argument("Assembly doesnt contain type " + std::string(typeIndex.name()));
+        return std::nullopt;
     }
 
     template<typename T>

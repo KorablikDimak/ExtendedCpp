@@ -9,17 +9,6 @@
 
 namespace Reflection
 {
-    #define STATIC_FIELD(name) \
-    []()->std::shared_ptr<MemberInfo> \
-    { \
-        using FieldType = decltype(name); \
-        return std::make_shared<StaticFieldInfo>(#name, typeid(FieldType), \
-            StaticFieldInfo::Helper<FieldType>([]()->FieldType* \
-            { \
-                return &(name); \
-            })); \
-    }()
-
     class StaticFieldInfo final : public MemberInfo
     {
     private:
@@ -69,5 +58,16 @@ namespace Reflection
         Reflection::MemberType MemberType() const noexcept override;
     };
 }
+
+#define STATIC_FIELD(name) \
+[]()->std::shared_ptr<Reflection::MemberInfo> \
+{ \
+    using FieldType = decltype(name); \
+    return std::make_shared<Reflection::StaticFieldInfo>(#name, typeid(FieldType), \
+        Reflection::StaticFieldInfo::Helper<FieldType>([]()->FieldType* \
+        { \
+            return &(name); \
+        })); \
+}()
 
 #endif

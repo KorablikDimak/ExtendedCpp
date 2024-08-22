@@ -10,24 +10,6 @@
 
 namespace Reflection
 {
-    #define METHOD(methodName, ...) \
-    []()->std::shared_ptr<MemberInfo> \
-    { \
-        return std::apply([](auto&&... args) \
-        { \
-            using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
-            auto methodLambda = [](ThisClassType* object, std::any& tupleArgs) \
-            { \
-                return std::apply([object](auto&&... args) \
-                    { return object->methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
-            }; \
-            using MethodType = decltype(methodLambda); \
-            return std::make_shared<MethodInfo>(#methodName, \
-                MethodInfo::Helper<ThisClassType, MethodType, ReturnType> \
-                (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
-        }, std::tuple<__VA_ARGS__>()); \
-    }()
-
     class MethodInfo final : public MemberInfo
     {
     private:
@@ -87,5 +69,23 @@ namespace Reflection
         }
     };
 }
+
+#define METHOD(methodName, ...) \
+[]()->std::shared_ptr<Reflection::MemberInfo> \
+{ \
+    return std::apply([](auto&&... args) \
+    { \
+        using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
+        auto methodLambda = [](ThisClassType* object, std::any& tupleArgs) \
+        { \
+            return std::apply([object](auto&&... args) \
+                { return object->methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
+        }; \
+        using MethodType = decltype(methodLambda); \
+        return std::make_shared<Reflection::MethodInfo>(#methodName, \
+            Reflection::MethodInfo::Helper<ThisClassType, MethodType, ReturnType> \
+                (std::move(methodLambda)), Reflection::ToTypeIndexes<__VA_ARGS__>()); \
+    }, std::tuple<__VA_ARGS__>()); \
+}()
 
 #endif

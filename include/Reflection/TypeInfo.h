@@ -12,17 +12,6 @@
 
 namespace Reflection
 {
-    #define META(className, ...) \
-    using ThisClassType = className; \
-    inline static const TypeInfo MetaInfo = TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
-
-    #define META_DECL \
-    static const TypeInfo MetaInfo;
-
-    #define META_IMPL(className, ...) \
-    using ThisClassType = className; \
-    const TypeInfo ThisClassType::MetaInfo = TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
-
     class TypeInfo final
     {
     private:
@@ -60,5 +49,16 @@ namespace Reflection
         std::vector<std::shared_ptr<StaticMethodInfo>> GetStaticMethods(const std::string_view& name) const noexcept;
     };
 }
+
+#define META_DECL \
+static const Reflection::TypeInfo MetaInfo;
+
+#define META_IMPL(className, ...) \
+using ThisClassType = className; \
+const Reflection::TypeInfo ThisClassType::MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
+
+#define META(className, ...) \
+using ThisClassType = className; \
+inline static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
 
 #endif

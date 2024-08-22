@@ -3,8 +3,6 @@
 
 #include <Reflection/Reflection.h>
 
-using namespace Reflection;
-
 struct TestStruct
 {
     int IntField{};

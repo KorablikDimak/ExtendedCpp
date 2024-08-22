@@ -9,17 +9,6 @@
 
 namespace Reflection
 {
-    #define FIELD(name) \
-    []()->std::shared_ptr<MemberInfo> \
-    { \
-        using FieldType = decltype(std::declval<ThisClassType>().name); \
-        return std::make_shared<FieldInfo>(#name, typeid(FieldType), \
-            FieldInfo::Helper<ThisClassType, FieldType>([](ThisClassType* object)->FieldType* \
-            { \
-                return &(object->name);\
-            })); \
-    }()
-
     class FieldInfo final : public MemberInfo
     {
     private:
@@ -72,5 +61,16 @@ namespace Reflection
         Reflection::MemberType MemberType() const noexcept override;
     };
 }
+
+#define FIELD(name) \
+[]()->std::shared_ptr<Reflection::MemberInfo> \
+{ \
+    using FieldType = decltype(std::declval<ThisClassType>().name); \
+    return std::make_shared<Reflection::FieldInfo>(#name, typeid(FieldType), \
+        Reflection::FieldInfo::Helper<ThisClassType, FieldType>([](ThisClassType* object)->FieldType* \
+        { \
+            return &(object->name);\
+        })); \
+}()
 
 #endif

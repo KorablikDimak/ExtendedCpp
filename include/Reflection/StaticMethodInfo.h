@@ -11,21 +11,6 @@
 
 namespace Reflection
 {
-    #define STATIC_METHOD(methodName, ...) \
-    []()->std::shared_ptr<MemberInfo> \
-    { \
-        auto methodLambda = [](std::any&& tupleArgs) \
-        { \
-            return std::apply([](auto&&... args) \
-                { return ThisClassType::methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
-        }; \
-        using MethodType = decltype(methodLambda);  \
-        using ReturnType = decltype(std::declval<MethodType>()(std::declval<std::any>())); \
-        return std::make_shared<StaticMethodInfo>(#methodName, \
-            StaticMethodInfo::Helper<MethodType, ReturnType> \
-            (std::move(methodLambda)), ToTypeIndexes<__VA_ARGS__>()); \
-    }()
-
     class StaticMethodInfo final : public MemberInfo
     {
     private:
@@ -81,5 +66,20 @@ namespace Reflection
         }
     };
 }
+
+#define STATIC_METHOD(methodName, ...) \
+[]()->std::shared_ptr<Reflection::MemberInfo> \
+{ \
+    auto methodLambda = [](std::any&& tupleArgs) \
+    { \
+        return std::apply([](auto&&... args) \
+            { return ThisClassType::methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
+    }; \
+    using MethodType = decltype(methodLambda);  \
+    using ReturnType = decltype(std::declval<MethodType>()(std::declval<std::any>())); \
+    return std::make_shared<Reflection::StaticMethodInfo>(#methodName, \
+        Reflection::StaticMethodInfo::Helper<MethodType, ReturnType> \
+            (std::move(methodLambda)), Reflection::ToTypeIndexes<__VA_ARGS__>()); \
+}()
 
 #endif

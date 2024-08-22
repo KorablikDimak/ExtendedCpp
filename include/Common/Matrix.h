@@ -32,18 +32,18 @@ namespace Common
 
         Matrix(const Matrix& matrix) noexcept
         {
-            _rowCount = matrix.RowCount();
-            _columnCount = matrix.ColumnCount();
+            _rowCount = matrix._rowCount;
+            _columnCount = matrix._columnCount;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i] = matrix.GetRow(i);
+                _table[i] = matrix[i];
         }
 
         Matrix(Matrix&& matrix) noexcept
         {
-            _rowCount = matrix.RowCount();
-            _columnCount = matrix.ColumnCount();
+            _rowCount = matrix._rowCount;
+            _columnCount = matrix._columnCount;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -90,20 +90,20 @@ namespace Common
 
         Matrix& operator=(const Matrix& matrix) noexcept
         {
-            _rowCount = matrix.RowCount();
-            _columnCount = matrix.ColumnCount();
+            _rowCount = matrix._rowCount;
+            _columnCount = matrix._columnCount;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
-                _table[i] = matrix.GetRow(i);
+                _table[i] = matrix[i];
 
             return *this;
         }
 
         Matrix& operator=(Matrix&& matrix) noexcept
         {
-            _rowCount = matrix.RowCount();
-            _columnCount = matrix.ColumnCount();
+            _rowCount = matrix._rowCount;
+            _columnCount = matrix._columnCount;
 
             _table.resize(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -152,67 +152,67 @@ namespace Common
 
         bool operator==(const Matrix& matrix) const noexcept
         {
-            if (_rowCount != matrix.RowCount() || _columnCount != matrix.ColumnCount())
+            if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return false;
 
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    if (_table[i][j] != matrix.GetElement(i, j)) return false;
+                    if (_table[i][j] != matrix[i][j]) return false;
 
             return true;
         }
 
         bool operator!=(const Matrix& matrix) const noexcept
         {
-            if (_rowCount != matrix.RowCount() || _columnCount != matrix.ColumnCount())
+            if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return true;
 
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    if (_table[i][j] == matrix.GetElement(i, j)) return false;
+                    if (_table[i][j] == matrix[i][j]) return false;
 
             return true;
         }
 
         Matrix operator+(const Matrix& matrix) const
         {
-            if (_rowCount != matrix.RowCount() || _columnCount != matrix.ColumnCount())
+            if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 throw std::invalid_argument("Size of matrix must be equal");
 
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    result[i][j] = _table[i][j] + matrix.GetElement(i, j);
+                    result[i][j] = _table[i][j] + matrix[i][j];
 
             return std::move(result);
         }
 
         Matrix operator-(const Matrix& matrix) const
         {
-            if (_rowCount != matrix.RowCount() || _columnCount != matrix.ColumnCount())
+            if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 throw std::invalid_argument("Size of matrix must be equal");
 
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    result[i][j] = _table[i][j] - matrix.GetElement(i, j);
+                    result[i][j] = _table[i][j] - matrix[i][j];
 
             return std::move(result);
         }
 
         Matrix operator*(const Matrix& matrix) const
         {
-            if (_columnCount != matrix.RowCount())
+            if (_columnCount != matrix._rowCount)
                 throw std::invalid_argument("Column size of left matrix must be equal to row size of right matrix");
 
-            Matrix result(_rowCount, matrix.ColumnCount());
+            Matrix result(_rowCount, matrix._columnCount);
 
             for (std::size_t i = 0; i < _rowCount; ++i)
-                for (std::size_t j = 0; j < matrix.ColumnCount(); ++j)
+                for (std::size_t j = 0; j < matrix._columnCount; ++j)
                 {
                     T c{};
                     for (std::size_t k = 0; k < _columnCount; ++k)
-                        c += _table[i][k] * matrix.GetElement(k, j);
+                        c += _table[i][k] * matrix[k][j];
 
                     result[i][j] = c;
                 }
@@ -240,9 +240,14 @@ namespace Common
             return std::move(result);
         }
 
-        std::vector<T>& operator[](std::size_t rowNumber) noexcept
+        const std::vector<T>& operator[](std::size_t rowNumber) const noexcept
         {
             return _table[rowNumber];
+        }
+
+        std::vector<T>&& operator[](std::size_t rowNumber) noexcept
+        {
+            return std::move(_table[rowNumber]);
         }
 
         Matrix Transpose() const noexcept
@@ -300,15 +305,16 @@ namespace Common
         Matrix Inverse() const
         {
             const T det = Det();
-            if (!det)
+            if (det == 0)
                 throw std::logic_error("Det must not be zero");
+            const T k = 1 / det;
 
             Matrix inverseMatrix(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
                 {
                     T a = AlgebraicComplement(i, j);
-                    inverseMatrix[j][i] = a / det;
+                    inverseMatrix[j][i] = a * k;
                 }
 
             return std::move(inverseMatrix);
@@ -446,6 +452,16 @@ namespace Common
             return _table[i][j];
         }
 
+        const T& GetElementRef(std::size_t i, std::size_t j) const noexcept
+        {
+            return _table[i][j];
+        }
+
+        T&& GetElementRef(std::size_t i, std::size_t j) noexcept
+        {
+            return std::move(_table[i][j]);
+        }
+
         void SetElement(const T& newValue, std::size_t i, std::size_t j) noexcept
         {
             _table[i][j] = newValue;
@@ -453,7 +469,7 @@ namespace Common
 
         void SetElement(T&& newValue, std::size_t i, std::size_t j) noexcept
         {
-            _table[i][j] = newValue;
+            _table[i][j] = std::move(newValue);
         }
 
         void Resize(std::size_t rowCount, std::size_t columnCount)
@@ -493,106 +509,130 @@ namespace Common
     typedef Matrix<std::int16_t> MatrixI16;
     typedef Matrix<std::int8_t> MatrixI8;
 
-    typedef Matrix<std::uint64_t> MatrixUI64;
-    typedef Matrix<std::uint32_t> MatrixUI32;
-    typedef Matrix<std::uint16_t> MatrixUI16;
-    typedef Matrix<std::uint8_t> MatrixUI8;
-
-    #define ZERO_MATRIX_F64(rowCount, columnCount) \
-    return MatrixF64(rowCount, columnCount);
-
-    #define ZERO_MATRIX_F32(rowCount, columnCount) \
-    return MatrixF32(rowCount, columnCount);
-
-    #define ZERO_MATRIX_I64(rowCount, columnCount) \
-    return MatrixI64(rowCount, columnCount);
-
-    #define ZERO_MATRIX_I32(rowCount, columnCount) \
-    return MatrixI32(rowCount, columnCount);
-
-    #define ZERO_MATRIX_I16(rowCount, columnCount) \
-    return MatrixI16(rowCount, columnCount);
-
-    #define ZERO_MATRIX_I8(rowCount, columnCount) \
-    return MatrixI8(rowCount, columnCount);
-
-    #define ZERO_MATRIX_UI64(rowCount, columnCount) \
-    return MatrixUI64(rowCount, columnCount);
-
-    #define ZERO_MATRIX_UI32(rowCount, columnCount) \
-    return MatrixUI32(rowCount, columnCount);
-
-    #define ZERO_MATRIX_UI16(rowCount, columnCount) \
-    return MatrixUI16(rowCount, columnCount);
-
-    #define ZERO_MATRIX_UI8(rowCount, columnCount) \
-    return MatrixUI8(rowCount, columnCount);
-
-    #define E_MATRIX_F64(rowCount, columnCount) \
-    MatrixF64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_F64(rowCount, columnCount) \
-    MatrixF64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_F32(rowCount, columnCount) \
-    MatrixF32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_I64(rowCount, columnCount) \
-    MatrixI64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_I32(rowCount, columnCount) \
-    MatrixI32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_I16(rowCount, columnCount) \
-    MatrixI16 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_I8(rowCount, columnCount) \
-    MatrixI8 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_UI64(rowCount, columnCount) \
-    MatrixUI64 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_UI32(rowCount, columnCount) \
-    MatrixUI32 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_UI16(rowCount, columnCount) \
-    MatrixUI16 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
-
-    #define E_MATRIX_UI8(rowCount, columnCount) \
-    MatrixUI8 matrix(rowCount, columnCount); \
-    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
-        matrix[i][j] = 1; \
-    return matrix;
+    typedef Matrix<std::uint64_t> MatrixU64;
+    typedef Matrix<std::uint32_t> MatrixU32;
+    typedef Matrix<std::uint16_t> MatrixU16;
+    typedef Matrix<std::uint8_t> MatrixU8;
 }
+
+#define ZERO_MATRIX_F64(rowCount, columnCount) \
+Common::MatrixF64(rowCount, columnCount)
+
+#define ZERO_MATRIX_F32(rowCount, columnCount) \
+Common::MatrixF32(rowCount, columnCount)
+
+#define ZERO_MATRIX_I64(rowCount, columnCount) \
+Common::MatrixI64(rowCount, columnCount)
+
+#define ZERO_MATRIX_I32(rowCount, columnCount) \
+Common::MatrixI32(rowCount, columnCount)
+
+#define ZERO_MATRIX_I16(rowCount, columnCount) \
+Common::MatrixI16(rowCount, columnCount)
+
+#define ZERO_MATRIX_I8(rowCount, columnCount) \
+Common::MatrixI8(rowCount, columnCount)
+
+#define ZERO_MATRIX_U64(rowCount, columnCount) \
+Common::MatrixU64(rowCount, columnCount)
+
+#define ZERO_MATRIX_U32(rowCount, columnCount) \
+Common::MatrixU32(rowCount, columnCount)
+
+#define ZERO_MATRIX_U16(rowCount, columnCount) \
+Common::MatrixU16(rowCount, columnCount)
+
+#define ZERO_MATRIX_U8(rowCount, columnCount) \
+Common::MatrixU8(rowCount, columnCount)
+
+#define E_MATRIX_F64(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixF64 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_F32(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixF32 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_I64(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixI64 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_I32(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixI32 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_I16(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixI16 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_I8(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixI8 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_U64(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixU64 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_U32(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixU32 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_U16(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixU16 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
+
+#define E_MATRIX_U8(rowCount, columnCount) \
+[]() \
+{ \
+    Common::MatrixU8 matrix(rowCount, columnCount); \
+    for (std::size_t i = 0, j = 0; i < rowCount && j < columnCount; ++i, ++j) \
+        matrix[i][j] = 1; \
+    return matrix; \
+}() \
 
 #endif
