@@ -44,7 +44,7 @@ TEST(MatrixTests, DetTest)
     ASSERT_EQ(det, 0);
 }
 
-TEST(MatrixTests, MultiplyMatrix)
+TEST(MatrixTests, MultiplyMatrixTest)
 {
     // Average
     Matrix matrix1(2, 3);
@@ -67,18 +67,29 @@ TEST(MatrixTests, MultiplyMatrix)
     ASSERT_TRUE(matrix3 == matrix4);
 }
 
-TEST(MatrixTests, BigMatrix)
+TEST(MatrixTests, BigMatrixTest)
 {
     // Average
-    const Matrix matrix1 = E_MATRIX_F64(100, 100);
-    const Matrix matrix2 = E_MATRIX_F64(100, 100);
+    const Matrix matrix1 = E_MATRIX_F64(500, 500);
+    const Matrix matrix2 = E_MATRIX_F64(500, 500);
 
     // Act
     const Matrix matrix3 = (matrix1 * matrix2).value();
 
     // Assert
-    ASSERT_TRUE(matrix3.RowCount() == 100);
-    ASSERT_TRUE(matrix3.ColumnCount() == 100);
+    ASSERT_TRUE(matrix3.RowCount() == 500);
+    ASSERT_TRUE(matrix3.ColumnCount() == 500);
+}
+
+TEST(MatrixTests, MultiplyPTest)
+{
+    const Common::MatrixI64 matrix1(100, 100, []{ return rand() / 10000; });
+    const Common::MatrixI64 matrix2(100, 100, []{ return rand() / 10000; });
+
+    const Common::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true).value();
+    const Common::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false).value();
+
+    ASSERT_TRUE(matrix3 == matrix4);
 }
 
 TEST(MatrixTests, MacrosZeroTest)

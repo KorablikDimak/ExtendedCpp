@@ -39,9 +39,79 @@ MultiplyBenchmarkDouble/matrixDoubleSize20         2695 ns         2403 ns      
 MultiplyBenchmarkDouble/matrixDoubleSize100      495416 ns       488281 ns         1120
 MultiplyBenchmarkDouble/matrixDoubleSize1000  661762100 ns    656250000 ns            1
 MultiplyBenchmarkDouble/matrixDoubleSize2000 5523743600 ns   5343750000 ns            1
+
 MultiplyBenchmarkInts/matrixIntsSize20             1944 ns         1925 ns       373333
 MultiplyBenchmarkInts/matrixIntsSize100          181651 ns       184168 ns         3733
 MultiplyBenchmarkInts/matrixIntsSize1000      177238875 ns    175781250 ns            4
 MultiplyBenchmarkInts/matrixIntsSize2000     1487947400 ns   1484375000 ns            1
+
 InverseBenchmarkDouble/matrixDoubleSize20      47816525 ns     41015625 ns           16
 InverseBenchmarkInts/matrixIntsSize20          45846680 ns     43750000 ns           15
+
+
+---------------------------------------------------------------------------------------
+Benchmark                                             Time             CPU   Iterations
+---------------------------------------------------------------------------------------
+MultiplyBenchmarkDouble/matrixDoubleSize20         3104 ns         2605 ns       497778
+MultiplyBenchmarkDouble/matrixDoubleSize100      702002 ns       491828 ns         1239
+MultiplyBenchmarkDouble/matrixDoubleSize1000  180125175 ns    156250000 ns            4
+MultiplyBenchmarkDouble/matrixDoubleSize2000  993571100 ns    875000000 ns            1
+
+MultiplyBenchmarkInts/matrixIntsSize20             2173 ns         1726 ns       407273
+MultiplyBenchmarkInts/matrixIntsSize100          297884 ns       214829 ns         4073
+MultiplyBenchmarkInts/matrixIntsSize1000       68489464 ns     56818182 ns           11
+MultiplyBenchmarkInts/matrixIntsSize2000      456167350 ns    375000000 ns            2
+
+InverseBenchmarkDouble/matrixDoubleSize20      44244900 ns     31250000 ns           21
+InverseBenchmarkInts/matrixIntsSize20          42463968 ns     37006579 ns           19
+
+
+---------------------------------------------------------------------------------------
+Benchmark                                             Time             CPU   Iterations
+---------------------------------------------------------------------------------------
+MultiplyBenchmarkDouble/matrixDoubleSize20         3237 ns         1855 ns       320000
+MultiplyBenchmarkDouble/matrixDoubleSize100     1137656 ns        76562 ns        10000
+MultiplyBenchmarkDouble/matrixDoubleSize1000  231577200 ns     62500000 ns           10
+MultiplyBenchmarkDouble/matrixDoubleSize2000 1335396000 ns    257812500 ns            2
+
+MultiplyBenchmarkInts/matrixIntsSize20             2008 ns         1995 ns       344615
+MultiplyBenchmarkInts/matrixIntsSize100          733384 ns        71875 ns        10000
+MultiplyBenchmarkInts/matrixIntsSize1000      136423372 ns      7812500 ns           32
+MultiplyBenchmarkInts/matrixIntsSize2000      774272744 ns    126736111 ns            9
+
+InverseBenchmarkDouble/matrixDoubleSize20      46661981 ns     41992188 ns           16
+InverseBenchmarkInts/matrixIntsSize20          48375333 ns     37500000 ns           15
+
+
+---------------------------------------------------------------------------------------
+Benchmark                                             Time             CPU   Iterations
+---------------------------------------------------------------------------------------
+MultiplyBenchmarkDouble/matrixDoubleSize20         2988 ns         2197 ns       298667
+MultiplyBenchmarkDouble/matrixDoubleSize100      826189 ns       117890 ns         3446
+MultiplyBenchmarkDouble/matrixDoubleSize1000  176171910 ns      9375000 ns          100
+MultiplyBenchmarkDouble/matrixDoubleSize2000 1010307243 ns    102678571 ns            7
+
+MultiplyBenchmarkInts/matrixIntsSize20             1982 ns         1967 ns       373333
+MultiplyBenchmarkInts/matrixIntsSize100          424455 ns        0.000 ns        10000
+MultiplyBenchmarkInts/matrixIntsSize1000       83424271 ns      1406250 ns          100
+MultiplyBenchmarkInts/matrixIntsSize2000      497980600 ns     37500000 ns           10
+
+InverseBenchmarkDouble/matrixDoubleSize20      42507519 ns     41015625 ns           16
+InverseBenchmarkInts/matrixIntsSize20          45762856 ns     44921875 ns           16
+
+
+---------------------------------------------------------------------------------------
+Benchmark                                             Time             CPU   Iterations
+---------------------------------------------------------------------------------------
+MultiplyBenchmarkDouble/matrixDoubleSize20         3157 ns         2609 ns       263529
+MultiplyBenchmarkDouble/matrixDoubleSize100      570984 ns        0.000 ns        10000
+MultiplyBenchmarkDouble/matrixDoubleSize1000  309271320 ns        0.000 ns           10
+MultiplyBenchmarkDouble/matrixDoubleSize2000 2.3933e+10 ns     31250000 ns            1
+
+MultiplyBenchmarkInts/matrixIntsSize20             2032 ns         1074 ns       640000
+MultiplyBenchmarkInts/matrixIntsSize100          488996 ns        0.000 ns        10000
+MultiplyBenchmarkInts/matrixIntsSize1000       89779002 ns        0.000 ns          100
+MultiplyBenchmarkInts/matrixIntsSize2000     2600673020 ns      9375000 ns           10
+
+InverseBenchmarkDouble/matrixDoubleSize20      44432035 ns     33593750 ns           20
+InverseBenchmarkInts/matrixIntsSize20          45392458 ns     31901042 ns           24

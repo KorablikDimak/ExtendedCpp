@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
+#include <functional>
+#include <future>
 
 namespace Common
 {
@@ -23,6 +25,28 @@ namespace Common
             _rowCount = rowCount;
             _columnCount = columnCount;
             _table.resize(_rowCount * _columnCount);
+        }
+
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T()> init) noexcept
+        {
+            _rowCount = rowCount;
+            _columnCount = columnCount;
+            _table.resize(_rowCount * _columnCount);
+
+            for (std::size_t i = 0; i < _rowCount; ++i)
+                for (std::size_t j = 0; j < _columnCount; ++j)
+                    _table[i * _columnCount + j] = init();
+        }
+
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T(std::size_t, std::size_t)> init) noexcept
+        {
+            _rowCount = rowCount;
+            _columnCount = columnCount;
+            _table.resize(_rowCount * _columnCount);
+
+            for (std::size_t i = 0; i < _rowCount; ++i)
+                for (std::size_t j = 0; j < _columnCount; ++j)
+                    _table[i * _columnCount + j] = init(i, j);
         }
 
         Matrix(const Matrix& matrix) noexcept
@@ -169,24 +193,28 @@ namespace Common
             return std::move(result);
         }
 
-        std::optional<Matrix> operator*(const Matrix& matrix) const noexcept
+        std::optional<Matrix> Multiply(const Matrix& matrix, const bool asParallel = true) const noexcept
         {
             if (_columnCount != matrix._rowCount)
                 return std::nullopt;
 
-            Matrix result(_rowCount, matrix._columnCount);
-            Matrix transpose = matrix.Transpose();
+            if (asParallel)
+            {
+                Matrix result = StrassenMultiplyParallel(matrix);
+                result.Resize(_rowCount, matrix._columnCount);
+                return std::move(result);
+            }
+            else
+            {
+                Matrix result = StrassenMultiply(matrix);
+                result.Resize(_rowCount, matrix._columnCount);
+                return std::move(result);
+            }
+        }
 
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                for (std::size_t j = 0; j < matrix._columnCount; ++j)
-                {
-                    T c{};
-                    for (std::size_t k = 0; k < _columnCount; ++k)
-                        c += _table[i * _columnCount + k] * transpose._table[j * transpose._columnCount + k];
-                    result._table[i * matrix._columnCount + j] = c;
-                }
-
-            return std::move(result);
+        std::optional<Matrix> operator*(const Matrix& matrix) const noexcept
+        {
+            return Multiply(matrix, true);
         }
 
         Matrix operator*(const T& alpha) const noexcept
@@ -460,6 +488,202 @@ namespace Common
         }
 
     private:
+        [[nodiscard]]
+        std::size_t NewDimension(std::size_t value) const noexcept
+        {
+            std::size_t result = 1;
+            while (result < value)
+                result <<= 1;
+            return result;
+        }
+
+        std::array<Matrix, 4> SplitMatrix() const noexcept
+        {
+            const std::size_t size = _rowCount / 2;
+
+            Matrix matrix1(size, size);
+            Matrix matrix2(size, size);
+            Matrix matrix3(size, size);
+            Matrix matrix4(size, size);
+
+            for (std::size_t i = 0; i < size; ++i)
+                for (std::size_t j = 0; j < size; ++j)
+                    matrix1._table[i * matrix1._columnCount + j] = _table[i * _columnCount + j];
+
+            for (std::size_t i = 0; i < size; ++i)
+                for (std::size_t j = size; j < _rowCount; ++j)
+                    matrix2._table[i * matrix3._columnCount + j - size] = _table[i * _columnCount + j];
+
+            for (std::size_t i = size; i < _rowCount; ++i)
+                for (std::size_t j = 0; j < size; ++j)
+                    matrix3._table[(i - size) * matrix2._columnCount + j] = _table[i * _columnCount + j];
+
+            for (std::size_t i = size; i < _rowCount; ++i)
+                for (std::size_t j = size; j < _rowCount; ++j)
+                    matrix4._table[(i - size) * matrix4._columnCount + j - size] = _table[i * _columnCount + j];
+
+            return { matrix1, matrix2, matrix3, matrix4 };
+        }
+
+        static Matrix CollectMatrix(std::array<Matrix, 4> parts) noexcept
+        {
+            const std::size_t size = parts[0]._rowCount;
+
+            Matrix matrix(size * 2, size * 2);
+
+            for (std::size_t i = 0; i < size; ++i)
+                for (std::size_t j = 0; j < size; ++j)
+                {
+                    matrix._table[i * matrix._columnCount + j] = parts[0]._table[i * size + j];
+                    matrix._table[i * matrix._columnCount + j + size] = parts[1]._table[i * size + j];
+                    matrix._table[(i + size) * matrix._columnCount + j] = parts[2]._table[i * size + j];
+                    matrix._table[(i + size) * matrix._columnCount + j + size] = parts[3]._table[i * size + j];
+                }
+
+            return std::move(matrix);
+        }
+
+        Matrix StrassenMultiply(const Matrix& matrix) const noexcept
+        {
+            std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
+
+            if (newDimension <= 64)
+                return MultiplyTranspose(matrix);
+
+            Matrix left(*this);
+            left.Resize(newDimension, newDimension);
+            std::array<Matrix, 4> A = left.SplitMatrix();
+
+            Matrix right(matrix);
+            right.Resize(newDimension, newDimension);
+            std::array<Matrix, 4> B = right.SplitMatrix();
+
+            Matrix a11 = std::move(A[0]);
+            Matrix a12 = std::move(A[1]);
+            Matrix a21 = std::move(A[2]);
+            Matrix a22 = std::move(A[3]);
+
+            Matrix b11 = std::move(B[0]);
+            Matrix b12 = std::move(B[1]);
+            Matrix b21 = std::move(B[2]);
+            Matrix b22 = std::move(B[3]);
+
+            Matrix p1 = ((a11 + a22).value() * (b11 + b22).value()).value();
+            Matrix p2 = ((a21 + a22).value() * b11).value();
+            Matrix p3 = (a11 * (b12 - b22).value()).value();
+            Matrix p4 = (a22 * (b21 - b11).value()).value();
+            Matrix p5 = ((a11 + a12).value() * b22).value();
+            Matrix p6 = ((a21 - a11).value() * (b11 + b12).value()).value();
+            Matrix p7 = ((a12 - a22).value() * (b21 + b22).value()).value();
+
+            Matrix c11 = ((p1 + p4).value() + (p7 - p5).value()).value();
+            Matrix c12 = (p3 + p5).value();
+            Matrix c21 = (p2 + p4).value();
+            Matrix c22 = ((p1 - p2).value() + (p3 + p6).value()).value();
+
+            return CollectMatrix({ c11, c12, c21, c22 });
+        }
+
+        Matrix StrassenMultiplyParallel(const Matrix& matrix) const noexcept
+        {
+            std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
+
+            if (newDimension <= 64)
+                return MultiplyTranspose(matrix);
+
+            std::future<std::array<Matrix, 4>> taskLeft = std::async(std::launch::async, [this, newDimension]
+            {
+                Matrix left(*this);
+                left.Resize(newDimension, newDimension);
+                return left.SplitMatrix();
+            });
+
+            std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [&matrix, newDimension]
+            {
+                Matrix right(matrix);
+                right.Resize(newDimension, newDimension);
+                return right.SplitMatrix();
+            });
+
+            std::array<Matrix, 4> A = taskLeft.get();
+            std::array<Matrix, 4> B = taskRight.get();
+
+            Matrix a11 = std::move(A[0]);
+            Matrix a12 = std::move(A[1]);
+            Matrix a21 = std::move(A[2]);
+            Matrix a22 = std::move(A[3]);
+
+            Matrix b11 = std::move(B[0]);
+            Matrix b12 = std::move(B[1]);
+            Matrix b21 = std::move(B[2]);
+            Matrix b22 = std::move(B[3]);
+
+            std::future<Matrix> taskP1 = std::async(std::launch::async, [&a11, &a22, &b11, &b22]
+            { return ((a11 + a22).value() * (b11 + b22).value()).value(); });
+
+            std::future<Matrix> taskP2 = std::async(std::launch::async, [&a21, &a22, &b11]
+            { return ((a21 + a22).value() * b11).value(); });
+
+            std::future<Matrix> taskP3 = std::async(std::launch::async, [&a11, &b12, &b22]
+            { return (a11 * (b12 - b22).value()).value(); });
+
+            std::future<Matrix> taskP4 = std::async(std::launch::async, [&a22, &b21, &b11]
+            { return (a22 * (b21 - b11).value()).value(); });
+
+            std::future<Matrix> taskP5 = std::async(std::launch::async, [&a11, &a12, &b22]
+            { return ((a11 + a12).value() * b22).value(); });
+
+            std::future<Matrix> taskP6 = std::async(std::launch::async, [&a21, &a11, &b11, &b12]
+            { return  ((a21 - a11).value() * (b11 + b12).value()).value(); });
+
+            std::future<Matrix> taskP7 = std::async(std::launch::async, [&a12, &a22, &b21, &b22]
+            { return ((a12 - a22).value() * (b21 + b22).value()).value(); });
+
+            Matrix p1 = taskP1.get();
+            Matrix p2 = taskP2.get();
+            Matrix p3 = taskP3.get();
+            Matrix p4 = taskP4.get();
+            Matrix p5 = taskP5.get();
+            Matrix p6 = taskP6.get();
+            Matrix p7 = taskP7.get();
+
+            std::future<Matrix> taskC11 = std::async(std::launch::async, [&p1, &p4, &p7, &p5]
+            { return ((p1 + p4).value() + (p7 - p5).value()).value(); });
+
+            std::future<Matrix> taskC12 = std::async(std::launch::async, [&p3, &p5]
+            { return (p3 + p5).value(); });
+
+            std::future<Matrix> taskC21 = std::async(std::launch::async, [&p2, &p4]
+            { return (p2 + p4).value(); });
+
+            std::future<Matrix> taskC22 = std::async(std::launch::async, [&p1, &p2, &p3, &p6]
+            { return ((p1 - p2).value() + (p3 + p6).value()).value(); });
+
+            Matrix c11 = taskC11.get();
+            Matrix c12 = taskC12.get();
+            Matrix c21 = taskC21.get();
+            Matrix c22 = taskC22.get();
+
+            return CollectMatrix({ c11, c12, c21, c22 });
+        }
+
+        Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
+        {
+            Matrix result(_rowCount, matrix._columnCount);
+            Matrix transpose = matrix.Transpose();
+
+            for (std::size_t i = 0; i < _rowCount; ++i)
+                for (std::size_t j = 0; j < matrix._columnCount; ++j)
+                {
+                    T c{};
+                    for (std::size_t k = 0; k < _columnCount; ++k)
+                        c += _table[i * _columnCount + k] * transpose._table[j * transpose._columnCount + k];
+                    result._table[i * matrix._columnCount + j] = c;
+                }
+
+            return std::move(result);
+        }
+
         T AlgebraicComplement(const std::size_t i, const std::size_t j) const noexcept
         {
             Matrix minorMatrix(*this);
