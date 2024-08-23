@@ -8,23 +8,23 @@ TEST(MatrixTests, SumMatrixTest)
 {
     // Average
     Matrix matrix1(3, 3);
-    matrix1[0] = { 1, 2, 3 };
-    matrix1[1] = { 4, 5, 6 };
-    matrix1[2] = { 7, 8, 9 };
+    matrix1.SetRow({ 1, 2, 3 }, 0);
+    matrix1.SetRow({ 4, 5, 6 }, 1);
+    matrix1.SetRow({ 7, 8, 9 }, 2);
 
     Matrix matrix2(3, 3);
-    matrix2[0] = { 7, 8, 9 };
-    matrix2[1] = { 4, 5, 6 };
-    matrix2[2] = { 1, 2, 3 };
+    matrix2.SetRow({ 7, 8, 9 }, 0);
+    matrix2.SetRow({ 4, 5, 6 }, 1);
+    matrix2.SetRow({ 1, 2, 3 }, 2);
 
     // Act
     const Matrix matrix3 = (matrix1 + matrix2).value();
 
     // Assert
     Matrix matrix4(3, 3);
-    matrix4[0] = { 8, 10, 12 };
-    matrix4[1] = { 8, 10, 12 };
-    matrix4[2] = { 8, 10, 12 };
+    matrix4.SetRow({ 8, 10, 12 }, 0);
+    matrix4.SetRow({ 8, 10, 12 }, 1);
+    matrix4.SetRow({ 8, 10, 12 }, 2);
 
     ASSERT_TRUE(matrix3 == matrix4);
 }
@@ -33,9 +33,9 @@ TEST(MatrixTests, DetTest)
 {
     // Average
     Matrix matrix(3, 3);
-    matrix[0] = { 1, 2, 3 };
-    matrix[1] = { 4, 5, 6 };
-    matrix[2] = { 7, 8, 9 };
+    matrix.SetRow({ 1, 2, 3 }, 0);
+    matrix.SetRow({ 4, 5, 6 }, 1);
+    matrix.SetRow({ 7, 8, 9 }, 2);
 
     // Act
     const double det = matrix.Det().value();
@@ -48,21 +48,21 @@ TEST(MatrixTests, MultiplyMatrix)
 {
     // Average
     Matrix matrix1(2, 3);
-    matrix1[0] = { 1, 2, 3 };
-    matrix1[1] = { 3, 1, -2 };
+    matrix1.SetRow({ 1, 2, 3 }, 0);
+    matrix1.SetRow({ 3, 1, -2 }, 1);
 
     Matrix matrix2(3, 2);
-    matrix2[0] = { 1, 2 };
-    matrix2[1] = { -3, 1 };
-    matrix2[2] = { 2, 0 };
+    matrix2.SetRow({ 1, 2 }, 0);
+    matrix2.SetRow({ -3, 1 }, 1);
+    matrix2.SetRow({ 2, 0 }, 2);
 
     // Act
     const Matrix matrix3 = (matrix1 * matrix2).value();
 
     // Assert
     Matrix matrix4(2, 2);
-    matrix4[0] = { 1, 4 };
-    matrix4[1] = { -4, 7 };
+    matrix4.SetRow({ 1, 4 }, 0);
+    matrix4.SetRow({ -4, 7 }, 1);
 
     ASSERT_TRUE(matrix3 == matrix4);
 }
