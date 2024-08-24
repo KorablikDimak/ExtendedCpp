@@ -376,7 +376,10 @@ target_link_libraries(MyExec PRIVATE
         ExtendedCpp::Events 
         ExtendedCpp::Json 
         ExtendedCpp::Xml 
-        ExtendedCpp::InfoLog)
+        ExtendedCpp::InfoLog
+        ExtendedCpp::Common
+        ExtendedCpp::DI
+        ExtendedCpp::Reflection)
 ```
 Assemblies tested using g++ and MSVC (CLang does not fully support C++20, so you can not build all of this)
 Testing and benchmarks also require appropriate libraries.
