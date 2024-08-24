@@ -99,9 +99,7 @@ set(Common_INCLUDES
 
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
-        src/Common/CancellationTokenSource.cpp
-        src/Common/Random.cpp
-        include/Reflection/MethodInfo.h)
+        src/Common/CancellationTokenSource.cpp)
 
 set(DI_INCLUDES
         include/DI/ServiceProvider.h
@@ -119,7 +117,8 @@ set(Reflection_INCLUDES
         include/Reflection/ConstructorInfo.h
         include/Reflection/Assembly.h
         include/Reflection/StaticMethodInfo.h
-        include/Reflection/StaticFieldInfo.h)
+        include/Reflection/StaticFieldInfo.h
+        include/Reflection/MethodInfo.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
