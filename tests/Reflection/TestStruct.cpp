@@ -11,7 +11,7 @@ META_IMPL(TestStruct,
           METHOD(TestMethodDouble, double, double),
           METHOD(TestMethodDouble, double, double, double),
           STATIC_METHOD(TestMethodStatic),
-          STATIC_METHOD(TestMethodStatic, int))
+          STATIC_METHOD(TestMethodStatic, int));
 
 TestStruct::TestStruct(const std::string& str) noexcept
 {

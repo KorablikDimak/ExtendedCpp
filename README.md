@@ -1,7 +1,7 @@
 [![](https://img.shields.io/badge/GoogleTest-green)](https://github.com/google/googletest)
 [![](https://img.shields.io/badge/GoogleBenchmarks-blue)](https://github.com/google/benchmark)
 [![](https://img.shields.io/badge/PugiXML-green)](https://github.com/zeux/pugixml)
-[![](https://img.shields.io/badge/PugiXML-black)](https://github.com/nlohmann/json)
+[![](https://img.shields.io/badge/nlohmannJSON-black)](https://github.com/nlohmann/json)
 
 # ExtendedCpp
 A set of libraries that extend standard C++ functionality. The libraries have no dependencies and is written in pure C++.
@@ -141,7 +141,84 @@ for (auto& element : linq)
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/LINQ).
 ### Benchmarks
-All benchmarks are in the directory [benchmarks](https://github.com/KorablikDimak/ExtendedCpp/tree/master/benchmarks)
+All benchmarks are in the directory [benchmarks](https://github.com/KorablikDimak/ExtendedCpp/tree/master/benchmarks/LINQ)
+
+---
+## Reflection
+### Description
+Library for implementing dynamic reflection.
+Allows you to access constructors, methods, fields, static methods and fields.
+Does not require rewriting existing code. To use it, just add two macros.
+
+`META_DECL` in your .h file and `META_IMPL(NameOfYourType, ...members...)`
+### Examples:
+```C++
+// TestStruct.h
+#include <Reflection/Reflection.h>
+
+struct TestStruct
+{
+    int IntField;
+    std::string StringField;
+    static double StaticField;
+    
+    TestStruct();
+    TestStruct(const std::string& str);
+    
+    int MethodInt();
+    double MethodOverride(double a, double b);
+    double MethodOverride(double a, double b, double c);
+    static int StaticMethod(int a);
+    
+    META_DECL;
+};
+
+// TestStruct.cpp
+META_IMPL(TestStruct,
+          FIELD(IntField),
+          FIELD(StringField),
+          STATIC_FIELD(StaticField),
+          CONSTRUCTOR(),
+          CONSTRUCTOR(const std::string&),
+          METHOD(MethodInt),
+          METHOD(MethodOverride, double, double),
+          METHOD(MethodOverride, double, double, double),
+          STATIC_METHOD(StaticMethod, int));
+
+// Usage
+
+// Get type info
+TypeInfo typeInfo = Reflection::GetType<TestStruct>();
+// or
+std::optional<TypeInfo> typeInfo = Reflection::GetType("TestStruct");
+// or
+std::optional<TypeInfo> typeInfo = Reflection::GetType(typeid(TestStruct));
+
+// Call constructors
+TestStruct testStruct = std::any_cast<TestStruct>(typeInfo.GetConstructors()[0]->Create());
+TestStruct* newTestStruct = std::any_cast<TestStruct*>(typeInfo.GetConstructors()[1]->New(std::string));
+
+// Invoke methods
+int result1 = std::any_cast<int>
+        (typeInfo.GetMethods("MethodInt")[0]->Invoke(&testStruct));
+double result2 = std::any_cast<double>
+        (typeInfo.GetMethods("MethodOverride")[0]->Invoke(&testStruct, double, double));
+double result3 = std::any_cast<double>
+        (typeInfo.GetMethods("MethodOverride")[1]->Invoke(&testStruct, double, double, double));
+
+// Get parameter info
+std::vector<std::type_index> parameters = typeInfo.GetMethods("MethodOverride")[0]->Parameters(); // size: 2
+std::vector<std::type_index> parameters = typeInfo.GetMethods("MethodOverride")[1]->Parameters(); // size: 3
+
+// Access to fields
+int* fieldPtr = std::any_cast<int*>(typeInfo.GetField("IntField")->GetField(&testStruct));
+*fieldPtr = 5;
+std::cout << testStruct.IntField << std::endl; // output: 5
+
+double* staticFieldPtr = std::any_cast<double*>(typeInfo.GetStaticFields("StaticField")->GetField());
+```
+### Unit tests
+All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Reflection).
 
 ---
 ## Events
@@ -256,28 +333,37 @@ They include:
 #include <Common/Common.h>
 
 Matrix matrix1(2, 3);
-matrix1[0] = { 1, 2, 3 };
-matrix1[1] = { 3, 1, -2 };
+matrix1.SetRow({ 1, 2, 3 }, 0);
+matrix1.SetRow({ 3, 1, -2 }, 1);
 
 Matrix matrix2(3, 2);
-matrix2[0] = { 1, 2 };
-matrix2[1] = { -3, 1 };
-matrix2[2] = { 2, 0 };
+matrix2.SetRow({ 1, 2 }, 0);
+matrix2.SetRow({ -3, 1 }, 1);
+matrix2.SetRow({ 2, 0 }, 2);
 
 const Matrix matrix3 = matrix1 * matrix2;
-// matrix3:
-// 1, 4
-// -4, 7
+std::cout << matrix3 << std::endl;
+// output:
+//  1   4
+// -4   7
 
 Matrix matrix4(3, 3);
-matrix4[0] = { 1, 2, 3 };
-matrix4[1] = { 4, 5, 6 };
-matrix4[2] = { 7, 8, 9 };
+matrix4.SetRow({ 1, 2, 3 }, 0);
+matrix4.SetRow({ 4, 5, 6 }, 1);
+matrix4.SetRow({ 7, 8, 9 }, 2);
 
 const double det = matrix4.Det(); // result: 0
+
+const Matrix matrix5(100, 100, []{ return Common::RandomInt(1, 10); }); // generate random matrix
+
+const std::optional<Matrix> invertedMatrix = matrix5.Inverse(); // inverse matrix
+// or
+const std::optional<Matrix> invertedMatrix = ~matrix5; // inverse matrix
 ```
-All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Common).
 ### Unit tests
+All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Common).
+### Benchmarks
+All benchmarks are in the directory [benchmarks](https://github.com/KorablikDimak/ExtendedCpp/tree/master/benchmarks/Common)
 
 ---
 ## Fast install

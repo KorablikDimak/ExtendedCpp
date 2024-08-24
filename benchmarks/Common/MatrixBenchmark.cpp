@@ -52,7 +52,7 @@ void InverseBenchmarkDouble(benchmark::State& state, Args&&... args)
     const Common::MatrixF64 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const auto result = matrix.Det();
+        const auto result = matrix.Inverse().value();
 }
 BENCHMARK_CAPTURE(InverseBenchmarkDouble, matrixDoubleSize20, GenerateDoubles(20));
 BENCHMARK_CAPTURE(InverseBenchmarkDouble, matrixDoubleSize100, GenerateDoubles(100));
@@ -66,7 +66,7 @@ void InverseBenchmarkInts(benchmark::State& state, Args&&... args)
     const Common::MatrixI32 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const auto result = matrix.Det();
+        const auto result = matrix.Inverse().value();
 }
 BENCHMARK_CAPTURE(InverseBenchmarkInts, matrixIntSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(InverseBenchmarkInts, matrixIntSize100, GenerateInts(100));
