@@ -4,24 +4,14 @@
 #include <benchmark/benchmark.h>
 
 #include <LINQ/Sort.h>
+#include <Common/Random.h>
 
 std::vector<std::string> GenerateStrings(const std::size_t count) noexcept
 {
     std::vector<std::string> result(count);
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     for (std::size_t i = 0; i < count; ++i)
-    {
-        std::string string;
-
-        for (unsigned char j = 0; j < 100; ++j)
-        {
-            const char symbol = static_cast<char>(rand());
-            string += symbol;
-        }
-
-        result[i] = std::move(string);
-    }
+        result[i] = std::move(Common::RandomString(20));
 
     return std::move(result);
 }
@@ -31,7 +21,7 @@ void QuickSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::QuickSort(strings.data(), 0, strings.size() - 1);
 }
 BENCHMARK_CAPTURE(QuickSortBenchmark, stringSize20, GenerateStrings(20));
@@ -45,7 +35,7 @@ void InsertionSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::InsertionSort(strings.data(), 0, strings.size() - 1);
 }
 BENCHMARK_CAPTURE(InsertionSortBenchmark, stringSize20, GenerateStrings(20));
@@ -58,7 +48,7 @@ void CombSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::CombSort(strings.data(), 0, strings.size() - 1);
 }
 BENCHMARK_CAPTURE(CombSortBenchmark, stringSize20, GenerateStrings(20));
@@ -72,7 +62,7 @@ void MergeSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::MergeSort(strings.data(), 0, strings.size() - 1);
 }
 BENCHMARK_CAPTURE(MergeSortBenchmark, stringSize20, GenerateStrings(20));
@@ -86,7 +76,7 @@ void TimSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::TimSort(strings.data(), 0, strings.size() - 1);
 }
 BENCHMARK_CAPTURE(TimSortBenchmark, stringSize20, GenerateStrings(20));
@@ -100,7 +90,7 @@ void StdSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector strings = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         std::ranges::sort(strings);
 }
 BENCHMARK_CAPTURE(StdSortBenchmark, stringSize20, GenerateStrings(20));

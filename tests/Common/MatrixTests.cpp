@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <Common/Matrix.h>
+#include <Common/Random.h>
 
 typedef Common::MatrixF64 Matrix;
 
@@ -41,7 +42,19 @@ TEST(MatrixTests, DetTest)
     const double det = matrix.Det().value();
 
     // Assert
-    ASSERT_EQ(det, 0);
+    ASSERT_TRUE(det < 0.0000001);
+}
+
+TEST(MatrixTests, DetBigTest)
+{
+    // Average
+    const Matrix matrix(1000, 1000, []{ return Common::RandomInt(1, 10); });
+
+    // Act
+    const auto det = matrix.Det();
+
+    // Assert
+    ASSERT_TRUE(det.has_value() && det.value() != 0);
 }
 
 TEST(MatrixTests, MultiplyMatrixTest)
@@ -83,12 +96,15 @@ TEST(MatrixTests, BigMatrixTest)
 
 TEST(MatrixTests, MultiplyPTest)
 {
-    const Common::MatrixI64 matrix1(100, 100, []{ return rand() / 10000; });
-    const Common::MatrixI64 matrix2(100, 100, []{ return rand() / 10000; });
+    // Average
+    const Common::MatrixI64 matrix1(500, 500, []{ return Common::RandomInt(1, 10); });
+    const Common::MatrixI64 matrix2(500, 500, []{ return Common::RandomInt(1, 10); });
 
+    // Act
     const Common::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true).value();
     const Common::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false).value();
 
+    // Assert
     ASSERT_TRUE(matrix3 == matrix4);
 }
 

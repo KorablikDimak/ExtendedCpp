@@ -3,14 +3,14 @@
 #include <benchmark/benchmark.h>
 
 #include <LINQ/Sort.h>
+#include <Common/Random.h>
 
 std::vector<double> GenerateDoubles(const std::size_t count) noexcept
 {
     std::vector<double> result(count);
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     for (std::size_t i = 0; i < count; ++i)
-        result[i] = static_cast<double>(rand() * rand());
+        result[i] = static_cast<double>(Common::RandomInt(0, 100000));
 
     return std::move(result);
 }
@@ -20,7 +20,7 @@ void QuickSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::QuickSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(QuickSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -35,7 +35,7 @@ void SelectionSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::SelectionSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(SelectionSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -49,7 +49,7 @@ void InsertionSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::InsertionSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(InsertionSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -63,7 +63,7 @@ void BucketSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::BucketSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(BucketSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -78,7 +78,7 @@ void CombSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(CombSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -94,7 +94,7 @@ void MergeSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(MergeSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -110,7 +110,7 @@ void TimSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         LINQ::Sort::TimSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(TimSortBenchmark, doubleSize20, GenerateDoubles(20));
@@ -126,7 +126,7 @@ void StdSortBenchmark(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
         std::ranges::sort(numbers);
 }
 BENCHMARK_CAPTURE(StdSortBenchmark, doubleSize20, GenerateDoubles(20));

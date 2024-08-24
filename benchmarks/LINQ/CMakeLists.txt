@@ -21,7 +21,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 add_executable(LINQ-benchmarks)
 target_sources(LINQ-benchmarks PRIVATE ${SOURCES})
 
-target_link_libraries(LINQ-benchmarks PRIVATE ExtendedCpp::LINQ benchmark::benchmark)
+target_link_libraries(LINQ-benchmarks PRIVATE ExtendedCpp::LINQ ExtendedCpp::Common benchmark::benchmark)
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
     target_compile_options(LINQ-benchmarks PRIVATE -O3)

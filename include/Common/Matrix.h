@@ -175,7 +175,8 @@ namespace Common
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    result._table[i * _columnCount + j] = _table[i * _columnCount + j] + matrix._table[i * _columnCount + j];
+                    result._table[i * _columnCount + j] =
+                            _table[i * _columnCount + j] + matrix._table[i * _columnCount + j];
 
             return std::move(result);
         }
@@ -188,7 +189,8 @@ namespace Common
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    result._table[i * _columnCount + j] = _table[i * _columnCount + j] - matrix._table[i * _columnCount + j];
+                    result._table[i * _columnCount + j] =
+                            _table[i * _columnCount + j] - matrix._table[i * _columnCount + j];
 
             return std::move(result);
         }
@@ -267,8 +269,8 @@ namespace Common
         void EraseColumn(const std::size_t columnNumber) noexcept
         {
             if (_columnCount == 0) return;
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                _table.erase(_table.begin() + i * _columnCount + columnNumber);
+            for (std::size_t i = 0, j = _rowCount - 1; i < _rowCount; ++i, --j)
+                _table.erase(_table.begin() + j * _columnCount + columnNumber);
             --_columnCount;
         }
 
@@ -276,28 +278,26 @@ namespace Common
         {
             if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
                 return std::nullopt;
-            return DetHelper();
+
+            const auto decomposeResult = LUPDecompose();
+            if (!decomposeResult.has_value())
+                return std::nullopt;
+
+            const auto [A, P] = decomposeResult.value();
+            return A.LUPDet(P);
         }
 
         std::optional<Matrix> Inverse() const noexcept
         {
             if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
                 return std::nullopt;
-            const T det = DetHelper();
 
-            if (det == 0)
+            const auto decomposeResult = LUPDecompose();
+            if (!decomposeResult.has_value())
                 return std::nullopt;
-            const T k = 1 / det;
 
-            Matrix inverseMatrix(_rowCount, _columnCount);
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                for (std::size_t j = 0; j < _columnCount; ++j)
-                {
-                    T a = AlgebraicComplement(i, j);
-                    inverseMatrix._table[j * _rowCount + i] = a * k;
-                }
-
-            return std::move(inverseMatrix);
+            const auto [A, P] = decomposeResult.value();
+            return A.LUPInvert(P);
         }
 
         std::optional<Matrix> operator~() const noexcept
@@ -313,13 +313,13 @@ namespace Common
             return std::move(copy);
         }
 
-        void SwapRow(const std::size_t row1Number, const std::size_t row2Number) noexcept
+        void SwapRows(const std::size_t row1Number, const std::size_t row2Number) noexcept
         {
             for (std::size_t i = 0; i < _columnCount; ++i)
                 std::swap(_table[row1Number * _columnCount + i], _table[row2Number * _columnCount + i]);
         }
 
-        void SwapColumn(const std::size_t column1Number, const std::size_t column2Number) noexcept
+        void SwapColumns(const std::size_t column1Number, const std::size_t column2Number) noexcept
         {
             for (std::size_t i = 0; i < _rowCount; ++i)
                 std::swap(_table[i * _columnCount + column1Number], _table[i * _columnCount + column2Number]);
@@ -341,9 +341,11 @@ namespace Common
                     for (std::size_t columnIndex = 0; columnIndex < _rowCount; ++columnIndex)
                         if (columnIndex != rowIndex)
                         {
-                            T multiplier = copy._table[columnIndex  * _columnCount + rowIndex] / copy._table[rowIndex * _columnCount + rowIndex];
+                            T multiplier = copy._table[columnIndex  * _columnCount + rowIndex] /
+                                    copy._table[rowIndex * _columnCount + rowIndex];
                             for (std::size_t i = 0; i < rank; ++i)
-                                copy._table[columnIndex * _columnCount + i] -= multiplier * copy._table[rowIndex * _columnCount + i];
+                                copy._table[columnIndex * _columnCount + i] -=
+                                        multiplier * copy._table[rowIndex * _columnCount + i];
                         }
                 }
                 else
@@ -353,7 +355,7 @@ namespace Common
                     for (std::size_t i = rowIndex + 1; i < _rowCount; ++i)
                         if (copy._table[i * _columnCount + rowIndex])
                         {
-                            copy.SwapRow(rowIndex, i);
+                            copy.SwapRows(rowIndex, i);
                             reduce = false;
                             break;
                         }
@@ -488,6 +490,147 @@ namespace Common
         }
 
     private:
+        std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept
+        {
+            std::vector<std::size_t> P(_rowCount + 1);
+            Matrix A(*this);
+
+            std::size_t i, j, k, imax;
+            T maxA, absA;
+
+            for (i = 0; i <= _rowCount; ++i)
+                P[i] = i;
+
+            for (i = 0; i < _rowCount; ++i)
+            {
+                maxA = 0.0;
+                imax = i;
+
+                for (k = i; k < _rowCount; ++k)
+                    if ((absA = std::abs(A._table[k * A._columnCount + i])) > maxA)
+                    {
+                        maxA = absA;
+                        imax = k;
+                    }
+
+                if (std::abs(maxA) < std::numeric_limits<std::double_t>::min())
+                    return std::nullopt;
+
+                if (imax != i)
+                {
+                    j = P[i];
+                    P[i] = P[imax];
+                    P[imax] = j;
+
+                    A.SwapRows(i, imax);
+                    ++P[_rowCount];
+                }
+
+                for (j = i + 1; j < _rowCount; ++j)
+                {
+                    A._table[j * A._columnCount + i] /= A._table[i * A._columnCount + i];
+
+                    for (k = i + 1; k < _rowCount; ++k)
+                        A._table[j * A._columnCount + k] -=
+                                A._table[j * A._columnCount + i] * A._table[i * A._columnCount + k];
+                }
+            }
+
+            return std::make_pair(std::move(A), std::move(P));
+        }
+
+        T LUPDet(const std::vector<std::size_t>& P) const noexcept
+        {
+            T det = _table[0];
+
+            for (std::size_t i = 1; i < _rowCount; ++i)
+                det *= _table[i * _columnCount + i];
+
+            return ((long long) P[_rowCount] - (long long) _rowCount) % 2 == 0 ? det : -det;
+        }
+
+        Matrix LUPInvert(const std::vector<std::size_t>& P) const noexcept
+        {
+            Matrix IA(_rowCount, _columnCount);
+
+            for (std::size_t j = 0; j < _rowCount; ++j)
+            {
+                for (std::size_t i = 0; i < _rowCount; ++i)
+                {
+                    IA._table[i * IA._columnCount + j] = P[i] == j ? 1.0 : 0.0;
+
+                    for (std::size_t k = 0; k < i; k++)
+                        IA._table[i * IA._columnCount + j] -=
+                                _table[i * _columnCount + k] * IA._table[k * IA._columnCount + j];
+                }
+
+                for (long long i = _rowCount - 1; i >= 0; --i)
+                {
+                    for (std::size_t k = i + 1; k < _rowCount; ++k)
+                        IA._table[i * IA._columnCount + j] -=
+                                _table[i * _columnCount + k] * IA._table[k * IA._columnCount + j];
+
+                    IA._table[i * IA._columnCount + j] /= _table[i * _columnCount + i];
+                }
+            }
+
+            return std::move(IA);
+        }
+
+        [[deprecated]]
+        Matrix Gauss() const noexcept
+        {
+            Matrix copy(*this);
+
+            for (std::size_t i = 0; i < _rowCount - 1; ++i)
+                for (std::size_t row = i + 1; row < _rowCount; ++row)
+                {
+                    if (copy._table[i * _columnCount + i] == 0)
+                        continue;
+                    T k = copy._table[row * _columnCount + i] / copy._table[i * _columnCount + i];
+                    for (std::size_t j = 0; j < _columnCount; ++j)
+                        copy._table[row * _columnCount + j] -= k * copy._table[i * _columnCount + j];
+                    copy._table[row * _columnCount + i] = 0;
+                }
+
+            for (long long i = _rowCount - 1; i > 0; --i)
+                for (long long row = i - 1; row > -1; --row)
+                {
+                    if (copy._table[i * _columnCount + i] == 0)
+                        continue;
+                    T k = copy._table[row * _columnCount + i] / copy._table[i * _columnCount + i];
+                    for (std::size_t j = 0; j < _columnCount; ++j)
+                        copy._table[row * _columnCount + j] -= k * copy._table[i * _columnCount + j];
+                    copy._table[row * _columnCount + i] = 0;
+                }
+
+            return std::move(copy);
+        }
+
+        [[deprecated]]
+        std::vector<T> LUPSolve(const std::vector<std::size_t>& P, const std::vector<T>& B) const noexcept
+        {
+            std::vector<T> X(_rowCount);
+
+            for (std::size_t i = 0; i < _rowCount; ++i)
+            {
+                X[i] = B[P[i]];
+
+                for (std::size_t k = 0; k < i; ++k)
+                    X[i] -= _table[i * _columnCount + k] * X[k];
+            }
+
+            for (long long i = _rowCount - 1; i >= 0; --i)
+            {
+                for (std::size_t k = i + 1; k < _rowCount; ++k)
+                    X[i] -= _table[i * _columnCount + k] * X[k];
+
+                X[i] /= _table[i * _columnCount + i];
+            }
+
+            return std::move(X);
+        }
+
         [[nodiscard]]
         std::size_t NewDimension(std::size_t value) const noexcept
         {
@@ -683,42 +826,14 @@ namespace Common
 
             return std::move(result);
         }
-
-        T AlgebraicComplement(const std::size_t i, const std::size_t j) const noexcept
-        {
-            Matrix minorMatrix(*this);
-            minorMatrix.EraseRow(i);
-            minorMatrix.EraseColumn(j);
-
-            if ((i + j) % 2 == 0)
-                return minorMatrix.DetHelper();
-            else
-                return -minorMatrix.DetHelper();
-        }
-
-        T DetHelper() const noexcept
-        {
-            if (_rowCount == 1)
-                return _table[0];
-
-            if (_rowCount == 2)
-                return _table[0] * _table[3] - _table[1] * _table[2];
-
-            if (_rowCount == 3)
-                return _table[0] * _table[4] * _table[8] +
-                    _table[6] * _table[1] * _table[5] +
-                    _table[2] * _table[3] * _table[7] -
-                    _table[2] * _table[4] * _table[6] -
-                    _table[0] * _table[5] * _table[7] -
-                    _table[1] * _table[3] * _table[8];
-
-            T result{};
-            for (std::size_t i = 0; i < _rowCount; ++i)
-                result += _table[i * _columnCount] * AlgebraicComplement(i, 0);
-
-            return std::move(result);
-        }
     };
+
+    template<typename T>
+    std::ostream& operator<< (std::ostream& stream, const Matrix<T>& matrix)
+    {
+        stream << matrix.ToString();
+        return stream;
+    }
 
     typedef Matrix<std::double_t> MatrixF64;
     typedef Matrix<std::float_t> MatrixF32;
