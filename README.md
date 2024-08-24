@@ -387,6 +387,9 @@ Build CMake options:
 - Events_BUILD_TESTS
 - Json_BUILD_TESTS
 - InfoLog_BUILD_TESTS
+- Common_BUILD_TESTS
+- Reflection_BUILD_TESTS
 - LINQ_BUILD_BENCHMARKS
+- Common_BUILD_BENCHMARKS
 
 The project can be installed using [my vcpkg fork](https://github.com/KorablikDimak/vcpkg).
