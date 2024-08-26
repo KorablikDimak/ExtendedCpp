@@ -12,7 +12,7 @@ namespace Reflection
     private:
         std::any _constructorHelper;
         std::any (*_constructor)(std::any&, std::any args);
-        std::any (*_constructorNew)(std::any&, std::any args);
+        std::shared_ptr<void> (*_constructorNew)(std::any&, std::any args){};
         std::vector<std::type_index> _parameters{};
 
     public:
@@ -21,22 +21,22 @@ namespace Reflection
         {
             using TuppleArgs = std::tuple<TArgs...>;
 
-            TClass Create(std::any& args)
+            TClass Create(const std::any& args)
             {
                 if constexpr (std::tuple_size_v<TuppleArgs> == 0)
                     return TClass();
                 else
                     return std::apply([](TArgs... args)
-                        { return TClass(args...); }, std::any_cast<TuppleArgs>(args));
+                        { return TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(args));
             }
 
-            TClass* New(std::any& args)
+            TClass* New(const std::any& args)
             {
                 if constexpr (std::tuple_size_v<TuppleArgs> == 0)
                     return new TClass();
                 else
-                    return std::apply([](TArgs... args)
-                        { return new TClass(args...); }, std::any_cast<TuppleArgs>(args));
+                    return std::apply([](TArgs&&... args)
+                        { return new TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(args));
             }
         };
 
@@ -44,7 +44,7 @@ namespace Reflection
         ConstructorInfo(const std::string& constructorName, THelper constructorHelper, std::vector<std::type_index> parameters) noexcept :
             _constructorHelper(constructorHelper),
             _constructor([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Create(args)); }),
-            _constructorNew([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).New(args)); }),
+            _constructorNew([](std::any& helper, std::any args){ return std::shared_ptr<void>(std::any_cast<THelper&>(helper).New(args)); }),
             _parameters(parameters),
             MemberInfo(constructorName) {}
 
@@ -52,17 +52,23 @@ namespace Reflection
         ConstructorInfo(std::string&& constructorName, THelper constructorHelper, std::vector<std::type_index> parameters) noexcept :
             _constructorHelper(constructorHelper),
             _constructor([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).Create(args)); }),
-            _constructorNew([](std::any& helper, std::any args){ return std::any(std::any_cast<THelper&>(helper).New(args)); }),
+            _constructorNew([](std::any& helper, std::any args){ return std::shared_ptr<void>(std::any_cast<THelper&>(helper).New(args)); }),
             _parameters(parameters),
             MemberInfo(std::move(constructorName)) {}
 
         ~ConstructorInfo() override = default;
 
         template<typename... TArgs>
-        auto Create(TArgs... args){ return _constructor(_constructorHelper, std::make_tuple(args...)); }
+        auto Create(TArgs... args)
+        {
+            return _constructor(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
+        }
 
         template<typename... TArgs>
-        auto New(TArgs... args){ return _constructorNew(_constructorHelper, std::make_tuple(args...)); }
+        auto New(TArgs... args)
+        {
+            return _constructorNew(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
+        }
 
         [[nodiscard]]
         inline Reflection::MemberType MemberType() const noexcept override

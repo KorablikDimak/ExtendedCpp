@@ -11,27 +11,23 @@
 #include <InfoLog/Converter.h>
 #include <InfoLog/Configuration.h>
 
-typedef std::vector<InfoLog::ISender::Ptr> Senders;
-
 namespace InfoLog
 {
     class Logger final
     {
     private:
-        std::unique_ptr<Senders> _senders;
+        std::vector<InfoLog::ISender::Ptr> _senders;
         std::mutex _loggerMutex;
 
     public:
         typedef std::shared_ptr<Logger> Ptr;
 
-        Logger();
+        Logger() noexcept = default;
 
         template<typename T>
         explicit Logger(const T& fileName) noexcept
         {
             auto configuration = std::make_unique<Configuration>(fileName);
-            _senders = std::make_unique<Senders>();
-
             for (const std::map<std::string, std::string>& config : configuration->GetConfigs())
                 AddSender(config);
         }
@@ -47,7 +43,7 @@ namespace InfoLog
         template<typename T>
         void Trace(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Trace, tag);
@@ -57,7 +53,7 @@ namespace InfoLog
         template<typename T>
         void Debug(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Debug, tag);
@@ -67,7 +63,7 @@ namespace InfoLog
         template<typename T>
         void Info(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Info, tag);
@@ -77,7 +73,7 @@ namespace InfoLog
         template<typename T>
         void Warning(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Warning, tag);
@@ -87,7 +83,7 @@ namespace InfoLog
         template<typename T>
         void Error(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Error, tag);
@@ -97,7 +93,7 @@ namespace InfoLog
         template<typename T>
         void Critical(const T& message, const std::string& tag = "") noexcept
         {
-            for (const ISender::Ptr& sender : *_senders)
+            for (const ISender::Ptr& sender : _senders)
             {
                 std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Critical, tag);

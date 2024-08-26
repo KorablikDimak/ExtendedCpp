@@ -14,10 +14,27 @@ namespace InfoLog
         return stream.str();
     }
 
+    template<typename TSource>
+    std::string ToString(TSource&& source) noexcept
+    {
+        std::stringstream stream;
+        stream << std::forward<TSource>(source);
+        return stream.str();
+    }
+
     template<typename T>
     T FromString(const std::string& source) noexcept
     {
         std::stringstream stream(source);
+        T result;
+        stream >> result;
+        return result;
+    }
+
+    template<typename T>
+    T FromString(std::string&& source) noexcept
+    {
+        std::stringstream stream(std::move(source));
         T result;
         stream >> result;
         return result;

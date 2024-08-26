@@ -24,7 +24,8 @@ namespace Reflection
         {
             TMethod _method;
 
-            explicit Helper(TMethod&& method) : _method(std::move(method)) {}
+            explicit Helper(TMethod&& method) noexcept :
+                _method(std::move(method)) {}
 
             TReturnType Invoke(std::any&& args)
             {
@@ -51,7 +52,10 @@ namespace Reflection
         ~StaticMethodInfo() override = default;
 
         template<typename... TArgs>
-        auto Invoke(TArgs... args){ return _method(_methodHelper, std::make_tuple(std::forward(args)...)); }
+        auto Invoke(TArgs... args)
+        {
+            return _method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...));
+        }
 
         [[nodiscard]]
         inline Reflection::MemberType MemberType() const noexcept override

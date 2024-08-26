@@ -21,12 +21,13 @@ namespace InfoLog
     public:
         typedef std::shared_ptr<Configuration> Ptr;
 
+        Configuration(const Configuration& configuration) noexcept;
+        Configuration(Configuration&& configuration) noexcept;
+
         template<typename T>
         explicit Configuration(const T& fileName)
         {
-            std::stringstream stream;
-            stream << fileName;
-            const std::string fileNameString = stream.str();
+            const std::string fileNameString = ToString(fileName);
 
             Xml::xml_document document;
 
@@ -55,7 +56,16 @@ namespace InfoLog
 
         ~Configuration() = default;
 
-        std::vector<std::map<std::string, std::string>> GetConfigs() noexcept;
+        Configuration& operator=(const Configuration& configuration) noexcept = default;
+
+        Configuration& operator=(Configuration&& configuration) noexcept
+        {
+            _configs = std::move(configuration._configs);
+            return *this;
+        }
+
+        [[nodiscard]]
+        std::vector<std::map<std::string, std::string>> GetConfigs() const noexcept;
     };
 }
 

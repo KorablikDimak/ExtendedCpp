@@ -31,5 +31,10 @@
         -->
         <target logsender="Console" minlevel="Warning" tag="your tag"
                 layout="{hour}:{minute}:{second}:{millisecond} | {level} | {message}"/>
+
+        <!--
+        You can add your own senders by Reflection library. See TestSender.h and TestSender.cpp
+        -->
+        <target logsender="TestSender" minlevel="Warning"/>
     </targets>
 </logger>

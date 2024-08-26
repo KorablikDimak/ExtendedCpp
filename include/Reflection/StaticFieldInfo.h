@@ -22,10 +22,10 @@ namespace Reflection
         {
             std::function<TField*()> _fieldGetter;
 
-            explicit Helper(std::function<TField*()>&& fieldGetter)
-                    : _fieldGetter(std::move(fieldGetter)) {}
+            explicit Helper(std::function<TField*()>&& fieldGetter) noexcept :
+                _fieldGetter(std::move(fieldGetter)) {}
 
-            TField* GetField()
+            TField* GetField() noexcept
             {
                 return _fieldGetter();
             }
@@ -47,7 +47,7 @@ namespace Reflection
                 { return std::any(std::any_cast<THelper&>(helper).GetField()); }),
             MemberInfo(std::move(fieldName)) {}
 
-        auto GetField()
+        auto GetField() noexcept
         {
             return _fieldGetter(_fieldHelper);
         }

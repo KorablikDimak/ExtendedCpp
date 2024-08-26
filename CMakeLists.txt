@@ -124,7 +124,8 @@ set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
         src/Reflection/FieldInfo.cpp
         src/Reflection/TypeInfo.cpp
-        src/Reflection/StaticFieldInfo.cpp)
+        src/Reflection/StaticFieldInfo.cpp
+        src/Reflection/Assembly.cpp)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
@@ -153,7 +154,7 @@ add_library(ExtendedCpp::Reflection ALIAS Reflection)
 set_interface_include_directories(LINQ Events Json DI)
 set_public_include_directories(Xml InfoLog Common Reflection)
 set_targets_version(LINQ Events Json Xml InfoLog Common DI Reflection)
-target_link_libraries(InfoLog PRIVATE Xml)
+target_link_libraries(InfoLog PRIVATE Xml Reflection)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     configure_package_config_file(
@@ -207,7 +208,7 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
     add_custom_command(
             TARGET InfoLog POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_SOURCE_DIR}/LogConfig.xml
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/InfoLog/LogConfig.xml
             ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/LogConfig.xml)
 
     if(BUILD_SHARED_LIBS)
@@ -222,6 +223,12 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX}
                 ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+        add_custom_command(
+                TARGET InfoLog POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif()
 endif()
 

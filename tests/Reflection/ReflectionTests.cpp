@@ -36,23 +36,24 @@ TEST(ReflectionTests, MetaConstructorTest)
 
     // Act
     auto createdStruct = std::any_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->Create());
-    auto newStruct = std::any_cast<TestStruct*>(TestStruct::MetaInfo.GetConstructors()[0]->New());
+    auto newStruct = std::static_pointer_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->New());
 
     // Assert
-    ASSERT_TRUE(newStruct != nullptr);
-    delete newStruct;
-    newStruct = nullptr;
+    ASSERT_TRUE(newStruct.get() != nullptr);
 }
 
 TEST(ReflectionTests, GetTypeTest)
 {
     // Average
-    auto typeInfo = Reflection::GetType<TestStruct>();
+    auto typeInfo1 = Reflection::GetType<TestStruct>();
+    TestStruct testStruct;
+    auto typeInfo2 = Reflection::GetType(testStruct);
 
     // Act
-    auto staticField = std::any_cast<double*>(typeInfo.GetStaticFields()[0]->GetField());
+    auto staticField = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
     *staticField = 6;
 
     // Assert
     ASSERT_TRUE(std::abs(TestStruct::StaticDoubleField - *staticField) < 0.001);
+    ASSERT_TRUE(typeInfo2.has_value());
 }

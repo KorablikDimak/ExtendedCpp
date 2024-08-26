@@ -22,10 +22,10 @@ namespace Reflection
         {
             std::function<TField*(TObject*)> _fieldGetter;
 
-            explicit Helper(std::function<TField*(TObject*)>&& fieldGetter)
-                : _fieldGetter(std::move(fieldGetter)) {}
+            explicit Helper(std::function<TField*(TObject*)>&& fieldGetter) noexcept :
+                _fieldGetter(std::move(fieldGetter)) {}
 
-            TField* GetField(std::any&& object)
+            TField* GetField(std::any&& object) noexcept
             {
                 return _fieldGetter(std::any_cast<TObject*>(object));
             }
@@ -45,13 +45,14 @@ namespace Reflection
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](std::any& helper, std::any&& object)
                 { return std::any(std::any_cast<THelper&>(helper).GetField(std::move(object))); }),
-            MemberInfo(std::move(fieldName)) {}
+            MemberInfo(std::move(fieldName))  {}
 
         ~FieldInfo() override = default;
 
         template<typename TObject>
-        auto GetField(TObject* object)
+        auto GetField(TObject* object) noexcept
         {
+            if (object == nullptr) return std::any();
             return _fieldGetter(_fieldHelper, object);
         }
 

@@ -1,7 +1,6 @@
 #ifndef InfoLog_FileSender_H
 #define InfoLog_FileSender_H
 
-#include <InfoLog/Parser.h>
 #include <InfoLog/ISender.h>
 
 namespace InfoLog

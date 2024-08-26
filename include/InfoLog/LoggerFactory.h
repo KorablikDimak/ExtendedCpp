@@ -8,26 +8,34 @@ namespace InfoLog
     class LoggerFactory final
     {
     private:
-        std::unique_ptr<Configuration> _configuration;
+        Configuration _configuration;
 
     public:
         template<typename T>
-        explicit LoggerFactory(const T& fileName) noexcept
-        {
-            _configuration = std::make_unique<Configuration>(fileName);
-        }
+        explicit LoggerFactory(const T& fileName) : _configuration(fileName) {}
 
-        explicit LoggerFactory(std::unique_ptr<Configuration>& configuration) noexcept;
+        LoggerFactory(const LoggerFactory& factory) noexcept = default;
+        LoggerFactory(LoggerFactory&& factory) noexcept : _configuration(std::move(factory._configuration)) {}
+
+        explicit LoggerFactory(const Configuration& configuration) noexcept;
+        explicit LoggerFactory(Configuration&& configuration) noexcept;
 
         ~LoggerFactory() = default;
 
         template<typename T>
-        void SetConfiguration(const T& fileName) noexcept
+        void SetConfiguration(const T& fileName)
         {
-            _configuration = std::make_unique<Configuration>(fileName);
+            _configuration = Configuration(fileName);
         }
 
-        void SetConfiguration(std::unique_ptr<Configuration>& configuration) noexcept;
+        template<typename T>
+        void SetConfiguration(T&& fileName)
+        {
+            _configuration = Configuration(std::forward<T>(fileName));
+        }
+
+        void SetConfiguration(const Configuration& configuration) noexcept;
+        void SetConfiguration(Configuration&& configuration) noexcept;
 
         [[nodiscard]]
         Logger::Ptr CreateLogger() const noexcept;

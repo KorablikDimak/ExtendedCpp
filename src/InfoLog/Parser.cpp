@@ -17,6 +17,7 @@ void InfoLog::Parser::ParseLayout(std::string& layout, const std::string& messag
 #elif defined(__APPLE__)
     try { localtime_r(&time, timeStructure.get());
 #endif
+
         const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(currentTime);
         const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - seconds);
 

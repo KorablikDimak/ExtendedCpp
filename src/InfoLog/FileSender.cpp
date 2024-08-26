@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <InfoLog/FileSender.h>
+#include <InfoLog/Parser.h>
 
 InfoLog::FileSender::FileSender(const std::map<std::string, std::string>& config)
 {

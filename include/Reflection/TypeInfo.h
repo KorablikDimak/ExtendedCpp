@@ -59,6 +59,6 @@ const Reflection::TypeInfo ThisClassType::MetaInfo = Reflection::TypeInfo(typeid
 
 #define META(className, ...) \
 using ThisClassType = className; \
-inline static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
+static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
 
 #endif

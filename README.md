@@ -179,7 +179,7 @@ META_IMPL(TestStruct,
           FIELD(StringField),
           STATIC_FIELD(StaticField),
           CONSTRUCTOR(),
-          CONSTRUCTOR(const std::string&),
+          CONSTRUCTOR(std::string),
           METHOD(MethodInt),
           METHOD(MethodOverride, double, double),
           METHOD(MethodOverride, double, double, double),
@@ -190,13 +190,13 @@ META_IMPL(TestStruct,
 // Get type info
 TypeInfo typeInfo = Reflection::GetType<TestStruct>();
 // or
-std::optional<TypeInfo> typeInfo = Reflection::GetType("TestStruct");
+std::vector<TypeInfo> typeInfo = Reflection::GetType("TestStruct");
 // or
 std::optional<TypeInfo> typeInfo = Reflection::GetType(typeid(TestStruct));
 
 // Call constructors
 TestStruct testStruct = std::any_cast<TestStruct>(typeInfo.GetConstructors()[0]->Create());
-TestStruct* newTestStruct = std::any_cast<TestStruct*>(typeInfo.GetConstructors()[1]->New(std::string));
+std::shared_ptr<TestStruct> newTestStruct = std::static_pointer_cast<TestStruct>(typeInfo.GetConstructors()[1]->New(std::string));
 
 // Invoke methods
 int result1 = std::any_cast<int>
@@ -308,6 +308,9 @@ Is an analog of a [InfoLog](https://github.com/KorablikDimak/InfoLog) but for **
 The **.xml** file is a convenient way to set the type of output message and its parameters. Builtins can output the method that raised the message.
 ### Creating a logger
 Basic way to get logger with [example xml](https://github.com/KorablikDimak/ExtendedCpp/blob/master/LogConfig.xml):
+
+You can add your own senders with interface class [ISender](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/InfoLog/ISender.h) with using my reflection library.
+See [TestSender.h](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.h) and [TestSender.cpp](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.cpp).
 ### Examples:
 ```C++
 #include <InfoLog/InfoLog.h>

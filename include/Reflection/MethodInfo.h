@@ -23,8 +23,8 @@ namespace Reflection
         {
             TMethod _method;
 
-            explicit Helper(TMethod&& method)
-                : _method(std::move(method)) {}
+            explicit Helper(TMethod&& method) noexcept :
+                _method(std::move(method)) {}
 
             TReturnType Invoke(std::any&& object, std::any&& args)
             {
@@ -53,7 +53,8 @@ namespace Reflection
         template<typename TObject, typename... TArgs>
         auto Invoke(TObject* object, TArgs... args)
         {
-            return _method(_methodHelper, object, std::make_tuple(std::forward(args)...));
+            if (object == nullptr) return std::any();
+            return _method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...));
         }
 
         [[nodiscard]]
