@@ -7,15 +7,15 @@ namespace Events
     class IEventHandler
     {
     public:
-        IEventHandler() = default;
+        IEventHandler() noexcept = default;
         virtual ~IEventHandler() = default;
 
-        bool operator==(const IEventHandler& other) const
+        bool operator==(const IEventHandler& other) const noexcept
         {
             return IsEquals(other);
         }
 
-        bool operator!=(const IEventHandler& other) const
+        bool operator!=(const IEventHandler& other) const noexcept
         {
             return !IsEquals(other);
         }
@@ -23,7 +23,7 @@ namespace Events
         virtual void Call(TParams... params) = 0;
 
     protected:
-        virtual bool IsEquals(const IEventHandler& other) const = 0;
+        virtual bool IsEquals(const IEventHandler& other) const noexcept = 0;
     };
 }
 

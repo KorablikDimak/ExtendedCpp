@@ -14,7 +14,7 @@ namespace Events
         void (*_method)(TParams... params);
 
     public:
-        explicit StaticMethodHandler(void(*method)(TParams...))
+        explicit StaticMethodHandler(void(*method)(TParams...)) noexcept
         {
             _method = method;
         }
@@ -26,13 +26,13 @@ namespace Events
             (*_method)(params...);
         }
 
-        bool IsEquals(void(*method)(TParams...)) const
+        bool IsEquals(void(*method)(TParams...)) const noexcept
         {
             return _method == method;
         }
 
     protected:
-        bool IsEquals(const IEventHandler<TParams...>& other) const override
+        bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
             const auto* staticMethodHandler = static_cast<const StaticMethodHandler*>(&other);
             return staticMethodHandler->IsEquals(_method);
@@ -40,7 +40,7 @@ namespace Events
     };
 
     template<typename ...TParams>
-    std::shared_ptr<IEventHandler<TParams...>> CreateStaticMethodHandler(void(*method)(TParams...))
+    std::shared_ptr<IEventHandler<TParams...>> CreateStaticMethodHandler(void(*method)(TParams...)) noexcept
     {
         return std::shared_ptr<IEventHandler<TParams...>>(new StaticMethodHandler<TParams...>(method));
     }

@@ -15,7 +15,7 @@ namespace Events
         void (TObject::*_method)(TParams... params);
 
     public:
-        MethodHandler(TObject* object, void(TObject::*method)(TParams...))
+        MethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept
         {
             _object = object;
             _method = method;
@@ -29,13 +29,13 @@ namespace Events
                 (_object->*_method)(params...);
         }
 
-        bool IsEquals(TObject* object, void(TObject::*method)(TParams...)) const
+        bool IsEquals(TObject* object, void(TObject::*method)(TParams...)) const noexcept
         {
             return _object == object && _method == method;
         }
 
     protected:
-        bool IsEquals(const IEventHandler<TParams...>& other) const override
+        bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
             const auto* methodHandler = static_cast<const MethodHandler*>(&other);
             return methodHandler->IsEquals(_object, _method);
@@ -43,7 +43,7 @@ namespace Events
     };
 
     template<typename TObject, typename ...TParams>
-    std::shared_ptr<IEventHandler<TParams...>> CreateMethodHandler(TObject* object, void(TObject::*method)(TParams...))
+    std::shared_ptr<IEventHandler<TParams...>> CreateMethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept
     {
         return std::shared_ptr<IEventHandler<TParams...>>(new MethodHandler<TObject, TParams...>(object, method));
     }

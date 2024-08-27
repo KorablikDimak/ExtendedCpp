@@ -41,14 +41,14 @@ namespace Events
             _listMutex.unlock_shared();
         }
 
-        void operator+=(const EventHandler& handler)
+        void operator+=(const EventHandler& handler) noexcept
         {
             std::lock_guard lock(_listMutex);
             if (!Contains(handler))
                 _handlers.push_back(handler);
         }
 
-        void operator-=(const EventHandler& handler)
+        void operator-=(const EventHandler& handler) noexcept
         {
             std::lock_guard lock(_listMutex);
             auto iterator = Find(handler);
@@ -64,7 +64,7 @@ namespace Events
             }
         }
 
-        bool Contains(const EventHandler& handler) const
+        bool Contains(const EventHandler& handler) const noexcept
         {
             for (const EventHandler& element : _handlers)
                 if (*handler == *element) return true;
@@ -72,7 +72,7 @@ namespace Events
         }
 
     private:
-        auto Find(const EventHandler& handler) const
+        auto Find(const EventHandler& handler) const noexcept
         {
             for (auto iterator = _handlers.begin(); iterator != _handlers.end(); ++iterator)
                 if (**iterator == *handler) return iterator;

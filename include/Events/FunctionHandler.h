@@ -15,7 +15,7 @@ namespace Events
         std::function<void(TParams...)> _function;
 
     public:
-        explicit FunctionHandler(std::function<void(TParams...)> function)
+        explicit FunctionHandler(std::function<void(TParams...)> function) noexcept
         {
             _function = function;
         }
@@ -27,14 +27,14 @@ namespace Events
             _function(params...);
         }
 
-        bool IsEquals(std::function<void(TParams...)> function) const
+        bool IsEquals(std::function<void(TParams...)> function) const noexcept
         {
             typedef void(Fn)(TParams...);
             return _function.template target<Fn*>() == function.template target<Fn*>();
         }
 
     protected:
-        bool IsEquals(const IEventHandler<TParams...>& other) const override
+        bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
             const auto* functionHandler = static_cast<const FunctionHandler*>(&other);
             return functionHandler->IsEquals(_function);
@@ -42,7 +42,7 @@ namespace Events
     };
 
     template<typename ...TParams>
-    std::shared_ptr<IEventHandler<TParams...>> CreateFunctionHandler(std::function<void(TParams...)> function)
+    std::shared_ptr<IEventHandler<TParams...>> CreateFunctionHandler(std::function<void(TParams...)> function) noexcept
     {
         return std::shared_ptr<IEventHandler<TParams...>>(new FunctionHandler<TParams...>(function));
     }
