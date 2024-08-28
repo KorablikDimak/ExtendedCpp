@@ -15,7 +15,7 @@ namespace Events
         void (TObject::*_method)(TParams... params) const;
 
     public:
-        ConstMethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept
+        ConstMethodHandler(TObject* object, void(TObject::*method)(TParams...) const) noexcept
         {
             _object = object;
             _method = method;
