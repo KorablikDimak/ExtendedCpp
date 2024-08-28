@@ -8,6 +8,7 @@
 #include <optional>
 #include <functional>
 #include <future>
+#include <array>
 
 namespace Common
 {
@@ -741,7 +742,7 @@ namespace Common
                 return left.SplitMatrix();
             });
 
-            std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [&matrix, newDimension]
+            std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [this, &matrix, newDimension]
             {
                 Matrix right(matrix);
                 right.Resize(newDimension, newDimension);

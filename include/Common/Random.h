@@ -12,7 +12,7 @@ namespace Common
     {
         std::random_device device;
         std::mt19937 generator(device());
-        generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+        generator.seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count()));
         std::uniform_real_distribution distribution(min, max);
         return distribution(generator);
     }
@@ -22,7 +22,7 @@ namespace Common
     {
         std::random_device device;
         std::mt19937 generator(device());
-        generator.seed(std::chrono::system_clock::now().time_since_epoch().count());
+        generator.seed(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count()));
         std::uniform_int_distribution distribution(min, max);
         return distribution(generator);
     }
@@ -47,14 +47,14 @@ namespace Common
         return randomString;
     }
 
-    template<typename TChar = char>
+    template<typename TChar>
     std::basic_string<TChar> RandomString(const std::size_t size, const std::vector<TChar>& charSet) noexcept
     {
         if (size == 0 || charSet.empty())
             return {};
 
         auto randChar = [&charSet]() -> char
-        { return charSet[RandomInt<int>(0, charSet.size() - 1)]; };
+        { return charSet[RandomInt<std::size_t>(0, charSet.size() - 1)]; };
 
         std::basic_string<TChar> randomString(size, 0);
         std::generate_n(randomString.begin(), size, randChar);
