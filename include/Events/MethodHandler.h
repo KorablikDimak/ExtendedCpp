@@ -23,7 +23,7 @@ namespace Events
 
         ~MethodHandler() override = default;
 
-        void Call(TParams... params) override
+        void Call(TParams... params) const override
         {
             if (_object != nullptr)
                 (_object->*_method)(params...);

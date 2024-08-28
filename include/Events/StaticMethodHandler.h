@@ -21,7 +21,7 @@ namespace Events
 
         ~StaticMethodHandler() override = default;
 
-        void Call(TParams... params) override
+        void Call(TParams... params) const override
         {
             (*_method)(params...);
         }

@@ -20,7 +20,7 @@ namespace Events
             return !IsEquals(other);
         }
 
-        virtual void Call(TParams... params) = 0;
+        virtual void Call(TParams... params) const = 0;
 
     protected:
         virtual bool IsEquals(const IEventHandler& other) const noexcept = 0;

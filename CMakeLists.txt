@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.6.6
+        VERSION 1.6.7
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -53,7 +53,8 @@ set(Events_INCLUDES
         include/Events/FunctionHandler.h
         include/Events/IEventHandler.h
         include/Events/MethodHandler.h
-        include/Events/StaticMethodHandler.h)
+        include/Events/StaticMethodHandler.h
+        include/Events/ConstMethodHandler.h)
 
 set(Json_INCLUDES
         include/Json/Json.h

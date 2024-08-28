@@ -22,7 +22,7 @@ namespace Events
 
         ~FunctionHandler() override = default;
 
-        void Call(TParams... params) override
+        void Call(TParams... params) const override
         {
             _function(params...);
         }
