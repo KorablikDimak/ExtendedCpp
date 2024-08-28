@@ -13,7 +13,7 @@ public:
     META_DECL;
 
 protected:
-    void Send(const std::string& message, LogLevel logLevel, const std::string& tag) noexcept override;
+    void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept override;
 };
 
 

@@ -6,7 +6,7 @@ InfoLog::ConsoleSender::ConsoleSender(const std::map<std::string, std::string>& 
     Config = config;
 }
 
-void InfoLog::ConsoleSender::Send(const std::string& message, const LogLevel logLevel, const std::string& tag) noexcept
+void InfoLog::ConsoleSender::Send(const std::string& message, const LogLevel logLevel, const std::string& tag) const noexcept
 {
     if (!ValidateLogLevel(logLevel)) return;
     if (!ValidateTag(tag)) return;

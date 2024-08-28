@@ -17,7 +17,6 @@ namespace InfoLog
     {
     private:
         std::vector<InfoLog::ISender::Ptr> _senders;
-        std::mutex _loggerMutex;
 
     public:
         typedef std::shared_ptr<Logger> Ptr;
@@ -41,63 +40,45 @@ namespace InfoLog
         void RemoveSender(const ISender::Ptr& sender) noexcept;
 
         template<typename T>
-        void Trace(const T& message, const std::string& tag = "") noexcept
+        void Trace(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Trace, tag);
-            }
         }
 
         template<typename T>
-        void Debug(const T& message, const std::string& tag = "") noexcept
+        void Debug(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Debug, tag);
-            }
         }
 
         template<typename T>
-        void Info(const T& message, const std::string& tag = "") noexcept
+        void Info(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Info, tag);
-            }
         }
 
         template<typename T>
-        void Warning(const T& message, const std::string& tag = "") noexcept
+        void Warning(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Warning, tag);
-            }
         }
 
         template<typename T>
-        void Error(const T& message, const std::string& tag = "") noexcept
+        void Error(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Error, tag);
-            }
         }
 
         template<typename T>
-        void Critical(const T& message, const std::string& tag = "") noexcept
+        void Critical(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
-            {
-                std::lock_guard<std::mutex> lock(_loggerMutex);
                 sender->Send(InfoLog::ToString(message), LogLevel::Critical, tag);
-            }
         }
     };
 }

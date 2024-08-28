@@ -17,7 +17,7 @@ namespace InfoLog
         ISender() noexcept = default;
         virtual ~ISender() = default;
 
-        virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) noexcept = 0;
+        virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept = 0;
 
     protected:
         std::map<std::string, std::string> Config;
