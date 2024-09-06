@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <Reflection/Reflection.h>
+
 #include "IService.h"
 
 class Target
@@ -15,6 +17,8 @@ public:
     {
         _service = service;
     }
+
+    META_DECL;
 };
 
 #endif

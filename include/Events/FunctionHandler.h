@@ -24,7 +24,7 @@ namespace Events
 
         void Call(TParams... params) const override
         {
-            _function(params...);
+            _function(std::forward<TParams>(params)...);
         }
 
         bool IsEquals(std::function<void(TParams...)> function) const noexcept

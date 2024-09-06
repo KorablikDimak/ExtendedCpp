@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.6.8
+        VERSION 1.7.0
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -106,7 +106,11 @@ set(DI_INCLUDES
         include/DI/ServiceProvider.h
         include/DI/Register.h
         include/DI/LifeTime.h
-        include/DI/DI.h)
+        include/DI/DI.h
+        include/DI/Injector.h)
+
+set(DI_SOURCE
+        src/DI/ServiceProvider.cpp)
 
 set(Reflection_INCLUDES
         include/Reflection/MemberInfo.h
@@ -126,7 +130,11 @@ set(Reflection_SOURCE
         src/Reflection/FieldInfo.cpp
         src/Reflection/TypeInfo.cpp
         src/Reflection/StaticFieldInfo.cpp
-        src/Reflection/Assembly.cpp)
+        src/Reflection/Assembly.cpp
+        src/Reflection/ConstructorInfo.cpp
+        src/Reflection/MethodInfo.cpp
+        src/Reflection/Reflection.cpp
+        src/Reflection/StaticMethodInfo.cpp)
 
 add_library(LINQ INTERFACE ${LINQ_INCLUDES})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
@@ -146,16 +154,17 @@ add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 add_library(Common ${Common_INCLUDES} ${Common_SOURCE})
 add_library(ExtendedCpp::Common ALIAS Common)
 
-add_library(DI INTERFACE ${DI_INCLUDES})
+add_library(DI ${DI_SOURCE} ${DI_INCLUDES})
 add_library(ExtendedCpp::DI ALIAS DI)
 
 add_library(Reflection ${Reflection_SOURCE} ${Reflection_INCLUDES})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 
-set_interface_include_directories(LINQ Events Json DI)
-set_public_include_directories(Xml InfoLog Common Reflection)
+set_interface_include_directories(LINQ Events Json)
+set_public_include_directories(Xml InfoLog Common Reflection DI)
 set_targets_version(LINQ Events Json Xml InfoLog Common DI Reflection)
 target_link_libraries(InfoLog PRIVATE Xml Reflection)
+target_link_libraries(DI PRIVATE Reflection)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     configure_package_config_file(
@@ -245,6 +254,20 @@ endif()
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/DI)
+
+    if(BUILD_SHARED_LIBS)
+        add_custom_command(
+                TARGET DI POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+        add_custom_command(
+                TARGET DI POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif()
 endif()
 
 if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)

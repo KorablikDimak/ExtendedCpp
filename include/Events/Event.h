@@ -26,7 +26,7 @@ namespace Events
         {
             std::lock_guard lock(_listMutex);
             for (const auto& handler : _handlers)
-                handler->Call(params...);
+                handler->Call(std::forward<TParams>(params)...);
         }
 
         void operator+=(const EventHandler& handler) noexcept

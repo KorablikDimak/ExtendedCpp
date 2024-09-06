@@ -2,10 +2,23 @@
 
 #include <Reflection/Assembly.h>
 
-Reflection::TypeInfo::TypeInfo(std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
-    _typeIndex(typeIndex), _members(members)
+Reflection::TypeInfo::TypeInfo(const std::string& name, std::type_index typeIndex,
+                               std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
+    _name(name), _typeIndex(typeIndex), _members(members)
 {
     Assembly::AddType(*this);
+}
+
+Reflection::TypeInfo::TypeInfo(std::string&& name, std::type_index typeIndex,
+                               std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
+    _name(std::move(name)), _typeIndex(typeIndex), _members(members)
+{
+    Assembly::AddType(*this);
+}
+
+std::string Reflection::TypeInfo::Name() const noexcept
+{
+    return _name;
 }
 
 std::type_index Reflection::TypeInfo::TypeIndex() const noexcept

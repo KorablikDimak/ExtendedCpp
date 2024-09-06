@@ -14,18 +14,20 @@ namespace Reflection
     private:
         std::type_index _typeIndex;
         std::any _fieldHelper;
-        std::any (*_fieldGetter)(std::any& helper, std::any&& object);
+        std::any (*_fieldGetter)(const std::any& helper, std::any&& object);
 
     public:
         template<typename TObject, typename TField>
         struct Helper final
         {
+        private:
             std::function<TField*(TObject*)> _fieldGetter;
 
+        public:
             explicit Helper(std::function<TField*(TObject*)>&& fieldGetter) noexcept :
                 _fieldGetter(std::move(fieldGetter)) {}
 
-            TField* GetField(std::any&& object) noexcept
+            TField* GetField(std::any&& object) const noexcept
             {
                 return _fieldGetter(std::any_cast<TObject*>(object));
             }
@@ -35,24 +37,24 @@ namespace Reflection
         FieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<THelper&>(helper).GetField(std::move(object))); }),
+            _fieldGetter([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
             MemberInfo(fieldName) {}
 
         template<typename THelper>
         FieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<THelper&>(helper).GetField(std::move(object))); }),
-            MemberInfo(std::move(fieldName))  {}
+            _fieldGetter([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
+            MemberInfo(std::move(fieldName)) {}
 
         ~FieldInfo() override = default;
 
         template<typename TObject>
-        auto GetField(TObject* object) noexcept
+        std::any GetField(TObject* object) const noexcept
         {
-            if (object == nullptr) return std::any();
+            if (object == nullptr) return {};
             return _fieldGetter(_fieldHelper, object);
         }
 

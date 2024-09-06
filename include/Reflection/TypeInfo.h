@@ -15,13 +15,17 @@ namespace Reflection
     class TypeInfo final
     {
     private:
+        std::string _name;
         std::type_index _typeIndex;
         std::vector<std::shared_ptr<MemberInfo>> _members;
 
     public:
-        TypeInfo(std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
+        TypeInfo(const std::string& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
+        TypeInfo(std::string&& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
         ~TypeInfo() = default;
 
+        [[nodiscard]]
+        std::string Name() const noexcept;
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;
         [[nodiscard]]
@@ -55,10 +59,10 @@ static const Reflection::TypeInfo MetaInfo;
 
 #define META_IMPL(className, ...) \
 using ThisClassType = className; \
-const Reflection::TypeInfo ThisClassType::MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
+const Reflection::TypeInfo ThisClassType::MetaInfo = Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__});
 
-#define META(className, ...) \
+#define META_TEMPLATE(className, ...) \
 using ThisClassType = className; \
-static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(typeid(ThisClassType), {__VA_ARGS__});
+inline static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__});
 
 #endif

@@ -18,7 +18,8 @@ set(DI_TESTS_HEADERS
 
 set(DI_TESTS_SOURCES
         main.cpp
-        DI_Tests.cpp)
+        DI_Tests.cpp
+        Target.cpp)
 
 add_executable(DI-tests ${DI_TESTS_HEADERS} ${DI_TESTS_SOURCES})
-target_link_libraries(DI-tests PRIVATE ExtendedCpp::DI GTest::gtest GTest::gtest_main)
+target_link_libraries(DI-tests PRIVATE ExtendedCpp::DI ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)

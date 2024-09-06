@@ -1,9 +1,10 @@
-#ifndef MethodTraits_MethodTraits_H
-#define MethodTraits_MethodTraits_H
+#ifndef Reflection_TypeTraits_H
+#define Reflection_TypeTraits_H
 
 #include <utility>
 #include <tuple>
 #include <typeindex>
+#include <vector>
 
 namespace Reflection
 {
@@ -42,6 +43,18 @@ namespace Reflection
         (typeIndexes.push_back(typeid(TParams)), ...);
         return typeIndexes;
     }
+
+    template<typename T, typename Enable = void>
+    struct IsSharedPtr
+    {
+        enum { value = false };
+    };
+
+    template<typename T>
+    struct IsSharedPtr<T, typename std::enable_if<std::is_same<typename std::remove_cv<T>::type, std::shared_ptr<typename T::element_type>>::value>::type>
+    {
+        enum { value = true };
+    };
 }
 
 #endif

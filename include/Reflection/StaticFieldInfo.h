@@ -14,18 +14,20 @@ namespace Reflection
     private:
         std::type_index _typeIndex;
         std::any _fieldHelper;
-        std::any (*_fieldGetter)(std::any& helper);
+        std::any (*_fieldGetter)(const std::any& helper);
 
     public:
         template<typename TField>
         struct Helper final
         {
+        private:
             std::function<TField*()> _fieldGetter;
 
+        public:
             explicit Helper(std::function<TField*()>&& fieldGetter) noexcept :
                 _fieldGetter(std::move(fieldGetter)) {}
 
-            TField* GetField() noexcept
+            TField* GetField() const noexcept
             {
                 return _fieldGetter();
             }
@@ -35,19 +37,20 @@ namespace Reflection
         StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](std::any& helper)
-                { return std::any(std::any_cast<THelper&>(helper).GetField()); }),
+            _fieldGetter([](const std::any& helper)
+                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }),
             MemberInfo(fieldName) {}
 
         template<typename THelper>
         StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](std::any& helper)
-                { return std::any(std::any_cast<THelper&>(helper).GetField()); }),
+            _fieldGetter([](const std::any& helper)
+                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }),
             MemberInfo(std::move(fieldName)) {}
 
-        auto GetField() noexcept
+        [[nodiscard]]
+        std::any GetField() const noexcept
         {
             return _fieldGetter(_fieldHelper);
         }

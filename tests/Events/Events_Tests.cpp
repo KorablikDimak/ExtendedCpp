@@ -4,6 +4,7 @@
 #include <Events/FunctionHandler.h>
 #include <Events/MethodHandler.h>
 #include <Events/StaticMethodHandler.h>
+#include <Events/ConstMethodHandler.h>
 
 #include "Events_Tests.h"
 
@@ -41,19 +42,28 @@ TEST(EventsTests, MethodHandlerTest)
     // Act
     const auto handler1 = Events::CreateMethodHandler(&handlerClass, &HandlerClass::Handler);
     const auto handler2 = METHOD_HANDLER(&handlerClass, &HandlerClass::Handler);
+    const auto handler3 = CONST_METHOD_HANDLER(&handlerClass, &HandlerClass::ConstHandler);
 
     // Assert
+    ASSERT_FALSE(event.Contains(handler1));
+    ASSERT_FALSE(event.Contains(handler2));
+    ASSERT_FALSE(event.Contains(handler3));
+    
     ASSERT_NO_THROW(event += handler1);
     ASSERT_NO_THROW(event += handler2);
+    ASSERT_NO_THROW(event += handler3);
 
     ASSERT_TRUE(event.Contains(handler1));
     ASSERT_TRUE(event.Contains(handler2));
+    ASSERT_TRUE(event.Contains(handler3));
 
     ASSERT_NO_THROW(event -= handler1);
     ASSERT_NO_THROW(event -= handler2);
+    ASSERT_NO_THROW(event -= handler3);
 
     ASSERT_FALSE(event.Contains(handler1));
     ASSERT_FALSE(event.Contains(handler2));
+    ASSERT_FALSE(event.Contains(handler3));
 }
 
 TEST(EventsTests, StaticMethodHandlerTest)

@@ -11,6 +11,7 @@ class HandlerClass
 {
 public:
     void Handler(const EventType::Ptr&) {}
+    void ConstHandler(const EventType::Ptr&) const {}
     static void StaticHandler(const EventType::Ptr&) {}
 };
 

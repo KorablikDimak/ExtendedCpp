@@ -12,7 +12,8 @@ endif()
 find_package(GTest REQUIRED)
 
 set(Reflection_TESTS_HEADERS
-        TestStruct.h)
+        TestStruct.h
+        TestTemplate.h)
 
 set(Reflection_TESTS_SOURCES
         main.cpp

@@ -26,7 +26,7 @@ namespace Events
         void Call(TParams... params) const override
         {
             if (_object != nullptr)
-                (_object->*_method)(params...);
+                (_object->*_method)(std::forward<TParams>(params)...);
         }
 
         bool IsEquals(TObject* object, void(TObject::*method)(TParams...)) const noexcept
