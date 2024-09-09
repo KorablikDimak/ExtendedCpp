@@ -26,7 +26,15 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return constructor->CreateFromAny<TTarget>(args);
+
+                try
+                {
+                    return constructor->CreateFromAny<TTarget>(args);
+                }
+                catch (...)
+                {
+                    return std::nullopt;
+                }
             }
 
             return std::nullopt;
@@ -68,7 +76,15 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return constructor->NewFromAny<TTarget>(args);
+
+                try
+                {
+                    return constructor->NewFromAny<TTarget>(args);
+                }
+                catch (...)
+                {
+                    return { nullptr };
+                }
             }
 
             return { nullptr };
