@@ -52,11 +52,14 @@ namespace Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).GetField()); }),
             MemberInfo(std::move(fieldName)) {}
 
-        [[nodiscard]]
-        std::any GetField() const noexcept
+        template<typename TField>
+        TField* GetField() const noexcept
         {
-            return _fieldGetter(_fieldHelper);
+            return std::any_cast<TField*>(_fieldGetter(_fieldHelper));
         }
+
+        [[nodiscard]]
+        std::any GetField() const noexcept;
 
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;

@@ -61,6 +61,12 @@ namespace Reflection
 
         ~StaticMethodInfo() override = default;
 
+        template<typename TResult, typename... TArgs>
+        TResult Invoke(TArgs&&... args) const
+        {
+            return std::any_cast<TResult>(_method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...)));
+        }
+
         template<typename... TArgs>
         std::any Invoke(TArgs&&... args) const
         {

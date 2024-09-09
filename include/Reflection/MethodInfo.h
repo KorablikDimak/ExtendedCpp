@@ -60,6 +60,13 @@ namespace Reflection
 
         ~MethodInfo() override = default;
 
+        template<typename TResult, typename TObject, typename... TArgs>
+        TResult Invoke(TObject* object, TArgs&&... args) const
+        {
+            if (object == nullptr) return {};
+            return std::any_cast<TResult>(_method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...)));
+        }
+
         template<typename TObject, typename... TArgs>
         std::any Invoke(TObject* object, TArgs&&... args) const
         {

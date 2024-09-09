@@ -169,21 +169,18 @@ struct TestStruct
     double MethodOverride(double a, double b);
     double MethodOverride(double a, double b, double c);
     static int StaticMethod(int a);
-    
-    META_DECL;
-};
 
-// TestStruct.cpp
-META_IMPL(TestStruct,
-          FIELD(IntField),
-          FIELD(StringField),
-          STATIC_FIELD(StaticField),
-          CONSTRUCTOR(),
-          CONSTRUCTOR(std::string),
-          METHOD(MethodInt),
-          METHOD(MethodOverride, double, double),
-          METHOD(MethodOverride, double, double, double),
-          STATIC_METHOD(StaticMethod, int));
+    META(TestStruct,
+         FIELD(IntField),
+         FIELD(StringField),
+         STATIC_FIELD(StaticField),
+         CONSTRUCTOR(),
+         CONSTRUCTOR(std::string),
+         METHOD(MethodInt),
+         METHOD(MethodOverride, double, double),
+         METHOD(MethodOverride, double, double, double),
+         STATIC_METHOD(StaticMethod, int));
+};
 
 // Usage
 
@@ -196,7 +193,12 @@ std::optional<TypeInfo> typeInfo = Reflection::GetType(typeid(TestStruct));
 
 // Call constructors
 TestStruct testStruct = std::any_cast<TestStruct>(typeInfo.GetConstructors()[0]->Create());
+// or
+TestStruct testStruct = typeInfo.GetConstructors()[0]->Create<TestStruct>();
+
 std::shared_ptr<TestStruct> newTestStruct = std::static_pointer_cast<TestStruct>(typeInfo.GetConstructors()[1]->New(std::string));
+// or
+std::shared_ptr<TestStruct> newTestStruct = typeInfo.GetConstructors()[1]->New<TestStruct>(std::string);
 
 // Invoke methods
 int result1 = std::any_cast<int>
@@ -205,6 +207,10 @@ double result2 = std::any_cast<double>
         (typeInfo.GetMethods("MethodOverride")[0]->Invoke(&testStruct, double, double));
 double result3 = std::any_cast<double>
         (typeInfo.GetMethods("MethodOverride")[1]->Invoke(&testStruct, double, double, double));
+// or
+int result1 = typeInfo.GetMethods("MethodInt")[0]->Invoke<int>(&testStruct);
+double result2 = typeInfo.GetMethods("MethodOverride")[0]->Invoke<double>(&testStruct, double, double);
+double result3 = typeInfo.GetMethods("MethodOverride")[1]->Invoke<double>(&testStruct, double, double, double);
 
 // Get parameter info
 std::vector<std::type_index> parameters = typeInfo.GetMethods("MethodOverride")[0]->Parameters(); // size: 2
@@ -212,10 +218,15 @@ std::vector<std::type_index> parameters = typeInfo.GetMethods("MethodOverride")[
 
 // Access to fields
 int* fieldPtr = std::any_cast<int*>(typeInfo.GetField("IntField")->GetField(&testStruct));
+// or 
+int* fieldPtr = typeInfo.GetField("IntField")->GetField<int>(&testStruct);
+
 *fieldPtr = 5;
 std::cout << testStruct.IntField << std::endl; // output: 5
 
 double* staticFieldPtr = std::any_cast<double*>(typeInfo.GetStaticFields("StaticField")->GetField());
+// or
+double* staticFieldPtr = typeInfo.GetStaticFields("StaticField")->GetField<double>();
 ```
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Reflection).
@@ -282,7 +293,25 @@ Target1 target1 = DI::Register<Target1(IService1, IService2)>::CreateRequired(se
 // constructor of class Target2
 // Target2(const std::shared_ptr<IService1>& service1, const std::shared_ptr<IService3>& service3) {...}
 Target2 target2 = DI::Register<Target2(IService1, IService3)>::CreateRequired(serviceProvider);
+
+// or with using Reflection
+
+// In declaration of Target1:
+META(Target1,
+     CONSTRUCTOR(std::shared_ptr<IService1>, std::shared_ptr<IService2>));
+
+// In declaration of Target2:
+META(Target2,
+     CONSTRUCTOR(std::shared_ptr<IService1>, std::shared_ptr<IService3>));
+
+Target1 target1 = DI::Injector<Target1>::CreateRequired(serviceProvider);
+Target2 target2 = DI::Injector<Target2>::CreateRequired(serviceProvider);
 ```
+
+To use dependency injection, the target class must have at least one public constructor that does not take arguments, 
+or all arguments must be `std::shared_ptr<SERVICE_TYPE>`.
+To use the reflection approach, you must also add information about at least one such constructor.
+
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/DI).
 

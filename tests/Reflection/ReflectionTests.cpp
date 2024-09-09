@@ -32,10 +32,12 @@ TEST(ReflectionTests, MetaMethodTest)
     testStruct.IntField = 7;
 
     // Act
-    auto result = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
+    auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
+    auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
 
     // Assert
-    ASSERT_EQ(result, 7);
+    ASSERT_EQ(result1, 7);
+    ASSERT_EQ(result2, 7);
     ASSERT_TRUE(TestStruct::MetaInfo.GetMethods("TestMethodDouble")[0]->Parameters()[0] == typeid(double));
 }
 
@@ -81,11 +83,19 @@ TEST(ReflectionTests, GetTypeTest)
     auto typeInfo2 = Reflection::GetType(typeid(testStruct));
 
     // Act
-    auto staticField = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
-    *staticField = 6;
+    auto staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
+    *staticField1 = 6;
 
     // Assert
-    ASSERT_TRUE(std::abs(TestStruct::StaticDoubleField - *staticField) < 0.001);
+    ASSERT_TRUE(std::abs(TestStruct::StaticDoubleField - *staticField1) < 0.001);
+    ASSERT_TRUE(typeInfo2.has_value());
+
+    // Act
+    auto staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
+    *staticField2 = 9;
+
+    // Assert
+    ASSERT_TRUE(std::abs(TestStruct::StaticDoubleField - *staticField2) < 0.001);
     ASSERT_TRUE(typeInfo2.has_value());
 }
 
