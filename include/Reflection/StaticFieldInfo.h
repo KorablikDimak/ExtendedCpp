@@ -24,6 +24,9 @@ namespace Reflection
             std::function<TField*()> _fieldGetter;
 
         public:
+            explicit Helper(const std::function<TField*()>& fieldGetter) noexcept :
+                    _fieldGetter(fieldGetter) {}
+
             explicit Helper(std::function<TField*()>&& fieldGetter) noexcept :
                 _fieldGetter(std::move(fieldGetter)) {}
 

@@ -223,6 +223,8 @@ namespace DI
                         _instances.insert(std::make_pair<std::type_index, std::shared_ptr<void>>(typeid(std::shared_ptr<TService>), factory(*this)));
                     return std::static_pointer_cast<TService>(_instances.at(typeid(std::shared_ptr<TService>)));
             }
+
+            throw std::invalid_argument("Service " + std::string(typeid(std::shared_ptr<TService>).name()) + " does not found!");
         }
 
         std::shared_ptr<void> GetServiceImplementation(std::type_index typeIndex) const;

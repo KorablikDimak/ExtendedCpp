@@ -10,6 +10,7 @@ struct TestTemplate
 
     TestTemplate() noexcept = default;
 
+private:
     T GetT() noexcept
     {
         return field;
@@ -20,11 +21,12 @@ struct TestTemplate
         field = value;
     }
 
-    META_TEMPLATE(TestTemplate,
-                  CONSTRUCTOR(),
-                  FIELD(field),
-                  METHOD(GetT),
-                  METHOD(SetT, T))
+public:
+    META(TestTemplate,
+         CONSTRUCTOR(),
+         FIELD(field),
+         METHOD(GetT),
+         METHOD(SetT, T))
 };
 
 #endif

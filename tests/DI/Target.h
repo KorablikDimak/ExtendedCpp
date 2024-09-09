@@ -18,7 +18,8 @@ public:
         _service = service;
     }
 
-    META_DECL;
+    META(Target,
+         CONSTRUCTOR(std::shared_ptr<IService>));
 };
 
 #endif

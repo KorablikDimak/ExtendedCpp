@@ -54,15 +54,12 @@ namespace Reflection
     };
 }
 
-#define META_DECL \
-static const Reflection::TypeInfo MetaInfo;
-
-#define META_IMPL(className, ...) \
+#define META(className, ...) \
 using ThisClassType = className; \
-const Reflection::TypeInfo ThisClassType::MetaInfo = Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__});
-
-#define META_TEMPLATE(className, ...) \
-using ThisClassType = className; \
-inline static const Reflection::TypeInfo MetaInfo = Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__});
+static Reflection::TypeInfo GetMetaInfo() \
+{ \
+    return Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__}); \
+} \
+inline static const Reflection::TypeInfo MetaInfo = GetMetaInfo();
 
 #endif

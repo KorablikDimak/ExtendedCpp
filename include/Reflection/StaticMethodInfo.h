@@ -29,7 +29,7 @@ namespace Reflection
             using ReturnType = TReturnType;
 
             explicit Helper(TMethod&& method) noexcept :
-                _method(std::move(method)) {}
+                _method(std::forward<TMethod>(method)) {}
 
             TReturnType Invoke(std::any&& args) const
             {

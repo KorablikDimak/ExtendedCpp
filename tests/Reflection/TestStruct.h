@@ -14,6 +14,7 @@ struct TestStruct
     TestStruct() noexcept = default;
     explicit TestStruct(const std::string& str) noexcept;
 
+private:
     [[nodiscard]]
     int TestMethodInt() const noexcept;
     [[nodiscard]]
@@ -25,7 +26,20 @@ struct TestStruct
     static int TestMethodStatic() noexcept;
     static int TestMethodStatic(int a) noexcept;
 
-    META_DECL;
+public:
+    META(TestStruct,
+         FIELD(IntField),
+         FIELD(StringField),
+         FIELD(IntPtrField),
+         STATIC_FIELD(StaticDoubleField),
+         CONSTRUCTOR(),
+         CONSTRUCTOR(std::string),
+         METHOD(TestMethodInt),
+         METHOD(TestMethodDouble, double, double),
+         METHOD(TestMethodDouble, double, double, double),
+         STATIC_METHOD(TestMethodStaticString),
+         STATIC_METHOD(TestMethodStatic),
+         STATIC_METHOD(TestMethodStatic, int));
 };
 
 #endif

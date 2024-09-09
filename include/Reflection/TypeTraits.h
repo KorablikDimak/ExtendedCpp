@@ -5,6 +5,7 @@
 #include <tuple>
 #include <typeindex>
 #include <vector>
+#include <memory>
 
 namespace Reflection
 {

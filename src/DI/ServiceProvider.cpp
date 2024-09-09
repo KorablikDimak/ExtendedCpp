@@ -60,4 +60,6 @@ std::shared_ptr<void> DI::ServiceProvider::GetServiceImplementation(std::type_in
                 _instances.insert(std::pair<std::type_index, std::shared_ptr<void>>(typeIndex, factory(*this)));
             return _instances.at(typeIndex);
     }
+
+    throw std::invalid_argument("Service " + std::string(typeIndex.name()) + " does not found!");
 }

@@ -1,19 +1,5 @@
 #include "TestStruct.h"
 
-META_IMPL(TestStruct,
-          FIELD(IntField),
-          FIELD(StringField),
-          FIELD(IntPtrField),
-          STATIC_FIELD(StaticDoubleField),
-          CONSTRUCTOR(),
-          CONSTRUCTOR(std::string),
-          METHOD(TestMethodInt),
-          METHOD(TestMethodDouble, double, double),
-          METHOD(TestMethodDouble, double, double, double),
-          STATIC_METHOD(TestMethodStaticString),
-          STATIC_METHOD(TestMethodStatic),
-          STATIC_METHOD(TestMethodStatic, int));
-
 TestStruct::TestStruct(const std::string& str) noexcept
 {
     StringField = str;
