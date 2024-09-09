@@ -161,10 +161,24 @@ namespace Reflection
 
         ~ConstructorInfo() override = default;
 
+        template<typename TTarget, typename... TArgs>
+        TTarget Create(TArgs&&... args) const
+        {
+            return std::any_cast<TTarget>
+                    (_constructor(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...)));
+        }
+
         template<typename... TArgs>
         std::any Create(TArgs&&... args) const
         {
             return _constructor(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
+        }
+
+        template<typename TTarget, typename... TArgs>
+        std::shared_ptr<TTarget> New(TArgs&&... args) const
+        {
+            return std::static_pointer_cast<TTarget>
+                    (_constructorNew(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         template<typename... TArgs>
@@ -173,18 +187,42 @@ namespace Reflection
             return _constructorNew(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
         }
 
+        template<typename TTarget>
+        TTarget CreateFromAny(const std::vector<std::any>& args) const
+        {
+            return std::any_cast<TTarget>
+                    (_fromAny(_constructorHelper, args));
+        }
+
+        template<typename TTarget>
+        std::shared_ptr<TTarget> NewFromAny(const std::vector<std::any>& args) const
+        {
+            return std::static_pointer_cast<TTarget>
+                    (_fromAnyNew(_constructorHelper, args));
+        }
+
+        template<typename TTarget>
+        TTarget CreateFromAny(const std::vector<std::shared_ptr<void>>& args) const
+        {
+            return std::any_cast<TTarget>
+                    (_fromAnyPtr(_constructorHelper, args));
+        }
+
+        template<typename TTarget>
+        std::shared_ptr<TTarget> NewFromAny(const std::vector<std::shared_ptr<void>>& args) const
+        {
+            return std::static_pointer_cast<TTarget>
+                    (_fromAnyPtrNew(_constructorHelper, args));
+        }
+
         [[nodiscard]]
         std::any CreateFromAny(const std::vector<std::any>& args) const;
-        std::any CreateFromAny(std::vector<std::any>&& args) const;
         [[nodiscard]]
         std::shared_ptr<void> NewFromAny(const std::vector<std::any>& args) const;
-        std::shared_ptr<void> NewFromAny(std::vector<std::any>&& args) const;
         [[nodiscard]]
         std::any CreateFromAny(const std::vector<std::shared_ptr<void>>& args) const;
-        std::any CreateFromAny(std::vector<std::shared_ptr<void>>&& args) const;
         [[nodiscard]]
         std::shared_ptr<void> NewFromAny(const std::vector<std::shared_ptr<void>>& args) const;
-        std::shared_ptr<void> NewFromAny(std::vector<std::shared_ptr<void>>&& args) const;
 
         [[nodiscard]]
         Reflection::MemberType MemberType() const noexcept override;

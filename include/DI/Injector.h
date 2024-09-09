@@ -26,7 +26,7 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return std::any_cast<TTarget>(constructor->CreateFromAny(std::move(args)));
+                return constructor->CreateFromAny<TTarget>(args);
             }
 
             return std::nullopt;
@@ -47,7 +47,7 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return std::any_cast<TTarget>(constructor->CreateFromAny(std::move(args)));
+                return constructor->CreateFromAny<TTarget>(args);
             }
 
             throw std::runtime_error("Can not create type " + std::string(typeid(TTarget).name()));
@@ -68,7 +68,7 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return std::static_pointer_cast<TTarget>(constructor->NewFromAny(std::move(args)));
+                return constructor->NewFromAny<TTarget>(args);
             }
 
             return { nullptr };
@@ -89,7 +89,7 @@ namespace DI
                 }
 
                 if (args.size() != constructor->Parameters().size()) continue;
-                return std::static_pointer_cast<TTarget>(constructor->NewFromAny(std::move(args)));
+                return constructor->NewFromAny<TTarget>(args);
             }
 
             throw std::runtime_error("Can not create type " + std::string(typeid(TTarget).name()));
