@@ -4,6 +4,7 @@
 #include <functional>
 
 #include <LINQ/TypeTraits.h>
+#include <LINQ/Concepts.h>
 
 namespace LINQ::Aggregate
 {
@@ -27,7 +28,7 @@ namespace LINQ::Aggregate
         return count;
     }
 
-    template<Summarizable T>
+    template<Concepts::Summarize T>
     T Sum(const T *const collection, std::size_t start, const std::size_t end) noexcept
     {
         T sum = collection[start];
@@ -36,8 +37,8 @@ namespace LINQ::Aggregate
         return sum;
     }
 
-    template<typename T, typename TSelector, Summarizable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
-    requires IsFunctor<TSelector, T>
+    template<typename T, typename TSelector, Concepts::Summarize TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T>
     TResult Sum(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector) noexcept
     {
         TResult sum = selector(collection[start]);
@@ -46,7 +47,7 @@ namespace LINQ::Aggregate
         return sum;
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     T Min(const T *const collection, std::size_t start, const std::size_t end) noexcept
     {
         T min = collection[start];
@@ -56,8 +57,8 @@ namespace LINQ::Aggregate
         return min;
     }
 
-    template<typename T, typename TSelector, Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
-    requires IsFunctor<TSelector, T>
+    template<typename T, typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T>
     TResult Min(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector) noexcept
     {
         TResult min = selector(collection[start]);
@@ -67,7 +68,7 @@ namespace LINQ::Aggregate
         return min;
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     T Max(const T *const collection, std::size_t start, const std::size_t end) noexcept
     {
         T max = collection[start];
@@ -77,8 +78,8 @@ namespace LINQ::Aggregate
         return max;
     }
 
-    template<typename T, typename TSelector, Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
-    requires IsFunctor<TSelector, T>
+    template<typename T, typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T>
     TResult Max(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector) noexcept
     {
         TResult max = selector(collection[start]);
@@ -88,7 +89,7 @@ namespace LINQ::Aggregate
         return max;
     }
 
-    template<Divisible T>
+    template<Concepts::Divisible T>
     T Average(const T *const collection, std::size_t start, const std::size_t end) noexcept
     {
         T sum = collection[start];
@@ -97,8 +98,8 @@ namespace LINQ::Aggregate
         return static_cast<T>(sum / (end + 1 - start));
     }
 
-    template<typename T, typename TSelector, Divisible TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
-    requires IsFunctor<TSelector, T>
+    template<typename T, typename TSelector, Concepts::Divisible TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T>
     TResult Average(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector) noexcept
     {
         TResult sum = selector(collection[start]);

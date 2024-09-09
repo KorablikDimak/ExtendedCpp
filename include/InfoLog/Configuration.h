@@ -24,7 +24,7 @@ namespace InfoLog
         Configuration(const Configuration& configuration) noexcept;
         Configuration(Configuration&& configuration) noexcept;
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         explicit Configuration(const T& fileName)
         {
             const std::string fileNameString = ToString(fileName);

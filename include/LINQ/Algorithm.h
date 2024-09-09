@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <LINQ/TypeTraits.h>
+#include <LINQ/Concepts.h>
 
 namespace LINQ
 {
@@ -13,7 +14,7 @@ namespace LINQ
 
 namespace LINQ::Algorithm
 {
-    template<Comparable TTarget>
+    template<Concepts::Comparable TTarget>
     std::size_t BinarySearch(const TTarget& target, const TTarget *const collection,
                              std::size_t start, std::size_t end) noexcept
     {
@@ -30,7 +31,7 @@ namespace LINQ::Algorithm
         return mid;
     }
 
-    template<Comparable TTarget, typename TCollectionType, typename TSelector>
+    template<Concepts::Comparable TTarget, typename TCollectionType, typename TSelector>
     requires std::same_as<typename FunctorTraits<TSelector(TCollectionType)>::ReturnType, TTarget>
     std::size_t BinarySearch(const TTarget& target, const TCollectionType *const collection,
                              std::size_t start, std::size_t end, TSelector&& selector) noexcept
@@ -48,7 +49,7 @@ namespace LINQ::Algorithm
         return mid;
     }
 
-    template<Comparable TTarget>
+    template<Concepts::Comparable TTarget>
     std::size_t BinarySearch(const TTarget& target, const TTarget *const *const collection,
                              std::size_t start, std::size_t end) noexcept
     {
@@ -65,7 +66,7 @@ namespace LINQ::Algorithm
         return mid;
     }
 
-    template<Equalable T>
+    template<Concepts::Equatable T>
     std::map<T, std::size_t> CountEqualKeys(const T *const collection, const std::size_t start, const std::size_t end) noexcept
     {
         std::map<T, std::size_t> equalKeyCounts;
@@ -79,7 +80,7 @@ namespace LINQ::Algorithm
         return equalKeyCounts;
     }
 
-    template<Equalable T>
+    template<Concepts::Equatable T>
     std::size_t CountCommonSubsequence(const T *const firstSequence, const std::size_t firstSize,
                                        const T *const secondSequence, const std::size_t secondSize) noexcept
     {
@@ -108,7 +109,7 @@ namespace LINQ::Algorithm
         return LCSTable[firstSize][secondSize];
     }
 
-    template<Equalable T>
+    template<Concepts::Equatable T>
     bool Contains(const T *const collection, const std::size_t collectionSize,
                   const T *const subCollection, const std::size_t subCollectionSize) noexcept
     {
@@ -136,7 +137,7 @@ namespace LINQ::Algorithm
         return false;
     }
 
-    template<Equalable T>
+    template<Concepts::Equatable T>
     std::size_t IndexAt(const T *const collection, const std::size_t collectionSize,
                         const T *const subCollection, const std::size_t subCollectionSize) noexcept
     {

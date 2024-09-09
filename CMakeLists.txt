@@ -45,7 +45,8 @@ set(LINQ_INCLUDES
         include/LINQ/Aggregate.h
         include/LINQ/LinqGenerator.h
         include/LINQ/Future.h
-        include/LINQ/YieldForeach.h)
+        include/LINQ/YieldForeach.h
+        include/LINQ/Concepts.h)
 
 set(Events_INCLUDES
         include/Events/Events.h
@@ -80,7 +81,8 @@ set(InfoLog_INCLUDES
         include/InfoLog/LogLevel.h
         include/InfoLog/Parser.h
         include/InfoLog/Converter.h
-        include/InfoLog/ConsoleSender.h)
+        include/InfoLog/ConsoleSender.h
+        include/InfoLog/Concepts.h)
 
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
@@ -96,7 +98,8 @@ set(Common_INCLUDES
         include/Common/CancellationTokenSource.h
         include/Common/Random.h
         include/Common/Matrix.h
-        include/Common/Common.h)
+        include/Common/Common.h
+        include/Common/Concepts.h)
 
 set(Common_SOURCE
         src/Common/CancellationToken.cpp
@@ -107,7 +110,8 @@ set(DI_INCLUDES
         include/DI/Register.h
         include/DI/LifeTime.h
         include/DI/DI.h
-        include/DI/Injector.h)
+        include/DI/Injector.h
+        include/DI/Concepts.h)
 
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
@@ -123,7 +127,8 @@ set(Reflection_INCLUDES
         include/Reflection/Assembly.h
         include/Reflection/StaticMethodInfo.h
         include/Reflection/StaticFieldInfo.h
-        include/Reflection/MethodInfo.h)
+        include/Reflection/MethodInfo.h
+        include/Reflection/Concepts.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp

@@ -10,7 +10,7 @@
 
 namespace LINQ::Sort
 {
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -41,7 +41,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void SelectionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -73,7 +73,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -104,7 +104,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void InsertionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -131,7 +131,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void InsertionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -159,7 +159,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void InsertionSort(T *const collection, const std::size_t start, const std::size_t end,
                        TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
@@ -189,7 +189,7 @@ namespace LINQ::Sort
 
     constexpr double FACTOR = 1.2473309;
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void CombSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -219,7 +219,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void CombSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -250,7 +250,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void CombSort(T *const collection, const std::size_t start, const std::size_t end,
                   TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
@@ -282,7 +282,7 @@ namespace LINQ::Sort
     }
 
     template<typename T>
-    requires Comparable<T> && Divisible<T>
+    requires Concepts::Comparable<T> && Concepts::Divisible<T>
     void BucketSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -348,9 +348,9 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> &&
-             Comparable<typename FunctorTraits<TSelector(T)>::ReturnType> &&
-             Divisible<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> &&
+             Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType> &&
+             Concepts::Divisible<typename FunctorTraits<TSelector(T)>::ReturnType>
     void BucketSort(T *const collection, std::size_t start, std::size_t end,
                     TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
     {
@@ -418,7 +418,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void Merge(T *const collection, std::size_t start, std::size_t mid, std::size_t end, const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
@@ -476,7 +476,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void MergeSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -486,7 +486,7 @@ namespace LINQ::Sort
         Merge(collection, start, mid, end, orderType);
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void Merge(T* *const collection, const std::size_t start, const std::size_t mid, const std::size_t end, const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
@@ -544,7 +544,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void MergeSort(T* *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -555,7 +555,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void Merge(T *const collection, std::size_t start, std::size_t mid, std::size_t end,
                TSelector&& selector, const OrderType orderType) noexcept
     {
@@ -615,7 +615,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void MergeSort(T *const collection, std::size_t start, std::size_t end,
                    TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
     {
@@ -628,7 +628,7 @@ namespace LINQ::Sort
 
     constexpr std::size_t RUN = 64;
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void TimSort(T *const collection, const std::size_t start, const std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -650,7 +650,7 @@ namespace LINQ::Sort
             }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void TimSort(T* *const collection, const std::size_t start, const std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
@@ -673,7 +673,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void TimSort(T *const collection, const std::size_t start, const std::size_t end,
                  TSelector selector, OrderType orderType = OrderType::ASC) noexcept
     {
@@ -696,7 +696,7 @@ namespace LINQ::Sort
             }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     std::size_t Partition(T *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
     {
         const T pivot = collection[start];
@@ -725,7 +725,7 @@ namespace LINQ::Sort
         return i - 1;
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void QuickSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         while (start < end)
@@ -752,7 +752,7 @@ namespace LINQ::Sort
         }
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     std::size_t Partition(T* *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
     {
         const T* pivot = collection[start];
@@ -781,7 +781,7 @@ namespace LINQ::Sort
         return i - 1;
     }
 
-    template<Comparable T>
+    template<Concepts::Comparable T>
     void QuickSort(T* *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
     {
         while (start < end)
@@ -809,7 +809,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     std::size_t Partition(T *const collection, std::size_t start, std::size_t end,
                                                   TSelector&& selector, const OrderType orderType) noexcept
     {
@@ -842,7 +842,7 @@ namespace LINQ::Sort
     }
 
     template<typename T, typename TSelector>
-    requires IsFunctor<TSelector, T> && Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void QuickSort(T *const collection, std::size_t start, std::size_t end,
                    TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
     {

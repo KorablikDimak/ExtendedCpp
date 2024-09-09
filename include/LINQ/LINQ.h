@@ -150,13 +150,13 @@ namespace LINQ
         return LinqContainer(std::move(std::vector<std::pair<TKey, TValue>>(collection.cbegin(), collection.cend())));
     }
 
-    template<ConstIterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::ConstIterable TCollection, typename TSource = typename TCollection::value_type>
     LinqContainer<TSource> From(const TCollection& collection) noexcept
     {
         return LinqContainer(std::move(std::vector<TSource>(collection.cbegin(), collection.cend())));
     }
 
-    template<Iterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
     LinqContainer<TSource> From(TCollection&& collection) noexcept
     {
         return LinqContainer(std::move(std::vector<TSource>(collection.begin(), collection.end())));
@@ -168,13 +168,13 @@ namespace LINQ
         return LinqContainer(std::move(std::vector<TSource>(begin, end)));
     }
 
-    template<ConstIterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::ConstIterable TCollection, typename TSource = typename TCollection::value_type>
     LinqGenerator<TSource> Generator(const TCollection& collection) noexcept
     {
         return LinqGenerator<TSource>(collection);
     }
 
-    template<Iterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
     LinqGenerator<TSource> Generator(TCollection&& collection) noexcept
     {
         return LinqGenerator<TSource>(std::forward<TCollection>(collection));

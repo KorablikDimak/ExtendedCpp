@@ -6,14 +6,14 @@
 
 namespace LINQ
 {
-    template<ConstIterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::ConstIterable TCollection, typename TSource = typename TCollection::value_type>
     Future<TSource> YieldForeach(const TCollection& collection) noexcept
     {
         for (const auto& element : collection)
             co_yield element;
     }
 
-    template<Iterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
     Future<TSource> YieldForeach(TCollection&& collection) noexcept
     {
         for (auto& element : collection)

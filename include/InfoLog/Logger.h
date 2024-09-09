@@ -23,7 +23,7 @@ namespace InfoLog
 
         Logger() noexcept = default;
 
-        template<typename T>
+        template<ConvertableToString T>
         explicit Logger(const T& fileName) noexcept
         {
             auto configuration = std::make_unique<Configuration>(fileName);
@@ -39,42 +39,42 @@ namespace InfoLog
         void AddSender(const ISender::Ptr& sender) noexcept;
         void RemoveSender(const ISender::Ptr& sender) noexcept;
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Trace(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
                 sender->Send(InfoLog::ToString(message), LogLevel::Trace, tag);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Debug(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
                 sender->Send(InfoLog::ToString(message), LogLevel::Debug, tag);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Info(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
                 sender->Send(InfoLog::ToString(message), LogLevel::Info, tag);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Warning(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
                 sender->Send(InfoLog::ToString(message), LogLevel::Warning, tag);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Error(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)
                 sender->Send(InfoLog::ToString(message), LogLevel::Error, tag);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void Critical(const T& message, const std::string& tag = "") const noexcept
         {
             for (const ISender::Ptr& sender : _senders)

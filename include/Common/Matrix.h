@@ -10,6 +10,8 @@
 #include <future>
 #include <array>
 
+#include <Common/Concepts.h>
+
 namespace Common
 {
     template<typename T>
@@ -22,6 +24,7 @@ namespace Common
 
     public:
         Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -29,6 +32,7 @@ namespace Common
         }
 
         Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T()> init) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -40,6 +44,7 @@ namespace Common
         }
 
         Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T(std::size_t, std::size_t)> init) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -65,6 +70,7 @@ namespace Common
         }
 
         explicit Matrix(const std::vector<std::vector<T>>& matrix) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -81,6 +87,7 @@ namespace Common
         }
 
         explicit Matrix(std::vector<std::vector<T>>&& matrix) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -109,6 +116,7 @@ namespace Common
         }
 
         Matrix& operator=(const std::vector<std::vector<T>>& matrix) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -127,6 +135,7 @@ namespace Common
         }
 
         Matrix& operator=(std::vector<std::vector<T>>&& matrix) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -145,6 +154,7 @@ namespace Common
         }
 
         bool operator==(const Matrix& matrix) const noexcept
+        requires Concepts::Equatable<T>
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return false;
@@ -157,6 +167,7 @@ namespace Common
         }
 
         bool operator!=(const Matrix& matrix) const noexcept
+        requires Concepts::Equatable<T>
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return true;
@@ -168,7 +179,8 @@ namespace Common
             return true;
         }
 
-        std::optional<Matrix> operator+(const Matrix& matrix) const noexcept
+        std::optional<Matrix> Sum(const Matrix& matrix) const noexcept
+        requires Concepts::Summarize<T>
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return std::nullopt;
@@ -182,7 +194,13 @@ namespace Common
             return std::move(result);
         }
 
-        std::optional<Matrix> operator-(const Matrix& matrix) const noexcept
+        std::optional<Matrix> operator+(const Matrix& matrix) const noexcept
+        {
+            return Sum(matrix);
+        }
+
+        std::optional<Matrix> Substitute(const Matrix& matrix) const noexcept
+        requires Concepts::Substitute<T>
         {
             if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
                 return std::nullopt;
@@ -196,7 +214,13 @@ namespace Common
             return std::move(result);
         }
 
+        std::optional<Matrix> operator-(const Matrix& matrix) const noexcept
+        {
+            return Substitute(matrix);
+        }
+
         std::optional<Matrix> Multiply(const Matrix& matrix, const bool asParallel = true) const noexcept
+        requires Concepts::Multiply<T>
         {
             if (_columnCount != matrix._rowCount)
                 return std::nullopt;
@@ -220,7 +244,8 @@ namespace Common
             return Multiply(matrix, true);
         }
 
-        Matrix operator*(const T& alpha) const noexcept
+        Matrix Multiply(const T& alpha) const noexcept
+        requires Concepts::Multiply<T>
         {
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -230,7 +255,13 @@ namespace Common
             return std::move(result);
         }
 
-        Matrix operator*(T&& alpha) const noexcept
+        Matrix operator*(const T&& alpha) const noexcept
+        {
+            return Multiply(alpha);
+        }
+
+        Matrix Multiply(T&& alpha) const noexcept
+        requires Concepts::Multiply<T>
         {
             Matrix result(_rowCount, _columnCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -240,7 +271,13 @@ namespace Common
             return std::move(result);
         }
 
+        Matrix operator*(T&& alpha) const noexcept
+        {
+            return Multiply(alpha);
+        }
+
         std::vector<T> operator[](const std::size_t rowNumber) const noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::vector<T> row(_columnCount);
 
@@ -307,6 +344,7 @@ namespace Common
         }
 
         Matrix operator-() const noexcept
+        requires Concepts::Negative<T>
         {
             Matrix copy = Matrix(*this);
             for (std::size_t i = 0; i < _rowCount * _columnCount; ++i)
@@ -328,6 +366,7 @@ namespace Common
 
         [[nodiscard]]
         std::size_t Rank() const noexcept
+        requires Concepts::Divisible<T> && Concepts::Multiply<T> && Concepts::Substitute<T>
         {
             if (_rowCount == 0 || _columnCount == 0)
                 return 0;
@@ -337,7 +376,7 @@ namespace Common
 
             for (std::size_t rowIndex = 0; rowIndex < rank; ++rowIndex)
             {
-                if (copy._table[rowIndex * _columnCount + rowIndex])
+                if (std::abs(copy._table[rowIndex * _columnCount + rowIndex]) < std::numeric_limits<std::double_t>::min())
                 {
                     for (std::size_t columnIndex = 0; columnIndex < _rowCount; ++columnIndex)
                         if (columnIndex != rowIndex)
@@ -387,6 +426,7 @@ namespace Common
         }
 
         std::vector<T> GetRow(const std::size_t rowNumber) const noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::vector<T> result(_columnCount);
             for (std::size_t i = 0; i < _columnCount; ++i)
@@ -413,6 +453,7 @@ namespace Common
         }
 
         std::vector<T> GetColumn(const std::size_t columnNumber) const noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::vector<T> column(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -464,6 +505,7 @@ namespace Common
         }
 
         void Resize(const std::size_t rowCount, const std::size_t columnCount) noexcept
+        requires Concepts::DefaultConstructable<T>
         {
             std::vector<T> newTable(rowCount * columnCount);
             for (std::size_t i = 0; i < _rowCount && i < rowCount; ++i)
@@ -492,6 +534,8 @@ namespace Common
 
     private:
         std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept
+        requires Concepts::DefaultConstructable<T> && Concepts::Comparable<T> &&
+                 Concepts::Divisible<T> && Concepts::Substitute<T> && Concepts::Multiply<T>
         {
             std::vector<std::size_t> P(_rowCount + 1);
             Matrix A(*this);
@@ -541,6 +585,7 @@ namespace Common
         }
 
         T LUPDet(const std::vector<std::size_t>& P) const noexcept
+        requires Concepts::Multiply<T> && Concepts::Negative<T>
         {
             T det = _table[0];
 
@@ -551,6 +596,8 @@ namespace Common
         }
 
         Matrix LUPInvert(const std::vector<std::size_t>& P) const noexcept
+        requires Concepts::ConstructableFromNumber<T> && Concepts::Substitute<T> &&
+                 Concepts::Multiply<T> && Concepts::Divisible<T>
         {
             Matrix IA(_rowCount, _columnCount);
 
@@ -558,7 +605,7 @@ namespace Common
             {
                 for (std::size_t i = 0; i < _rowCount; ++i)
                 {
-                    IA._table[i * IA._columnCount + j] = P[i] == j ? 1.0 : 0.0;
+                    IA._table[i * IA._columnCount + j] = P[i] == j ? T(1) : T(0);
 
                     for (std::size_t k = 0; k < i; k++)
                         IA._table[i * IA._columnCount + j] -=
@@ -580,13 +627,14 @@ namespace Common
 
         [[deprecated]]
         Matrix Gauss() const noexcept
+        requires Concepts::Divisible<T> && Concepts::Multiply<T> && Concepts::Substitute<T>
         {
             Matrix copy(*this);
 
             for (std::size_t i = 0; i < _rowCount - 1; ++i)
                 for (std::size_t row = i + 1; row < _rowCount; ++row)
                 {
-                    if (copy._table[i * _columnCount + i] == 0)
+                    if (std::abs(copy._table[i * _columnCount + i]) < std::numeric_limits<std::double_t>::min())
                         continue;
                     T k = copy._table[row * _columnCount + i] / copy._table[i * _columnCount + i];
                     for (std::size_t j = 0; j < _columnCount; ++j)
@@ -597,7 +645,7 @@ namespace Common
             for (long long i = _rowCount - 1; i > 0; --i)
                 for (long long row = i - 1; row > -1; --row)
                 {
-                    if (copy._table[i * _columnCount + i] == 0)
+                    if (std::abs(copy._table[i * _columnCount + i]) < std::numeric_limits<std::double_t>::min())
                         continue;
                     T k = copy._table[row * _columnCount + i] / copy._table[i * _columnCount + i];
                     for (std::size_t j = 0; j < _columnCount; ++j)
@@ -610,6 +658,8 @@ namespace Common
 
         [[deprecated]]
         std::vector<T> LUPSolve(const std::vector<std::size_t>& P, const std::vector<T>& B) const noexcept
+        requires Concepts::Substitute<T> && Concepts::Divisible<T> &&
+                 Concepts::Multiply<T> && Concepts::DefaultConstructable<T>
         {
             std::vector<T> X(_rowCount);
 
@@ -812,6 +862,7 @@ namespace Common
         }
 
         Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
+        requires Concepts::DefaultConstructable<T> && Concepts::Multiply<T> && Concepts::Summarize<T>
         {
             Matrix result(_rowCount, matrix._columnCount);
             Matrix transpose = matrix.Transpose();

@@ -253,7 +253,7 @@ namespace LINQ
 
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
-        requires IsPair<TSource>
+        requires Concepts::IsPair<TSource>
         std::map<TKey, TValue> ToMap() const noexcept
         {
             std::map<TKey, TValue> newCollection;
@@ -264,7 +264,7 @@ namespace LINQ
 
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
-        requires IsPair<TSource>
+        requires Concepts::IsPair<TSource>
         std::unordered_map<TKey, TValue> ToUnorderedMap() const noexcept
         {
             std::unordered_map<TKey, TValue> newCollection;
@@ -274,7 +274,7 @@ namespace LINQ
         }
 
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires IsFunctor<TSelector, TSource>
+        requires Concepts::IsFunctor<TSelector, TSource>
         LinqContainer<TResult> Select(TSelector&& selector) const noexcept
         {
             std::vector<TResult> newCollection;
@@ -287,7 +287,7 @@ namespace LINQ
         }
 
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
-        requires IsFunctor<TSelector, TSource>
+        requires Concepts::IsFunctor<TSelector, TSource>
         LinqContainer<TResult> SelectMany(TSelector&& selector) const noexcept
         {
             std::vector<TResult> newCollection;
@@ -303,11 +303,11 @@ namespace LINQ
         }
 
         template<typename TCollectionSelector,
-                 Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
+                Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
                  typename TCollectionValueType = typename TCollection::value_type,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
-        requires IsFunctor<TCollectionSelector, TSource> && IsFunctor<TResultSelector, TSource, TCollectionValueType>
+        requires Concepts::IsFunctor<TCollectionSelector, TSource> && Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
         LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector) const noexcept
         {
             std::vector<TResult> newCollection;
@@ -347,7 +347,7 @@ namespace LINQ
         }
 
         LinqContainer Order(OrderType orderType = OrderType::ASC) const noexcept
-        requires Comparable<TSource>
+        requires Concepts::Comparable<TSource>
         {
             if (_size == 0) return *this;
             std::vector<TSource> newCollection(_collection.cbegin(), _collection.cend());
@@ -356,7 +356,7 @@ namespace LINQ
         }
 
         template<typename TSelector>
-        requires IsFunctor<TSelector, TSource> && Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC) const noexcept
         {
             if (_size == 0) return *this;
@@ -372,7 +372,7 @@ namespace LINQ
         }
 
         template<typename TOtherCollection>
-        requires ConstIterable<TOtherCollection> && HasSize<TOtherCollection> && Equalable<TSource>
+        requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
         LinqContainer Except(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -394,7 +394,7 @@ namespace LINQ
         }
 
         template<typename TOtherCollection>
-        requires Iterable<TOtherCollection> && HasSize<TOtherCollection> && Equalable<TSource>
+        requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
         LinqContainer Except(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -415,8 +415,8 @@ namespace LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        template<ConstIterable TOtherCollection>
-        requires Equalable<TSource>
+        template<Concepts::ConstIterable TOtherCollection>
+        requires Concepts::Equatable<TSource>
         LinqContainer Intersect(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -434,8 +434,8 @@ namespace LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        template<Iterable TOtherCollection>
-        requires Equalable<TSource>
+        template<Concepts::Iterable TOtherCollection>
+        requires Concepts::Equatable<TSource>
         LinqContainer Intersect(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -454,7 +454,7 @@ namespace LINQ
         }
 
         LinqContainer Distinct() const noexcept
-        requires Equalable<TSource>
+        requires Concepts::Equatable<TSource>
         {
             std::set<TSource> newCollection;
             for (std::size_t i = 0; i < _size; ++i)
@@ -465,8 +465,8 @@ namespace LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        template<ConstIterable TOtherCollection>
-        requires Equalable<TSource>
+        template<Concepts::ConstIterable TOtherCollection>
+        requires Concepts::Equatable<TSource>
         LinqContainer Union(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -482,8 +482,8 @@ namespace LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        template<Iterable TOtherCollection>
-        requires Equalable<TSource>
+        template<Concepts::Iterable TOtherCollection>
+        requires Concepts::Equatable<TSource>
         LinqContainer Union(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -519,15 +519,15 @@ namespace LINQ
         }
 
         TSource Sum() const
-        requires Summarizable<TSource>
+        requires Concepts::Summarize<TSource>
         {
             if (_size == 0)
                 throw std::out_of_range("Collection is empty");
             return Aggregate::Sum(_data, 0, _size - 1);
         }
 
-        template<typename TSelector, Summarizable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires IsFunctor<TSelector, TSource>
+        template<typename TSelector, Concepts::Summarize TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource>
         TResult Sum(TSelector&& selector) const
         {
             if (_size == 0)
@@ -536,15 +536,15 @@ namespace LINQ
         }
 
         TSource Min() const
-        requires Comparable<TSource>
+        requires Concepts::Comparable<TSource>
         {
             if (_size == 0)
                 throw std::out_of_range("Collection is empty");
             return Aggregate::Min(_data, 0, _size - 1);
         }
 
-        template<typename TSelector, Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires IsFunctor<TSelector, TSource>
+        template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource>
         TResult Min(TSelector&& selector) const
         {
             if (_size == 0)
@@ -554,15 +554,15 @@ namespace LINQ
         }
 
         TSource Max() const
-        requires Comparable<TSource>
+        requires Concepts::Comparable<TSource>
         {
             if (_size == 0)
                 throw std::out_of_range("Collection is empty");
             return Aggregate::Max(_data, 0, _size - 1);
         }
 
-        template<typename TSelector, Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires IsFunctor<TSelector, TSource>
+        template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource>
         TResult Max(TSelector&& selector) const
         {
             if (_size == 0)
@@ -571,15 +571,15 @@ namespace LINQ
         }
 
         TSource Average() const
-        requires Divisible<TSource>
+        requires Concepts::Divisible<TSource>
         {
             if (_size == 0)
                 throw std::out_of_range("Collection is empty");
             return Aggregate::Average(_data, 0, _size - 1);
         }
 
-        template<typename TSelector, Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires IsFunctor<TSelector, TSource>
+        template<typename TSelector, Concepts::Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource>
         TResult Average(TSelector&& selector) const
         {
             if (_size == 0)
@@ -736,7 +736,7 @@ namespace LINQ
         }
 
         template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
-        requires IsFunctor<TKeySelector, TSource>
+        requires Concepts::IsFunctor<TKeySelector, TSource>
         std::map<TKey, std::vector<TSource>> GroupBy(TKeySelector&& keySelector) const noexcept
         {
             std::map<TKey, std::vector<TSource>> result;
@@ -751,16 +751,16 @@ namespace LINQ
             return result;
         }
 
-        template<ConstIterable TOtherCollection,
+        template<Concepts::ConstIterable TOtherCollection,
                  typename TInnerKeySelector,
                  typename TOtherKeySelector,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires IsFunctor<TInnerKeySelector, TSource> &&
-                 IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
+        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
+                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
                  std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-                 Equalable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
+                 Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         LinqContainer<TResult> Join(const TOtherCollection& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
@@ -779,16 +779,16 @@ namespace LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        template<Iterable TOtherCollection,
+        template<Concepts::Iterable TOtherCollection,
                  typename TInnerKeySelector,
                  typename TOtherKeySelector,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires IsFunctor<TInnerKeySelector, TSource> &&
-                 IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
+        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
+                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
                  std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-                 Equalable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
+                 Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         LinqContainer<TResult> Join(TOtherCollection&& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
@@ -807,15 +807,15 @@ namespace LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        template<ConstIterable TOtherCollection,
+        template<Concepts::ConstIterable TOtherCollection,
                  typename TInnerKeySelector,
-                 Equalable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
+                 Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
                  typename TOtherKeySelector,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires IsFunctor<TInnerKeySelector, TSource> &&
-                 IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
+        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
+                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
                  std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         LinqContainer<TResult> GroupJoin(const TOtherCollection& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
@@ -837,15 +837,15 @@ namespace LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        template<Iterable TOtherCollection,
+        template<Concepts::Iterable TOtherCollection,
                  typename TInnerKeySelector,
-                 Equalable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
+                 Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
                  typename TOtherKeySelector,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires IsFunctor<TInnerKeySelector, TSource> &&
-                 IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
+        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
+                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
                  std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         LinqContainer<TResult> GroupJoin(TOtherCollection&& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
@@ -869,7 +869,7 @@ namespace LINQ
 
         template<typename TOtherCollection,
                  typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-        requires ConstIterable<TOtherCollection> && HasSize<TOtherCollection>
+        requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) const
         {
             if (otherCollection.empty())
@@ -891,7 +891,7 @@ namespace LINQ
 
         template<typename TOtherCollection,
                  typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-        requires Iterable<TOtherCollection> && HasSize<TOtherCollection>
+        requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) const
         {
             if (otherCollection.empty())
@@ -933,7 +933,7 @@ namespace LINQ
         }
 
         template<typename TSelector>
-        requires IsFunctor<TSelector, TSource> && Equalable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         bool Contains(const TSource& element, TSelector&& selector) const noexcept
         {
             for (std::size_t i = 0; i < _size; ++i)
@@ -942,14 +942,14 @@ namespace LINQ
         }
 
         bool Contains(const std::vector<TSource>& subCollection) const noexcept
-        requires Equalable<TSource>
+        requires Concepts::Equatable<TSource>
         {
             if (subCollection.empty()) return true;
             return Algorithm::Contains(_data, _size, subCollection.data(), subCollection.size());
         }
 
         std::size_t IndexAt(const TSource& element) const noexcept
-        requires Equalable<TSource>
+        requires Concepts::Equatable<TSource>
         {
             for (int i = 0; i < _size; ++i)
                 if (_data[i] == element) return i;
@@ -957,7 +957,7 @@ namespace LINQ
         }
 
         template<typename TSelector>
-        requires IsFunctor<TSelector, TSource> && Equalable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         std::size_t IndexAt(const TSource& element, TSelector&& selector) const noexcept
         {
             for (int i = 0; i < _size; ++i)
@@ -966,20 +966,20 @@ namespace LINQ
         }
 
         std::size_t IndexAt(const std::vector<TSource>& subCollection) const noexcept
-        requires Equalable<TSource>
+        requires Concepts::Equatable<TSource>
         {
             return Algorithm::IndexAt(_data, _size, subCollection.data(), subCollection.size());
         }
 
         std::size_t BinarySearch(const TSource& element) const noexcept
-        requires Comparable<TSource>
+        requires Concepts::Comparable<TSource>
         {
             if (_size == 0) return NPOS;
             return Algorithm::BinarySearch(std::forward<TSource>(element), _data, 0, _size - 1);
         }
 
         template<typename TSelector>
-        requires IsFunctor<TSelector, TSource> && Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         std::size_t BinarySearch(const TSource& element, TSelector&& selector) const noexcept
         {
             if (_size == 0) return NPOS;
@@ -1013,7 +1013,7 @@ namespace LINQ
         }
 
         template<typename TCollection>
-        requires ConstIterable<TCollection> && HasSize<TCollection>
+        requires Concepts::ConstIterable<TCollection> && Concepts::HasSize<TCollection>
         LinqContainer PushBack(const TCollection& otherCollection) const noexcept
         {
             std::vector<TSource> newCollection;
@@ -1039,7 +1039,7 @@ namespace LINQ
         }
 
         template<typename TCollection>
-        requires ConstIterable<TCollection> && HasSize<TCollection>
+        requires Concepts::ConstIterable<TCollection> && Concepts::HasSize<TCollection>
         LinqContainer PushFront(const TCollection& otherCollection) const noexcept
         {
             return Insert(otherCollection, 0);
@@ -1078,7 +1078,7 @@ namespace LINQ
         }
 
         template<typename TCollection>
-        requires ConstIterable<TCollection> && HasSize<TCollection>
+        requires Concepts::ConstIterable<TCollection> && Concepts::HasSize<TCollection>
         LinqContainer Insert(const TCollection& otherCollection, std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;

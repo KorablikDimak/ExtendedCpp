@@ -11,7 +11,7 @@ namespace InfoLog
         Configuration _configuration;
 
     public:
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         explicit LoggerFactory(const T& fileName) : _configuration(fileName) {}
 
         LoggerFactory(const LoggerFactory& factory) noexcept = default;
@@ -22,13 +22,13 @@ namespace InfoLog
 
         ~LoggerFactory() = default;
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void SetConfiguration(const T& fileName)
         {
             _configuration = Configuration(fileName);
         }
 
-        template<typename T>
+        template<Concepts::ConvertableToString T>
         void SetConfiguration(T&& fileName)
         {
             _configuration = Configuration(std::forward<T>(fileName));

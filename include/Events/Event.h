@@ -16,7 +16,7 @@ namespace Events
         using EventHandler = std::shared_ptr<IEventHandler<TParams...>>;
 
         std::list<EventHandler> _handlers;
-        mutable std::shared_mutex _listMutex;
+        mutable std::mutex _listMutex;
 
     public:
         Event() noexcept = default;

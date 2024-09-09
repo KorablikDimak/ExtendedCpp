@@ -4,6 +4,7 @@
 #include <optional>
 
 #include <DI/ServiceProvider.h>
+#include <DI/Concepts.h>
 
 namespace DI
 {
@@ -11,6 +12,7 @@ namespace DI
     class Register;
 
     template<typename TTarget, typename... TDependencies>
+    requires Concepts::ConstructableFromSharedPtr<TTarget, TDependencies...>
     class Register<TTarget(TDependencies...)>
     {
     private:

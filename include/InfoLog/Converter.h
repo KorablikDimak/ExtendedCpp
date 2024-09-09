@@ -2,11 +2,12 @@
 #define InfoLog_Converter_H
 
 #include <algorithm>
-#include <sstream>
+
+#include <InfoLog/Concepts.h>
 
 namespace InfoLog
 {
-    template<typename TSource>
+    template<Concepts::ConvertableToString TSource>
     std::string ToString(const TSource& source) noexcept
     {
         std::stringstream stream;
@@ -14,7 +15,7 @@ namespace InfoLog
         return stream.str();
     }
 
-    template<typename TSource>
+    template<Concepts::ConvertableToString TSource>
     std::string ToString(TSource&& source) noexcept
     {
         std::stringstream stream;
@@ -22,7 +23,7 @@ namespace InfoLog
         return stream.str();
     }
 
-    template<typename T>
+    template<Concepts::ConvertableFromString T>
     T FromString(const std::string& source) noexcept
     {
         std::stringstream stream(source);
@@ -31,7 +32,7 @@ namespace InfoLog
         return result;
     }
 
-    template<typename T>
+    template<Concepts::ConvertableFromString T>
     T FromString(std::string&& source) noexcept
     {
         std::stringstream stream(std::move(source));
