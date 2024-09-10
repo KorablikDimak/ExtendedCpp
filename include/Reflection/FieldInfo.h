@@ -17,18 +17,15 @@ namespace Reflection
         std::any (*_fieldGetter)(const std::any& helper, std::any&& object);
 
     public:
-        template<typename TObject, typename TField>
+        template<typename TObject, typename TField, typename TFieldGetter>
         struct Helper final
         {
         private:
-            std::function<TField*(TObject*)> _fieldGetter;
+            TFieldGetter _fieldGetter;
 
         public:
-            explicit Helper(const std::function<TField*(TObject*)>& fieldGetter) noexcept :
-                    _fieldGetter(fieldGetter) {}
-
-            explicit Helper(std::function<TField*(TObject*)>&& fieldGetter) noexcept :
-                _fieldGetter(std::move(fieldGetter)) {}
+            explicit Helper(TFieldGetter&& fieldGetter) noexcept :
+                _fieldGetter(std::forward<TFieldGetter>(fieldGetter)) {}
 
             TField* GetField(std::any&& object) const noexcept
             {
@@ -79,11 +76,12 @@ namespace Reflection
 []()->std::shared_ptr<Reflection::MemberInfo> \
 { \
     using FieldType = decltype(std::declval<ThisClassType>().name); \
+    auto fieldGetter = [](ThisClassType* object)->FieldType* \
+    { \
+        return &(object->name);\
+    }; \
     return std::make_shared<Reflection::FieldInfo>(#name, typeid(FieldType), \
-        Reflection::FieldInfo::Helper<ThisClassType, FieldType>([](ThisClassType* object)->FieldType* \
-        { \
-            return &(object->name);\
-        })); \
+        Reflection::FieldInfo::Helper<ThisClassType, FieldType, decltype(fieldGetter)>(std::move(fieldGetter))); \
 }()
 
 #endif

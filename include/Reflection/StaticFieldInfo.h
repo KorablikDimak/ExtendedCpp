@@ -17,18 +17,15 @@ namespace Reflection
         std::any (*_fieldGetter)(const std::any& helper);
 
     public:
-        template<typename TField>
+        template<typename TField, typename TFieldGetter>
         struct Helper final
         {
         private:
-            std::function<TField*()> _fieldGetter;
+            TFieldGetter _fieldGetter;
 
         public:
-            explicit Helper(const std::function<TField*()>& fieldGetter) noexcept :
-                    _fieldGetter(fieldGetter) {}
-
-            explicit Helper(std::function<TField*()>&& fieldGetter) noexcept :
-                _fieldGetter(std::move(fieldGetter)) {}
+            explicit Helper(TFieldGetter&& fieldGetter) noexcept :
+                _fieldGetter(std::forward<TFieldGetter>(fieldGetter)) {}
 
             TField* GetField() const noexcept
             {
@@ -72,11 +69,12 @@ namespace Reflection
 []()->std::shared_ptr<Reflection::MemberInfo> \
 { \
     using FieldType = decltype(name); \
+    auto fieldGetter = []()->FieldType* \
+    { \
+        return &(name); \
+    }; \
     return std::make_shared<Reflection::StaticFieldInfo>(#name, typeid(FieldType), \
-        Reflection::StaticFieldInfo::Helper<FieldType>([]()->FieldType* \
-        { \
-            return &(name); \
-        })); \
+        Reflection::StaticFieldInfo::Helper<FieldType, decltype(fieldGetter)>(std::move(fieldGetter))); \
 }()
 
 #endif
