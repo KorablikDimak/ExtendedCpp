@@ -6,7 +6,7 @@ std::vector<Reflection::TypeInfo> Reflection::GetType(const std::string& typeNam
     for (const auto& type : Assembly::GetTypes())
         if (std::string_view(type.TypeIndex().name()).find(typeName) != std::string_view::npos)
             info.push_back(type);
-    return info;
+    return std::move(info);
 }
 
 std::optional<Reflection::TypeInfo> Reflection::GetType(std::type_index typeIndex) noexcept
