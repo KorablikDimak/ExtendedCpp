@@ -34,9 +34,43 @@ void InfoLog::Logger::AddSender(const std::map<std::string, std::string>& config
             for (const auto& constructor : constructors)
                 if (constructor->Parameters().size() == 1 && constructor->Parameters()[0] == typeid(config))
                 {
-                    std::shared_ptr newSender = constructor->New(config);
-                    if (newSender == nullptr) continue;
-                    _senders.push_back(std::static_pointer_cast<ISender>(constructor->New(config)));
+                    std::shared_ptr<void> newSender = constructor->New(config);
+                    if (!newSender) continue;
+                    _senders.push_back(std::static_pointer_cast<ISender>(newSender));
+                    return;
+                }
+        }
+    }
+}
+
+void InfoLog::Logger::AddSender(std::map<std::string, std::string>&& config) noexcept
+{
+    std::string logSenderName;
+
+    if (config.contains("sender")) logSenderName = config.at("sender");
+    else if (config.contains("logsender")) logSenderName = config.at("logsender");
+    else return;
+
+    if (ToLowerCase(logSenderName) == "file") _senders.push_back(std::make_shared<FileSender>(std::move(config)));
+    else if (ToLowerCase(logSenderName) == "filesender") _senders.push_back(std::make_shared<FileSender>(std::move(config)));
+    else if (ToLowerCase(logSenderName) == "console") _senders.push_back(std::make_shared<ConsoleSender>(std::move(config)));
+    else if (ToLowerCase(logSenderName) == "consolesender") _senders.push_back(std::make_shared<ConsoleSender>(std::move(config)));
+    else
+    {
+        const std::vector<Reflection::TypeInfo> sendersInfo = Reflection::GetType(logSenderName);
+        if (sendersInfo.empty()) return;
+
+        for (const auto& senderInfo : sendersInfo)
+        {
+            const auto constructors = senderInfo.GetConstructors();
+            if (constructors.empty()) continue;
+
+            for (const auto& constructor : constructors)
+                if (constructor->Parameters().size() == 1 && constructor->Parameters()[0] == typeid(config))
+                {
+                    std::shared_ptr<void> newSender = constructor->New(config);
+                    if (!newSender) continue;
+                    _senders.push_back(std::static_pointer_cast<ISender>(newSender));
                     return;
                 }
         }

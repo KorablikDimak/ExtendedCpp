@@ -15,5 +15,6 @@ void InfoLog::ConsoleSender::Send(const std::string& message, const LogLevel log
     std::string layout = Config.at("layout");
     Parser::ParseLayout(layout, message, logLevel, tag);
 
+    std::lock_guard lock(_mutex);
     std::cout << layout << std::endl;
 }

@@ -8,14 +8,6 @@
 namespace InfoLog
 {
     template<Concepts::ConvertableToString TSource>
-    std::string ToString(const TSource& source) noexcept
-    {
-        std::stringstream stream;
-        stream << source;
-        return stream.str();
-    }
-
-    template<Concepts::ConvertableToString TSource>
     std::string ToString(TSource&& source) noexcept
     {
         std::stringstream stream;
@@ -29,7 +21,7 @@ namespace InfoLog
         std::stringstream stream(source);
         T result;
         stream >> result;
-        return result;
+        return std::move(result);
     }
 
     template<Concepts::ConvertableFromString T>
@@ -38,7 +30,7 @@ namespace InfoLog
         std::stringstream stream(std::move(source));
         T result;
         stream >> result;
-        return result;
+        return std::move(result);
     }
 
     inline std::string ToLowerCase(const std::string& string) noexcept
@@ -46,13 +38,14 @@ namespace InfoLog
         std::string copy = string;
         std::ranges::transform(copy, copy.begin(),
             [](const unsigned char c){ return std::tolower(c); });
-        return copy;
+        return std::move(copy);
     }
 
-    inline void ToLowerCase(std::string&& string) noexcept
+    inline std::string ToLowerCase(std::string&& string) noexcept
     {
-        std::ranges::transform(std::forward<std::string>(string), string.begin(),
+        std::ranges::transform(string, string.begin(),
             [](const unsigned char c){ return std::tolower(c); });
+        return std::move(string);
     }
 
     inline void ReplaceAll(std::string& str, const std::string& from, const std::string& to) noexcept

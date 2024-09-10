@@ -7,6 +7,9 @@ namespace InfoLog
 {
     class ConsoleSender final : public ISender
     {
+    private:
+        mutable std::mutex _mutex;
+
     public:
         explicit ConsoleSender(const std::map<std::string, std::string>& config) noexcept;
         ~ConsoleSender() override = default;
