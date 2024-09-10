@@ -24,7 +24,7 @@ namespace Common
 
     public:
         Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -32,7 +32,7 @@ namespace Common
         }
 
         Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T()> init) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -44,7 +44,7 @@ namespace Common
         }
 
         Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T(std::size_t, std::size_t)> init) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -70,7 +70,7 @@ namespace Common
         }
 
         explicit Matrix(const std::vector<std::vector<T>>& matrix) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -87,7 +87,7 @@ namespace Common
         }
 
         explicit Matrix(std::vector<std::vector<T>>&& matrix) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -116,7 +116,7 @@ namespace Common
         }
 
         Matrix& operator=(const std::vector<std::vector<T>>& matrix) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -135,7 +135,7 @@ namespace Common
         }
 
         Matrix& operator=(std::vector<std::vector<T>>&& matrix) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::size_t maxColumnColumn = 0;
             for (std::size_t i = 0; i < matrix.size(); ++i)
@@ -277,7 +277,7 @@ namespace Common
         }
 
         std::vector<T> operator[](const std::size_t rowNumber) const noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::vector<T> row(_columnCount);
 
@@ -426,7 +426,7 @@ namespace Common
         }
 
         std::vector<T> GetRow(const std::size_t rowNumber) const noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::vector<T> result(_columnCount);
             for (std::size_t i = 0; i < _columnCount; ++i)
@@ -453,7 +453,7 @@ namespace Common
         }
 
         std::vector<T> GetColumn(const std::size_t columnNumber) const noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::vector<T> column(_rowCount);
             for (std::size_t i = 0; i < _rowCount; ++i)
@@ -505,7 +505,7 @@ namespace Common
         }
 
         void Resize(const std::size_t rowCount, const std::size_t columnCount) noexcept
-        requires Concepts::DefaultConstructable<T>
+        requires std::is_default_constructible_v<T>
         {
             std::vector<T> newTable(rowCount * columnCount);
             for (std::size_t i = 0; i < _rowCount && i < rowCount; ++i)
@@ -534,7 +534,7 @@ namespace Common
 
     private:
         std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept
-        requires Concepts::DefaultConstructable<T> && Concepts::Comparable<T> &&
+        requires std::is_default_constructible_v<T> && Concepts::Comparable<T> &&
                  Concepts::Divisible<T> && Concepts::Substitute<T> && Concepts::Multiply<T>
         {
             std::vector<std::size_t> P(_rowCount + 1);
@@ -659,7 +659,7 @@ namespace Common
         [[deprecated]]
         std::vector<T> LUPSolve(const std::vector<std::size_t>& P, const std::vector<T>& B) const noexcept
         requires Concepts::Substitute<T> && Concepts::Divisible<T> &&
-                 Concepts::Multiply<T> && Concepts::DefaultConstructable<T>
+                 Concepts::Multiply<T> && std::is_default_constructible_v<T>
         {
             std::vector<T> X(_rowCount);
 
@@ -862,7 +862,7 @@ namespace Common
         }
 
         Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
-        requires Concepts::DefaultConstructable<T> && Concepts::Multiply<T> && Concepts::Summarize<T>
+        requires std::is_default_constructible_v<T> && Concepts::Multiply<T> && Concepts::Summarize<T>
         {
             Matrix result(_rowCount, matrix._columnCount);
             Matrix transpose = matrix.Transpose();

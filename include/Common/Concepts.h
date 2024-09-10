@@ -24,12 +24,6 @@ namespace Common::Concepts
     };
 
     template<typename T>
-    concept DefaultConstructable = requires
-    {
-        T();
-    };
-
-    template<typename T>
     concept ConstructableFromNumber = requires
     {
         T(0);

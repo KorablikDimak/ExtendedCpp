@@ -23,7 +23,7 @@ namespace InfoLog
 
         Logger() noexcept = default;
 
-        template<ConvertableToString T>
+        template<Concepts::ConvertableToString T>
         explicit Logger(const T& fileName) noexcept
         {
             auto configuration = std::make_unique<Configuration>(fileName);

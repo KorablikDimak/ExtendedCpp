@@ -19,7 +19,9 @@ endif()
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
+option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
 option(BUILD_SHARED_LIBS "Build libs as shared" ON)
+
 option(BUILD_ALL_TESTS "Build all tests for ExtendedCpp" OFF)
 option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
 option(Events_BUILD_TESTS "Build Events library tests" OFF)
@@ -28,9 +30,10 @@ option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(DI_BUILD_TESTS "Build DI library tests" OFF)
 option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
+
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
-option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ${is_top_level})
+
 set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
         "${CMAKE_INSTALL_LIBDIR}/extendedcpp" CACHE STRING
         "Install path for ExtendedCpp package-related CMake files")

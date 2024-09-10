@@ -11,7 +11,7 @@ namespace Reflection
     std::vector<TypeInfo> GetType(const std::string& typeName) noexcept;
     std::optional<TypeInfo> GetType(std::type_index typeIndex) noexcept;
 
-    template<HasMetaInfo T>
+    template<Concepts::HasMetaInfo T>
     TypeInfo GetType() noexcept
     {
         return T::MetaInfo;
