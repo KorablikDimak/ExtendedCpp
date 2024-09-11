@@ -1,0 +1,7 @@
+#ifndef ExtendedCpp_Common_CancellationToken_HPP
+#define ExtendedCpp_Common_CancellationToken_HPP
+
+import ExtendedCpp.Common.CancellationTokenSource;
+import ExtendedCpp.Common.CancellationToken;
+
+#endif

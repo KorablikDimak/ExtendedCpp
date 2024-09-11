@@ -1,0 +1,63 @@
+module;
+
+#include <utility>
+
+export module ExtendedCpp.Common.Concepts;
+
+export namespace ExtendedCpp::Common::Concepts
+{
+    template<typename T>
+    concept Equatable = requires(T value)
+    {
+        { value == value } -> std::convertible_to<bool>;
+        { value != value } -> std::convertible_to<bool>;
+    };
+
+    template<typename T>
+    concept Comparable = requires(T value)
+    {
+        { value < value } -> std::convertible_to<bool>;
+        { value > value } -> std::convertible_to<bool>;
+        { value <= value } -> std::convertible_to<bool>;
+        { value >= value } -> std::convertible_to<bool>;
+        { value == value } -> std::convertible_to<bool>;
+        { value != value } -> std::convertible_to<bool>;
+    };
+
+    template<typename T>
+    concept ConstructableFromNumber = requires
+    {
+        T(0);
+        T(1);
+    };
+
+    template<typename T>
+    concept Summarize = requires(T value)
+    {
+        { value + value } -> std::convertible_to<T>;
+    };
+
+    template<typename T>
+    concept Substitute = requires(T value)
+    {
+        { value - value } -> std::convertible_to<T>;
+    };
+
+    template<typename T>
+    concept Multiply = requires(T value)
+    {
+        { value * value } -> std::convertible_to<T>;
+    };
+
+    template<typename T>
+    concept Divisible = requires(T value)
+    {
+        { value / value } -> std::convertible_to<T>;
+    };
+
+    template<typename T>
+    concept Negative = requires(T value)
+    {
+        { -value } -> std::convertible_to<T>;
+    };
+}
