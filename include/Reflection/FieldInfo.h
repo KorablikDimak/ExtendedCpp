@@ -52,16 +52,18 @@ namespace Reflection
         ~FieldInfo() override = default;
 
         template<typename TField, typename TObject>
-        TField* GetField(TObject* object) const noexcept
+        TField* GetField(TObject* object) const
         {
-            if (object == nullptr) return {};
+            if (!object)
+                throw std::invalid_argument("Object is null");
             return std::any_cast<TField*>(_fieldGetter(_fieldHelper, object));
         }
 
         template<typename TObject>
-        std::any GetField(TObject* object) const noexcept
+        std::any GetField(TObject* object) const
         {
-            if (object == nullptr) return {};
+            if (!object)
+                throw std::invalid_argument("Object is null");
             return _fieldGetter(_fieldHelper, object);
         }
 

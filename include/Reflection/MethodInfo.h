@@ -32,7 +32,10 @@ namespace Reflection
 
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
-                return _method(std::any_cast<TObject*>(object), args);
+                if constexpr (std::same_as<TReturnType, void>)
+                    _method(std::any_cast<TObject*>(std::move(object)), std::move(args));
+                else
+                    return _method(std::any_cast<TObject*>(std::move(object)), std::move(args));
             }
         };
 
@@ -41,8 +44,13 @@ namespace Reflection
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
                 {
-                    if constexpr (std::same_as<void, typename THelper::ReturnType>) return std::any();
-                    else return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
+                    if constexpr (std::same_as<void, typename THelper::ReturnType>)
+                    {
+                        std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args));
+                        return std::any();
+                    }
+                    else
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _parameters(std::move(parameters)),
             MemberInfo(methodName) {}
@@ -52,8 +60,13 @@ namespace Reflection
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
                 {
-                    if constexpr (std::same_as<void, typename THelper::ReturnType>) return std::any();
-                    else return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
+                    if constexpr (std::same_as<void, typename THelper::ReturnType>)
+                    {
+                        std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args));
+                        return std::any();
+                    }
+                    else
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _parameters(std::move(parameters)),
             MemberInfo(std::move(methodName)) {}
@@ -63,14 +76,19 @@ namespace Reflection
         template<typename TResult, typename TObject, typename... TArgs>
         TResult Invoke(TObject* object, TArgs&&... args) const
         {
-            if (object == nullptr) return {};
-            return std::any_cast<TResult>(_method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...)));
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            if constexpr (std::same_as<TResult, void>)
+                _method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...));
+            else
+                return std::any_cast<TResult>(_method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         template<typename TObject, typename... TArgs>
         std::any Invoke(TObject* object, TArgs&&... args) const
         {
-            if (object == nullptr) return {};
+            if (!object)
+                throw std::invalid_argument("Object is null");
             return _method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...));
         }
 
@@ -87,10 +105,10 @@ namespace Reflection
     return std::apply([](auto&&... args) \
     { \
         using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
-        auto methodLambda = [](ThisClassType* object, std::any& tupleArgs) \
+        auto methodLambda = [](ThisClassType* object, std::any&& tupleArgs) \
         { \
             return std::apply([object](auto&&... args) \
-                { return object->methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(tupleArgs)); \
+                { return object->methodName(args...); }, std::any_cast<std::tuple<__VA_ARGS__>>(std::move(tupleArgs))); \
         }; \
         using MethodType = decltype(methodLambda); \
         return std::make_shared<Reflection::MethodInfo>(#methodName, \
