@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include <chrono>
 
 namespace Common
 {

@@ -4,6 +4,7 @@
 #include <any>
 #include <typeindex>
 #include <functional>
+#include <stdexcept>
 
 #include <Reflection/MemberInfo.h>
 

@@ -9,6 +9,7 @@
 #include <functional>
 #include <future>
 #include <array>
+#include <algorithm>
 
 #include <Common/Concepts.h>
 
@@ -18,9 +19,9 @@ namespace Common
     class Matrix final
     {
     private:
-        std::vector<T> _table;
-        std::size_t _rowCount;
-        std::size_t _columnCount;
+        std::vector<T> _table{};
+        std::size_t _rowCount{};
+        std::size_t _columnCount{};
 
     public:
         Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
@@ -312,6 +313,7 @@ namespace Common
             --_columnCount;
         }
 
+        [[nodiscard]]
         std::optional<T> Det() const noexcept
         {
             if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
@@ -325,6 +327,7 @@ namespace Common
             return A.LUPDet(P);
         }
 
+        [[nodiscard]]
         std::optional<Matrix> Inverse() const noexcept
         {
             if (_rowCount != _columnCount || _rowCount == 0 || _columnCount == 0)
@@ -425,6 +428,7 @@ namespace Common
             return _columnCount;
         }
 
+        [[nodiscard]]
         std::vector<T> GetRow(const std::size_t rowNumber) const noexcept
         requires std::is_default_constructible_v<T>
         {
@@ -452,6 +456,7 @@ namespace Common
                 _table[rowNumber * _columnCount + i] = std::move(newRow[i]);
         }
 
+        [[nodiscard]]
         std::vector<T> GetColumn(const std::size_t columnNumber) const noexcept
         requires std::is_default_constructible_v<T>
         {

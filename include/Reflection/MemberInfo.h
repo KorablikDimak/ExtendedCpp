@@ -20,7 +20,7 @@ namespace Reflection
         [[nodiscard]]
         virtual std::string Name() const noexcept;
         [[nodiscard]]
-        virtual MemberType MemberType() const noexcept;
+        virtual Reflection::MemberType MemberType() const noexcept;
     };
 }
 
