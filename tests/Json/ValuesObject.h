@@ -1,7 +1,7 @@
 #ifndef ValuesObject_H
 #define ValuesObject_H
 
-#include <Json/Json.h>
+#include <ExtendedCpp/Json.h>
 
 class ValuesObject
 {
@@ -11,14 +11,14 @@ public:
     std::vector<std::string> stringsField;
 };
 
-inline void from_json(const Json::Json& json, ValuesObject& object)
+inline void from_json(const ExtendedCpp::Json& json, ValuesObject& object)
 {
     VALUES_FROM_JSON(intsField)
     VALUES_FROM_JSON(boolsField)
     VALUES_FROM_JSON(stringsField)
 }
 
-inline void to_json(Json::Json& json, const std::shared_ptr<ValuesObject>& object)
+inline void to_json(ExtendedCpp::Json& json, const std::shared_ptr<ValuesObject>& object)
 {
     VALUES_TO_JSON(intsField)
     VALUES_TO_JSON(boolsField)

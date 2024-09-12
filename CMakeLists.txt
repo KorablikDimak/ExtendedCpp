@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(ExtendedCpp
-        VERSION 1.7.1
+        VERSION 2.0.0
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -40,53 +40,53 @@ set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
         "Install path for ExtendedCpp package-related CMake files")
 
 set(LINQ_INCLUDES
-        include/LINQ/LINQ.h
-        include/LINQ/OrderType.h
-        include/LINQ/Algorithm.h
-        include/LINQ/LinqContainer.h
-        include/LINQ/TypeTraits.h
-        include/LINQ/Sort.h
-        include/LINQ/Aggregate.h
-        include/LINQ/LinqGenerator.h
-        include/LINQ/Future.h
-        include/LINQ/YieldForeach.h
-        include/LINQ/Concepts.h)
+        include/ExtendedCpp/LINQ.h
+        include/ExtendedCpp/LINQ/OrderType.h
+        include/ExtendedCpp/LINQ/Algorithm.h
+        include/ExtendedCpp/LINQ/LinqContainer.h
+        include/ExtendedCpp/LINQ/TypeTraits.h
+        include/ExtendedCpp/LINQ/Sort.h
+        include/ExtendedCpp/LINQ/Aggregate.h
+        include/ExtendedCpp/LINQ/LinqGenerator.h
+        include/ExtendedCpp/LINQ/Future.h
+        include/ExtendedCpp/LINQ/YieldForeach.h
+        include/ExtendedCpp/LINQ/Concepts.h)
 
 set(Events_INCLUDES
-        include/Events/Events.h
-        include/Events/Event.h
-        include/Events/FunctionHandler.h
-        include/Events/IEventHandler.h
-        include/Events/MethodHandler.h
-        include/Events/StaticMethodHandler.h
-        include/Events/ConstMethodHandler.h)
+        include/ExtendedCpp/Events.h
+        include/ExtendedCpp/Events/Event.h
+        include/ExtendedCpp/Events/FunctionHandler.h
+        include/ExtendedCpp/Events/IEventHandler.h
+        include/ExtendedCpp/Events/MethodHandler.h
+        include/ExtendedCpp/Events/StaticMethodHandler.h
+        include/ExtendedCpp/Events/ConstMethodHandler.h)
 
 set(Json_INCLUDES
-        include/Json/Json.h
-        include/Json/json.hpp
-        include/Json/json_fwd.hpp
-        include/Json/JsonMacros.h)
+        include/ExtendedCpp/Json.h
+        include/ExtendedCpp/Json/json.hpp
+        include/ExtendedCpp/Json/json_fwd.hpp
+        include/ExtendedCpp/Json/JsonMacros.h)
 
 set(Xml_INCLUDES
-        include/Xml/Xml.h
-        include/Xml/pugixml.hpp
-        include/Xml/pugiconfig.hpp)
+        include/ExtendedCpp/Xml.h
+        include/ExtendedCpp/Xml/pugixml.hpp
+        include/ExtendedCpp/Xml/pugiconfig.hpp)
 
 set(Xml_SOURCE
         src/Xml/pugixml.cpp)
 
 set(InfoLog_INCLUDES
-        include/InfoLog/InfoLog.h
-        include/InfoLog/Configuration.h
-        include/InfoLog/FileSender.h
-        include/InfoLog/ISender.h
-        include/InfoLog/Logger.h
-        include/InfoLog/LoggerFactory.h
-        include/InfoLog/LogLevel.h
-        include/InfoLog/Parser.h
-        include/InfoLog/Converter.h
-        include/InfoLog/ConsoleSender.h
-        include/InfoLog/Concepts.h)
+        include/ExtendedCpp/InfoLog.h
+        include/ExtendedCpp/InfoLog/Configuration.h
+        include/ExtendedCpp/InfoLog/FileSender.h
+        include/ExtendedCpp/InfoLog/ISender.h
+        include/ExtendedCpp/InfoLog/Logger.h
+        include/ExtendedCpp/InfoLog/LoggerFactory.h
+        include/ExtendedCpp/InfoLog/LogLevel.h
+        include/ExtendedCpp/InfoLog/Parser.h
+        include/ExtendedCpp/InfoLog/Converter.h
+        include/ExtendedCpp/InfoLog/ConsoleSender.h
+        include/ExtendedCpp/InfoLog/Concepts.h)
 
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
@@ -98,41 +98,41 @@ set(InfoLog_SOURCE
         src/InfoLog/ConsoleSender.cpp)
 
 set(Common_INCLUDES
-        include/Common/CancellationToken.h
-        include/Common/CancellationTokenSource.h
-        include/Common/Random.h
-        include/Common/Matrix.h
-        include/Common/Common.h
-        include/Common/Concepts.h)
+        include/ExtendedCpp/Cancellation/CancellationToken.h
+        include/ExtendedCpp/Cancellation/CancellationTokenSource.h
+        include/ExtendedCpp/Random.h
+        include/ExtendedCpp/Matrix.h
+        include/ExtendedCpp/Cancellation.h
+        include/ExtendedCpp/Concepts.h)
 
 set(Common_SOURCE
-        src/Common/CancellationToken.cpp
-        src/Common/CancellationTokenSource.cpp)
+        src/Cancellation/CancellationToken.cpp
+        src/Cancellation/CancellationTokenSource.cpp)
 
 set(DI_INCLUDES
-        include/DI/ServiceProvider.h
-        include/DI/Register.h
-        include/DI/LifeTime.h
-        include/DI/DI.h
-        include/DI/Injector.h
-        include/DI/Concepts.h)
+        include/ExtendedCpp/DI/ServiceProvider.h
+        include/ExtendedCpp/DI/Register.h
+        include/ExtendedCpp/DI/LifeTime.h
+        include/ExtendedCpp/DI.h
+        include/ExtendedCpp/DI/Injector.h
+        include/ExtendedCpp/DI/Concepts.h)
 
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
 
 set(Reflection_INCLUDES
-        include/Reflection/MemberInfo.h
-        include/Reflection/FieldInfo.h
-        include/Reflection/TypeInfo.h
-        include/Reflection/Reflection.h
-        include/Reflection/TypeTraits.h
-        include/Reflection/MemberType.h
-        include/Reflection/ConstructorInfo.h
-        include/Reflection/Assembly.h
-        include/Reflection/StaticMethodInfo.h
-        include/Reflection/StaticFieldInfo.h
-        include/Reflection/MethodInfo.h
-        include/Reflection/Concepts.h)
+        include/ExtendedCpp/Reflection/MemberInfo.h
+        include/ExtendedCpp/Reflection/FieldInfo.h
+        include/ExtendedCpp/Reflection/TypeInfo.h
+        include/ExtendedCpp/Reflection.h
+        include/ExtendedCpp/Reflection/TypeTraits.h
+        include/ExtendedCpp/Reflection/MemberType.h
+        include/ExtendedCpp/Reflection/ConstructorInfo.h
+        include/ExtendedCpp/Reflection/Assembly.h
+        include/ExtendedCpp/Reflection/StaticMethodInfo.h
+        include/ExtendedCpp/Reflection/StaticFieldInfo.h
+        include/ExtendedCpp/Reflection/MethodInfo.h
+        include/ExtendedCpp/Reflection/Concepts.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
@@ -268,14 +268,14 @@ if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
         add_custom_command(
                 TARGET DI POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
 
         add_custom_command(
                 TARGET DI POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif()
 endif()
 

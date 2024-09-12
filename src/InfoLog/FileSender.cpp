@@ -2,17 +2,17 @@
 #include <filesystem>
 #include <iostream>
 
-#include <InfoLog/FileSender.h>
-#include <InfoLog/Parser.h>
+#include <ExtendedCpp/InfoLog/FileSender.h>
+#include <ExtendedCpp/InfoLog/Parser.h>
 
-InfoLog::FileSender::FileSender(const std::map<std::string, std::string>& config)
+ExtendedCpp::InfoLog::FileSender::FileSender(const std::map<std::string, std::string>& config)
 {
     Config = config;
     if (!Config.contains("filepath")) throw std::invalid_argument("Config does not have attribute \"filepath\"");
     _filePath = Config.at("filepath");
 }
 
-void InfoLog::FileSender::Send(const std::string& message, const LogLevel logLevel, const std::string& tag) const noexcept
+void ExtendedCpp::InfoLog::FileSender::Send(const std::string& message, const LogLevel logLevel, const std::string& tag) const noexcept
 {
     if (!ValidateLogLevel(logLevel)) return;
     if (!ValidateTag(tag)) return;

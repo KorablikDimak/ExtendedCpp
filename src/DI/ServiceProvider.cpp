@@ -1,25 +1,25 @@
-#include <DI/ServiceProvider.h>
+#include <ExtendedCpp/DI/ServiceProvider.h>
 
-DI::ServiceProvider::ServiceProvider(const ServiceProvider& serviceProvider) noexcept
+ExtendedCpp::DI::ServiceProvider::ServiceProvider(const ServiceProvider& serviceProvider) noexcept
 {
     _factories = serviceProvider._factories;
     _instances = serviceProvider._instances;
 }
 
-DI::ServiceProvider::ServiceProvider(ServiceProvider&& serviceProvider) noexcept
+ExtendedCpp::DI::ServiceProvider::ServiceProvider(ServiceProvider&& serviceProvider) noexcept
 {
     _factories = std::move(serviceProvider._factories);
     _instances = std::move(serviceProvider._instances);
 }
 
-DI::ServiceProvider& DI::ServiceProvider::operator=(ServiceProvider&& serviceProvider) noexcept
+ExtendedCpp::DI::ServiceProvider& ExtendedCpp::DI::ServiceProvider::operator=(ServiceProvider&& serviceProvider) noexcept
 {
     _factories = std::move(serviceProvider._factories);
     _instances = std::move(serviceProvider._instances);
     return *this;
 }
 
-std::shared_ptr<void> DI::ServiceProvider::GetService(std::type_index typeIndex) const noexcept
+std::shared_ptr<void> ExtendedCpp::DI::ServiceProvider::GetService(std::type_index typeIndex) const noexcept
 {
     if (!_factories.contains(typeIndex))
         return { nullptr };
@@ -34,14 +34,14 @@ std::shared_ptr<void> DI::ServiceProvider::GetService(std::type_index typeIndex)
     }
 }
 
-std::shared_ptr<void> DI::ServiceProvider::GetServiceRequired(std::type_index typeIndex) const
+std::shared_ptr<void> ExtendedCpp::DI::ServiceProvider::GetServiceRequired(std::type_index typeIndex) const
 {
     if (!_factories.contains(typeIndex))
         throw std::invalid_argument("Service " + std::string(typeIndex.name()) + " does not found!");
     return GetServiceImplementation(typeIndex);
 }
 
-std::shared_ptr<void> DI::ServiceProvider::GetServiceImplementation(std::type_index typeIndex) const
+std::shared_ptr<void> ExtendedCpp::DI::ServiceProvider::GetServiceImplementation(std::type_index typeIndex) const
 {
     const auto& [factory, lifeTime] = _factories.at(typeIndex);
 

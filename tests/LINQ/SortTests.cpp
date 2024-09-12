@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <LINQ/Sort.h>
+#include <ExtendedCpp/LINQ/Sort.h>
 
 #include "LINQ_Tests.h"
 
@@ -11,7 +11,7 @@ TEST(SortTests, SelectionSortTest)
     const short arrCorrect1[10] = { 2, 2, 4, 5, 7, 10, 21, 25, 40, 50 };
 
     // Act
-    LINQ::Sort::SelectionSort(arr1, 0, 9);
+    ExtendedCpp::LINQ::Sort::SelectionSort(arr1, 0, 9);
 
     // Assert
     for (short i = 0; i < 10; ++i)
@@ -22,7 +22,7 @@ TEST(SortTests, SelectionSortTest)
     const std::vector arrCorrect2 = { 3, 6, 9, 10, 11, 18, 23, 33 };
 
     // Act
-    LINQ::Sort::SelectionSort(arr2.data(), 0, 7);
+    ExtendedCpp::LINQ::Sort::SelectionSort(arr2.data(), 0, 7);
 
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
@@ -33,7 +33,7 @@ TEST(SortTests, SelectionSortTest)
     short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::SelectionSort(arr3, 0, 5);
+    ExtendedCpp::LINQ::Sort::SelectionSort(arr3, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -53,7 +53,7 @@ TEST(SortTests, SelectionSortTest)
     constexpr unsigned char sortedAges[] = { 23, 24, 27, 29 };
 
     // Act
-    LINQ::Sort::SelectionSort(persons, 0, 3, [](const Person& person){ return person.Age; });
+    ExtendedCpp::LINQ::Sort::SelectionSort(persons, 0, 3, [](const Person& person){ return person.Age; });
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -67,7 +67,7 @@ TEST(SortTests, InsertionSortTest)
     const short arrCorrect1[10] = { 2, 2, 4, 5, 7, 10, 21, 25, 40, 50 };
 
     // Act
-    LINQ::Sort::InsertionSort(arr1, 0, 9);
+    ExtendedCpp::LINQ::Sort::InsertionSort(arr1, 0, 9);
 
     // Assert
     for (short i = 0; i < 10; ++i)
@@ -78,7 +78,7 @@ TEST(SortTests, InsertionSortTest)
     const std::vector arrCorrect2 = { 3, 6, 9, 10, 11, 18, 23, 33 };
 
     // Act
-    LINQ::Sort::InsertionSort(arr2.data(), 0, 7);
+    ExtendedCpp::LINQ::Sort::InsertionSort(arr2.data(), 0, 7);
 
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
@@ -89,7 +89,7 @@ TEST(SortTests, InsertionSortTest)
     short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::InsertionSort(arr3, 0, 5);
+    ExtendedCpp::LINQ::Sort::InsertionSort(arr3, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -109,7 +109,7 @@ TEST(SortTests, InsertionSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::InsertionSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::InsertionSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -123,14 +123,14 @@ TEST(SortTests, BucketSortTest)
     constexpr short arrCorrect[20] = { -9, -7, 2, 2, 3, 4, 5, 6, 7, 9, 10, 10, 12, 18, 21, 23, 25, 33, 40, 50 };
 
     // Act
-    LINQ::Sort::BucketSort(arr, 0, 19);
+    ExtendedCpp::LINQ::Sort::BucketSort(arr, 0, 19);
 
     // Assert
     for (short i = 0; i < 20; ++i)
         ASSERT_TRUE(arr[i] == arrCorrect[i]);
 
     // Act
-    LINQ::Sort::BucketSort(arr, 0, 19, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::BucketSort(arr, 0, 19, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0, j = 19; i < 20; ++i, --j)
@@ -145,7 +145,7 @@ TEST(SortTests, BucketSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::BucketSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::BucketSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -159,14 +159,14 @@ TEST(SortTests, CombSortTest)
     constexpr short arrCorrect[20] = { -9, -7, 2, 2, 3, 4, 5, 6, 7, 9, 10, 10, 12, 18, 21, 23, 25, 33, 40, 50 };
 
     // Act
-    LINQ::Sort::CombSort(arr, 0, 19);
+    ExtendedCpp::LINQ::Sort::CombSort(arr, 0, 19);
 
     // Assert
     for (short i = 0; i < 20; ++i)
         ASSERT_TRUE(arr[i] == arrCorrect[i]);
 
     // Act
-    LINQ::Sort::CombSort(arr, 0, 19, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::CombSort(arr, 0, 19, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0, j = 19; i < 20; ++i, --j)
@@ -181,7 +181,7 @@ TEST(SortTests, CombSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::CombSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::CombSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -192,7 +192,7 @@ TEST(SortTests, CombSortTest)
     short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::CombSort(arr3, 0, 5);
+    ExtendedCpp::LINQ::Sort::CombSort(arr3, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -211,7 +211,7 @@ TEST(SortTests, MergeSortTest)
     const std::vector arrCorrect1 = { 3, 6, 9, 10, 12, 18, 23, 33 };
 
     // Act
-    LINQ::Sort::MergeSort(arr1.data(), 0, 7);
+    ExtendedCpp::LINQ::Sort::MergeSort(arr1.data(), 0, 7);
 
     // Assert
     for (short i = 0; i < 8; ++i)
@@ -222,7 +222,7 @@ TEST(SortTests, MergeSortTest)
     short* arrCorrect2[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::MergeSort(arr2, 0, 5);
+    ExtendedCpp::LINQ::Sort::MergeSort(arr2, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -242,7 +242,7 @@ TEST(SortTests, MergeSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::MergeSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::MergeSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -256,7 +256,7 @@ TEST(SortTests, QuickSortTest)
     const short arrCorrect1[10] = { 2, 3, 5, 6, 7, 10, 21, 25, 40, 50 };
 
     // Act
-    LINQ::Sort::QuickSort(arr1, 0, 9);
+    ExtendedCpp::LINQ::Sort::QuickSort(arr1, 0, 9);
 
     // Assert
     for (short i = 0; i < 10; ++i)
@@ -267,7 +267,7 @@ TEST(SortTests, QuickSortTest)
     const std::vector arrCorrect2 = { 3, 6, 9, 10, 12, 18, 23, 33 };
 
     // Act
-    LINQ::Sort::QuickSort(arr2.data(), 0, 7);
+    ExtendedCpp::LINQ::Sort::QuickSort(arr2.data(), 0, 7);
 
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
@@ -278,7 +278,7 @@ TEST(SortTests, QuickSortTest)
     short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::QuickSort(arr3, 0, 5);
+    ExtendedCpp::LINQ::Sort::QuickSort(arr3, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -298,7 +298,7 @@ TEST(SortTests, QuickSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::QuickSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::QuickSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)
@@ -312,7 +312,7 @@ TEST(SortTests, TimSortTest)
     const short arrCorrect1[10] = { 2, 3, 5, 6, 7, 10, 21, 25, 40, 50 };
 
     // Act
-    LINQ::Sort::TimSort(arr1, 0, 9);
+    ExtendedCpp::LINQ::Sort::TimSort(arr1, 0, 9);
 
     // Assert
     for (short i = 0; i < 10; ++i)
@@ -323,7 +323,7 @@ TEST(SortTests, TimSortTest)
     const std::vector arrCorrect2 = { 3, 6, 9, 10, 12, 18, 23, 33 };
 
     // Act
-    LINQ::Sort::TimSort(arr2.data(), 0, 7);
+    ExtendedCpp::LINQ::Sort::TimSort(arr2.data(), 0, 7);
 
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
@@ -334,7 +334,7 @@ TEST(SortTests, TimSortTest)
     short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
 
     // Act
-    LINQ::Sort::TimSort(arr3, 0, 5);
+    ExtendedCpp::LINQ::Sort::TimSort(arr3, 0, 5);
 
     // Assert
     for (unsigned char i = 0; i < 6; ++i)
@@ -354,7 +354,7 @@ TEST(SortTests, TimSortTest)
     constexpr unsigned char sortedAges[] = { 29, 27, 24, 23 };
 
     // Act
-    LINQ::Sort::TimSort(persons, 0, 3, [](const Person& person){ return person.Age; }, OrderType::DESC);
+    ExtendedCpp::LINQ::Sort::TimSort(persons, 0, 3, [](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::DESC);
 
     // Assert
     for (short i = 0; i < 4; ++i)

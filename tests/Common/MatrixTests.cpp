@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <Common/Matrix.h>
-#include <Common/Random.h>
+#include <ExtendedCpp/Matrix.h>
+#include <ExtendedCpp/Random.h>
 
-typedef Common::MatrixF64 Matrix;
+typedef ExtendedCpp::MatrixF64 Matrix;
 
 TEST(MatrixTests, SumMatrixTest)
 {
@@ -48,7 +48,7 @@ TEST(MatrixTests, DetTest)
 TEST(MatrixTests, DetBigTest)
 {
     // Average
-    const Matrix matrix(1000, 1000, []{ return Common::RandomInt(1, 10); });
+    const Matrix matrix(1000, 1000, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
 
     // Act
     const auto det = matrix.Det();
@@ -97,12 +97,12 @@ TEST(MatrixTests, BigMatrixTest)
 TEST(MatrixTests, MultiplyPTest)
 {
     // Average
-    const Common::MatrixI64 matrix1(500, 500, []{ return Common::RandomInt(1, 10); });
-    const Common::MatrixI64 matrix2(500, 500, []{ return Common::RandomInt(1, 10); });
+    const ExtendedCpp::MatrixI64 matrix1(500, 500, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
+    const ExtendedCpp::MatrixI64 matrix2(500, 500, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
 
     // Act
-    const Common::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true).value();
-    const Common::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false).value();
+    const ExtendedCpp::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true).value();
+    const ExtendedCpp::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false).value();
 
     // Assert
     ASSERT_TRUE(matrix3 == matrix4);
@@ -112,18 +112,18 @@ TEST(MatrixTests, MacrosZeroTest)
 {
     // Average
     // Act
-    const Common::MatrixF64 matrixF64 = ZERO_MATRIX_F64(10, 10);
-    const Common::MatrixF32 matrixF32 = ZERO_MATRIX_F32(10, 10);
+    const ExtendedCpp::MatrixF64 matrixF64 = ZERO_MATRIX_F64(10, 10);
+    const ExtendedCpp::MatrixF32 matrixF32 = ZERO_MATRIX_F32(10, 10);
 
-    const Common::MatrixI64 matrixI64 = ZERO_MATRIX_I64(10, 10);
-    const Common::MatrixI32 matrixI32 = ZERO_MATRIX_I32(10, 10);
-    const Common::MatrixI16 matrixI16 = ZERO_MATRIX_I16(10, 10);
-    const Common::MatrixI8 matrixI8 = ZERO_MATRIX_I8(10, 10);
+    const ExtendedCpp::MatrixI64 matrixI64 = ZERO_MATRIX_I64(10, 10);
+    const ExtendedCpp::MatrixI32 matrixI32 = ZERO_MATRIX_I32(10, 10);
+    const ExtendedCpp::MatrixI16 matrixI16 = ZERO_MATRIX_I16(10, 10);
+    const ExtendedCpp::MatrixI8 matrixI8 = ZERO_MATRIX_I8(10, 10);
 
-    const Common::MatrixU64 matrixU64 = ZERO_MATRIX_U64(10, 10);
-    const Common::MatrixU32 matrixU32 = ZERO_MATRIX_U32(10, 10);
-    const Common::MatrixU16 matrixU16 = ZERO_MATRIX_U16(10, 10);
-    const Common::MatrixU8 matrixU8 = ZERO_MATRIX_U8(10, 10);
+    const ExtendedCpp::MatrixU64 matrixU64 = ZERO_MATRIX_U64(10, 10);
+    const ExtendedCpp::MatrixU32 matrixU32 = ZERO_MATRIX_U32(10, 10);
+    const ExtendedCpp::MatrixU16 matrixU16 = ZERO_MATRIX_U16(10, 10);
+    const ExtendedCpp::MatrixU8 matrixU8 = ZERO_MATRIX_U8(10, 10);
 
     // Assert
     for (std::size_t i = 0; i < 10; ++i)
@@ -145,18 +145,18 @@ TEST(MatrixTests, MacrosETest)
 {
     // Average
     // Act
-    const Common::MatrixF64 matrixF64 = E_MATRIX_F64(10, 10);
-    const Common::MatrixF32 matrixF32 = E_MATRIX_F32(10, 10);
+    const ExtendedCpp::MatrixF64 matrixF64 = E_MATRIX_F64(10, 10);
+    const ExtendedCpp::MatrixF32 matrixF32 = E_MATRIX_F32(10, 10);
 
-    const Common::MatrixI64 matrixI64 = E_MATRIX_I64(10, 10);
-    const Common::MatrixI32 matrixI32 = E_MATRIX_I32(10, 10);
-    const Common::MatrixI16 matrixI16 = E_MATRIX_I16(10, 10);
-    const Common::MatrixI8 matrixI8 = E_MATRIX_I8(10, 10);
+    const ExtendedCpp::MatrixI64 matrixI64 = E_MATRIX_I64(10, 10);
+    const ExtendedCpp::MatrixI32 matrixI32 = E_MATRIX_I32(10, 10);
+    const ExtendedCpp::MatrixI16 matrixI16 = E_MATRIX_I16(10, 10);
+    const ExtendedCpp::MatrixI8 matrixI8 = E_MATRIX_I8(10, 10);
 
-    const Common::MatrixU64 matrixU64 = E_MATRIX_U64(10, 10);
-    const Common::MatrixU32 matrixU32 = E_MATRIX_U32(10, 10);
-    const Common::MatrixU16 matrixU16 = E_MATRIX_U16(10, 10);
-    const Common::MatrixU8 matrixU8 = E_MATRIX_U8(10, 10);
+    const ExtendedCpp::MatrixU64 matrixU64 = E_MATRIX_U64(10, 10);
+    const ExtendedCpp::MatrixU32 matrixU32 = E_MATRIX_U32(10, 10);
+    const ExtendedCpp::MatrixU16 matrixU16 = E_MATRIX_U16(10, 10);
+    const ExtendedCpp::MatrixU8 matrixU8 = E_MATRIX_U8(10, 10);
 
     // Assert
     for (std::size_t i = 0; i < 10; ++i)

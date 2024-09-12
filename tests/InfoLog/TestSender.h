@@ -1,10 +1,10 @@
 #ifndef TestSender_H
 #define TestSender_H
 
-#include <InfoLog/ISender.h>
-#include <Reflection/Reflection.h>
+#include <ExtendedCpp/InfoLog/ISender.h>
+#include <ExtendedCpp/Reflection.h>
 
-class TestSender final : public InfoLog::ISender
+class TestSender final : public ExtendedCpp::InfoLog::ISender
 {
 public:
     explicit TestSender(const std::map<std::string, std::string>& config);
@@ -14,7 +14,7 @@ public:
          CONSTRUCTOR(std::map<std::string, std::string>));
 
 protected:
-    void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept override;
+    void Send(const std::string& message, ExtendedCpp::InfoLog::LogLevel logLevel, const std::string& tag) const noexcept override;
 };
 
 

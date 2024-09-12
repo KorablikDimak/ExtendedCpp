@@ -1,16 +1,16 @@
-#include <Reflection/StaticFieldInfo.h>
+#include <ExtendedCpp/Reflection/StaticFieldInfo.h>
 
-std::any Reflection::StaticFieldInfo::GetField() const noexcept
+std::any ExtendedCpp::Reflection::StaticFieldInfo::GetField() const noexcept
 {
     return _fieldGetter(_fieldHelper);
 }
 
-std::type_index Reflection::StaticFieldInfo::TypeIndex() const noexcept
+std::type_index ExtendedCpp::Reflection::StaticFieldInfo::TypeIndex() const noexcept
 {
     return _typeIndex;
 }
 
-Reflection::MemberType Reflection::StaticFieldInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticFieldInfo::MemberType() const noexcept
 {
     return MemberType::StaticField;
 }

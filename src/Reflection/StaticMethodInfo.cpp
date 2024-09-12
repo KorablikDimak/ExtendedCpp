@@ -1,11 +1,11 @@
-#include <Reflection/StaticMethodInfo.h>
+#include <ExtendedCpp/Reflection/StaticMethodInfo.h>
 
-Reflection::MemberType Reflection::StaticMethodInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticMethodInfo::MemberType() const noexcept
 {
     return MemberType::StaticMethod;
 }
 
-std::vector<std::type_index> Reflection::StaticMethodInfo::Parameters() const noexcept
+std::vector<std::type_index> ExtendedCpp::Reflection::StaticMethodInfo::Parameters() const noexcept
 {
     return _parameters;
 }

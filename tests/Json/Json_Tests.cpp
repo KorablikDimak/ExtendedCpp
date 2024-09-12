@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Json/Json.h>
+#include <ExtendedCpp/Json.h>
 
 #include "ObjectObject.h"
 #include "ObjectsObject.h"
@@ -10,7 +10,7 @@ TEST(JsonTests, VALUE_FROM_JSON_Test)
     // Average
     std::string jsonString =
         R"({"intField": 1, "boolField": true, "stringField": "stringValue"})";
-    const Json::Json json = Json::Json::parse(jsonString);
+    const ExtendedCpp::Json json = ExtendedCpp::Json::parse(jsonString);
 
     // Act
     const auto [intField, boolField, stringField] = json.get<ValueObject>();
@@ -26,7 +26,7 @@ TEST(JsonTests, VALUES_FROM_JSON_Test)
     // Average
     const std::string jsonString =
         R"({"intsField": [1, 2, 3], "boolsField": [true, false, true], "stringsField": ["stringValue1", "stringValue2", "stringValue3"]})";
-    const Json::Json json = Json::Json::parse(jsonString);
+    const ExtendedCpp::Json json = ExtendedCpp::Json::parse(jsonString);
 
     // Act
     const auto [intsField, boolsField, stringsField] = json.get<ValuesObject>();
@@ -51,7 +51,7 @@ TEST(JsonTests, OBJECT_FROM_JSON_Test)
     const std::string jsonString =
         R"({"valueObject": {"intField": 1, "boolField": true, "stringField": "stringValue"},
 "valuesObject": {"intsField": [1, 2, 3], "boolsField": [true, false, true], "stringsField": ["stringValue1", "stringValue2", "stringValue3"]}})";
-    const Json::Json json = Json::Json::parse(jsonString);
+    const ExtendedCpp::Json json = ExtendedCpp::Json::parse(jsonString);
 
     // Act
     const auto [valueObject, valuesObject] = json.get<ObjectObject>();
@@ -81,7 +81,7 @@ TEST(JsonTests, OBJECTS_FROM_JSON_Test)
         R"({"valueObjects": [{"intField": 1, "boolField": true, "stringField": "stringValue1"},
 {"intField": 2, "boolField": false, "stringField": "stringValue2"},
 {"intField": 3, "boolField": true, "stringField": "stringValue3"}]})";
-    const Json::Json json = Json::Json::parse(jsonString);
+    const ExtendedCpp::Json json = ExtendedCpp::Json::parse(jsonString);
 
     // Act
     const auto [valueObjects] = json.get<ObjectsObject>();
@@ -109,7 +109,7 @@ TEST(JsonTests, VALUE_TO_JSON_Test)
     valueObject.stringField = "stringValue1";
 
     // Act
-    const Json::Json json = std::make_shared<ValueObject>(valueObject);
+    const ExtendedCpp::Json json = std::make_shared<ValueObject>(valueObject);
     const auto [intField, boolField, stringField] = json.get<ValueObject>();
 
     // Assert
@@ -129,7 +129,7 @@ TEST(JsonTests, VALUES_TO_JSON_Test)
     valuesObject.stringsField = { "stringValue1", "stringValue2", "stringValue3" };
 
     // Act
-    const Json::Json json = std::make_shared<ValuesObject>(valuesObject);
+    const ExtendedCpp::Json json = std::make_shared<ValuesObject>(valuesObject);
     const auto [intsField, boolsField, stringsField] = json.get<ValuesObject>();
 
     // Assert
@@ -166,7 +166,7 @@ TEST(JsonTests, OBJECT_TO_JSON_Test)
     objectObject.valuesObject = std::make_shared<ValuesObject>(valuesObject);
 
     // Act
-    const Json::Json json = std::make_shared<ObjectObject>(objectObject);
+    const ExtendedCpp::Json json = std::make_shared<ObjectObject>(objectObject);
     const auto assertObject = json.get<ObjectObject>();
 
     // Assert
@@ -213,7 +213,7 @@ TEST(JsonTests, OBJECTS_TO_JSON_Test)
         std::make_shared<ValueObject>(valueObject3) };
 
     // Act
-    const Json::Json json = std::make_shared<ObjectsObject>(objectsObject);
+    const ExtendedCpp::Json json = std::make_shared<ObjectsObject>(objectsObject);
     const auto [valueObjects] = json.get<ObjectsObject>();
 
     // Assert

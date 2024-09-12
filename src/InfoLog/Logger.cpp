@@ -1,15 +1,15 @@
-#include <InfoLog/Logger.h>
-#include <InfoLog/FileSender.h>
-#include <Reflection/Reflection.h>
+#include <ExtendedCpp/InfoLog/Logger.h>
+#include <ExtendedCpp/InfoLog/FileSender.h>
+#include <ExtendedCpp/Reflection.h>
 
-InfoLog::Logger::Logger(const Configuration::Ptr& configuration) noexcept
+ExtendedCpp::InfoLog::Logger::Logger(const Configuration::Ptr& configuration) noexcept
 {
     const auto configs = configuration->GetConfigs();
     for (const std::map<std::string, std::string>& config : configs)
         AddSender(config);
 }
 
-void InfoLog::Logger::AddSender(const std::map<std::string, std::string>& config) noexcept
+void ExtendedCpp::InfoLog::Logger::AddSender(const std::map<std::string, std::string>& config) noexcept
 {
     std::string logSenderName;
 
@@ -43,7 +43,7 @@ void InfoLog::Logger::AddSender(const std::map<std::string, std::string>& config
     }
 }
 
-void InfoLog::Logger::AddSender(std::map<std::string, std::string>&& config) noexcept
+void ExtendedCpp::InfoLog::Logger::AddSender(std::map<std::string, std::string>&& config) noexcept
 {
     std::string logSenderName;
 
@@ -77,12 +77,12 @@ void InfoLog::Logger::AddSender(std::map<std::string, std::string>&& config) noe
     }
 }
 
-void InfoLog::Logger::AddSender(const ISender::Ptr& sender) noexcept
+void ExtendedCpp::InfoLog::Logger::AddSender(const ISender::Ptr& sender) noexcept
 {
     _senders.push_back(sender);
 }
 
-void InfoLog::Logger::RemoveSender(const ISender::Ptr& sender) noexcept
+void ExtendedCpp::InfoLog::Logger::RemoveSender(const ISender::Ptr& sender) noexcept
 {
     for (int i = 0; i < _senders.size(); ++i)
         if (sender.get() == _senders[i].get()) _senders.erase(_senders.begin() + i);

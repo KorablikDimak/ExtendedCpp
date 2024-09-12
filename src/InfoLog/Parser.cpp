@@ -1,10 +1,10 @@
 #include <filesystem>
 #include <iostream>
 
-#include <InfoLog/Parser.h>
-#include <InfoLog/Converter.h>
+#include <ExtendedCpp/InfoLog/Parser.h>
+#include <ExtendedCpp/InfoLog/Converter.h>
 
-void InfoLog::Parser::ParseLayout(std::string& layout, const std::string& message, const LogLevel logLevel, const std::string& tag) noexcept
+void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::string& message, const LogLevel logLevel, const std::string& tag) noexcept
 {
     const auto currentTime = std::chrono::system_clock::now();
     const time_t time = std::chrono::system_clock::to_time_t(currentTime);

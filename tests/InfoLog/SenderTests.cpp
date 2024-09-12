@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <InfoLog/LoggerFactory.h>
+#include <ExtendedCpp/InfoLog/LoggerFactory.h>
 
 TEST(FileSenderTests, CreateLoggerTest)
 {
@@ -8,7 +8,7 @@ TEST(FileSenderTests, CreateLoggerTest)
     const std::string xmlFilePath = "LogConfig.xml";
 
     // Act
-    const auto factory = InfoLog::LoggerFactory(xmlFilePath);
+    const auto factory = ExtendedCpp::InfoLog::LoggerFactory(xmlFilePath);
     const auto logger = factory.CreateLogger();
 
     // Assert
@@ -21,7 +21,7 @@ TEST(FileSenderTests, FileLogSendTest)
     std::string xmlFilePath = "LogConfig.xml";
 
     // Act
-    auto factory = InfoLog::LoggerFactory(xmlFilePath);
+    auto factory = ExtendedCpp::InfoLog::LoggerFactory(xmlFilePath);
     auto logger = factory.CreateLogger();
 
     // Assert

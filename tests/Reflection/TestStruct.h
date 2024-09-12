@@ -1,7 +1,7 @@
 #ifndef TestStruct_H
 #define TestStruct_H
 
-#include <Reflection/Reflection.h>
+#include <ExtendedCpp/Reflection.h>
 
 struct TestStruct
 {
@@ -17,6 +17,7 @@ struct TestStruct
 private:
     [[nodiscard]]
     int TestMethodInt() const noexcept;
+    inline int TestMethodInt() noexcept { return --IntField; }
     [[nodiscard]]
     double TestMethodDouble(double a, double b) const noexcept;
     [[nodiscard]]

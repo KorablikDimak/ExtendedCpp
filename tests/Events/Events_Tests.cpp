@@ -1,22 +1,22 @@
 #include <gtest/gtest.h>
 
-#include <Events/Event.h>
-#include <Events/FunctionHandler.h>
-#include <Events/MethodHandler.h>
-#include <Events/StaticMethodHandler.h>
-#include <Events/ConstMethodHandler.h>
+#include <ExtendedCpp/Events/Event.h>
+#include <ExtendedCpp/Events/FunctionHandler.h>
+#include <ExtendedCpp/Events/MethodHandler.h>
+#include <ExtendedCpp/Events/StaticMethodHandler.h>
+#include <ExtendedCpp/Events/ConstMethodHandler.h>
 
 #include "Events_Tests.h"
 
 TEST(EventsTests, FunectionHandlerTest)
 {
     // Average
-    auto event = Events::Event<const EventType::Ptr&>();
+    auto event = ExtendedCpp::Events::Event<const EventType::Ptr&>();
     const std::function functor1 = [](const EventType::Ptr&){};
     const std::function functor2 = [](const EventType::Ptr&){};
 
     // Act
-    const auto handler1 = Events::CreateFunctionHandler(functor1);
+    const auto handler1 = ExtendedCpp::Events::CreateFunctionHandler(functor1);
     const auto handler2 = FUNCTION_HANDLER(functor2);
 
     // Assert
@@ -36,11 +36,11 @@ TEST(EventsTests, FunectionHandlerTest)
 TEST(EventsTests, MethodHandlerTest)
 {
     // Average
-    auto event = Events::Event<const EventType::Ptr&>();
+    auto event = ExtendedCpp::Events::Event<const EventType::Ptr&>();
     HandlerClass handlerClass;
 
     // Act
-    const auto handler1 = Events::CreateMethodHandler(&handlerClass, &HandlerClass::Handler);
+    const auto handler1 = ExtendedCpp::Events::CreateMethodHandler(&handlerClass, &HandlerClass::Handler);
     const auto handler2 = METHOD_HANDLER(&handlerClass, &HandlerClass::Handler);
     const auto handler3 = CONST_METHOD_HANDLER(&handlerClass, &HandlerClass::ConstHandler);
 
@@ -69,10 +69,10 @@ TEST(EventsTests, MethodHandlerTest)
 TEST(EventsTests, StaticMethodHandlerTest)
 {
     // Average
-    auto event = Events::Event<const EventType::Ptr&>();
+    auto event = ExtendedCpp::Events::Event<const EventType::Ptr&>();
 
     // Act
-    const auto handler1 = Events::CreateStaticMethodHandler(&HandlerClass::StaticHandler);
+    const auto handler1 = ExtendedCpp::Events::CreateStaticMethodHandler(&HandlerClass::StaticHandler);
     const auto handler2 = STATIC_METHOD_HANDLER(&HandlerClass::StaticHandler);
 
     // Assert

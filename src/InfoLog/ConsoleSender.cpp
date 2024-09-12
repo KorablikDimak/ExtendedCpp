@@ -1,12 +1,12 @@
 #include <iostream>
-#include <InfoLog/ConsoleSender.h>
+#include <ExtendedCpp/InfoLog/ConsoleSender.h>
 
-InfoLog::ConsoleSender::ConsoleSender(const std::map<std::string, std::string>& config) noexcept
+ExtendedCpp::InfoLog::ConsoleSender::ConsoleSender(const std::map<std::string, std::string>& config) noexcept
 {
     Config = config;
 }
 
-void InfoLog::ConsoleSender::Send(const std::string& message, const LogLevel logLevel, const std::string& tag) const noexcept
+void ExtendedCpp::InfoLog::ConsoleSender::Send(const std::string& message, const ExtendedCpp::InfoLog::LogLevel logLevel, const std::string& tag) const noexcept
 {
     if (!ValidateLogLevel(logLevel)) return;
     if (!ValidateTag(tag)) return;

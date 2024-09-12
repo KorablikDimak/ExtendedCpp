@@ -1,11 +1,11 @@
-#include <Reflection/FieldInfo.h>
+#include <ExtendedCpp/Reflection/FieldInfo.h>
 
-std::type_index Reflection::FieldInfo::TypeIndex() const noexcept
+std::type_index ExtendedCpp::Reflection::FieldInfo::TypeIndex() const noexcept
 {
     return _typeIndex;
 }
 
-Reflection::MemberType Reflection::FieldInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::FieldInfo::MemberType() const noexcept
 {
     return MemberType::Field;
 }

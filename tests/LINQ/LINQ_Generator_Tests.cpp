@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <LINQ/LINQ.h>
+#include <ExtendedCpp/LINQ.h>
 
 #include "LINQ_Tests.h"
 
@@ -15,7 +15,7 @@ TEST(LINQ_Generator_Tests, YieldForeachTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    auto future = LINQ::YieldForeach(people);
+    auto future = ExtendedCpp::LINQ::YieldForeach(people);
 
     // Assert
     while (future)
@@ -33,7 +33,7 @@ TEST(LINQ_Generator_Tests, SelectTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    const std::vector names = LINQ::Generator(people)
+    const std::vector names = ExtendedCpp::LINQ::Generator(people)
             .Select([](const Person& person){ return person.Name; })
             .ToVector();
 
@@ -63,7 +63,7 @@ TEST(LINQ_Generator_Tests, SelectMany1Test)
     std::vector companies { company1, company2 };
 
     // Act
-    std::vector employees = LINQ::Generator(companies)
+    std::vector employees = ExtendedCpp::LINQ::Generator(companies)
             .SelectMany([](const Company& company){ return company.People; })
             .ToVector();
 
@@ -95,7 +95,7 @@ TEST(LINQ_Generator_Tests, SelectMany2Test)
     std::vector companies { company1, company2 };
 
     // Act
-    std::vector employees = LINQ::Generator(companies)
+    std::vector employees = ExtendedCpp::LINQ::Generator(companies)
             .SelectMany([](const Company& company){ return company.People; },
                 [](const Company& company, const Person& person){ return Employer(person.Name, company.Name); })
             .ToVector();
@@ -120,7 +120,7 @@ TEST(LINQ_Generator_Tests, WhereTest)
     const std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
 
     // Act
-    const std::vector selectedNames = LINQ::Generator(names)
+    const std::vector selectedNames = ExtendedCpp::LINQ::Generator(names)
             .Where([](const std::string& name){ return name.size() == 3; })
             .ToVector();
 
@@ -134,7 +134,7 @@ TEST(LINQ_Generator_Tests, RemoveWhereTest)
     const std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
 
     // Act
-    const std::vector selectedNames = LINQ::Generator(names)
+    const std::vector selectedNames = ExtendedCpp::LINQ::Generator(names)
             .RemoveWhere([](const std::string& name){ return name.size() == 3; })
             .ToVector();
 
@@ -148,8 +148,8 @@ TEST(LINQ_Generator_Tests, OrderByTest)
     const std::vector numbers { 1, 5, 9, 2, 0, 145, 2 };
 
     // Act
-    const std::vector sortedNumbers = LINQ::Generator(numbers)
-            .Order(OrderType::DESC)
+    const std::vector sortedNumbers = ExtendedCpp::LINQ::Generator(numbers)
+            .Order(ExtendedCpp::LINQ::OrderType::DESC)
             .ToVector();
 
     // Assert
@@ -173,8 +173,8 @@ TEST(LINQ_Generator_Tests, OrderByWithSelectorTest)
     std::vector people { person1, person2, person3, person4 };
 
     // Act
-    std::vector sortedPeople = LINQ::Generator(people)
-            .OrderBy([](const Person& person){ return person.Age; }, OrderType::ASC)
+    std::vector sortedPeople = ExtendedCpp::LINQ::Generator(people)
+            .OrderBy([](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::ASC)
             .ToVector();
 
     // Assert
@@ -184,8 +184,8 @@ TEST(LINQ_Generator_Tests, OrderByWithSelectorTest)
     ASSERT_EQ(29, sortedPeople[3].Age);
 
     // Act
-    std::vector sortedAges = LINQ::Generator(people)
-            .OrderBy([](const Person& person){ return person.Age; }, OrderType::ASC)
+    std::vector sortedAges = ExtendedCpp::LINQ::Generator(people)
+            .OrderBy([](const Person& person){ return person.Age; }, ExtendedCpp::LINQ::OrderType::ASC)
             .Select([](const Person& person){ return person.Age; })
             .ToVector();
 
@@ -203,7 +203,7 @@ TEST(LINQ_Generator_Tests, ExceptTest1)
     const std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Except(numbers2)
             .ToVector();
 
@@ -218,7 +218,7 @@ TEST(LINQ_Generator_Tests, ExceptTest2)
     std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Except(std::move(numbers2))
             .ToVector();
 
@@ -233,7 +233,7 @@ TEST(LINQ_Generator_Tests, IntersectTest1)
     const std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Intersect(numbers2)
             .ToVector();
 
@@ -248,7 +248,7 @@ TEST(LINQ_Generator_Tests, IntersectTest2)
     std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Intersect(std::move(numbers2))
             .ToVector();
 
@@ -262,7 +262,7 @@ TEST(LINQ_Generator_Tests, DistinctTest)
     const std::vector numbers {1, 3, 6, 1, 6, 4};
 
     // Act
-    const std::vector result = LINQ::Generator(numbers)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers)
             .Distinct()
             .ToVector();
 
@@ -277,7 +277,7 @@ TEST(LINQ_Generator_Tests, UnionTest1)
     const std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Union(numbers2)
             .ToVector();
 
@@ -292,7 +292,7 @@ TEST(LINQ_Generator_Tests, UnionTest2)
     std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Union(std::move(numbers2))
             .ToVector();
 
@@ -306,7 +306,7 @@ TEST(LINQ_Generator_Tests, AggregateTest)
     const std::vector numbers { 1, 2, 3, 4, 5 };
 
     // Act
-    const int result = LINQ::Generator(numbers)
+    const int result = ExtendedCpp::LINQ::Generator(numbers)
             .Aggregate<int>([](const int x, const int y){ return x * y; });
 
     // Assert
@@ -319,7 +319,7 @@ TEST(LINQ_Generator_Tests, CountPredicateTest)
     const std::vector numbers { 1, 1, 2, 2, 3 };
 
     // Act
-    const std::size_t result = LINQ::Generator(numbers)
+    const std::size_t result = ExtendedCpp::LINQ::Generator(numbers)
             .Count([](const int n){ return n == 2; });
 
     // Assert
@@ -332,7 +332,7 @@ TEST(LINQ_Generator_Tests, SumTest)
     const std::vector numbers { 1, 1, 2, 2, 3 };
 
     // Act
-    const int result = LINQ::Generator(numbers)
+    const int result = ExtendedCpp::LINQ::Generator(numbers)
             .Sum();
 
     // Assert
@@ -350,7 +350,7 @@ TEST(LINQ_Generator_Tests, SumWithSelectorTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    const int result = LINQ::Generator(people)
+    const int result = ExtendedCpp::LINQ::Generator(people)
             .Sum([](const Person& person){ return person.Age; });
 
     // Assert
@@ -363,7 +363,7 @@ TEST(LINQ_Generator_Tests, MinTest)
     const std::vector numbers { 1, 1, 2, 2, 3 };
 
     // Act
-    const int result = LINQ::Generator(numbers)
+    const int result = ExtendedCpp::LINQ::Generator(numbers)
             .Min();
 
     // Assert
@@ -381,7 +381,7 @@ TEST(LINQ_Generator_Tests, MinWithSelectorTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    const int result = LINQ::Generator(people)
+    const int result = ExtendedCpp::LINQ::Generator(people)
             .Min([](const Person& person){ return person.Age; });
 
     // Assert
@@ -394,7 +394,7 @@ TEST(LINQ_Generator_Tests, MaxTest)
     const std::vector numbers { 1, 1, 2, 2, 3 };
 
     // Act
-    const int result = LINQ::Generator(numbers)
+    const int result = ExtendedCpp::LINQ::Generator(numbers)
             .Max();
 
     // Assert
@@ -412,7 +412,7 @@ TEST(LINQ_Generator_Tests, MaxWithSelectorTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    const int result = LINQ::Generator(people)
+    const int result = ExtendedCpp::LINQ::Generator(people)
             .Max([](const Person& person){ return person.Age; });
 
     // Assert
@@ -425,7 +425,7 @@ TEST(LINQ_Generator_Tests, AverageTest)
     const std::vector numbers { 1, 1, 3, 3 };
 
     // Act
-    const int result = LINQ::Generator(numbers)
+    const int result = ExtendedCpp::LINQ::Generator(numbers)
             .Average();
 
     // Assert
@@ -443,7 +443,7 @@ TEST(LINQ_Generator_Tests, AverageWithSelectorTest)
     const std::vector people { person1, person2, person3, person4 };
 
     // Act
-    const int result = LINQ::Generator(people)
+    const int result = ExtendedCpp::LINQ::Generator(people)
             .Average([](const Person& person){ return person.Age; });
 
     // Assert
@@ -456,7 +456,7 @@ TEST(LINQ_Generator_Tests, SkipTest)
     const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers)
             .Skip(3)
             .ToVector();
 
@@ -473,7 +473,7 @@ TEST(LINQ_Generator_Tests, SkipWhileTest)
     const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers)
             .SkipWhile([](const int n){ return n < 4; })
             .ToVector();
 
@@ -490,7 +490,7 @@ TEST(LINQ_Generator_Tests, TakeTest)
     const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers)
             .Take(3)
             .ToVector();
 
@@ -507,7 +507,7 @@ TEST(LINQ_Generator_Tests, TakeWhileTest)
     const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers)
             .TakeWhile([](const int n){ return n < 4; })
             .ToVector();
 
@@ -530,7 +530,7 @@ TEST(LINQ_Generator_Tests, GroupByTest)
     std::vector people { person1, person2, person3, person4, person5 };
 
     // Act
-    std::map companies = LINQ::Generator(people)
+    std::map companies = ExtendedCpp::LINQ::Generator(people)
             .GroupBy([](const Employer& employer){ return employer.CompanyName; })
             .ToMap();
 
@@ -557,7 +557,7 @@ TEST(LINQ_Generator_Tests, JoinTest1)
     std::vector companies { company1, company2 };
 
     // Act
-    const std::vector employees = LINQ::Generator(people)
+    const std::vector employees = ExtendedCpp::LINQ::Generator(people)
             .Join(companies,
                 [](const Employer& employer){ return employer.CompanyName; },
                 [](const ItCompany& company){ return company.Name; },
@@ -590,7 +590,7 @@ TEST(LINQ_Generator_Tests, JoinTest2)
     std::vector companies { company1, company2 };
 
     // Act
-    const std::vector employees = LINQ::Generator(people)
+    const std::vector employees = ExtendedCpp::LINQ::Generator(people)
             .Join(std::move(companies),
                   [](const Employer& employer){ return employer.CompanyName; },
                   [](const ItCompany& company){ return company.Name; },
@@ -623,7 +623,7 @@ TEST(LINQ_Generator_Tests, GroupJoinTest1)
     std::vector companies{company1, company2};
 
     // Act
-    const std::vector result = LINQ::Generator(people)
+    const std::vector result = ExtendedCpp::LINQ::Generator(people)
             .GroupJoin(companies,
                 [](const Employer& employer) { return employer.CompanyName; },
                 [](const ItCompany& company) { return company.Name; },
@@ -652,7 +652,7 @@ TEST(LINQ_Generator_Tests, GroupJoinTest2)
     std::vector companies{company1, company2};
 
     // Act
-    const std::vector result = LINQ::Generator(people)
+    const std::vector result = ExtendedCpp::LINQ::Generator(people)
             .GroupJoin(std::move(companies),
                        [](const Employer& employer) { return employer.CompanyName; },
                        [](const ItCompany& company) { return company.Name; },
@@ -671,7 +671,7 @@ TEST(LINQ_Generator_Tests, ZipTest1)
     const std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
         .Zip(numbers2)
         .ToVector();
 
@@ -690,7 +690,7 @@ TEST(LINQ_Generator_Tests, ZipTest2)
     std::vector numbers2 { 3, 2, 1, 4, 7 };
 
     // Act
-    const std::vector result = LINQ::Generator(numbers1)
+    const std::vector result = ExtendedCpp::LINQ::Generator(numbers1)
             .Zip(std::move(numbers2))
             .ToVector();
 
@@ -708,14 +708,14 @@ TEST(LINQ_Generator_Tests, AllTest)
     const std::vector numbers { 4, 3, 6, 1, 5 };
 
     // Act
-    bool result = LINQ::Generator(numbers)
+    bool result = ExtendedCpp::LINQ::Generator(numbers)
             .All([](const int i){ return i < 7; });
 
     // Assert
     ASSERT_TRUE(result);
 
     // Act
-    result = LINQ::Generator(numbers)
+    result = ExtendedCpp::LINQ::Generator(numbers)
             .All([](const int i){ return i < 3; });
 
     // Assert
@@ -728,14 +728,14 @@ TEST(LINQ_Generator_Tests, AnyTest)
     const std::vector numbers { 4, 3, 6, 1, 5 };
 
     // Act
-    bool result = LINQ::Generator(numbers)
+    bool result = ExtendedCpp::LINQ::Generator(numbers)
             .Any([](const int i){ return i < 2; });
 
     // Assert
     ASSERT_TRUE(result);
 
     // Act
-    result = LINQ::Generator(numbers)
+    result = ExtendedCpp::LINQ::Generator(numbers)
             .Any([](const int i){ return i > 7; });
 
     // Assert
@@ -801,18 +801,18 @@ TEST(LINQ_Generator_Tests, FromContainerTest)
     numbersUnorderedMap.insert(std::make_pair(3, 3));
 
     // Act
-    auto linq1 = LINQ::Generator(numbersVector);
-    auto linq2 = LINQ::Generator(numbersArray);
-    auto linq3 = LINQ::Generator(numbersList);
-    auto linq4 = LINQ::Generator(numbersForwardList);
-    auto linq5 = LINQ::Generator(numbersStack);
-    auto linq6 = LINQ::Generator(numbersQueue);
-    auto linq7 = LINQ::Generator(numbersDequeue);
-    auto linq8 = LINQ::Generator(numbersPriorityQueue);
-    auto linq9 = LINQ::Generator(numbersSet);
-    auto linq10 = LINQ::Generator(numbersUnorderedSet);
-    auto linq11 = LINQ::Generator(numbersMap);
-    auto linq12 = LINQ::Generator(numbersUnorderedMap);
+    auto linq1 = ExtendedCpp::LINQ::Generator(numbersVector);
+    auto linq2 = ExtendedCpp::LINQ::Generator(numbersArray);
+    auto linq3 = ExtendedCpp::LINQ::Generator(numbersList);
+    auto linq4 = ExtendedCpp::LINQ::Generator(numbersForwardList);
+    auto linq5 = ExtendedCpp::LINQ::Generator(numbersStack);
+    auto linq6 = ExtendedCpp::LINQ::Generator(numbersQueue);
+    auto linq7 = ExtendedCpp::LINQ::Generator(numbersDequeue);
+    auto linq8 = ExtendedCpp::LINQ::Generator(numbersPriorityQueue);
+    auto linq9 = ExtendedCpp::LINQ::Generator(numbersSet);
+    auto linq10 = ExtendedCpp::LINQ::Generator(numbersUnorderedSet);
+    auto linq11 = ExtendedCpp::LINQ::Generator(numbersMap);
+    auto linq12 = ExtendedCpp::LINQ::Generator(numbersUnorderedMap);
 
     std::vector result1 = linq1.ToVector();
     std::vector result2 = linq2.ToVector();
@@ -851,18 +851,18 @@ TEST(LINQ_Generator_Tests, ToContainerTest)
     numberPairs.emplace_back(0, 0);
     numberPairs.emplace_back(3, 3);
 
-    auto linq1 = LINQ::Generator(numbers);
-    auto linq2 = LINQ::Generator(numbers);
-    auto linq3 = LINQ::Generator(numbers);
-    auto linq4 = LINQ::Generator(numbers);
-    auto linq5 = LINQ::Generator(numbers);
-    auto linq6 = LINQ::Generator(numbers);
-    auto linq7 = LINQ::Generator(numbers);
-    auto linq8 = LINQ::Generator(numbers);
-    auto linq9 = LINQ::Generator(numbers);
-    auto linq10 = LINQ::Generator(numbers);
-    auto linqPairs1 = LINQ::Generator(numberPairs);
-    auto linqPairs2 = LINQ::Generator(numberPairs);
+    auto linq1 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq2 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq3 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq4 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq5 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq6 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq7 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq8 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq9 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq10 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linqPairs1 = ExtendedCpp::LINQ::Generator(numberPairs);
+    auto linqPairs2 = ExtendedCpp::LINQ::Generator(numberPairs);
 
     // Act
     std::vector vectorResult = linq1.ToVector();
@@ -905,7 +905,7 @@ TEST(LINQ_Generator_Tests, ReverseTest)
     const std::vector numbers { 8, 7, 1, 9, 50, 0, 3 };
 
     // Act
-    const std::vector reverseNumbers = LINQ::Generator(numbers)
+    const std::vector reverseNumbers = ExtendedCpp::LINQ::Generator(numbers)
             .Reverse()
             .ToVector();
 
@@ -920,9 +920,9 @@ TEST(LINQ_Generator_Tests, ForeachTest)
     const std::vector numbers { 8, 8, 8, 8, 8 };
 
     // Act
-    auto linq1 = LINQ::Generator(numbers);
-    auto linq2 = LINQ::Generator(numbers);
-    auto linq3 = LINQ::Generator(numbers);
+    auto linq1 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq2 = ExtendedCpp::LINQ::Generator(numbers);
+    auto linq3 = ExtendedCpp::LINQ::Generator(numbers);
 
     // Assert
     for (const auto& element : linq1)

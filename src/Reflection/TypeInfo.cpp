@@ -1,33 +1,32 @@
-#include <Reflection/TypeInfo.h>
+#include <ExtendedCpp/Reflection/TypeInfo.h>
+#include <ExtendedCpp/Reflection/Assembly.h>
 
-#include <Reflection/Assembly.h>
-
-Reflection::TypeInfo::TypeInfo(const std::string& name, std::type_index typeIndex,
+ExtendedCpp::Reflection::TypeInfo::TypeInfo(const std::string& name, std::type_index typeIndex,
                                std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
     _name(name), _typeIndex(typeIndex), _members(members)
 {
     Assembly::AddType(*this);
 }
 
-Reflection::TypeInfo::TypeInfo(std::string&& name, std::type_index typeIndex,
+ExtendedCpp::Reflection::TypeInfo::TypeInfo(std::string&& name, std::type_index typeIndex,
                                std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
     _name(std::move(name)), _typeIndex(typeIndex), _members(members)
 {
     Assembly::AddType(*this);
 }
 
-std::string Reflection::TypeInfo::Name() const noexcept
+std::string ExtendedCpp::Reflection::TypeInfo::Name() const noexcept
 {
     return _name;
 }
 
-std::type_index Reflection::TypeInfo::TypeIndex() const noexcept
+std::type_index ExtendedCpp::Reflection::TypeInfo::TypeIndex() const noexcept
 {
     return _typeIndex;
 }
 
-std::vector<std::shared_ptr<Reflection::MemberInfo>>
-Reflection::TypeInfo::GetMembers() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::MemberInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetMembers() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::MemberInfo>> result;
     result.reserve(_members.size());
@@ -38,8 +37,8 @@ Reflection::TypeInfo::GetMembers() const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::FieldInfo>>
-Reflection::TypeInfo::GetFields() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::FieldInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetFields() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::FieldInfo>> result;
 
@@ -50,8 +49,8 @@ Reflection::TypeInfo::GetFields() const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::StaticFieldInfo>>
-Reflection::TypeInfo::GetStaticFields() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::StaticFieldInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetStaticFields() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::StaticFieldInfo>> result;
 
@@ -62,8 +61,8 @@ Reflection::TypeInfo::GetStaticFields() const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::MethodInfo>>
-Reflection::TypeInfo::GetMethods() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::MethodInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetMethods() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::MethodInfo>> result;
 
@@ -74,7 +73,8 @@ Reflection::TypeInfo::GetMethods() const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> Reflection::TypeInfo::GetStaticMethods() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::StaticMethodInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetStaticMethods() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> result;
 
@@ -85,8 +85,8 @@ std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> Reflection::TypeInfo:
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::ConstructorInfo>>
-Reflection::TypeInfo::GetConstructors() const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::ConstructorInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetConstructors() const noexcept
 {
     std::vector<std::shared_ptr<Reflection::ConstructorInfo>> result;
 
@@ -97,8 +97,8 @@ Reflection::TypeInfo::GetConstructors() const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::MemberInfo>>
-Reflection::TypeInfo::GetMembers(const std::string_view& name) const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::MemberInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetMembers(const std::string_view& name) const noexcept
 {
     std::vector<std::shared_ptr<Reflection::MemberInfo>> result;
     result.reserve(_members.size());
@@ -110,8 +110,8 @@ Reflection::TypeInfo::GetMembers(const std::string_view& name) const noexcept
     return result;
 }
 
-std::shared_ptr<Reflection::FieldInfo>
-Reflection::TypeInfo::GetField(const std::string_view& name) const noexcept
+std::shared_ptr<ExtendedCpp::Reflection::FieldInfo>
+ExtendedCpp::Reflection::TypeInfo::GetField(const std::string_view& name) const noexcept
 {
     for (const auto& member : _members)
         if (member->MemberType() == MemberType::Field && member->Name() == name)
@@ -120,8 +120,8 @@ Reflection::TypeInfo::GetField(const std::string_view& name) const noexcept
     return {nullptr};
 }
 
-std::shared_ptr<Reflection::StaticFieldInfo>
-Reflection::TypeInfo::GetStaticField(const std::string_view& name) const noexcept
+std::shared_ptr<ExtendedCpp::Reflection::StaticFieldInfo>
+ExtendedCpp::Reflection::TypeInfo::GetStaticField(const std::string_view& name) const noexcept
 {
     for (const auto& member : _members)
         if (member->MemberType() == MemberType::StaticField && member->Name() == name)
@@ -130,8 +130,8 @@ Reflection::TypeInfo::GetStaticField(const std::string_view& name) const noexcep
     return {nullptr};
 }
 
-std::vector<std::shared_ptr<Reflection::MethodInfo>>
-Reflection::TypeInfo::GetMethods(const std::string_view& name) const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::MethodInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetMethods(const std::string_view& name) const noexcept
 {
     std::vector<std::shared_ptr<Reflection::MethodInfo>> result;
 
@@ -142,8 +142,8 @@ Reflection::TypeInfo::GetMethods(const std::string_view& name) const noexcept
     return result;
 }
 
-std::vector<std::shared_ptr<Reflection::StaticMethodInfo>>
-Reflection::TypeInfo::GetStaticMethods(const std::string_view &name) const noexcept
+std::vector<std::shared_ptr<ExtendedCpp::Reflection::StaticMethodInfo>>
+ExtendedCpp::Reflection::TypeInfo::GetStaticMethods(const std::string_view &name) const noexcept
 {
     std::vector<std::shared_ptr<Reflection::StaticMethodInfo>> result;
 

@@ -36,15 +36,30 @@ TEST(ReflectionTests, MetaMethodTest)
     auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
 
     // Assert
-    ASSERT_EQ(result1, 7);
-    ASSERT_EQ(result2, 7);
+    ASSERT_EQ(result1, 6);
+    ASSERT_EQ(result2, 5);
+    ASSERT_TRUE(TestStruct::MetaInfo.GetMethods("TestMethodDouble")[0]->Parameters()[0] == typeid(double));
+}
+
+TEST(ReflectionTests, ConstMetaMethodTest)
+{
+    // Average
+    const TestStruct testStruct;
+
+    // Act
+    auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
+    auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
+
+    // Assert
+    ASSERT_EQ(result1, 0);
+    ASSERT_EQ(result2, 0);
     ASSERT_TRUE(TestStruct::MetaInfo.GetMethods("TestMethodDouble")[0]->Parameters()[0] == typeid(double));
 }
 
 TEST(ReflectionTests, MetaStaticMethodTest)
 {
     // Average
-    auto typeInfo = Reflection::GetType<TestStruct>();
+    auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
 
     // Act
     auto staticMethodInfo = typeInfo.GetStaticMethods();
@@ -78,9 +93,9 @@ TEST(ReflectionTests, MetaConstructorTest)
 TEST(ReflectionTests, GetTypeTest)
 {
     // Average
-    auto typeInfo1 = Reflection::GetType<TestStruct>();
+    auto typeInfo1 = ExtendedCpp::Reflection::GetType<TestStruct>();
     TestStruct testStruct;
-    auto typeInfo2 = Reflection::GetType(typeid(testStruct));
+    auto typeInfo2 = ExtendedCpp::Reflection::GetType(typeid(testStruct));
 
     // Act
     auto staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
@@ -102,7 +117,7 @@ TEST(ReflectionTests, GetTypeTest)
 TEST(ReflectionTests, ConstructorFromAnyTest)
 {
     // Average
-    auto typeInfo = Reflection::GetType<TestStruct>();
+    auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
     auto constructors = typeInfo.GetConstructors();
 
     // Act

@@ -1,8 +1,8 @@
-#include <InfoLog/ISender.h>
+#include <ExtendedCpp/InfoLog/ISender.h>
 
-#include "InfoLog/Converter.h"
+#include <ExtendedCpp/InfoLog/Converter.h>
 
-bool InfoLog::ISender::ValidateLogLevel(const LogLevel logLevel) const noexcept
+bool ExtendedCpp::InfoLog::ISender::ValidateLogLevel(const LogLevel logLevel) const noexcept
 {
     if (!Config.contains("minlevel")) return true;
 
@@ -18,7 +18,7 @@ bool InfoLog::ISender::ValidateLogLevel(const LogLevel logLevel) const noexcept
     return logLevel >= minLogLevel;
 }
 
-bool InfoLog::ISender::ValidateTag(const std::string& tag) const noexcept
+bool ExtendedCpp::InfoLog::ISender::ValidateTag(const std::string& tag) const noexcept
 {
     if (!Config.contains("tag")) return true;
     return Config.at("tag") == tag;

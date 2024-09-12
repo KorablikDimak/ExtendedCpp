@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Common/Random.h>
+#include <ExtendedCpp/Random.h>
 
 TEST(RandomTests, RandomStringTest)
 {
@@ -8,8 +8,8 @@ TEST(RandomTests, RandomStringTest)
     const std::vector charSet = {'a', 'b', 'c'};
 
     // Act
-    const std::string randomString1 = Common::RandomString(5, charSet);
-    const std::string randomString2 = Common::RandomString(5);
+    const std::string randomString1 = ExtendedCpp::Random::RandomString(5, charSet);
+    const std::string randomString2 = ExtendedCpp::Random::RandomString(5);
 
     // Assert
     ASSERT_TRUE(randomString1.size() == 5);
@@ -24,8 +24,8 @@ TEST(RandomTests, RandomIntTest)
     const int max = 100;
 
     // Act
-    const int random1 = Common::RandomInt(min, max);
-    const int random2 = Common::RandomInt(-20, 30);
+    const int random1 = ExtendedCpp::Random::RandomInt(min, max);
+    const int random2 = ExtendedCpp::Random::RandomInt(-20, 30);
 
     // Assert
     ASSERT_TRUE(random1 >= -100 && random1 <= 100);
@@ -39,8 +39,8 @@ TEST(RandomTests, RandomRealTest)
     const double max = 1.2;
 
     // Act
-    const double random1 = Common::RandomReal(min, max);
-    const double random2 = Common::RandomReal(-2.7, 3.9);
+    const double random1 = ExtendedCpp::Random::RandomReal(min, max);
+    const double random2 = ExtendedCpp::Random::RandomReal(-2.7, 3.9);
 
     // Assert
     ASSERT_TRUE(random1 >= -0.5 && random1 <= 1.2);
@@ -54,8 +54,8 @@ TEST(RandomTests, RandomNumberTest)
     const unsigned int max = 150;
 
     // Act
-    const unsigned int random1 = Common::Random(min, max);
-    const double random2 = Common::Random(0.8, 6.3);
+    const unsigned int random1 = ExtendedCpp::Random::Random(min, max);
+    const double random2 = ExtendedCpp::Random::Random(0.8, 6.3);
 
     // Assert
     ASSERT_TRUE(random1 >= 110 && random1 <= 150);
@@ -69,7 +69,7 @@ TEST(RandomTests, RandomSequenceTest)
     const unsigned int max = 80;
 
     // Act
-    const auto sequence = Common::RandomSequence(min, max, 10);
+    const auto sequence = ExtendedCpp::Random::RandomSequence(min, max, 10);
 
     // Assert
     for (const auto element : sequence)

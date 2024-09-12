@@ -1,15 +1,15 @@
-#include <Reflection/Assembly.h>
+#include <ExtendedCpp/Reflection/Assembly.h>
 
-std::map<std::type_index, Reflection::TypeInfo>  Reflection::Assembly::_typeList;
-std::mutex Reflection::Assembly::_listMutex;
+std::map<std::type_index, ExtendedCpp::Reflection::TypeInfo> ExtendedCpp::Reflection::Assembly::_typeList;
+std::mutex ExtendedCpp::Reflection::Assembly::_listMutex;
 
-void Reflection::Assembly::AddType(const TypeInfo& typeInfo) noexcept
+void ExtendedCpp::Reflection::Assembly::AddType(const TypeInfo& typeInfo) noexcept
 {
     std::lock_guard<std::mutex> guard(_listMutex);
     _typeList.insert(std::make_pair(typeInfo.TypeIndex(), typeInfo));
 }
 
-std::vector<Reflection::TypeInfo> Reflection::Assembly::GetTypes() noexcept
+std::vector<ExtendedCpp::Reflection::TypeInfo> ExtendedCpp::Reflection::Assembly::GetTypes() noexcept
 {
     std::lock_guard<std::mutex> guard(_listMutex);
     std::vector<TypeInfo> types;

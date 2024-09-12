@@ -1,6 +1,6 @@
-#include <Reflection/Reflection.h>
+#include <ExtendedCpp/Reflection.h>
 
-std::vector<Reflection::TypeInfo> Reflection::GetType(const std::string& typeName) noexcept
+std::vector<ExtendedCpp::Reflection::TypeInfo> ExtendedCpp::Reflection::GetType(const std::string& typeName) noexcept
 {
     std::vector<TypeInfo> info;
     for (const auto& type : Assembly::GetTypes())
@@ -9,7 +9,7 @@ std::vector<Reflection::TypeInfo> Reflection::GetType(const std::string& typeNam
     return std::move(info);
 }
 
-std::optional<Reflection::TypeInfo> Reflection::GetType(std::type_index typeIndex) noexcept
+std::optional<ExtendedCpp::Reflection::TypeInfo> ExtendedCpp::Reflection::GetType(std::type_index typeIndex) noexcept
 {
     for (const auto& type : Assembly::GetTypes())
         if (type.TypeIndex() == typeIndex)
