@@ -1,6 +1,8 @@
 #ifndef InfoLog_ConsoleSender_H
 #define InfoLog_ConsoleSender_H
 
+#include <mutex>
+
 #include <InfoLog/ISender.h>
 
 namespace InfoLog
