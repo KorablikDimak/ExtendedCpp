@@ -117,11 +117,13 @@ namespace ExtendedCpp::Reflection
 #define STATIC_METHOD(methodName, ...) \
 []() \
 { \
-    return std::apply([](auto&&... args) \
+    using TupleType = std::tuple<__VA_ARGS__>; \
+    constexpr std::size_t vaSize = std::tuple_size_v<TupleType>; \
+    return []<std::size_t... Indexes>(std::index_sequence<Indexes...>) \
     { \
-        using ReturnType = decltype(methodName(args...)); \
+        using ReturnType = decltype(methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
         return ExtendedCpp::Reflection::CreateStaticMethodInfo<ReturnType __VA_OPT__(,) __VA_ARGS__>(#methodName, &methodName); \
-    }, std::tuple<__VA_ARGS__>()); \
+    }(std::make_index_sequence<vaSize>()); \
 }()
 
 #endif

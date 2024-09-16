@@ -105,19 +105,19 @@ namespace ExtendedCpp::DI
         }
 
     private:
-        template<std::size_t ...Indexes>
+        template<std::size_t... Indexes>
         static TTarget CallConstructor(std::index_sequence<Indexes...>, auto&& dependencyTuple)
         {
             return TTarget(std::get<Indexes>(dependencyTuple)...);
         }
 
-        template<std::size_t ...Indexes>
+        template<std::size_t... Indexes>
         static TTarget* CallConstructorNew(std::index_sequence<Indexes...>, auto&& dependencyTuple)
         {
             return new TTarget(std::get<Indexes>(dependencyTuple)...);
         }
 
-        template<std::size_t ...Indexes>
+        template<std::size_t... Indexes>
         static std::shared_ptr<TTarget> CallConstructorPtr(std::index_sequence<Indexes...>, auto&& dependencyTuple)
         {
             return std::make_shared<TTarget>(std::get<Indexes>(dependencyTuple)...);

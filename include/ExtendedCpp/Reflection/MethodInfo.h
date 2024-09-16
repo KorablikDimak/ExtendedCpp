@@ -60,7 +60,7 @@ namespace ExtendedCpp::Reflection
             using ReturnType = TReturnType;
 
             explicit ConstHelper(TMethod&& method) noexcept :
-                    _method(std::forward<TMethod>(method)) {}
+                _method(std::forward<TMethod>(method)) {}
 
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
@@ -249,20 +249,24 @@ namespace ExtendedCpp::Reflection
 #define METHOD(methodName, ...) \
 []() \
 { \
-    return std::apply([](auto&&... args) \
-    {                           \
-        if constexpr(!requires { std::declval<const ThisClassType>().methodName(args...); }) \
+    using TupleType = std::tuple<__VA_ARGS__>; \
+    constexpr std::size_t vaSize = std::tuple_size_v<TupleType>; \
+    return []<std::size_t... Indexes>(std::index_sequence<Indexes...>) \
+    { \
+        if constexpr(!requires { std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...); }) \
         { \
-            using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
+            using ReturnType = decltype(std::declval<ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
             ReturnType(ThisClassType::*methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ReturnType __VA_OPT__(,) __VA_ARGS__> \
                 (#methodName, methodPtr); \
         } \
-        else if constexpr(requires { static_cast<decltype(std::declval<ThisClassType>().methodName(args...))(ThisClassType::*)(__VA_ARGS__)>(&ThisClassType::methodName); } && \
-                          requires { static_cast<decltype(std::declval<const ThisClassType>().methodName(args...))(ThisClassType::*)(__VA_ARGS__) const>(&ThisClassType::methodName); }) \
+        else if constexpr(requires { static_cast<decltype(std::declval<ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)) \
+                                (ThisClassType::*)(__VA_ARGS__)>(&ThisClassType::methodName); } && \
+                          requires { static_cast<decltype(std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)) \
+                                (ThisClassType::*)(__VA_ARGS__) const>(&ThisClassType::methodName); }) \
         { \
-            using ReturnType = decltype(std::declval<ThisClassType>().methodName(args...)); \
-            using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(args...)); \
+            using ReturnType = decltype(std::declval<ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
+            using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
             ReturnType(ThisClassType::*methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
             ConstReturnType(ThisClassType::*constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ReturnType, ConstReturnType __VA_OPT__(,) __VA_ARGS__> \
@@ -270,12 +274,12 @@ namespace ExtendedCpp::Reflection
         } \
         else \
         { \
-            using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(args...)); \
+            using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
             ConstReturnType(ThisClassType::*constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ConstReturnType __VA_OPT__(,) __VA_ARGS__> \
                 (#methodName, constMethodPtr); \
         } \
-    }, std::tuple<__VA_ARGS__>()); \
+    }(std::make_index_sequence<vaSize>()); \
 }()
 
 #endif

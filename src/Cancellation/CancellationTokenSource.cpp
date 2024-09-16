@@ -12,12 +12,12 @@ ExtendedCpp::Cancellation::CancellationTokenSource::~CancellationTokenSource()
     delete _token;
 }
 
-ExtendedCpp::Cancellation::CancellationToken* ExtendedCpp::Cancellation::CancellationTokenSource::Token() const noexcept
+const ExtendedCpp::Cancellation::CancellationToken* ExtendedCpp::Cancellation::CancellationTokenSource::Token() const noexcept
 {
     return _token;
 }
 
-void ExtendedCpp::Cancellation::CancellationTokenSource::Cancel() const noexcept
+void ExtendedCpp::Cancellation::CancellationTokenSource::Cancel() noexcept
 {
     *_cancellationRequest.load() = true;
 }

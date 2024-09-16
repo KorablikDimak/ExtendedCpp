@@ -32,49 +32,52 @@ namespace ExtendedCpp::DI
         ServiceProvider& operator=(ServiceProvider&& serviceProvider) noexcept;
 
         template<typename TService, typename TImplementation>
+        requires std::is_default_constructible_v<TImplementation> &&
+                std::is_base_of_v<TService, TImplementation>
         void AddSingleton() noexcept
         {
-            static_assert(std::is_default_constructible<TImplementation>() == true);
             AddSingleton<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
         template<typename TService, typename TImplementation>
+        requires std::is_default_constructible_v<TImplementation> &&
+                std::is_base_of_v<TService, TImplementation>
         void AddTransient() noexcept
         {
-            static_assert(std::is_default_constructible<TImplementation>() == true);
             AddTransient<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
         template<typename TService, typename TImplementation>
+        requires std::is_default_constructible_v<TImplementation> &&
+                std::is_base_of_v<TService, TImplementation>
         void AddScoped() noexcept
         {
-            static_assert(std::is_default_constructible<TImplementation>() == true);
             AddScoped<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
         template<typename TService>
+        requires std::is_default_constructible_v<TService>
         void AddSingleton() noexcept
         {
-            static_assert(std::is_default_constructible<TService>() == true);
             AddSingleton<TService>([](const ServiceProvider&)
                 { return std::make_shared<TService>(); });
         }
 
         template<typename TService>
+        requires std::is_default_constructible_v<TService>
         void AddTransient() noexcept
         {
-            static_assert(std::is_default_constructible<TService>() == true);
             AddTransient<TService>([](const ServiceProvider&)
                 { return std::make_shared<TService>(); });
         }
 
         template<typename TService>
+        requires std::is_default_constructible_v<TService>
         void AddScoped() noexcept
         {
-            static_assert(std::is_default_constructible<TService>() == true);
             AddScoped<TService>([](const ServiceProvider&)
                 { return std::make_shared<TService>(); });
         }

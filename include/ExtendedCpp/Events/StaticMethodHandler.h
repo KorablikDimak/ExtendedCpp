@@ -42,7 +42,7 @@ namespace ExtendedCpp::Events
     template<typename ...TParams>
     std::shared_ptr<IEventHandler<TParams...>> CreateStaticMethodHandler(void(*method)(TParams...)) noexcept
     {
-        return std::shared_ptr<IEventHandler<TParams...>>(new StaticMethodHandler<TParams...>(method));
+        return std::make_shared<StaticMethodHandler<TParams...>>(method);
     }
 }
 

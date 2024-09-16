@@ -44,7 +44,7 @@ namespace ExtendedCpp::Events
     template<typename ...TParams>
     std::shared_ptr<IEventHandler<TParams...>> CreateFunctionHandler(std::function<void(TParams...)> function) noexcept
     {
-        return std::shared_ptr<IEventHandler<TParams...>>(new FunctionHandler<TParams...>(function));
+        return std::make_shared<FunctionHandler<TParams...>>(function);
     }
 }
 

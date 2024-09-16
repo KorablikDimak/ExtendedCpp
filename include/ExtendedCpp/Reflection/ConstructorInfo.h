@@ -51,7 +51,7 @@ namespace ExtendedCpp::Reflection
             }
 
             template<std::size_t... Index>
-            decltype(auto) Get(const std::vector<std::any>& args, std::index_sequence<Index...>) const noexcept
+            decltype(auto) Get(const std::vector<std::any>& args, std::index_sequence<Index...>) const
             {
                 return std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type...>(args[Index]...);
             }

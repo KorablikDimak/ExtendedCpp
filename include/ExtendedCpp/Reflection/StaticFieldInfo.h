@@ -51,7 +51,7 @@ namespace ExtendedCpp::Reflection
             MemberInfo(std::move(fieldName)) {}
 
         template<typename TField>
-        TField* GetField() const noexcept
+        TField* GetField() const
         {
             return std::any_cast<TField*>(_fieldGetter(_fieldHelper));
         }

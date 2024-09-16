@@ -17,6 +17,7 @@ namespace ExtendedCpp::Reflection
         std::type_index _typeIndex;
         std::any _fieldHelper;
         std::any (*_fieldGetter)(const std::any& helper, std::any&& object);
+        std::any (*_fieldReader)(const std::any& helper, std::any&& object);
 
     public:
         template<typename TObject, typename TField>
@@ -27,9 +28,14 @@ namespace ExtendedCpp::Reflection
 
         public:
             explicit Helper(TField TObject::* fieldPtr) noexcept :
-                    _fieldPtr(fieldPtr) {}
+                _fieldPtr(fieldPtr) {}
 
-            TField* GetField(std::any&& object) const noexcept
+            TField* GetField(std::any&& object) const
+            {
+                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+            }
+
+            const TField* ReadField(std::any&& object) const
             {
                 return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
             }
@@ -41,6 +47,8 @@ namespace ExtendedCpp::Reflection
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper, std::any&& object)
                 { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
+            _fieldReader([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
             MemberInfo(fieldName) {}
 
         template<typename THelper>
@@ -49,6 +57,8 @@ namespace ExtendedCpp::Reflection
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper, std::any&& object)
                 { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
+            _fieldReader([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
             MemberInfo(std::move(fieldName)) {}
 
         ~FieldInfo() override = default;
@@ -67,6 +77,22 @@ namespace ExtendedCpp::Reflection
             if (!object)
                 throw std::invalid_argument("Object is null");
             return _fieldGetter(_fieldHelper, object);
+        }
+
+        template<typename TField, typename TObject>
+        const TField* ReadField(TObject* object) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return std::any_cast<TField*>(_fieldReader(_fieldHelper, object));
+        }
+
+        template<typename TObject>
+        std::any ReadField(TObject* object) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return _fieldReader(_fieldHelper, object);
         }
 
         [[nodiscard]]

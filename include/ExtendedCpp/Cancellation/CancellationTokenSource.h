@@ -16,8 +16,8 @@ namespace ExtendedCpp::Cancellation
         ~CancellationTokenSource();
 
         [[nodiscard]]
-        CancellationToken* Token() const noexcept;
-        void Cancel() const noexcept;
+        const CancellationToken* Token() const noexcept;
+        void Cancel() noexcept;
     };
 }
 

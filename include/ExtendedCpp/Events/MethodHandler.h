@@ -45,7 +45,7 @@ namespace ExtendedCpp::Events
     template<typename TObject, typename ...TParams>
     std::shared_ptr<IEventHandler<TParams...>> CreateMethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept
     {
-        return std::shared_ptr<IEventHandler<TParams...>>(new MethodHandler<TObject, TParams...>(object, method));
+        return std::make_shared<MethodHandler<TObject, TParams...>>(object, method);
     }
 }
 
