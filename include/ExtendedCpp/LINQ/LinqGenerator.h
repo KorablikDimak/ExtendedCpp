@@ -90,7 +90,7 @@ namespace ExtendedCpp::LINQ
         explicit LinqGenerator(TIterator&& begin, TIterator&& end) noexcept :
             _yieldContext(YieldForeach(std::forward<TIterator>(begin), std::forward<TIterator>(end))) {}
 
-        ~LinqGenerator() noexcept = default;
+        ~LinqGenerator() = default;
 
         explicit operator bool() noexcept
         {

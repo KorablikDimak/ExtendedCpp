@@ -1,7 +1,6 @@
 #ifndef LINQ_LinqContainer_H
 #define LINQ_LinqContainer_H
 
-#include <cstdint>
 #include <array>
 #include <list>
 #include <forward_list>
@@ -23,8 +22,6 @@ namespace ExtendedCpp::LINQ
     {
     private:
         std::vector<TSource> _collection;
-        TSource* _data;
-        std::size_t _size;
 
     public:
         using value_type = TSource;
@@ -36,44 +33,32 @@ namespace ExtendedCpp::LINQ
         explicit LinqContainer(const std::vector<TSource>& collection) noexcept
         {
             _collection = collection;
-            _data = _collection.data();
-            _size = _collection.size();
         }
 
         explicit LinqContainer(std::vector<TSource>&& collection) noexcept
         {
             _collection = std::move(collection);
-            _data = _collection.data();
-            _size = _collection.size();
         }
 
         LinqContainer(const LinqContainer& container) noexcept
         {
             _collection = container.ToVector();
-            _data = _collection.data();
-            _size = _collection.size();
         }
 
         LinqContainer(LinqContainer&& container) noexcept
         {
             _collection = std::move(container.ToVector());
-            _data = _collection.data();
-            _size = _collection.size();
         }
 
         LinqContainer& operator=(const std::vector<TSource>& collection) noexcept
         {
             _collection = collection;
-            _data = _collection.data();
-            _size = _collection.size();
             return *this;
         }
 
         LinqContainer& operator=(std::vector<TSource>&& collection) noexcept
         {
             _collection = std::move(collection);
-            _data = _collection.data();
-            _size = _collection.size();
             return *this;
         }
 
@@ -81,31 +66,27 @@ namespace ExtendedCpp::LINQ
         {
             if (this == &container) return *this;
             _collection = container.ToVector();
-            _data = _collection.data();
-            _size = _collection.size();
             return *this;
         }
 
         LinqContainer& operator=(LinqContainer&& container) noexcept
         {
             _collection = std::move(container.ToVector());
-            _data = _collection.data();
-            _size = _collection.size();
             return *this;
         }
 
-        ~LinqContainer() noexcept = default;
+        ~LinqContainer() = default;
 
         [[nodiscard]]
         std::size_t size() const noexcept
         {
-            return _size;
+            return _collection.size();
         }
 
         [[nodiscard]]
         bool empty() const noexcept
         {
-            return _size == 0;
+            return _collection.empty();
         }
 
         iterator begin() noexcept
@@ -170,30 +151,25 @@ namespace ExtendedCpp::LINQ
 
         TSource* data() noexcept
         {
-            return _data;
+            return _collection.data();
         }
 
         const TSource* data() const noexcept
         {
-            return _data;
-        }
-
-        std::vector<TSource> ToVector() noexcept
-        {
-            return std::move(_collection);
+            return _collection.data();
         }
 
         std::vector<TSource> ToVector() const noexcept
         {
-            return std::vector<TSource>(_collection);
+            return _collection;
         }
 
         template<std::size_t SIZE>
         std::array<TSource, SIZE> ToArray() const noexcept
         {
             std::array<TSource, SIZE> array;
-            for (std::size_t i = 0; i < SIZE && i < _size; ++i)
-                array[i] = _data[i];
+            for (std::size_t i = 0; i < SIZE && i < _collection.size(); ++i)
+                array[i] = _collection[i];
             return array;
         }
 
@@ -210,16 +186,16 @@ namespace ExtendedCpp::LINQ
         std::stack<TSource> ToStack() const noexcept
         {
             std::stack<TSource> stack;
-            for (std::size_t i = 0; i < _size; ++i)
-                stack.push(_data[i]);
+            for (const TSource& element : _collection)
+                stack.push(element);
             return stack;
         }
 
         std::queue<TSource> ToQueue() const noexcept
         {
             std::queue<TSource> queue;
-            for (std::size_t i = 0; i < _size; ++i)
-                queue.push(_data[i]);
+            for (const TSource& element : _collection)
+                queue.push(element);
             return queue;
         }
 
@@ -231,24 +207,24 @@ namespace ExtendedCpp::LINQ
         std::priority_queue<TSource> ToPriorityQueue() const noexcept
         {
             std::priority_queue<TSource> priorityQueue;
-            for (std::size_t i = 0; i < _size; ++i)
-                priorityQueue.push(_data[i]);
+            for (const TSource& element : _collection)
+                priorityQueue.push(element);
             return priorityQueue;
         }
 
         std::set<TSource> ToSet() const noexcept
         {
             std::set<TSource> newCollection;
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
             return newCollection;
         }
 
         std::unordered_set<TSource> ToUnorderedSet() const noexcept
         {
             std::unordered_set<TSource> newCollection;
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
             return newCollection;
         }
 
@@ -258,8 +234,8 @@ namespace ExtendedCpp::LINQ
         std::map<TKey, TValue> ToMap() const noexcept
         {
             std::map<TKey, TValue> newCollection;
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
             return newCollection;
         }
 
@@ -269,8 +245,8 @@ namespace ExtendedCpp::LINQ
         std::unordered_map<TKey, TValue> ToUnorderedMap() const noexcept
         {
             std::unordered_map<TKey, TValue> newCollection;
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
             return newCollection;
         }
 
@@ -279,10 +255,10 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> Select(TSelector&& selector) const noexcept
         {
             std::vector<TResult> newCollection;
-            newCollection.reserve(_size);
+            newCollection.reserve(_collection.size());
 
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.push_back(selector(_data[i]));
+            for (const TSource& element : _collection)
+                newCollection.push_back(selector(element));
 
             return LinqContainer<TResult>(std::move(newCollection));
         }
@@ -293,9 +269,9 @@ namespace ExtendedCpp::LINQ
         {
             std::vector<TResult> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (std::size_t i = 0; i < _collection.size(); ++i)
             {
-                std::vector<TResult> tempCollection = selector(_data[i]);
+                std::vector<TResult> tempCollection = selector(_collection[i]);
                 for (std::size_t j = 0; j < tempCollection.size(); ++j)
                     newCollection.push_back(std::move(tempCollection[j]));
             }
@@ -313,35 +289,35 @@ namespace ExtendedCpp::LINQ
         {
             std::vector<TResult> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
-                TCollection tempCollection = collectionSelector(_data[i]);
-                for (auto& element : tempCollection)
-                    newCollection.push_back(resultSelector(_data[i], std::move(element)));
+                TCollection tempCollection = collectionSelector(element);
+                for (auto&& tempElement : tempCollection)
+                    newCollection.push_back(resultSelector(element, std::move(tempElement)));
             }
 
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        LinqContainer Where(std::function<bool(TSource)> predicate) const noexcept
+        LinqContainer Where(const std::function<bool(TSource)> predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                if (predicate(_data[i]))
-                    newCollection.push_back(_data[i]);
+            for (const TSource& element : _collection)
+                if (predicate(element))
+                    newCollection.push_back(element);
 
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer RemoveWhere(std::function<bool(TSource)> predicate) const noexcept
+        LinqContainer RemoveWhere(const std::function<bool(TSource)> predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
-                if (predicate(_data[i])) continue;
-                else newCollection.push_back(_data[i]);
+                if (predicate(element)) continue;
+                else newCollection.push_back(element);
             }
 
             return LinqContainer(std::move(newCollection));
@@ -350,9 +326,9 @@ namespace ExtendedCpp::LINQ
         LinqContainer Order(OrderType orderType = OrderType::ASC) const noexcept
         requires Concepts::Comparable<TSource>
         {
-            if (_size == 0) return *this;
+            if (_collection.empty()) return *this;
             std::vector<TSource> newCollection(_collection.cbegin(), _collection.cend());
-            Sort::QuickSort(newCollection.data(), 0, _size - 1, orderType);
+            Sort::QuickSort(newCollection.data(), 0, _collection.size() - 1, orderType);
             return LinqContainer(std::move(newCollection));
         }
 
@@ -360,9 +336,9 @@ namespace ExtendedCpp::LINQ
         requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC) const noexcept
         {
-            if (_size == 0) return *this;
+            if (IsEmpty()) return *this;
             std::vector<TSource> newCollection(_collection.cbegin(), _collection.cend());
-            Sort::QuickSort(newCollection.data(), 0, _size - 1, std::forward<TSelector>(selector), orderType);
+            Sort::QuickSort(newCollection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector), orderType);
             return LinqContainer(std::move(newCollection));
         }
 
@@ -378,13 +354,13 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
-                std::size_t j = 0;
-                for (const auto& element : otherCollection)
+                long long j = 0;
+                for (const TSource& otherElement : otherCollection)
                 {
-                    if (_data[i] == element) break;
-                    if (j == otherCollection.size() - 1) newCollection.insert(_data[i]);
+                    if (element == otherElement) break;
+                    if (j == otherCollection.size() - 1) newCollection.insert(element);
                     ++j;
                 }
             }
@@ -400,13 +376,13 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
                 std::size_t j = 0;
-                for (auto& element : otherCollection)
+                for (TSource&& otherElement : otherCollection)
                 {
-                    if (_data[i] == std::move(element)) break;
-                    if (j == otherCollection.size() - 1) newCollection.insert(_data[i]);
+                    if (element == std::move(otherElement)) break;
+                    if (j == otherCollection.size() - 1) newCollection.insert(element);
                     ++j;
                 }
             }
@@ -422,11 +398,11 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                for (const auto& element : otherCollection)
-                    if (_data[i] == element)
+            for (const TSource& element : _collection)
+                for (const TSource& otherElement : otherCollection)
+                    if (element == otherElement)
                     {
-                        newCollection.insert(_data[i]);
+                        newCollection.insert(element);
                         break;
                     }
 
@@ -441,11 +417,11 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                for (auto& element : otherCollection)
-                    if (_data[i] == element)
+            for (const TSource& element : _collection)
+                for (TSource&& otherElement : otherCollection)
+                    if (element == otherElement)
                     {
-                        newCollection.insert(std::move(element));
+                        newCollection.insert(std::move(otherElement));
                         break;
                     }
 
@@ -458,8 +434,8 @@ namespace ExtendedCpp::LINQ
         requires Concepts::Equatable<TSource>
         {
             std::set<TSource> newCollection;
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
 
             std::vector<TSource> assignCollection;
             assignCollection.assign(newCollection.cbegin(), newCollection.cend());
@@ -472,10 +448,10 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
 
-            for (const auto& element : otherCollection)
+            for (const TSource& element : otherCollection)
                 newCollection.insert(element);
 
             std::vector<TSource> assignCollection;
@@ -489,10 +465,10 @@ namespace ExtendedCpp::LINQ
         {
             std::set<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                newCollection.insert(_data[i]);
+            for (const TSource& element : _collection)
+                newCollection.insert(element);
 
-            for (auto& element : otherCollection)
+            for (TSource&& element : otherCollection)
                 newCollection.insert(std::move(element));
 
             std::vector<TSource> assignCollection;
@@ -501,182 +477,201 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TResult>
-        TResult Aggregate(std::function<TResult(TResult, TSource)> aggregateFunction) const
+        TResult Aggregate(const std::function<TResult(TResult, TSource)> aggregateFunction) const
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Aggregate(_data, 0, _size - 1, std::move(aggregateFunction));
+            return Aggregate::Aggregate(_collection.data(), 0, _collection.size() - 1, std::move(aggregateFunction));
         }
 
         [[nodiscard]]
         std::size_t Count() const noexcept
         {
-            return _size;
+            return _collection.size();
         }
 
-        std::size_t Count(std::function<bool(TSource)> predicate) const noexcept
+        std::size_t Count(const std::function<bool(TSource)> predicate) const noexcept
         {
-            return Aggregate::Count(_data, 0, _size - 1, std::move(predicate));
+            if (_collection.empty())
+                return 0;
+            return Aggregate::Count(_collection.data(), 0, _collection.size() - 1, std::move(predicate));
         }
 
         TSource Sum() const
         requires Concepts::Summarize<TSource>
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Sum(_data, 0, _size - 1);
+            return Aggregate::Sum(_collection.data(), 0, _collection.size() - 1);
         }
 
         template<typename TSelector, Concepts::Summarize TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TSelector, TSource>
         TResult Sum(TSelector&& selector) const
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Sum(_data, 0, _size - 1, std::forward<TSelector>(selector));
+            return Aggregate::Sum(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
         TSource Min() const
         requires Concepts::Comparable<TSource>
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Min(_data, 0, _size - 1);
+            return Aggregate::Min(_collection.data(), 0, _collection.size() - 1);
         }
 
         template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TSelector, TSource>
         TResult Min(TSelector&& selector) const
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
 
-            return Aggregate::Min(_data, 0, _size - 1, std::forward<TSelector>(selector));
+            return Aggregate::Min(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
         TSource Max() const
         requires Concepts::Comparable<TSource>
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Max(_data, 0, _size - 1);
+            return Aggregate::Max(_collection.data(), 0, _collection.size() - 1);
         }
 
         template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TSelector, TSource>
         TResult Max(TSelector&& selector) const
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Max(_data, 0, _size - 1, std::forward<TSelector>(selector));
+            return Aggregate::Max(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
         TSource Average() const
         requires Concepts::Divisible<TSource>
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Average(_data, 0, _size - 1);
+            return Aggregate::Average(_collection.data(), 0, _collection.size() - 1);
         }
 
         template<typename TSelector, Concepts::Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TSelector, TSource>
         TResult Average(TSelector&& selector) const
         {
-            if (_size == 0)
+            if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
-            return Aggregate::Average(_data, 0, _size - 1, std::forward<TSelector>(selector));
+            return Aggregate::Average(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
         TSource First() const
         {
-            if (_size == 0)
-                throw std::out_of_range("Element not found");
-            return _data[0];
+            if (_collection.empty())
+                throw std::out_of_range("Collection is empty");
+            return _collection[0];
         }
 
-        TSource First(std::function<bool(TSource)> predicate) const
+        TSource First(const std::function<bool(TSource)> predicate) const
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (predicate(_data[i])) return _data[i];
+            for (const TSource& element : _collection)
+                if (predicate(element)) return element;
             throw std::out_of_range("Element not found");
         }
 
         TSource FirstOrDefault(const TSource& defaultValue = TSource()) const noexcept
+        requires std::is_default_constructible_v<TSource>
         {
-            if (_size == 0) return defaultValue;
-            return _data[0];
+            if (_collection.empty())
+                return defaultValue;
+            return _collection[0];
         }
 
-        TSource FirstOrDefault(std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
+        TSource FirstOrDefault(const std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
+        requires std::is_default_constructible_v<TSource>
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (predicate(_data[i])) return _data[i];
+            for (const TSource& element : _collection)
+                if (predicate(element)) return element;
             return defaultValue;
         }
 
         TSource Last() const
         {
-            if (_size == 0)
-                throw std::out_of_range("Element not found");
-            return _data[_size - 1];
+            if (_collection.empty())
+                throw std::out_of_range("Collection is empty");
+            return _collection[_collection.size() - 1];
         }
 
-        TSource Last(std::function<bool(TSource)> predicate) const
+        TSource Last(const std::function<bool(TSource)> predicate) const
         {
-            for (std::int64_t i = _size - 1; i >= 0; --i)
-                if (predicate(_data[i])) return _data[i];
+            for (const_reverse_iterator it = _collection.crbegin(); it != _collection.crend(); ++it)
+                if (predicate(*it)) return *it;
             throw std::out_of_range("Element not found");
         }
 
         TSource LastOrDefault(const TSource& defaultValue = TSource()) const noexcept
+        requires std::is_default_constructible_v<TSource>
         {
-            if (_size == 0) return defaultValue;
-            return _data[_size - 1];
+            if (_collection.empty())
+                return defaultValue;
+            return _collection[_collection.size() - 1];
         }
 
-        TSource LastOrDefault(std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
+        TSource LastOrDefault(const std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
+        requires std::is_default_constructible_v<TSource>
         {
-            for (std::int64_t i = _size - 1; i >= 0; --i)
-                if (predicate(_data[i])) return _data[i];
+            for (const_reverse_iterator it = _collection.crbegin(); it != _collection.crend(); ++it)
+                if (predicate(*it)) return *it;
             return defaultValue;
         }
 
-        TSource At(const std::size_t position) const noexcept
+        TSource At(const std::size_t position) const
         {
-            return _data[position];
+            if (position >= _collection.size())
+                throw std::out_of_range("Position out of range");
+            return _collection[position];
+        }
+
+        TSource AtOrDefault(const std::size_t position, const TSource& defaultValue = TSource()) const noexcept
+        requires std::is_default_constructible_v<TSource>
+        {
+            if (position >= _collection.size())
+                return defaultValue;
+            return _collection[position];
         }
 
         [[nodiscard]]
         bool IsEmpty() const noexcept
         {
-            return _size == 0;
+            return _collection.empty();
         }
 
-        LinqContainer Skip(const std::size_t count) const
+        LinqContainer Skip(const std::size_t count) const noexcept
         {
-            if (count >= _size)
-                throw std::overflow_error("Skip count must be less then collection size");
-
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size - count);
 
-            for (std::size_t i = count; i < _size; ++i)
-                newCollection.push_back(_data[i]);
+            if (count >= _collection.size())
+                return LinqContainer(std::move(newCollection));
+
+            newCollection.reserve(_collection.size() - count);
+            for (std::size_t i = count; i < _collection.size(); ++i)
+                newCollection.push_back(_collection[i]);
 
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer SkipLast(const std::size_t count) const
+        LinqContainer SkipLast(const std::size_t count) const noexcept
         {
-            if (count >= _size)
-                throw std::overflow_error("SkipLast count must be less then collection size");
-
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size - count);
 
-            for (std::size_t i = 0; i < _size - count; ++i)
-                newCollection.push_back(_data[i]);
+            if (count >= _collection.size())
+                return LinqContainer(std::move(newCollection));
+
+            newCollection.reserve(_collection.size() - count);
+
+            for (std::size_t i = 0; i < _collection.size() - count; ++i)
+                newCollection.push_back(_collection[i]);
 
             return LinqContainer(std::move(newCollection));
         }
@@ -686,39 +681,39 @@ namespace ExtendedCpp::LINQ
             std::vector<TSource> newCollection;
 
             std::size_t i = 0;
-            for (; i < _size; ++i)
-                if(!predicate(_data[i])) break;
+            for (; i < _collection.size(); ++i)
+                if(!predicate(_collection[i])) break;
 
-            for (; i < _size; ++i)
-                newCollection.push_back(_data[i]);
+            for (; i < _collection.size(); ++i)
+                newCollection.push_back(_collection[i]);
 
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer Take(const std::size_t count) const
+        LinqContainer Take(const std::size_t count) const noexcept
         {
-            if (count >= _size)
-                throw std::overflow_error("Take count must be less then collection size");
-
             std::vector<TSource> newCollection;
-            newCollection.reserve(count);
 
+            if (count >= _collection.size())
+                return LinqContainer(std::move(newCollection));
+
+            newCollection.reserve(count);
             for (std::size_t i = 0; i < count; ++i)
-                newCollection.push_back(_data[i]);
+                newCollection.push_back(_collection[i]);
 
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer TakeLast(const std::size_t count) const
+        LinqContainer TakeLast(const std::size_t count) const noexcept
         {
-            if (count >= _size)
-                throw std::overflow_error("TakeLast count must be less then collection size");
-
             std::vector<TSource> newCollection;
-            newCollection.reserve(count);
 
-            for (std::size_t i = _size - count; i < _size; ++i)
-                newCollection.push_back(_data[i]);
+            if (count >= _collection.size())
+                return LinqContainer(std::move(newCollection));
+
+            newCollection.reserve(count);
+            for (std::size_t i = _collection.size() - count; i < _collection.size(); ++i)
+                newCollection.push_back(_collection[i]);
 
             return LinqContainer(std::move(newCollection));
         }
@@ -727,10 +722,10 @@ namespace ExtendedCpp::LINQ
         {
             std::vector<TSource> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
-                if (!predicate(_data[i])) break;
-                newCollection.push_back(_data[i]);
+                if (!predicate(element)) break;
+                newCollection.push_back(element);
             }
 
             return LinqContainer(std::move(newCollection));
@@ -742,11 +737,11 @@ namespace ExtendedCpp::LINQ
         {
             std::map<TKey, std::vector<TSource>> result;
 
-            for (std::size_t i = 0; i < _size; ++i)
+            for (const TSource& element : _collection)
             {
-                if (!result.contains(keySelector(_data[i])))
-                    result.insert(std::pair<TKey, std::vector<TSource>>(keySelector(_data[i]), std::vector<TSource>()));
-                result.at(keySelector(_data[i])).push_back(_data[i]);
+                if (!result.contains(keySelector(element)))
+                    result.insert(std::pair<TKey, std::vector<TSource>>(keySelector(element), std::vector<TSource>()));
+                result.at(keySelector(element)).push_back(element);
             }
 
             return result;
@@ -765,17 +760,17 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> Join(const TOtherCollection& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) const
+                                    TResultSelector&& resultSelector) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-
             std::vector<TResult> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                for (const auto& element : otherCollection)
-                    if (innerKeySelector(_data[i]) == otherKeySelector(element))
-                        newCollection.push_back(resultSelector(_data[i], element));
+            if (otherCollection.empty())
+                return LinqContainer<TResult>(std::move(newCollection));
+
+            for (const TSource& element : _collection)
+                for (const auto& otherElement : otherCollection)
+                    if (innerKeySelector(element) == otherKeySelector(otherElement))
+                        newCollection.push_back(resultSelector(element, otherElement));
 
             return LinqContainer<TResult>(std::move(newCollection));
         }
@@ -793,17 +788,17 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> Join(TOtherCollection&& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) const
+                                    TResultSelector&& resultSelector) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-
             std::vector<TResult> newCollection;
 
-            for (std::size_t i = 0; i < _size; ++i)
-                for (auto& element : otherCollection)
-                    if (innerKeySelector(_data[i]) == otherKeySelector(element))
-                        newCollection.push_back(resultSelector(_data[i], std::move(element)));
+            if (otherCollection.empty())
+                return LinqContainer<TResult>(std::move(newCollection));
+
+            for (const TSource& element : _collection)
+                for (auto& otherElement : otherCollection)
+                    if (innerKeySelector(element) == otherKeySelector(otherElement))
+                        newCollection.push_back(resultSelector(element, std::move(otherElement)));
 
             return LinqContainer<TResult>(std::move(newCollection));
         }
@@ -821,12 +816,12 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> GroupJoin(const TOtherCollection& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) const
+                                         TResultSelector&& resultSelector) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-
             std::vector<TResult> newCollection;
+
+            if (otherCollection.empty())
+                return LinqContainer<TResult>(std::move(newCollection));
 
             std::map<TKey, std::vector<TSource>> groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
 
@@ -851,12 +846,12 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> GroupJoin(TOtherCollection&& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) const
+                                         TResultSelector&& resultSelector) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-
             std::vector<TResult> newCollection;
+
+            if (otherCollection.empty())
+                return LinqContainer<TResult>(std::move(newCollection));
 
             std::map<TKey, std::vector<TSource>> groups = GroupBy(innerKeySelector);
 
@@ -871,19 +866,19 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection,
                  typename TOtherCollectionValueType = typename TOtherCollection::value_type>
         requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
-        LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) const
+        LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-            if (otherCollection.size() != _size)
-                throw std::invalid_argument("the size of inner collection is not equal to the size of other collection");
-
             std::vector<std::pair<TSource, TOtherCollectionValueType>> newCollection;
+
+            if (otherCollection.empty())
+                return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
+            if (otherCollection.size() != _collection.size())
+                return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
 
             std::size_t i = 0;
             for (const auto& element : otherCollection)
             {
-                newCollection.push_back(std::pair<TSource, TOtherCollectionValueType>(_data[i], element));
+                newCollection.push_back(std::pair<TSource, TOtherCollectionValueType>(_collection[i], element));
                 ++i;
             }
 
@@ -893,19 +888,19 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection,
                  typename TOtherCollectionValueType = typename TOtherCollection::value_type>
         requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
-        LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) const
+        LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) const noexcept
         {
-            if (otherCollection.empty())
-                throw std::invalid_argument("other collection must not be empty");
-            if (otherCollection.size() != _size)
-                throw std::invalid_argument("the size of inner collection is not equal to the size of other collection");
-
             std::vector<std::pair<TSource, TOtherCollectionValueType>> newCollection;
+
+            if (otherCollection.empty())
+                return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
+            if (otherCollection.size() != _collection.size())
+                return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
 
             std::size_t i = 0;
             for (auto& element : otherCollection)
             {
-                newCollection.push_back(std::pair<TSource, TOtherCollectionValueType>(_data[i], std::move(element)));
+                newCollection.push_back(std::pair<TSource, TOtherCollectionValueType>(_collection[i], std::move(element)));
                 ++i;
             }
 
@@ -914,83 +909,92 @@ namespace ExtendedCpp::LINQ
 
         bool All(std::function<bool(TSource)> predicate) const noexcept
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (!predicate(_data[i])) return false;
+            for (const TSource& element : _collection)
+                if (!predicate(element))
+                    return false;
             return true;
         }
 
         bool Any(std::function<bool(TSource)> predicate) const noexcept
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (predicate(_data[i])) return true;
+            for (const TSource& element : _collection)
+                if (predicate(element))
+                    return true;
             return false;
         }
 
-        bool Contains(const TSource& element) const noexcept
+        bool Contains(const TSource& target) const noexcept
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (_data[i] == element) return true;
+            for (const TSource& element : _collection)
+                if (element == target)
+                    return true;
             return false;
         }
 
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        bool Contains(const TSource& element, TSelector&& selector) const noexcept
+        bool Contains(const TSource& target, TSelector&& selector) const noexcept
         {
-            for (std::size_t i = 0; i < _size; ++i)
-                if (selector(_data[i]) == selector(element)) return true;
+            for (const TSource& element : _collection)
+                if (selector(element) == selector(target))
+                    return true;
             return false;
         }
 
         bool Contains(const std::vector<TSource>& subCollection) const noexcept
         requires Concepts::Equatable<TSource>
         {
-            if (subCollection.empty()) return true;
-            return Algorithm::Contains(_data, _size, subCollection.data(), subCollection.size());
+            if (subCollection.empty())
+                return true;
+            return Algorithm::Contains(_collection.data(), _collection.size(), subCollection.data(), subCollection.size());
         }
 
-        std::size_t IndexAt(const TSource& element) const noexcept
+        std::size_t IndexAt(const TSource& target) const noexcept
         requires Concepts::Equatable<TSource>
         {
-            for (int i = 0; i < _size; ++i)
-                if (_data[i] == element) return i;
+            for (int i = 0; i < _collection.size(); ++i)
+                if (_collection[i] == target)
+                    return i;
             return NPOS;
         }
 
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        std::size_t IndexAt(const TSource& element, TSelector&& selector) const noexcept
+        std::size_t IndexAt(const TSource& target, TSelector&& selector) const noexcept
         {
-            for (int i = 0; i < _size; ++i)
-                if (selector(_data[i]) == selector(element)) return i;
+            for (int i = 0; i < _collection.size(); ++i)
+                if (selector(_collection[i]) == selector(target))
+                    return i;
             return NPOS;
         }
 
         std::size_t IndexAt(const std::vector<TSource>& subCollection) const noexcept
         requires Concepts::Equatable<TSource>
         {
-            return Algorithm::IndexAt(_data, _size, subCollection.data(), subCollection.size());
+            return Algorithm::IndexAt(_collection.data(), _collection.size(), subCollection.data(), subCollection.size());
         }
 
         std::size_t BinarySearch(const TSource& element) const noexcept
         requires Concepts::Comparable<TSource>
         {
-            if (_size == 0) return NPOS;
-            return Algorithm::BinarySearch(std::forward<TSource>(element), _data, 0, _size - 1);
+            if (_collection.empty())
+                return NPOS;
+            return Algorithm::BinarySearch(std::forward<TSource>(element), _collection.data(), 0, _collection.size() - 1);
         }
 
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         std::size_t BinarySearch(const TSource& element, TSelector&& selector) const noexcept
         {
-            if (_size == 0) return NPOS;
-            return Algorithm::BinarySearch(std::forward<TSource>(element), _data, 0, _size - 1, std::forward<TSelector>(selector));
+            if (_collection.empty())
+                return NPOS;
+            return Algorithm::BinarySearch(std::forward<TSource>(element), _collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
         LinqContainer PushBack(const TSource& element) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + 1);
+            newCollection.reserve(_collection.size() + 1);
 
             std::copy(_collection.cbegin(), _collection.cend(),
                       std::inserter(newCollection, newCollection.begin()));
@@ -1003,7 +1007,7 @@ namespace ExtendedCpp::LINQ
         LinqContainer PushBack(TSource&& element) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + 1);
+            newCollection.reserve(_collection.size() + 1);
 
             std::copy(_collection.cbegin(), _collection.cend(),
                       std::inserter(newCollection, newCollection.begin()));
@@ -1018,7 +1022,7 @@ namespace ExtendedCpp::LINQ
         LinqContainer PushBack(const TCollection& otherCollection) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + otherCollection.size());
+            newCollection.reserve(_collection.size() + otherCollection.size());
 
             std::copy(_collection.cbegin(), _collection.cend(),
                       std::inserter(newCollection, newCollection.begin()));
@@ -1049,7 +1053,7 @@ namespace ExtendedCpp::LINQ
         LinqContainer Insert(const TSource& element, std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + 1);
+            newCollection.reserve(_collection.size() + 1);
 
             std::copy(_collection.cbegin(), _collection.cbegin() + position,
                       std::inserter(newCollection, newCollection.begin()));
@@ -1065,7 +1069,7 @@ namespace ExtendedCpp::LINQ
         LinqContainer Insert(TSource&& element, std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + 1);
+            newCollection.reserve(_collection.size() + 1);
 
             std::copy(_collection.cbegin(), _collection.cbegin() + position,
                       std::inserter(newCollection, newCollection.begin()));
@@ -1083,7 +1087,7 @@ namespace ExtendedCpp::LINQ
         LinqContainer Insert(const TCollection& otherCollection, std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size + otherCollection.size());
+            newCollection.reserve(_collection.size() + otherCollection.size());
 
             std::copy(_collection.cbegin(), _collection.cbegin() + position,
                       std::inserter(newCollection, newCollection.begin()));
@@ -1102,13 +1106,14 @@ namespace ExtendedCpp::LINQ
             return Erase(position, position);
         }
 
-        LinqContainer Erase(std::size_t begin, std::size_t end) const
+        LinqContainer Erase(std::size_t begin, std::size_t end) const noexcept
         {
-            if (_size <= end - begin)
-                throw std::invalid_argument("you try erase more element than collection has");
-
             std::vector<TSource> newCollection;
-            newCollection.reserve(_size - (end - begin));
+
+            if (begin > end || _collection.size() <= end - begin)
+                return LinqContainer(std::move(newCollection));
+
+            newCollection.reserve(_collection.size() - (end - begin));
 
             std::copy(_collection.cbegin(), _collection.cbegin() + begin,
                       std::inserter(newCollection, newCollection.begin()));
