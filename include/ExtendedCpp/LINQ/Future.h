@@ -43,11 +43,13 @@ namespace ExtendedCpp::LINQ
             TSource _value;
         };
 
-        explicit Future(handle_type handle) noexcept : _handle(handle) {}
+        explicit Future(handle_type handle) noexcept :
+            _handle(handle) {}
 
         ~Future()
         {
-            if (_handle) _handle.destroy();
+            if (_handle)
+                _handle.destroy();
             _handle = nullptr;
         }
 
@@ -58,8 +60,10 @@ namespace ExtendedCpp::LINQ
 
         TSource Value() const noexcept
         {
-            if (!_handle.done()) return _handle.promise().Value();
-            else return {};
+            if (!_handle.done())
+                return _handle.promise().Value();
+            else
+                return {};
         }
 
         TSource Next() noexcept

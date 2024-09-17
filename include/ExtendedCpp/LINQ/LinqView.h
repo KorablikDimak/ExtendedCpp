@@ -13,6 +13,8 @@ namespace ExtendedCpp::LINQ
         TIterator _end;
 
         template<typename TOut, typename TInIterator, typename TSelector>
+        requires Concepts::IsFunctor<TSelector, typename TInIterator::value_type> &&
+                 std::same_as<TOut, typename FunctorTraits<TSelector(typename TInIterator::value_type)>::ReturnType>
         struct SelectorIterator
         {
         private:
@@ -26,7 +28,8 @@ namespace ExtendedCpp::LINQ
                 _inIterator(inIterator),
                 _selector(std::forward<TSelector>(selector)) {}
 
-            std::optional<TOut> operator*() const noexcept
+            std::optional<TOut> operator*()
+                const noexcept(std::is_nothrow_invocable_v<TSelector, typename TInIterator::value_type>)
             {
                 if ((*_inIterator).has_value())
                     return _selector((*_inIterator).value());
@@ -47,6 +50,7 @@ namespace ExtendedCpp::LINQ
         };
 
         template<typename TInIterator, typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, typename TInIterator::value_type>
         struct WhereIterator
         {
         private:
@@ -60,7 +64,8 @@ namespace ExtendedCpp::LINQ
                     _inIterator(inIterator),
                     _predicate(std::forward<TPredicate>(predicate)) {}
 
-            std::optional<value_type> operator*() noexcept
+            std::optional<value_type> operator*()
+                noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type>)
             {
                 if ((*_inIterator).has_value() && _predicate((*_inIterator).value()))
                     return (*_inIterator).value();

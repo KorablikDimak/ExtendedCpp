@@ -5,6 +5,12 @@
 
 namespace ExtendedCpp::Concepts
 {
+    template<typename TFunctor, typename ...Args>
+    concept IsFunctor = requires
+    {
+        std::declval<TFunctor>()(std::declval<Args>()...);
+    };
+
     template<typename T>
     concept Equatable = requires(T value)
     {

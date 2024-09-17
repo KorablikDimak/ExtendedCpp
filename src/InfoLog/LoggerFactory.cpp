@@ -1,8 +1,10 @@
 #include <ExtendedCpp/InfoLog/LoggerFactory.h>
 
-ExtendedCpp::InfoLog::LoggerFactory::LoggerFactory(const Configuration& configuration) noexcept : _configuration(configuration) {}
+ExtendedCpp::InfoLog::LoggerFactory::LoggerFactory(const Configuration& configuration) noexcept :
+    _configuration(configuration) {}
 
-ExtendedCpp::InfoLog::LoggerFactory::LoggerFactory(Configuration&& configuration) noexcept : _configuration(std::move(configuration)) {}
+ExtendedCpp::InfoLog::LoggerFactory::LoggerFactory(Configuration&& configuration) noexcept :
+    _configuration(std::move(configuration)) {}
 
 void ExtendedCpp::InfoLog::LoggerFactory::SetConfiguration(const Configuration& configuration) noexcept
 {

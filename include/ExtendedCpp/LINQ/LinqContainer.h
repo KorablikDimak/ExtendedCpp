@@ -252,7 +252,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TSelector, TSource>
-        LinqContainer<TResult> Select(TSelector&& selector) const noexcept
+        LinqContainer<TResult> Select(TSelector&& selector)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             std::vector<TResult> newCollection;
             newCollection.reserve(_collection.size());
@@ -265,7 +266,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
         requires Concepts::IsFunctor<TSelector, TSource>
-        LinqContainer<TResult> SelectMany(TSelector&& selector) const noexcept
+        LinqContainer<TResult> SelectMany(TSelector&& selector)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             std::vector<TResult> newCollection;
 
@@ -285,7 +287,9 @@ namespace ExtendedCpp::LINQ
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
         requires Concepts::IsFunctor<TCollectionSelector, TSource> && Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
-        LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector) const noexcept
+        LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector)
+            const noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
+                           std::is_nothrow_invocable_v<TCollectionSelector, TSource, TCollectionValueType>)
         {
             std::vector<TResult> newCollection;
 
@@ -301,7 +305,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqContainer Where(TPredicate&& predicate) const noexcept
+        LinqContainer Where(TPredicate&& predicate)
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             std::vector<TSource> newCollection;
 
@@ -314,7 +319,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqContainer RemoveWhere(TPredicate&& predicate) const noexcept
+        LinqContainer RemoveWhere(TPredicate&& predicate)
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             std::vector<TSource> newCollection;
 
@@ -339,8 +345,10 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC) const noexcept
+        requires Concepts::IsFunctor<TSelector, TSource> &&
+                 Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             if (_collection.empty())
                 return *this;
@@ -507,7 +515,7 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        std::size_t Count(TPredicate&& predicate) const noexcept
+        std::size_t Count(TPredicate&& predicate) const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             if (_collection.empty())
                 return 0;
@@ -610,7 +618,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource> && std::is_default_constructible_v<TSource>
-        TSource FirstOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource()) const noexcept
+        TSource FirstOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource())
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             for (const TSource& element : _collection)
                 if (predicate(element))
@@ -645,7 +654,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource> && std::is_default_constructible_v<TSource>
-        TSource LastOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource()) const noexcept
+        TSource LastOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource())
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             for (const_reverse_iterator it = _collection.crbegin(); it != _collection.crend(); ++it)
                 if (predicate(*it))
@@ -705,7 +715,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqContainer SkipWhile(TPredicate&& predicate) const noexcept
+        LinqContainer SkipWhile(TPredicate&& predicate)
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             std::vector<TSource> newCollection;
 
@@ -750,7 +761,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqContainer TakeWhile(TPredicate&& predicate) const noexcept
+        LinqContainer TakeWhile(TPredicate&& predicate)
+            const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             std::vector<TSource> newCollection;
 
@@ -766,7 +778,8 @@ namespace ExtendedCpp::LINQ
 
         template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
         requires Concepts::IsFunctor<TKeySelector, TSource>
-        std::map<TKey, std::vector<TSource>> GroupBy(TKeySelector&& keySelector) const noexcept
+        std::map<TKey, std::vector<TSource>> GroupBy(TKeySelector&& keySelector)
+            const noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
         {
             std::map<TKey, std::vector<TSource>> result;
 
@@ -793,7 +806,10 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> Join(const TOtherCollection& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) const noexcept
+                                    TResultSelector&& resultSelector)
+            const noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                           std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                           std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> newCollection;
 
@@ -821,7 +837,10 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> Join(TOtherCollection&& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
-                                    TResultSelector&& resultSelector) const noexcept
+                                    TResultSelector&& resultSelector)
+            const noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                           std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                           std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> newCollection;
 
@@ -849,7 +868,10 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> GroupJoin(const TOtherCollection& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) const noexcept
+                                         TResultSelector&& resultSelector)
+            const noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                           std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                           std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> newCollection;
 
@@ -879,7 +901,10 @@ namespace ExtendedCpp::LINQ
         LinqContainer<TResult> GroupJoin(TOtherCollection&& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
-                                         TResultSelector&& resultSelector) const noexcept
+                                         TResultSelector&& resultSelector)
+            const noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                           std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                           std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> newCollection;
 
@@ -942,7 +967,7 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        bool All(TPredicate&& predicate) const noexcept
+        bool All(TPredicate&& predicate) const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             for (const TSource& element : _collection)
                 if (!predicate(element))
@@ -952,7 +977,7 @@ namespace ExtendedCpp::LINQ
 
         template<typename TPredicate>
         requires Concepts::IsPredicate<TPredicate, TSource>
-        bool Any(TPredicate&& predicate) const noexcept
+        bool Any(TPredicate&& predicate) const noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             for (const TSource& element : _collection)
                 if (predicate(element))
@@ -971,7 +996,8 @@ namespace ExtendedCpp::LINQ
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> &&
                  Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        bool Contains(const TSource& target, TSelector&& selector) const noexcept
+        bool Contains(const TSource& target, TSelector&& selector)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             for (const TSource& element : _collection)
                 if (selector(element) == selector(target))
@@ -999,7 +1025,8 @@ namespace ExtendedCpp::LINQ
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> &&
                  Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        std::size_t IndexAt(const TSource& target, TSelector&& selector) const noexcept
+        std::size_t IndexAt(const TSource& target, TSelector&& selector)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             for (int i = 0; i < _collection.size(); ++i)
                 if (selector(_collection[i]) == selector(target))
@@ -1024,7 +1051,8 @@ namespace ExtendedCpp::LINQ
         template<typename TSelector>
         requires Concepts::IsFunctor<TSelector, TSource> &&
                  Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        std::size_t BinarySearch(const TSource& element, TSelector&& selector) const noexcept
+        std::size_t BinarySearch(const TSource& element, TSelector&& selector)
+            const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             if (_collection.empty())
                 return NPOS;

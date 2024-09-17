@@ -33,7 +33,10 @@ namespace ExtendedCpp
             _table.resize(_rowCount * _columnCount);
         }
 
-        Matrix(const std::size_t rowCount, const std::size_t columnCount, const std::function<T()> init) noexcept
+        template<typename TInit>
+        requires Concepts::IsFunctor<TInit>
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
+            noexcept(std::is_nothrow_invocable_v<TInit>)
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
@@ -44,7 +47,10 @@ namespace ExtendedCpp
                     _table.push_back(init());
         }
 
-        Matrix(const std::size_t rowCount, const std::size_t columnCount, const std::function<T(std::size_t, std::size_t)> init) noexcept
+        template<typename TInit>
+        requires Concepts::IsFunctor<TInit, std::size_t, std::size_t>
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
+            noexcept(std::is_nothrow_invocable_v<TInit, std::size_t, std::size_t>)
         {
             _rowCount = rowCount;
             _columnCount = columnCount;

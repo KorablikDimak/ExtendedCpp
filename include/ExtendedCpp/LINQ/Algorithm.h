@@ -34,7 +34,8 @@ namespace ExtendedCpp::LINQ::Algorithm
     template<Concepts::Comparable TTarget, typename TCollectionType, typename TSelector>
     requires std::same_as<typename FunctorTraits<TSelector(TCollectionType)>::ReturnType, TTarget>
     std::size_t BinarySearch(const TTarget& target, const TCollectionType *const collection,
-                             std::size_t start, std::size_t end, TSelector&& selector) noexcept
+                             std::size_t start, std::size_t end, TSelector&& selector)
+                             noexcept(std::is_nothrow_invocable_v<TSelector, TCollectionType>)
     {
         if (end - start <= 1)
         {

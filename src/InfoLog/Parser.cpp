@@ -1,5 +1,5 @@
 #include <filesystem>
-#include <iostream>
+#include <chrono>
 
 #include <ExtendedCpp/InfoLog/Parser.h>
 #include <ExtendedCpp/InfoLog/Converter.h>
@@ -54,9 +54,16 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
     ReplaceAll(layout, "{level}", logLevelString);
     ReplaceAll(layout, "{loglevel}", logLevelString);
 
-    const std::filesystem::path baseDirectory = std::filesystem::current_path();
-    ReplaceAll(layout, "{basedir}", baseDirectory.string());
-    ReplaceAll(layout, "{basedirectory}", baseDirectory.string());
-    ReplaceAll(layout, "{tag}", tag);
-    ReplaceAll(layout, "{message}", message);
+    try
+    {
+        const std::filesystem::path baseDirectory = std::filesystem::current_path();
+        ReplaceAll(layout, "{basedir}", baseDirectory.string());
+        ReplaceAll(layout, "{basedirectory}", baseDirectory.string());
+        ReplaceAll(layout, "{tag}", tag);
+        ReplaceAll(layout, "{message}", message);
+    }
+    catch (const std::filesystem::filesystem_error&)
+    {
+        return;
+    }
 }
