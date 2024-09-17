@@ -1,8 +1,6 @@
 #ifndef LINQ_Aggregate_H
 #define LINQ_Aggregate_H
 
-#include <functional>
-
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 #include <ExtendedCpp/LINQ/Concepts.h>
 
@@ -18,9 +16,9 @@ namespace ExtendedCpp::LINQ::Aggregate
         return result;
     }
 
-    template<typename T>
-    std::size_t Count(const T *const collection, const std::size_t start, const std::size_t end,
-        std::function<bool(T)> predicate) noexcept
+    template<typename T, typename TPredicate>
+    requires Concepts::IsPredicate<TPredicate, T>
+    std::size_t Count(const T *const collection, const std::size_t start, const std::size_t end, TPredicate&& predicate) noexcept
     {
         std::size_t count = 0;
         for (std::size_t i = start; i <= end; ++i)

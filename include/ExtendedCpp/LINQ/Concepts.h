@@ -68,6 +68,12 @@ namespace ExtendedCpp::LINQ::Concepts
         collection.size();
         collection.empty();
     };
+
+    template<typename T, typename... TArgs>
+    concept IsPredicate = requires(T predicate, TArgs... args)
+    {
+        { predicate(std::forward<TArgs>(args)...) } -> std::convertible_to<bool>;
+    };
 }
 
 #endif

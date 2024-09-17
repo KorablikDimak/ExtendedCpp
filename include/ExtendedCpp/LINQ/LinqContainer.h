@@ -214,18 +214,18 @@ namespace ExtendedCpp::LINQ
 
         std::set<TSource> ToSet() const noexcept
         {
-            std::set<TSource> newCollection;
+            std::set<TSource> set;
             for (const TSource& element : _collection)
-                newCollection.insert(element);
-            return newCollection;
+                set.insert(element);
+            return set;
         }
 
         std::unordered_set<TSource> ToUnorderedSet() const noexcept
         {
-            std::unordered_set<TSource> newCollection;
+            std::unordered_set<TSource> unorderedSet;
             for (const TSource& element : _collection)
-                newCollection.insert(element);
-            return newCollection;
+                unorderedSet.insert(element);
+            return unorderedSet;
         }
 
         template<typename TKey = typename PairTraits<TSource>::FirstType,
@@ -233,10 +233,10 @@ namespace ExtendedCpp::LINQ
         requires Concepts::IsPair<TSource>
         std::map<TKey, TValue> ToMap() const noexcept
         {
-            std::map<TKey, TValue> newCollection;
+            std::map<TKey, TValue> map;
             for (const TSource& element : _collection)
-                newCollection.insert(element);
-            return newCollection;
+                map.insert(element);
+            return map;
         }
 
         template<typename TKey = typename PairTraits<TSource>::FirstType,
@@ -244,10 +244,10 @@ namespace ExtendedCpp::LINQ
         requires Concepts::IsPair<TSource>
         std::unordered_map<TKey, TValue> ToUnorderedMap() const noexcept
         {
-            std::unordered_map<TKey, TValue> newCollection;
+            std::unordered_map<TKey, TValue> unorderedMap;
             for (const TSource& element : _collection)
-                newCollection.insert(element);
-            return newCollection;
+                unorderedMap.insert(element);
+            return unorderedMap;
         }
 
         template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
@@ -269,18 +269,18 @@ namespace ExtendedCpp::LINQ
         {
             std::vector<TResult> newCollection;
 
-            for (std::size_t i = 0; i < _collection.size(); ++i)
+            for (const TSource& element : _collection)
             {
-                std::vector<TResult> tempCollection = selector(_collection[i]);
-                for (std::size_t j = 0; j < tempCollection.size(); ++j)
-                    newCollection.push_back(std::move(tempCollection[j]));
+                std::vector<TResult> tempCollection = selector(element);
+                for (auto&& tempElement : tempCollection)
+                    newCollection.push_back(std::move(tempElement));
             }
 
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
         template<typename TCollectionSelector,
-                Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
+                 Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
                  typename TCollectionValueType = typename TCollection::value_type,
                  typename TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
@@ -299,7 +299,9 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        LinqContainer Where(const std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqContainer Where(TPredicate&& predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
@@ -310,13 +312,16 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer RemoveWhere(const std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqContainer RemoveWhere(TPredicate&& predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
             for (const TSource& element : _collection)
             {
-                if (predicate(element)) continue;
+                if (predicate(element))
+                    continue;
                 else newCollection.push_back(element);
             }
 
@@ -326,7 +331,8 @@ namespace ExtendedCpp::LINQ
         LinqContainer Order(OrderType orderType = OrderType::ASC) const noexcept
         requires Concepts::Comparable<TSource>
         {
-            if (_collection.empty()) return *this;
+            if (_collection.empty())
+                return *this;
             std::vector<TSource> newCollection(_collection.cbegin(), _collection.cend());
             Sort::QuickSort(newCollection.data(), 0, _collection.size() - 1, orderType);
             return LinqContainer(std::move(newCollection));
@@ -336,7 +342,8 @@ namespace ExtendedCpp::LINQ
         requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC) const noexcept
         {
-            if (IsEmpty()) return *this;
+            if (_collection.empty())
+                return *this;
             std::vector<TSource> newCollection(_collection.cbegin(), _collection.cend());
             Sort::QuickSort(newCollection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector), orderType);
             return LinqContainer(std::move(newCollection));
@@ -349,7 +356,9 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection>
-        requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
+        requires Concepts::ConstIterable<TOtherCollection> &&
+                 Concepts::HasSize<TOtherCollection> &&
+                 Concepts::Equatable<TSource>
         LinqContainer Except(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -359,8 +368,10 @@ namespace ExtendedCpp::LINQ
                 long long j = 0;
                 for (const TSource& otherElement : otherCollection)
                 {
-                    if (element == otherElement) break;
-                    if (j == otherCollection.size() - 1) newCollection.insert(element);
+                    if (element == otherElement)
+                        break;
+                    if (j == otherCollection.size() - 1)
+                        newCollection.insert(element);
                     ++j;
                 }
             }
@@ -371,7 +382,9 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection>
-        requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
+        requires Concepts::Iterable<TOtherCollection> &&
+                 Concepts::HasSize<TOtherCollection> &&
+                 Concepts::Equatable<TSource>
         LinqContainer Except(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -381,8 +394,10 @@ namespace ExtendedCpp::LINQ
                 std::size_t j = 0;
                 for (TSource&& otherElement : otherCollection)
                 {
-                    if (element == std::move(otherElement)) break;
-                    if (j == otherCollection.size() - 1) newCollection.insert(element);
+                    if (element == std::move(otherElement))
+                        break;
+                    if (j == otherCollection.size() - 1)
+                        newCollection.insert(element);
                     ++j;
                 }
             }
@@ -490,11 +505,13 @@ namespace ExtendedCpp::LINQ
             return _collection.size();
         }
 
-        std::size_t Count(const std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        std::size_t Count(TPredicate&& predicate) const noexcept
         {
             if (_collection.empty())
                 return 0;
-            return Aggregate::Count(_collection.data(), 0, _collection.size() - 1, std::move(predicate));
+            return Aggregate::Count(_collection.data(), 0, _collection.size() - 1, std::forward<TPredicate>(predicate));
         }
 
         TSource Sum() const
@@ -573,10 +590,13 @@ namespace ExtendedCpp::LINQ
             return _collection[0];
         }
 
-        TSource First(const std::function<bool(TSource)> predicate) const
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        TSource First(TPredicate&& predicate) const
         {
             for (const TSource& element : _collection)
-                if (predicate(element)) return element;
+                if (predicate(element))
+                    return element;
             throw std::out_of_range("Element not found");
         }
 
@@ -588,11 +608,13 @@ namespace ExtendedCpp::LINQ
             return _collection[0];
         }
 
-        TSource FirstOrDefault(const std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
-        requires std::is_default_constructible_v<TSource>
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource> && std::is_default_constructible_v<TSource>
+        TSource FirstOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource()) const noexcept
         {
             for (const TSource& element : _collection)
-                if (predicate(element)) return element;
+                if (predicate(element))
+                    return element;
             return defaultValue;
         }
 
@@ -603,10 +625,13 @@ namespace ExtendedCpp::LINQ
             return _collection[_collection.size() - 1];
         }
 
-        TSource Last(const std::function<bool(TSource)> predicate) const
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        TSource Last(TPredicate&& predicate) const
         {
             for (const_reverse_iterator it = _collection.crbegin(); it != _collection.crend(); ++it)
-                if (predicate(*it)) return *it;
+                if (predicate(*it))
+                    return *it;
             throw std::out_of_range("Element not found");
         }
 
@@ -618,11 +643,13 @@ namespace ExtendedCpp::LINQ
             return _collection[_collection.size() - 1];
         }
 
-        TSource LastOrDefault(const std::function<bool(TSource)> predicate, const TSource& defaultValue = TSource()) const noexcept
-        requires std::is_default_constructible_v<TSource>
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource> && std::is_default_constructible_v<TSource>
+        TSource LastOrDefault(TPredicate&& predicate, const TSource& defaultValue = TSource()) const noexcept
         {
             for (const_reverse_iterator it = _collection.crbegin(); it != _collection.crend(); ++it)
-                if (predicate(*it)) return *it;
+                if (predicate(*it))
+                    return *it;
             return defaultValue;
         }
 
@@ -676,13 +703,16 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer SkipWhile(std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqContainer SkipWhile(TPredicate&& predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
             std::size_t i = 0;
             for (; i < _collection.size(); ++i)
-                if(!predicate(_collection[i])) break;
+                if(!predicate(_collection[i]))
+                    break;
 
             for (; i < _collection.size(); ++i)
                 newCollection.push_back(_collection[i]);
@@ -718,13 +748,16 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer TakeWhile(std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqContainer TakeWhile(TPredicate&& predicate) const noexcept
         {
             std::vector<TSource> newCollection;
 
             for (const TSource& element : _collection)
             {
-                if (!predicate(element)) break;
+                if (!predicate(element))
+                    break;
                 newCollection.push_back(element);
             }
 
@@ -907,7 +940,9 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
         }
 
-        bool All(std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        bool All(TPredicate&& predicate) const noexcept
         {
             for (const TSource& element : _collection)
                 if (!predicate(element))
@@ -915,7 +950,9 @@ namespace ExtendedCpp::LINQ
             return true;
         }
 
-        bool Any(std::function<bool(TSource)> predicate) const noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        bool Any(TPredicate&& predicate) const noexcept
         {
             for (const TSource& element : _collection)
                 if (predicate(element))
@@ -932,7 +969,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> &&
+                 Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         bool Contains(const TSource& target, TSelector&& selector) const noexcept
         {
             for (const TSource& element : _collection)
@@ -959,7 +997,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> &&
+                 Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         std::size_t IndexAt(const TSource& target, TSelector&& selector) const noexcept
         {
             for (int i = 0; i < _collection.size(); ++i)
@@ -983,7 +1022,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> &&
+                 Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         std::size_t BinarySearch(const TSource& element, TSelector&& selector) const noexcept
         {
             if (_collection.empty())

@@ -11,7 +11,8 @@
 namespace ExtendedCpp::LINQ::Sort
 {
     template<Concepts::Comparable T>
-    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end,
+                       const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
         {
@@ -42,7 +43,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void SelectionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void SelectionSort(T* *const collection, const std::size_t start, const std::size_t end,
+                       const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
         {
@@ -74,7 +76,8 @@ namespace ExtendedCpp::LINQ::Sort
 
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
+    void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector,
+                       const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
         {
@@ -105,7 +108,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void InsertionSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void InsertionSort(T *const collection, const std::size_t start, const std::size_t end,
+                       const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
         {
@@ -132,7 +136,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void InsertionSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void InsertionSort(T* *const collection, const std::size_t start, const std::size_t end,
+                       const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
         {
@@ -190,7 +195,8 @@ namespace ExtendedCpp::LINQ::Sort
     constexpr double FACTOR = 1.2473309;
 
     template<Concepts::Comparable T>
-    void CombSort(T *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void CombSort(T *const collection, const std::size_t start, const std::size_t end,
+                  const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         std::size_t step = end - start;
@@ -220,7 +226,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void CombSort(T* *const collection, const std::size_t start, const std::size_t end, const OrderType orderType = OrderType::ASC) noexcept
+    void CombSort(T* *const collection, const std::size_t start, const std::size_t end,
+                  const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         std::size_t step = end - start;
@@ -283,7 +290,8 @@ namespace ExtendedCpp::LINQ::Sort
 
     template<typename T>
     requires Concepts::Comparable<T> && Concepts::Divisible<T>
-    void BucketSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void BucketSort(T *const collection, const std::size_t start, const std::size_t end,
+                    const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
 
@@ -351,8 +359,8 @@ namespace ExtendedCpp::LINQ::Sort
     requires Concepts::IsFunctor<TSelector, T> &&
              Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType> &&
              Concepts::Divisible<typename FunctorTraits<TSelector(T)>::ReturnType>
-    void BucketSort(T *const collection, std::size_t start, std::size_t end,
-                    TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
+    void BucketSort(T *const collection, const std::size_t start, const std::size_t end,
+                    TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
 
@@ -419,7 +427,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void Merge(T *const collection, std::size_t start, std::size_t mid, std::size_t end, const OrderType orderType) noexcept
+    void Merge(T *const collection, const std::size_t start, const std::size_t mid, const std::size_t end,
+               const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
         const std::size_t n2 = end - mid;
@@ -477,7 +486,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void MergeSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void MergeSort(T *const collection, const std::size_t start, const std::size_t end,
+                   const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t mid = (start + end) / 2;
@@ -487,7 +497,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void Merge(T* *const collection, const std::size_t start, const std::size_t mid, const std::size_t end, const OrderType orderType) noexcept
+    void Merge(T* *const collection, const std::size_t start, const std::size_t mid, const std::size_t end,
+               const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
         const std::size_t n2 = end - mid;
@@ -545,7 +556,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void MergeSort(T* *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void MergeSort(T* *const collection, const std::size_t start, const std::size_t end,
+                   const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t mid = (start + end) / 2;
@@ -556,7 +568,7 @@ namespace ExtendedCpp::LINQ::Sort
 
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    void Merge(T *const collection, std::size_t start, std::size_t mid, std::size_t end,
+    void Merge(T *const collection, const std::size_t start, const std::size_t mid, const std::size_t end,
                TSelector&& selector, const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
@@ -616,8 +628,8 @@ namespace ExtendedCpp::LINQ::Sort
 
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    void MergeSort(T *const collection, std::size_t start, std::size_t end,
-                   TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
+    void MergeSort(T *const collection, const std::size_t start, const std::size_t end,
+                   TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t mid = (start + end) / 2;
@@ -629,7 +641,8 @@ namespace ExtendedCpp::LINQ::Sort
     constexpr std::size_t RUN = 64;
 
     template<Concepts::Comparable T>
-    void TimSort(T *const collection, const std::size_t start, const std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void TimSort(T *const collection, const std::size_t start, const std::size_t end,
+                 const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t count = end + 1 - start;
@@ -651,7 +664,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void TimSort(T* *const collection, const std::size_t start, const std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void TimSort(T* *const collection, const std::size_t start, const std::size_t end,
+                 const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t count = end + 1 - start;
@@ -675,7 +689,7 @@ namespace ExtendedCpp::LINQ::Sort
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void TimSort(T *const collection, const std::size_t start, const std::size_t end,
-                 TSelector selector, OrderType orderType = OrderType::ASC) noexcept
+                 TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end) return;
         const std::size_t count = end + 1 - start;
@@ -697,7 +711,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    std::size_t Partition(T *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
+    std::size_t Partition(T *const collection, const std::size_t start, const std::size_t end,
+                          const OrderType orderType) noexcept
     {
         const T pivot = collection[start];
         std::size_t i = start + 1;
@@ -726,7 +741,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void QuickSort(T *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void QuickSort(T *const collection, std::size_t start, std::size_t end,
+                   const OrderType orderType = OrderType::ASC) noexcept
     {
         while (start < end)
         {
@@ -753,7 +769,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    std::size_t Partition(T* *const collection, std::size_t start, std::size_t end, const OrderType orderType) noexcept
+    std::size_t Partition(T* *const collection, const std::size_t start, const std::size_t end,
+                          const OrderType orderType) noexcept
     {
         const T* pivot = collection[start];
         std::size_t i = start + 1;
@@ -782,7 +799,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::Comparable T>
-    void QuickSort(T* *const collection, std::size_t start, std::size_t end, OrderType orderType = OrderType::ASC) noexcept
+    void QuickSort(T* *const collection, std::size_t start, std::size_t end,
+                   const OrderType orderType = OrderType::ASC) noexcept
     {
         while (start < end)
         {
@@ -810,8 +828,8 @@ namespace ExtendedCpp::LINQ::Sort
 
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
-    std::size_t Partition(T *const collection, std::size_t start, std::size_t end,
-                                                  TSelector&& selector, const OrderType orderType) noexcept
+    std::size_t Partition(T *const collection, const std::size_t start, const std::size_t end,
+                          TSelector&& selector, const OrderType orderType) noexcept
     {
         using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
 
@@ -844,7 +862,7 @@ namespace ExtendedCpp::LINQ::Sort
     template<typename T, typename TSelector>
     requires Concepts::IsFunctor<TSelector, T> && Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
     void QuickSort(T *const collection, std::size_t start, std::size_t end,
-                   TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
+                   TSelector&& selector, const OrderType orderType = OrderType::ASC) noexcept
     {
         while (start < end)
         {

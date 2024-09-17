@@ -21,32 +21,20 @@ void ExtendedCpp::InfoLog::FileSender::Send(const std::string& message, const Lo
     std::string filePath = _filePath;
     Parser::ParseLayout(filePath, message, logLevel, tag);
 
-    try
     {
         std::filesystem::path layoutPath(filePath);
         std::lock_guard lock(_mutex);
         if (!exists(layoutPath.parent_path()))
             create_directories(layoutPath.parent_path());
     }
-    catch (...)
-    {
-        std::cerr << "std::filesystem error" << std::endl;
-        return;
-    }
 
     std::string layout = Config.at("layout");
     Parser::ParseLayout(layout, message, logLevel, tag);
 
-    try
     {
         std::lock_guard lock(_mutex);
         std::ofstream fileStream(filePath, std::ios::app);
         if (fileStream.is_open()) fileStream << layout << std::endl;
         fileStream.close();
-    }
-    catch (...)
-    {
-        std::cerr << "std::ofstream error" << std::endl;
-        return;
     }
 }

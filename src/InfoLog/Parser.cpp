@@ -11,46 +11,38 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
     const std::unique_ptr<tm> timeStructure(new tm());
 
 #if defined(_WIN32)
-    try { localtime_s(timeStructure.get(), &time);
+    localtime_s(timeStructure.get(), &time);
 #elif defined(__linux__)
-    try { localtime_r(&time, timeStructure.get());
+    localtime_r(&time, timeStructure.get());
 #elif defined(__APPLE__)
-    try { localtime_r(&time, timeStructure.get());
+    localtime_r(&time, timeStructure.get());
 #endif
 
-        const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(currentTime);
-        const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - seconds);
+    const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(currentTime);
+    const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - seconds);
 
-        ReplaceAll(layout, "{years}", std::to_string(timeStructure->tm_year + 1900));
-        ReplaceAll(layout, "{months}", std::to_string(timeStructure->tm_mon + 1));
-        ReplaceAll(layout, "{days}", std::to_string(timeStructure->tm_mday));
+    ReplaceAll(layout, "{years}", std::to_string(timeStructure->tm_year + 1900));
+    ReplaceAll(layout, "{months}", std::to_string(timeStructure->tm_mon + 1));
+    ReplaceAll(layout, "{days}", std::to_string(timeStructure->tm_mday));
 
-        ReplaceAll(layout, "{year}", std::to_string(timeStructure->tm_year + 1900));
-        ReplaceAll(layout, "{month}", std::to_string(timeStructure->tm_mon + 1));
-        ReplaceAll(layout, "{day}", std::to_string(timeStructure->tm_mday));
+    ReplaceAll(layout, "{year}", std::to_string(timeStructure->tm_year + 1900));
+    ReplaceAll(layout, "{month}", std::to_string(timeStructure->tm_mon + 1));
+    ReplaceAll(layout, "{day}", std::to_string(timeStructure->tm_mday));
 
-        ReplaceAll(layout, "{yyyy}", std::to_string(timeStructure->tm_year + 1900));
-        ReplaceAll(layout, "{yy}", std::to_string(timeStructure->tm_year - 100));
-        ReplaceAll(layout, "{mm}", std::to_string(timeStructure->tm_mon + 1));
-        ReplaceAll(layout, "{dd}", std::to_string(timeStructure->tm_mday));
+    ReplaceAll(layout, "{yyyy}", std::to_string(timeStructure->tm_year + 1900));
+    ReplaceAll(layout, "{yy}", std::to_string(timeStructure->tm_year - 100));
+    ReplaceAll(layout, "{mm}", std::to_string(timeStructure->tm_mon + 1));
+    ReplaceAll(layout, "{dd}", std::to_string(timeStructure->tm_mday));
 
-        ReplaceAll(layout, "{hours}", std::to_string(timeStructure->tm_hour));
-        ReplaceAll(layout, "{minutes}", std::to_string(timeStructure->tm_min));
-        ReplaceAll(layout, "{seconds}", std::to_string(timeStructure->tm_sec));
-        ReplaceAll(layout, "{milliseconds}", std::to_string(milliseconds.count()));
+    ReplaceAll(layout, "{hours}", std::to_string(timeStructure->tm_hour));
+    ReplaceAll(layout, "{minutes}", std::to_string(timeStructure->tm_min));
+    ReplaceAll(layout, "{seconds}", std::to_string(timeStructure->tm_sec));
+    ReplaceAll(layout, "{milliseconds}", std::to_string(milliseconds.count()));
 
-        ReplaceAll(layout, "{hour}", std::to_string(timeStructure->tm_hour));
-        ReplaceAll(layout, "{minute}", std::to_string(timeStructure->tm_min));
-        ReplaceAll(layout, "{second}", std::to_string(timeStructure->tm_sec));
-        ReplaceAll(layout, "{millisecond}", std::to_string(milliseconds.count()));
-    }
-#if defined(_WIN32)
-    catch (...) { std::cerr << "localtime_s() error" << std::endl; }
-#elif defined(__linux__)
-    catch (...) { std::cerr << "localtime_r() error" << std::endl; }
-#elif defined(__APPLE__)
-    catch (...) { std::cerr << "localtime_r() error" << std::endl; }
-#endif
+    ReplaceAll(layout, "{hour}", std::to_string(timeStructure->tm_hour));
+    ReplaceAll(layout, "{minute}", std::to_string(timeStructure->tm_min));
+    ReplaceAll(layout, "{second}", std::to_string(timeStructure->tm_sec));
+    ReplaceAll(layout, "{millisecond}", std::to_string(milliseconds.count()));
 
     std::string logLevelString = "TRACE";
     if (logLevel == LogLevel::Debug) logLevelString = "DEBUG";
@@ -62,13 +54,9 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
     ReplaceAll(layout, "{level}", logLevelString);
     ReplaceAll(layout, "{loglevel}", logLevelString);
 
-    try
-    {
-        const std::filesystem::path baseDirectory = std::filesystem::current_path();
-        ReplaceAll(layout, "{basedir}", baseDirectory.string());
-        ReplaceAll(layout, "{basedirectory}", baseDirectory.string());
-        ReplaceAll(layout, "{tag}", tag);
-        ReplaceAll(layout, "{message}", message);
-    }
-    catch (...) { std::cerr << "std::filesystem::current_path() error" << std::endl; }
+    const std::filesystem::path baseDirectory = std::filesystem::current_path();
+    ReplaceAll(layout, "{basedir}", baseDirectory.string());
+    ReplaceAll(layout, "{basedirectory}", baseDirectory.string());
+    ReplaceAll(layout, "{tag}", tag);
+    ReplaceAll(layout, "{message}", message);
 }

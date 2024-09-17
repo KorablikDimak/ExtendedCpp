@@ -1,7 +1,6 @@
 #ifndef LINQ_LinqGenerator_H
 #define LINQ_LinqGenerator_H
 
-#include <cstdint>
 #include <array>
 #include <list>
 #include <forward_list>
@@ -27,7 +26,8 @@ namespace ExtendedCpp::LINQ
         public:
             Iterator(Future<TSource>& yieldContext, bool isEnd) noexcept : _yieldContext(yieldContext), _isEnd(isEnd)
             {
-                if (_yieldContext) _value = _yieldContext.Value();
+                if (_yieldContext)
+                    _value = _yieldContext.Value();
                 else _isEnd = true;
             }
 
@@ -43,7 +43,8 @@ namespace ExtendedCpp::LINQ
 
             Iterator& operator++() noexcept
             {
-                if (_yieldContext) _value = _yieldContext.Next();
+                if (_yieldContext)
+                    _value = _yieldContext.Next();
                 else _isEnd = true;
                 return *this;
             }
@@ -64,6 +65,7 @@ namespace ExtendedCpp::LINQ
 
     public:
         using value_type = TSource;
+        using iterator = Iterator;
         using promise_type = typename Future<TSource>::promise_type;
         using handle_type = typename Future<TSource>::handle_type;
 
@@ -117,7 +119,7 @@ namespace ExtendedCpp::LINQ
             std::vector<TSource> collection;
             while (_yieldContext)
                 collection.push_back(_yieldContext.Next());
-            return std::move(collection);
+            return collection;
         }
 
         template<std::size_t SIZE>
@@ -126,7 +128,7 @@ namespace ExtendedCpp::LINQ
             std::array<TSource, SIZE> collection;
             for (std::size_t i = 0; i < SIZE && _yieldContext; ++i)
                 collection[i] = _yieldContext.Next();
-            return std::move(collection);
+            return collection;
         }
 
         std::list<TSource> ToList() noexcept
@@ -134,7 +136,7 @@ namespace ExtendedCpp::LINQ
             std::list<TSource> collection;
             while (_yieldContext)
                 collection.push_back(_yieldContext.Next());
-            return std::move(collection);
+            return collection;
         }
 
         std::forward_list<TSource> ToForwardList() noexcept
@@ -142,7 +144,7 @@ namespace ExtendedCpp::LINQ
             std::forward_list<TSource> collection;
             while (_yieldContext)
                 collection.push_front(_yieldContext.Next());
-            return std::move(collection);
+            return collection;
         }
 
         std::stack<TSource> ToStack() noexcept
@@ -236,24 +238,33 @@ namespace ExtendedCpp::LINQ
                 typename TCollectionValueType = typename TCollection::value_type,
                 typename TResultSelector,
                 typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
-        requires Concepts::IsFunctor<TCollectionSelector, TSource> && Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
+        requires Concepts::IsFunctor<TCollectionSelector, TSource> &&
+                 Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
         LinqGenerator<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector) noexcept
         {
             return LinqGenerator<TResult>([this](TCollectionSelector&& collectionSelector_, TResultSelector&& resultSelector_)
-                { return SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector_), std::forward<TResultSelector>(resultSelector_)); },
-                std::forward<TCollectionSelector>(collectionSelector), std::forward<TResultSelector>(resultSelector));
+                { return SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector_),
+                        std::forward<TResultSelector>(resultSelector_)); },
+                        std::forward<TCollectionSelector>(collectionSelector),
+                        std::forward<TResultSelector>(resultSelector));
         }
 
-        LinqGenerator Where(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqGenerator Where(TPredicate&& predicate) noexcept
         {
-            return LinqGenerator([this](std::function<bool(TSource)> predicate_)
-                { return WhereGenerator(std::move(predicate_)); }, std::move(predicate));
+            return LinqGenerator([this](TPredicate&& predicate_)
+                { return WhereGenerator(std::forward<TPredicate>(predicate_)); },
+                    std::forward<TPredicate>(predicate));
         }
 
-        LinqGenerator RemoveWhere(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqGenerator RemoveWhere(TPredicate&& predicate) noexcept
         {
-            return LinqGenerator([this](std::function<bool(TSource)> predicate_)
-                { return RemoveWhereGenerator(std::move(predicate_)); }, std::move(predicate));
+            return LinqGenerator([this](TPredicate&& predicate_)
+                { return RemoveWhereGenerator(std::forward<TPredicate>(predicate_)); },
+                    std::forward<TPredicate>(predicate));
         }
 
         LinqGenerator Order(OrderType orderType = OrderType::ASC) noexcept
@@ -271,7 +282,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> && Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::IsFunctor<TSelector, TSource> &&
+                 Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         LinqGenerator OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC) noexcept
         {
             std::vector<TSource> newCollection;
@@ -279,7 +291,8 @@ namespace ExtendedCpp::LINQ
                 newCollection.push_back(_yieldContext.Next());
             if (newCollection.empty()) return *this;
 
-            Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1, std::forward<TSelector>(selector), orderType);
+            Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1,
+                            std::forward<TSelector>(selector), orderType);
 
             return LinqGenerator([this, newCollection = std::move(newCollection)]()
                 { return Generator(newCollection); });
@@ -296,7 +309,9 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection>
-        requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
+        requires Concepts::ConstIterable<TOtherCollection> &&
+                 Concepts::HasSize<TOtherCollection> &&
+                 Concepts::Equatable<TSource>
         LinqGenerator Except(const TOtherCollection& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -319,7 +334,9 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection>
-        requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection> && Concepts::Equatable<TSource>
+        requires Concepts::Iterable<TOtherCollection> &&
+                 Concepts::HasSize<TOtherCollection> &&
+                 Concepts::Equatable<TSource>
         LinqGenerator Except(TOtherCollection&& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -439,7 +456,9 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Aggregate(collection.data(), 0, collection.size() - 1, std::move(aggregateFunction));
         }
 
-        std::size_t Count(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        std::size_t Count(TPredicate&& predicate) noexcept
         {
             std::size_t result = 0;
             while (_yieldContext)
@@ -562,10 +581,12 @@ namespace ExtendedCpp::LINQ
                 { return SkipGenerator(count_); }, count);
         }
 
-        LinqGenerator SkipWhile(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqGenerator SkipWhile(TPredicate&& predicate) noexcept
         {
-            return LinqGenerator([this](std::function<bool(TSource)> predicate_)
-                { return SkipWhileGenerator(predicate_); }, std::move(predicate));
+            return LinqGenerator([this](TPredicate&& predicate_)
+                { return SkipWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
         }
 
         LinqGenerator Take(const std::size_t count)
@@ -574,10 +595,12 @@ namespace ExtendedCpp::LINQ
                 { return TakeGenerator(count_); }, count);
         }
 
-        LinqGenerator TakeWhile(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        LinqGenerator TakeWhile(TPredicate&& predicate) noexcept
         {
-            return LinqGenerator([this](std::function<bool(TSource)> predicate_)
-                { return TakeWhileGenerator(predicate_); }, std::move(predicate));
+            return LinqGenerator([this](TPredicate&& predicate_)
+                { return TakeWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
         }
 
         template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
@@ -735,17 +758,23 @@ namespace ExtendedCpp::LINQ
                 { return ZipGenerator(otherCollection_); }, std::forward<TOtherCollection>(otherCollection));
         }
 
-        bool All(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        bool All(TPredicate&& predicate) noexcept
         {
             while (_yieldContext)
-                if (!predicate(_yieldContext.Next())) return false;
+                if (!predicate(_yieldContext.Next()))
+                    return false;
             return true;
         }
 
-        bool Any(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        bool Any(TPredicate&& predicate) noexcept
         {
             while (_yieldContext)
-                if (predicate(_yieldContext.Next())) return true;
+                if (predicate(_yieldContext.Next()))
+                    return true;
             return false;
         }
 
@@ -811,13 +840,17 @@ namespace ExtendedCpp::LINQ
             }
         }
 
-        Future<TSource> RemoveWhereGenerator(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        Future<TSource> RemoveWhereGenerator(TPredicate&& predicate) noexcept
         {
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
-                if (predicate(element)) continue;
-                else co_yield std::move(element);
+                if (predicate(element))
+                    continue;
+                else
+                    co_yield std::move(element);
             }
         }
 
@@ -834,7 +867,9 @@ namespace ExtendedCpp::LINQ
                 co_yield _yieldContext.Next();
         }
 
-        Future<TSource> SkipWhileGenerator(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        Future<TSource> SkipWhileGenerator(TPredicate&& predicate) noexcept
         {
             while (_yieldContext)
             {
@@ -863,12 +898,15 @@ namespace ExtendedCpp::LINQ
                 _yieldContext.Next();
         }
 
-        Future<TSource> TakeWhileGenerator(std::function<bool(TSource)> predicate) noexcept
+        template<typename TPredicate>
+        requires Concepts::IsPredicate<TPredicate, TSource>
+        Future<TSource> TakeWhileGenerator(TPredicate&& predicate) noexcept
         {
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
-                if (!predicate(element)) break;
+                if (!predicate(element))
+                    break;
                 co_yield std::move(element);
             }
 

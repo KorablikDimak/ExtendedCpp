@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "ExtendedCpp/LINQ.h"
+#include <ExtendedCpp/LINQ.h>
 
 #include "LINQ_Tests.h"
 

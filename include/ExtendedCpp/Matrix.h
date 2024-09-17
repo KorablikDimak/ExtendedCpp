@@ -33,28 +33,26 @@ namespace ExtendedCpp
             _table.resize(_rowCount * _columnCount);
         }
 
-        Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T()> init) noexcept
-        requires std::is_default_constructible_v<T>
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, const std::function<T()> init) noexcept
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
-            _table.resize(_rowCount * _columnCount);
+            _table.reserve(_rowCount * _columnCount);
 
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    _table[i * _columnCount + j] = init();
+                    _table.push_back(init());
         }
 
-        Matrix(const std::size_t rowCount, const std::size_t columnCount, std::function<T(std::size_t, std::size_t)> init) noexcept
-        requires std::is_default_constructible_v<T>
+        Matrix(const std::size_t rowCount, const std::size_t columnCount, const std::function<T(std::size_t, std::size_t)> init) noexcept
         {
             _rowCount = rowCount;
             _columnCount = columnCount;
-            _table.resize(_rowCount * _columnCount);
+            _table.reserve(_rowCount * _columnCount);
 
             for (std::size_t i = 0; i < _rowCount; ++i)
                 for (std::size_t j = 0; j < _columnCount; ++j)
-                    _table[i * _columnCount + j] = init(i, j);
+                    _table.push_back(init(i, j));
         }
 
         Matrix(const Matrix& matrix) noexcept
@@ -193,7 +191,7 @@ namespace ExtendedCpp
                     result._table[i * _columnCount + j] =
                             _table[i * _columnCount + j] + matrix._table[i * _columnCount + j];
 
-            return std::move(result);
+            return result;
         }
 
         std::optional<Matrix> operator+(const Matrix& matrix) const noexcept
@@ -213,7 +211,7 @@ namespace ExtendedCpp
                     result._table[i * _columnCount + j] =
                             _table[i * _columnCount + j] - matrix._table[i * _columnCount + j];
 
-            return std::move(result);
+            return result;
         }
 
         std::optional<Matrix> operator-(const Matrix& matrix) const noexcept
@@ -231,13 +229,13 @@ namespace ExtendedCpp
             {
                 Matrix result = StrassenMultiplyParallel(matrix);
                 result.Resize(_rowCount, matrix._columnCount);
-                return std::move(result);
+                return result;
             }
             else
             {
                 Matrix result = StrassenMultiply(matrix);
                 result.Resize(_rowCount, matrix._columnCount);
-                return std::move(result);
+                return result;
             }
         }
 
@@ -254,7 +252,7 @@ namespace ExtendedCpp
                 for (std::size_t j = 0; j < _columnCount; ++j)
                     result._table[i * _columnCount + j] = _table[i * _columnCount + j] * alpha;
 
-            return std::move(result);
+            return result;
         }
 
         Matrix operator*(const T&& alpha) const noexcept
@@ -270,7 +268,7 @@ namespace ExtendedCpp
                 for (std::size_t j = 0; j < _columnCount; ++j)
                     result._table[i * _columnCount + j] = _table[i * _columnCount + j] * std::move(alpha);
 
-            return std::move(result);
+            return result;
         }
 
         Matrix operator*(T&& alpha) const noexcept
@@ -286,7 +284,7 @@ namespace ExtendedCpp
             for (std::size_t i = 0; i < _columnCount; ++i)
                 row[i] = _table[rowNumber * _columnCount + i];
 
-            return std::move(row);
+            return row;
         }
 
         Matrix Transpose() const noexcept
@@ -296,7 +294,7 @@ namespace ExtendedCpp
                 for (std::size_t j = 0; j < _columnCount; ++j)
                     result._table[j * _rowCount + i] = _table[i * _columnCount + j];
 
-            return std::move(result);
+            return result;
         }
 
         void EraseRow(const std::size_t rowNumber) noexcept
@@ -353,7 +351,7 @@ namespace ExtendedCpp
             Matrix copy = Matrix(*this);
             for (std::size_t i = 0; i < _rowCount * _columnCount; ++i)
                 copy._table[i] = -copy._table[i];
-            return std::move(copy);
+            return copy;
         }
 
         void SwapRows(const std::size_t row1Number, const std::size_t row2Number) noexcept
@@ -535,7 +533,7 @@ namespace ExtendedCpp
                 matrixString += "\n";
             }
 
-            return std::move(matrixString);
+            return matrixString;
         }
 
     private:
@@ -628,7 +626,7 @@ namespace ExtendedCpp
                 }
             }
 
-            return std::move(IA);
+            return IA;
         }
 
         [[deprecated]]
@@ -659,7 +657,7 @@ namespace ExtendedCpp
                     copy._table[row * _columnCount + i] = 0;
                 }
 
-            return std::move(copy);
+            return copy;
         }
 
         [[deprecated]]
@@ -685,7 +683,7 @@ namespace ExtendedCpp
                 X[i] /= _table[i * _columnCount + i];
             }
 
-            return std::move(X);
+            return X;
         }
 
         [[nodiscard]]
@@ -722,7 +720,52 @@ namespace ExtendedCpp
                 for (std::size_t j = size; j < _rowCount; ++j)
                     matrix4._table[(i - size) * matrix4._columnCount + j - size] = _table[i * _columnCount + j];
 
-            return { matrix1, matrix2, matrix3, matrix4 };
+            return { std::move(matrix1), std::move(matrix2), std::move(matrix3), std::move(matrix4) };
+        }
+
+        std::array<Matrix, 4> SplitMatrixParallel() const noexcept
+        {
+            auto task1 = std::async(std::launch::async, [this]()
+            {
+                const std::size_t size = _rowCount / 2;
+                Matrix matrix1(size, size);
+                for (std::size_t i = 0; i < size; ++i)
+                    for (std::size_t j = 0; j < size; ++j)
+                        matrix1._table[i * matrix1._columnCount + j] = _table[i * _columnCount + j];
+                return matrix1;
+            });
+
+            auto task2 = std::async(std::launch::async, [this]()
+            {
+                const std::size_t size = _rowCount / 2;
+                Matrix matrix2(size, size);
+                for (std::size_t i = 0; i < size; ++i)
+                    for (std::size_t j = size; j < _rowCount; ++j)
+                        matrix2._table[i * matrix2._columnCount + j - size] = _table[i * _columnCount + j];
+                return matrix2;
+            });
+
+            auto task3 = std::async(std::launch::async, [this]()
+            {
+                const std::size_t size = _rowCount / 2;
+                Matrix matrix3(size, size);
+                for (std::size_t i = size; i < _rowCount; ++i)
+                    for (std::size_t j = 0; j < size; ++j)
+                        matrix3._table[(i - size) * matrix3._columnCount + j] = _table[i * _columnCount + j];
+                return matrix3;
+            });
+
+            auto task4 = std::async(std::launch::async, [this]()
+            {
+                const std::size_t size = _rowCount / 2;
+                Matrix matrix4(size, size);
+                for (std::size_t i = size; i < _rowCount; ++i)
+                    for (std::size_t j = size; j < _rowCount; ++j)
+                        matrix4._table[(i - size) * matrix4._columnCount + j - size] = _table[i * _columnCount + j];
+                return matrix4;
+            });
+
+            return { std::move(task1.get()), std::move(task2.get()), std::move(task3.get()), std::move(task4.get()) };
         }
 
         static Matrix CollectMatrix(std::array<Matrix, 4> parts) noexcept
@@ -740,7 +783,7 @@ namespace ExtendedCpp
                     matrix._table[(i + size) * matrix._columnCount + j + size] = parts[3]._table[i * size + j];
                 }
 
-            return std::move(matrix);
+            return matrix;
         }
 
         Matrix StrassenMultiply(const Matrix& matrix) const noexcept
@@ -781,7 +824,7 @@ namespace ExtendedCpp
             Matrix c21 = (p2 + p4).value();
             Matrix c22 = ((p1 - p2).value() + (p3 + p6).value()).value();
 
-            return CollectMatrix({ c11, c12, c21, c22 });
+            return CollectMatrix({ std::move(c11), std::move(c12), std::move(c21), std::move(c22) });
         }
 
         Matrix StrassenMultiplyParallel(const Matrix& matrix) const noexcept
@@ -795,18 +838,18 @@ namespace ExtendedCpp
             {
                 Matrix left(*this);
                 left.Resize(newDimension, newDimension);
-                return left.SplitMatrix();
+                return left.SplitMatrixParallel();
             });
 
             std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [this, &matrix, newDimension]
             {
                 Matrix right(matrix);
                 right.Resize(newDimension, newDimension);
-                return right.SplitMatrix();
+                return right.SplitMatrixParallel();
             });
 
-            std::array<Matrix, 4> A = taskLeft.get();
-            std::array<Matrix, 4> B = taskRight.get();
+            std::array<Matrix, 4> A = std::move(taskLeft.get());
+            std::array<Matrix, 4> B = std::move(taskRight.get());
 
             Matrix a11 = std::move(A[0]);
             Matrix a12 = std::move(A[1]);
@@ -839,13 +882,13 @@ namespace ExtendedCpp
             std::future<Matrix> taskP7 = std::async(std::launch::async, [&a12, &a22, &b21, &b22]
             { return ((a12 - a22).value() * (b21 + b22).value()).value(); });
 
-            Matrix p1 = taskP1.get();
-            Matrix p2 = taskP2.get();
-            Matrix p3 = taskP3.get();
-            Matrix p4 = taskP4.get();
-            Matrix p5 = taskP5.get();
-            Matrix p6 = taskP6.get();
-            Matrix p7 = taskP7.get();
+            Matrix p1 = std::move(taskP1.get());
+            Matrix p2 = std::move(taskP2.get());
+            Matrix p3 = std::move(taskP3.get());
+            Matrix p4 = std::move(taskP4.get());
+            Matrix p5 = std::move(taskP5.get());
+            Matrix p6 = std::move(taskP6.get());
+            Matrix p7 = std::move(taskP7.get());
 
             std::future<Matrix> taskC11 = std::async(std::launch::async, [&p1, &p4, &p7, &p5]
             { return ((p1 + p4).value() + (p7 - p5).value()).value(); });
@@ -859,12 +902,12 @@ namespace ExtendedCpp
             std::future<Matrix> taskC22 = std::async(std::launch::async, [&p1, &p2, &p3, &p6]
             { return ((p1 - p2).value() + (p3 + p6).value()).value(); });
 
-            Matrix c11 = taskC11.get();
-            Matrix c12 = taskC12.get();
-            Matrix c21 = taskC21.get();
-            Matrix c22 = taskC22.get();
+            Matrix c11 = std::move(taskC11.get());
+            Matrix c12 = std::move(taskC12.get());
+            Matrix c21 = std::move(taskC21.get());
+            Matrix c22 = std::move(taskC22.get());
 
-            return CollectMatrix({ c11, c12, c21, c22 });
+            return CollectMatrix({ std::move(c11), std::move(c12), std::move(c21), std::move(c22) });
         }
 
         Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
@@ -882,7 +925,7 @@ namespace ExtendedCpp
                     result._table[i * matrix._columnCount + j] = c;
                 }
 
-            return std::move(result);
+            return result;
         }
     };
 

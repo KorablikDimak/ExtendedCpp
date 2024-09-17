@@ -3,6 +3,7 @@
 
 #include <ExtendedCpp/LINQ/LinqContainer.h>
 #include <ExtendedCpp/LINQ/LinqGenerator.h>
+#include <ExtendedCpp/LINQ/LinqView.h>
 
 namespace ExtendedCpp::LINQ
 {
@@ -306,6 +307,51 @@ namespace ExtendedCpp::LINQ
         }
 
         return LinqGenerator<TSource>(std::move(vectorCollection));
+    }
+
+    template<typename TInIterator>
+    struct OptionalIterator
+    {
+    private:
+        TInIterator _inIterator;
+
+    public:
+        using value_type = TInIterator::value_type;
+
+        explicit OptionalIterator(TInIterator inIterator) noexcept :
+                _inIterator(inIterator) {}
+
+        std::optional<value_type> operator*() const noexcept
+        {
+            return *_inIterator;
+        }
+
+        OptionalIterator& operator++() noexcept
+        {
+            ++_inIterator;
+            return *this;
+        }
+
+        bool operator!=(const OptionalIterator& other) const noexcept
+        {
+            return _inIterator != other._inIterator;
+        }
+    };
+
+    template<Concepts::ConstIterable TCollection, typename TIterator = TCollection::const_iterator>
+    LinqView<OptionalIterator<TIterator>> View(const TCollection& collection) noexcept
+    {
+        return LinqView<OptionalIterator<TIterator>>(
+                OptionalIterator<TIterator>(collection.cbegin()),
+                OptionalIterator<TIterator>(collection.cend()));
+    }
+
+    template<Concepts::Iterable TCollection, typename TIterator = TCollection::iterator>
+    LinqView<OptionalIterator<TIterator>> View(TCollection&& collection) noexcept
+    {
+        return LinqView<OptionalIterator<TIterator>>(
+                OptionalIterator<TIterator>(collection.begin()),
+                OptionalIterator<TIterator>(collection.end()));
     }
 }
 
