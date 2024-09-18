@@ -53,3 +53,35 @@ TEST(LINQ_View_Tests, RemoveWhereTest)
     // Assert
     ASSERT_EQ(3, selectedNames.size());
 }
+
+TEST(LINQ_View_Tests, JoinTest)
+{
+    // Average
+    Employer person1("Tom", "Microsoft");
+    Employer person2("Bob", "Google");
+    Employer person3("Sam", "Microsoft");
+    Employer person4("Alice", "Google");
+    Employer person5("Jon", "Google");
+
+    std::vector people { person1, person2, person3, person4, person5 };
+
+    ItCompany company1("Microsoft", "C#");
+    ItCompany company2("Google", "C++");
+
+    std::vector companies { company1, company2 };
+
+    // Act
+    const std::vector employees = ExtendedCpp::LINQ::View(people)
+            .Join(companies,
+                  [](const Employer& employer){ return employer.CompanyName; },
+                  [](const ItCompany& company){ return company.Name; },
+                  [](const Employer& employer, const ItCompany& company){ return Employer(employer.Name, company.Name, company.Language); })
+            .ToVector();
+
+    // Asset
+    ASSERT_EQ("C#", employees[0].Language);
+    ASSERT_EQ("C++", employees[1].Language);
+    ASSERT_EQ("C#", employees[2].Language);
+    ASSERT_EQ("C++", employees[3].Language);
+    ASSERT_EQ("C++", employees[4].Language);
+}

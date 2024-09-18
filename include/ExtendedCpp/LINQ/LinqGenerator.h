@@ -72,7 +72,7 @@ namespace ExtendedCpp::LINQ
         using handle_type = typename Future<TSource>::handle_type;
 
         template<typename TGenerator, typename... Args>
-        requires Concepts::IsFunctor<TGenerator, Args...>
+        requires std::invocable<TGenerator, Args...>
         explicit LinqGenerator(TGenerator&& generator, Args... args) noexcept :
             _yieldContext(generator(std::forward<Args>(args)...)) {}
 
@@ -86,7 +86,7 @@ namespace ExtendedCpp::LINQ
 
         template<typename TConstIterator>
         requires std::is_const<TConstIterator>::value_type
-        explicit LinqGenerator(TConstIterator&& begin, TConstIterator&& end) noexcept :
+        explicit LinqGenerator(const TConstIterator& begin, const TConstIterator& end) noexcept :
             _yieldContext(YieldForeach(begin, end)) {}
 
         template<typename TIterator>
@@ -101,7 +101,7 @@ namespace ExtendedCpp::LINQ
             return static_cast<bool>(_yieldContext);
         }
 
-        TSource Next() noexcept
+        TSource Next()
         {
             return _yieldContext.Next();
         }
@@ -116,7 +116,7 @@ namespace ExtendedCpp::LINQ
             return Iterator(_yieldContext, true);
         }
 
-        std::vector<TSource> ToVector() noexcept
+        std::vector<TSource> ToVector()
         {
             std::vector<TSource> collection;
             while (_yieldContext)
@@ -125,7 +125,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::size_t SIZE>
-        std::array<TSource, SIZE> ToArray() noexcept
+        std::array<TSource, SIZE> ToArray()
         {
             std::array<TSource, SIZE> collection;
             for (std::size_t i = 0; i < SIZE && _yieldContext; ++i)
@@ -133,7 +133,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::list<TSource> ToList() noexcept
+        std::list<TSource> ToList()
         {
             std::list<TSource> collection;
             while (_yieldContext)
@@ -141,7 +141,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::forward_list<TSource> ToForwardList() noexcept
+        std::forward_list<TSource> ToForwardList()
         {
             std::forward_list<TSource> collection;
             while (_yieldContext)
@@ -149,7 +149,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::stack<TSource> ToStack() noexcept
+        std::stack<TSource> ToStack()
         {
             std::stack<TSource> collection;
             while (_yieldContext)
@@ -157,7 +157,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::queue<TSource> ToQueue() noexcept
+        std::queue<TSource> ToQueue()
         {
             std::queue<TSource> collection;
             while (_yieldContext)
@@ -165,7 +165,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::deque<TSource> ToDeque() noexcept
+        std::deque<TSource> ToDeque()
         {
             std::deque<TSource> collection;
             while (_yieldContext)
@@ -173,7 +173,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::priority_queue<TSource> ToPriorityQueue() noexcept
+        std::priority_queue<TSource> ToPriorityQueue()
         {
             std::priority_queue<TSource> collection;
             while (_yieldContext)
@@ -181,7 +181,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::set<TSource> ToSet() noexcept
+        std::set<TSource> ToSet()
         {
             std::set<TSource> collection;
             while (_yieldContext)
@@ -189,7 +189,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::unordered_set<TSource> ToUnorderedSet() noexcept
+        std::unordered_set<TSource> ToUnorderedSet()
         {
             std::unordered_set<TSource> collection;
             while (_yieldContext)
@@ -200,7 +200,7 @@ namespace ExtendedCpp::LINQ
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
-        std::map<TKey, TValue> ToMap() noexcept
+        std::map<TKey, TValue> ToMap()
         {
             std::map<TKey, TValue> collection;
             while (_yieldContext)
@@ -211,7 +211,7 @@ namespace ExtendedCpp::LINQ
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
-        std::unordered_map<TKey, TValue> ToUnorderedMap() noexcept
+        std::unordered_map<TKey, TValue> ToUnorderedMap()
         {
             std::unordered_map<TKey, TValue> collection;
             while (_yieldContext)
@@ -219,32 +219,32 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
-        LinqGenerator<TResult> Select(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
+        template<std::invocable<TSource> TSelector,
+                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        LinqGenerator<TResult> Select(TSelector&& selector)
+        noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             return LinqGenerator<TResult>([this](TSelector&& selector_)
                 { return SelectGenerator(std::forward<TSelector>(selector_)); }, std::forward<TSelector>(selector));
         }
 
-        template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
-        requires Concepts::IsFunctor<TSelector, TSource>
-        LinqGenerator<TResult> SelectMany(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
+        template<std::invocable<TSource> TSelector,
+                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
+        LinqGenerator<TResult> SelectMany(TSelector&& selector)
+        noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             return LinqGenerator<TResult>([this](TSelector&& selector_)
                 { return SelectManyGenerator(std::forward<TSelector>(selector_)); }, std::forward<TSelector>(selector));
         }
 
-        template<typename TCollectionSelector,
+        template<std::invocable<TSource> TCollectionSelector,
                  Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
                  typename TCollectionValueType = typename TCollection::value_type,
-                 typename TResultSelector,
+                 std::invocable<TSource, TCollectionValueType> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
-        requires Concepts::IsFunctor<TCollectionSelector, TSource> &&
-                 Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
         LinqGenerator<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
-                     std::is_nothrow_invocable_v<TResultSelector, TSource, TCollectionValueType>)
+        noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
+                 std::is_nothrow_invocable_v<TResultSelector, TSource, TCollectionValueType>)
         {
             return LinqGenerator<TResult>([this](TCollectionSelector&& collectionSelector_, TResultSelector&& resultSelector_)
                 { return SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector_),
@@ -253,18 +253,18 @@ namespace ExtendedCpp::LINQ
                         std::forward<TResultSelector>(resultSelector));
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqGenerator Where(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        LinqGenerator Where(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return WhereGenerator(std::forward<TPredicate>(predicate_)); },
                     std::forward<TPredicate>(predicate));
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqGenerator RemoveWhere(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        LinqGenerator RemoveWhere(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return RemoveWhereGenerator(std::forward<TPredicate>(predicate_)); },
@@ -285,11 +285,10 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        template<typename TSelector>
-        requires Concepts::IsFunctor<TSelector, TSource> &&
-                 Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        template<std::invocable<TSource> TSelector>
+        requires Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
         LinqGenerator OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC)
-            noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
+        noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             std::vector<TSource> newCollection;
             while (_yieldContext)
@@ -448,8 +447,8 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        template<typename TResult>
-        TResult Aggregate(std::function<TResult(TResult, TSource)> aggregateFunction)
+        template<typename TResult, std::invocable<TResult, TSource> TAggregate>
+        TResult Aggregate(TAggregate&& aggregateFunction)
         {
             std::vector<TSource> collection;
             while (_yieldContext)
@@ -458,12 +457,13 @@ namespace ExtendedCpp::LINQ
             if (collection.empty())
                 throw std::out_of_range("Collection is empty");
 
-            return Aggregate::Aggregate(collection.data(), 0, collection.size() - 1, std::move(aggregateFunction));
+            return Aggregate::Aggregate<TResult>(collection.data(), 0, collection.size() - 1,
+                                                 std::forward<TAggregate>(aggregateFunction));
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        std::size_t Count(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        std::size_t Count(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             std::size_t result = 0;
             while (_yieldContext)
@@ -485,8 +485,8 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Sum(collection.data(), 0, collection.size() - 1);
         }
 
-        template<typename TSelector, Concepts::Summarize TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 Concepts::Summarize TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         TResult Sum(TSelector&& selector)
         {
             std::vector<TSource> collection;
@@ -512,8 +512,8 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Min(collection.data(), 0, collection.size() - 1);
         }
 
-        template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         TResult Min(TSelector&& selector)
         {
             std::vector<TSource> collection;
@@ -539,8 +539,8 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Max(collection.data(), 0, collection.size() - 1);
         }
 
-        template<typename TSelector, Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         TResult Max(TSelector&& selector)
         {
             std::vector<TSource> collection;
@@ -566,8 +566,8 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Average(collection.data(), 0, collection.size() - 1);
         }
 
-        template<typename TSelector, Concepts::Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 Concepts::Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         TResult Average(TSelector&& selector)
         {
             std::vector<TSource> collection;
@@ -586,9 +586,9 @@ namespace ExtendedCpp::LINQ
                 { return SkipGenerator(count_); }, count);
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        LinqGenerator SkipWhile(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        LinqGenerator SkipWhile(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return SkipWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
@@ -600,18 +600,17 @@ namespace ExtendedCpp::LINQ
                 { return TakeGenerator(count_); }, count);
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
+        template<Concepts::IsPredicate<TSource> TPredicate>
         LinqGenerator TakeWhile(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return TakeWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
         }
 
-        template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TKeySelector, TSource>
+        template<std::invocable<TSource> TKeySelector,
+                 typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
         LinqGenerator<std::pair<TKey, std::vector<TSource>>> GroupBy(TKeySelector&& keySelector)
-            noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
+        noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
         {
             return LinqGenerator<std::pair<TKey, std::vector<TSource>>>([this](TKeySelector&& keySelector_)
                 { return GroupByGenerator(std::forward<TKeySelector>(keySelector_)); },
@@ -619,14 +618,11 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection,
-                 typename TInnerKeySelector,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<TSource> TInnerKeySelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
-                 std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
+        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         LinqGenerator<TResult> Join(const TOtherCollection& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
@@ -651,14 +647,11 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection,
-                 typename TInnerKeySelector,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<TSource> TInnerKeySelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
-                 std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
+        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         LinqGenerator<TResult> Join(TOtherCollection&& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
@@ -683,15 +676,12 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection,
-                 typename TInnerKeySelector,
+                 std::invocable<TSource> TInnerKeySelector,
                  Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
-                 std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         LinqGenerator<TResult> GroupJoin(const TOtherCollection& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
@@ -715,15 +705,12 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection,
-                 typename TInnerKeySelector,
+                 std::invocable<TSource> TInnerKeySelector,
                  Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
-                 std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         LinqGenerator<TResult> GroupJoin(TOtherCollection&& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
@@ -764,8 +751,7 @@ namespace ExtendedCpp::LINQ
                 { return ZipGenerator(otherCollection_); }, std::forward<TOtherCollection>(otherCollection));
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
+        template<Concepts::IsPredicate<TSource> TPredicate>
         bool All(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
@@ -774,8 +760,7 @@ namespace ExtendedCpp::LINQ
             return true;
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
+        template<Concepts::IsPredicate<TSource> TPredicate>
         bool Any(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
@@ -799,16 +784,16 @@ namespace ExtendedCpp::LINQ
                 co_yield std::move(*it);
         }
 
-        template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
         Future<TResult> SelectGenerator(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             while (_yieldContext)
                 co_yield selector(_yieldContext.Next());
         }
 
-        template<typename TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
-        requires Concepts::IsFunctor<TSelector, TSource>
+        template<std::invocable<TSource> TSelector,
+                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
         Future<TResult> SelectManyGenerator(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             while (_yieldContext)
@@ -819,15 +804,14 @@ namespace ExtendedCpp::LINQ
             }
         }
 
-        template<typename TCollectionSelector,
-                Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
-                typename TCollectionValueType = typename TCollection::value_type,
-                typename TResultSelector,
-                typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
-        requires Concepts::IsFunctor<TCollectionSelector, TSource> && Concepts::IsFunctor<TResultSelector, TSource, TCollectionValueType>
+        template<std::invocable<TSource> TCollectionSelector,
+                 Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
+                 typename TCollectionValueType = typename TCollection::value_type,
+                 std::invocable<TSource, TCollectionValueType> TResultSelector,
+                 typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
         Future<TResult> SelectManyGenerator(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
-                     std::is_nothrow_invocable_v<TResultSelector, TSource, TCollectionValueType>)
+        noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
+                 std::is_nothrow_invocable_v<TResultSelector, TSource, TCollectionValueType>)
         {
             while (_yieldContext)
             {
@@ -838,9 +822,9 @@ namespace ExtendedCpp::LINQ
             }
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        Future<TSource> WhereGenerator(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        Future<TSource> WhereGenerator(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
             {
@@ -850,9 +834,9 @@ namespace ExtendedCpp::LINQ
             }
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        Future<TSource> RemoveWhereGenerator(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        Future<TSource> RemoveWhereGenerator(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
             {
@@ -877,9 +861,9 @@ namespace ExtendedCpp::LINQ
                 co_yield _yieldContext.Next();
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        Future<TSource> SkipWhileGenerator(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        Future<TSource> SkipWhileGenerator(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
             {
@@ -908,9 +892,9 @@ namespace ExtendedCpp::LINQ
                 _yieldContext.Next();
         }
 
-        template<typename TPredicate>
-        requires Concepts::IsPredicate<TPredicate, TSource>
-        Future<TSource> TakeWhileGenerator(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+        template<Concepts::IsPredicate<TSource> TPredicate>
+        Future<TSource> TakeWhileGenerator(TPredicate&& predicate)
+        noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             while (_yieldContext)
             {
@@ -924,10 +908,10 @@ namespace ExtendedCpp::LINQ
                 _yieldContext.Next();
         }
 
-        template<typename TKeySelector, typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
-        requires Concepts::IsFunctor<TKeySelector, TSource>
+        template<std::invocable<TSource> TKeySelector,
+                 typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
         Future<std::pair<TKey, std::vector<TSource>>> GroupByGenerator(TKeySelector&& keySelector)
-            noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
+        noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
         {
             std::map<TKey, std::vector<TSource>> result;
 
@@ -944,22 +928,19 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection,
-                typename TInnerKeySelector,
-                typename TOtherKeySelector,
-                typename TResultSelector,
-                typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
-                 std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
+                 std::invocable<TSource> TInnerKeySelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
+                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         Future<TResult> JoinGenerator(const TOtherCollection& otherCollection,
                                       TInnerKeySelector&& innerKeySelector,
                                       TOtherKeySelector&& otherKeySelector,
                                       TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
-                     std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                     std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
+        noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> result;
 
@@ -976,23 +957,20 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection,
-                typename TInnerKeySelector,
-                typename TOtherKeySelector,
-                typename TResultSelector,
-                typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, TSource, typename TOtherCollection::value_type> &&
-                 std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
+                 std::invocable<TSource> TInnerKeySelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
+                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
                               typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         Future<TResult> JoinGenerator(TOtherCollection&& otherCollection,
                                       TInnerKeySelector&& innerKeySelector,
                                       TOtherKeySelector&& otherKeySelector,
                                       TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
-                     std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                     std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
+        noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
             std::vector<TResult> result;
 
@@ -1009,22 +987,19 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection,
-                 typename TInnerKeySelector,
+                 std::invocable<TSource> TInnerKeySelector,
                  Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
-                 std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         Future<TResult> GroupJoinGenerator(const TOtherCollection& otherCollection,
                                            TInnerKeySelector&& innerKeySelector,
                                            TOtherKeySelector&& otherKeySelector,
                                            TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
-                     std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                     std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
+        noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
             auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
             std::vector<TResult> result;
@@ -1042,22 +1017,19 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection,
-                 typename TInnerKeySelector,
+                 std::invocable<TSource>  TInnerKeySelector,
                  Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                 typename TOtherKeySelector,
-                 typename TResultSelector,
+                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
+                 std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires Concepts::IsFunctor<TInnerKeySelector, TSource> &&
-                 Concepts::IsFunctor<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                 Concepts::IsFunctor<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type> &&
-                 std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
         Future<TResult> GroupJoinGenerator(TOtherCollection&& otherCollection,
                                            TInnerKeySelector&& innerKeySelector,
                                            TOtherKeySelector&& otherKeySelector,
                                            TResultSelector&& resultSelector)
-            noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
-                     std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                     std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
+        noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, TSource> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
             auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
             std::vector<TResult> result;

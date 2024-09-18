@@ -2,13 +2,14 @@
 #define LINQ_Concepts_H
 
 #include <utility>
+#include <optional>
 
 namespace ExtendedCpp::LINQ::Concepts
 {
-    template<typename TFunctor, typename ...Args>
-    concept IsFunctor = requires
+    template<typename TIter>
+    concept OptionalIter = requires(TIter iter)
     {
-        std::declval<TFunctor>()(std::declval<Args>()...);
+        { *(++iter) } -> std::same_as<std::optional<typename TIter::value_type>>;
     };
 
     template<typename TPair>
@@ -53,6 +54,7 @@ namespace ExtendedCpp::LINQ::Concepts
     {
         collection.begin();
         collection.end();
+        typename T::iterator;
     };
 
     template<typename T>
@@ -60,6 +62,7 @@ namespace ExtendedCpp::LINQ::Concepts
     {
         collection.cbegin();
         collection.cend();
+        typename T::const_iterator;
     };
 
     template<typename T>

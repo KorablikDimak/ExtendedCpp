@@ -321,7 +321,8 @@ namespace ExtendedCpp::LINQ
         explicit OptionalIterator(TInIterator inIterator) noexcept :
                 _inIterator(inIterator) {}
 
-        std::optional<value_type> operator*() const noexcept
+        std::optional<value_type> operator*()
+        const noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
         {
             return *_inIterator;
         }
@@ -347,7 +348,7 @@ namespace ExtendedCpp::LINQ
     }
 
     template<Concepts::Iterable TCollection, typename TIterator = TCollection::iterator>
-    LinqView<OptionalIterator<TIterator>> View(TCollection&& collection) noexcept
+    LinqView<OptionalIterator<TIterator>> View(TCollection& collection) noexcept
     {
         return LinqView<OptionalIterator<TIterator>>(
                 OptionalIterator<TIterator>(collection.begin()),
