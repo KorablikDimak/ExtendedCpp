@@ -21,15 +21,19 @@ namespace ExtendedCpp::LINQ
     template<typename TSource>
     class LinqGenerator final
     {
+    private:
+        Future<TSource> _yieldContext;
+
         class Iterator final
         {
         public:
             Iterator(Future<TSource>& yieldContext, bool isEnd) noexcept :
-                _yieldContext(yieldContext), _isEnd(isEnd)
+                    _yieldContext(yieldContext), _isEnd(isEnd)
             {
                 if (_yieldContext)
                     _value = _yieldContext.Value();
-                else _isEnd = true;
+                else
+                    _isEnd = true;
             }
 
             TSource& operator*() noexcept
@@ -62,9 +66,6 @@ namespace ExtendedCpp::LINQ
             bool _isEnd;
         };
 
-    private:
-        Future<TSource> _yieldContext;
-
     public:
         using value_type = TSource;
         using iterator = Iterator;
@@ -84,15 +85,9 @@ namespace ExtendedCpp::LINQ
         explicit LinqGenerator(TCollection&& collection) noexcept :
             _yieldContext(YieldForeach(std::forward<TCollection>(collection))) {}
 
-        template<typename TConstIterator>
-        requires std::is_const<TConstIterator>::value_type
-        explicit LinqGenerator(const TConstIterator& begin, const TConstIterator& end) noexcept :
+        template<std::forward_iterator TIterator>
+        LinqGenerator(const TIterator begin, const TIterator end) noexcept :
             _yieldContext(YieldForeach(begin, end)) {}
-
-        template<typename TIterator>
-        requires (!std::is_const<TIterator>::value_type)
-        explicit LinqGenerator(TIterator&& begin, TIterator&& end) noexcept :
-            _yieldContext(YieldForeach(std::forward<TIterator>(begin), std::forward<TIterator>(end))) {}
 
         ~LinqGenerator() = default;
 
@@ -101,7 +96,7 @@ namespace ExtendedCpp::LINQ
             return static_cast<bool>(_yieldContext);
         }
 
-        TSource Next()
+        TSource Next() noexcept
         {
             return _yieldContext.Next();
         }
@@ -116,7 +111,7 @@ namespace ExtendedCpp::LINQ
             return Iterator(_yieldContext, true);
         }
 
-        std::vector<TSource> ToVector()
+        std::vector<TSource> ToVector() noexcept
         {
             std::vector<TSource> collection;
             while (_yieldContext)
@@ -125,7 +120,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::size_t SIZE>
-        std::array<TSource, SIZE> ToArray()
+        std::array<TSource, SIZE> ToArray() noexcept
         {
             std::array<TSource, SIZE> collection;
             for (std::size_t i = 0; i < SIZE && _yieldContext; ++i)
@@ -133,7 +128,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::list<TSource> ToList()
+        std::list<TSource> ToList() noexcept
         {
             std::list<TSource> collection;
             while (_yieldContext)
@@ -141,7 +136,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::forward_list<TSource> ToForwardList()
+        std::forward_list<TSource> ToForwardList() noexcept
         {
             std::forward_list<TSource> collection;
             while (_yieldContext)
@@ -149,7 +144,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::stack<TSource> ToStack()
+        std::stack<TSource> ToStack() noexcept
         {
             std::stack<TSource> collection;
             while (_yieldContext)
@@ -157,7 +152,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::queue<TSource> ToQueue()
+        std::queue<TSource> ToQueue() noexcept
         {
             std::queue<TSource> collection;
             while (_yieldContext)
@@ -165,7 +160,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::deque<TSource> ToDeque()
+        std::deque<TSource> ToDeque() noexcept
         {
             std::deque<TSource> collection;
             while (_yieldContext)
@@ -173,7 +168,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::priority_queue<TSource> ToPriorityQueue()
+        std::priority_queue<TSource> ToPriorityQueue() noexcept
         {
             std::priority_queue<TSource> collection;
             while (_yieldContext)
@@ -181,7 +176,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::set<TSource> ToSet()
+        std::set<TSource> ToSet() noexcept
         {
             std::set<TSource> collection;
             while (_yieldContext)
@@ -189,7 +184,7 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        std::unordered_set<TSource> ToUnorderedSet()
+        std::unordered_set<TSource> ToUnorderedSet() noexcept
         {
             std::unordered_set<TSource> collection;
             while (_yieldContext)
@@ -200,7 +195,7 @@ namespace ExtendedCpp::LINQ
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
-        std::map<TKey, TValue> ToMap()
+        std::map<TKey, TValue> ToMap() noexcept
         {
             std::map<TKey, TValue> collection;
             while (_yieldContext)
@@ -211,7 +206,7 @@ namespace ExtendedCpp::LINQ
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
-        std::unordered_map<TKey, TValue> ToUnorderedMap()
+        std::unordered_map<TKey, TValue> ToUnorderedMap() noexcept
         {
             std::unordered_map<TKey, TValue> collection;
             while (_yieldContext)
@@ -225,7 +220,8 @@ namespace ExtendedCpp::LINQ
         noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             return LinqGenerator<TResult>([this](TSelector&& selector_)
-                { return SelectGenerator(std::forward<TSelector>(selector_)); }, std::forward<TSelector>(selector));
+                { return SelectGenerator(std::forward<TSelector>(selector_)); },
+                        std::forward<TSelector>(selector));
         }
 
         template<std::invocable<TSource> TSelector,
@@ -234,7 +230,8 @@ namespace ExtendedCpp::LINQ
         noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             return LinqGenerator<TResult>([this](TSelector&& selector_)
-                { return SelectManyGenerator(std::forward<TSelector>(selector_)); }, std::forward<TSelector>(selector));
+                { return SelectManyGenerator(std::forward<TSelector>(selector_)); },
+                        std::forward<TSelector>(selector));
         }
 
         template<std::invocable<TSource> TCollectionSelector,
@@ -248,7 +245,7 @@ namespace ExtendedCpp::LINQ
         {
             return LinqGenerator<TResult>([this](TCollectionSelector&& collectionSelector_, TResultSelector&& resultSelector_)
                 { return SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector_),
-                        std::forward<TResultSelector>(resultSelector_)); },
+                                             std::forward<TResultSelector>(resultSelector_)); },
                         std::forward<TCollectionSelector>(collectionSelector),
                         std::forward<TResultSelector>(resultSelector));
         }
@@ -259,7 +256,7 @@ namespace ExtendedCpp::LINQ
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return WhereGenerator(std::forward<TPredicate>(predicate_)); },
-                    std::forward<TPredicate>(predicate));
+                        std::forward<TPredicate>(predicate));
         }
 
         template<Concepts::IsPredicate<TSource> TPredicate>
@@ -268,7 +265,7 @@ namespace ExtendedCpp::LINQ
         {
             return LinqGenerator([this](TPredicate&& predicate_)
                 { return RemoveWhereGenerator(std::forward<TPredicate>(predicate_)); },
-                    std::forward<TPredicate>(predicate));
+                        std::forward<TPredicate>(predicate));
         }
 
         LinqGenerator Order(OrderType orderType = OrderType::ASC) noexcept
@@ -277,7 +274,8 @@ namespace ExtendedCpp::LINQ
             std::vector<TSource> newCollection;
             while (_yieldContext)
                 newCollection.push_back(_yieldContext.Next());
-            if (newCollection.empty()) return *this;
+            if (newCollection.empty())
+                return *this;
 
             Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1, orderType);
 
@@ -293,7 +291,8 @@ namespace ExtendedCpp::LINQ
             std::vector<TSource> newCollection;
             while (_yieldContext)
                 newCollection.push_back(_yieldContext.Next());
-            if (newCollection.empty()) return *this;
+            if (newCollection.empty())
+                return *this;
 
             Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1,
                             std::forward<TSelector>(selector), orderType);
@@ -350,10 +349,12 @@ namespace ExtendedCpp::LINQ
                 auto element = _yieldContext.Next();
 
                 std::size_t i = 0;
-                for (auto& otherElement : otherCollection)
+                for (auto&& otherElement : otherCollection)
                 {
-                    if (element == std::move(otherElement)) break;
-                    if (i == otherCollection.size() - 1) newCollection.insert(element);
+                    if (element == std::move(otherElement))
+                        break;
+                    if (i == otherCollection.size() - 1)
+                        newCollection.insert(element);
                     ++i;
                 }
             }
@@ -388,11 +389,12 @@ namespace ExtendedCpp::LINQ
         LinqGenerator Intersect(TOtherCollection&& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
+            auto inner = std::forward<TOtherCollection>(otherCollection);
 
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
-                for (auto& otherElement : otherCollection)
+                for (auto&& otherElement : inner)
                     if (element == otherElement)
                     {
                         newCollection.insert(std::move(otherElement));
@@ -440,7 +442,7 @@ namespace ExtendedCpp::LINQ
             while (_yieldContext)
                 newCollection.insert(_yieldContext.Next());
 
-            for (auto& element : otherCollection)
+            for (auto&& element : otherCollection)
                 newCollection.insert(std::move(element));
 
             return LinqGenerator([this, newCollection = std::move(newCollection)]()
@@ -577,7 +579,8 @@ namespace ExtendedCpp::LINQ
             if (collection.empty())
                 throw std::out_of_range("Collection is empty");
 
-            return Aggregate::Average(collection.data(), 0, collection.size() - 1, std::forward<TSelector>(selector));
+            return Aggregate::Average(collection.data(), 0, collection.size() - 1,
+                                      std::forward<TSelector>(selector));
         }
 
         LinqGenerator Skip(const std::size_t count) noexcept
@@ -591,7 +594,8 @@ namespace ExtendedCpp::LINQ
         noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
-                { return SkipWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
+                { return SkipWhileGenerator(std::forward<TPredicate>(predicate_)); },
+                        std::forward<TPredicate>(predicate));
         }
 
         LinqGenerator Take(const std::size_t count)
@@ -604,7 +608,8 @@ namespace ExtendedCpp::LINQ
         LinqGenerator TakeWhile(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
         {
             return LinqGenerator([this](TPredicate&& predicate_)
-                { return TakeWhileGenerator(std::forward<TPredicate>(predicate_)); }, std::forward<TPredicate>(predicate));
+                { return TakeWhileGenerator(std::forward<TPredicate>(predicate_)); },
+                        std::forward<TPredicate>(predicate));
         }
 
         template<std::invocable<TSource> TKeySelector,
@@ -614,7 +619,7 @@ namespace ExtendedCpp::LINQ
         {
             return LinqGenerator<std::pair<TKey, std::vector<TSource>>>([this](TKeySelector&& keySelector_)
                 { return GroupByGenerator(std::forward<TKeySelector>(keySelector_)); },
-                                          std::forward<TKeySelector>(keySelector));
+                        std::forward<TKeySelector>(keySelector));
         }
 
         template<Concepts::ConstIterable TOtherCollection,
@@ -632,15 +637,14 @@ namespace ExtendedCpp::LINQ
             if (otherCollection.empty())
                 throw std::invalid_argument("other collection must not be empty");
 
-            return LinqGenerator<TResult>([this](const TOtherCollection& otherCollection_,
+            return LinqGenerator<TResult>([this, otherCollection](
                     TInnerKeySelector&& innerKeySelector_,
                     TOtherKeySelector&& otherKeySelector_,
                     TResultSelector&& resultSelector_)
-                { return JoinGenerator(otherCollection_,
+                { return JoinGenerator(otherCollection,
                     std::forward<TInnerKeySelector>(innerKeySelector_),
                     std::forward<TOtherKeySelector>(otherKeySelector_),
                     std::forward<TResultSelector>(resultSelector_)); },
-                otherCollection,
                 std::forward<TInnerKeySelector>(innerKeySelector),
                 std::forward<TOtherKeySelector>(otherKeySelector),
                 std::forward<TResultSelector>(resultSelector));
@@ -661,15 +665,14 @@ namespace ExtendedCpp::LINQ
             if (otherCollection.empty())
                 throw std::invalid_argument("other collection must not be empty");
 
-            return LinqGenerator<TResult>([this](TOtherCollection&& otherCollection_,
+            return LinqGenerator<TResult>([this, otherCollection = std::forward<TOtherCollection>(otherCollection)](
                     TInnerKeySelector&& innerKeySelector_,
                     TOtherKeySelector&& otherKeySelector_,
                     TResultSelector&& resultSelector_)
-                { return JoinGenerator(std::forward<TOtherCollection>(otherCollection_),
+                { return JoinGenerator(otherCollection,
                     std::forward<TInnerKeySelector>(innerKeySelector_),
                     std::forward<TOtherKeySelector>(otherKeySelector_),
                     std::forward<TResultSelector>(resultSelector_)); },
-                std::forward<TOtherCollection>(otherCollection),
                 std::forward<TInnerKeySelector>(innerKeySelector),
                 std::forward<TOtherKeySelector>(otherKeySelector),
                 std::forward<TResultSelector>(resultSelector));
@@ -690,15 +693,14 @@ namespace ExtendedCpp::LINQ
             if (otherCollection.empty())
                 throw std::invalid_argument("other collection must not be empty");
 
-            return LinqGenerator<TResult>([this](const TOtherCollection& otherCollection_,
+            return LinqGenerator<TResult>([this, otherCollection](
                     TInnerKeySelector&& innerKeySelector_,
                     TOtherKeySelector&& otherKeySelector_,
                     TResultSelector&& resultSelector_)
-                { return GroupJoinGenerator(otherCollection_,
+                { return GroupJoinGenerator(otherCollection,
                     std::forward<TInnerKeySelector>(innerKeySelector_),
                     std::forward<TOtherKeySelector>(otherKeySelector_),
                     std::forward<TResultSelector>(resultSelector_)); },
-                otherCollection,
                 std::forward<TInnerKeySelector>(innerKeySelector),
                 std::forward<TOtherKeySelector>(otherKeySelector),
                 std::forward<TResultSelector>(resultSelector));
@@ -719,15 +721,14 @@ namespace ExtendedCpp::LINQ
             if (otherCollection.empty())
                 throw std::invalid_argument("other collection must not be empty");
 
-            return LinqGenerator<TResult>([this](TOtherCollection&& otherCollection_,
+            return LinqGenerator<TResult>([this, otherCollection = std::forward<TOtherCollection>(otherCollection)](
                     TInnerKeySelector&& innerKeySelector_,
                     TOtherKeySelector&& otherKeySelector_,
                     TResultSelector&& resultSelector_)
-                { return GroupJoinGenerator(std::forward<TOtherCollection>(otherCollection_),
+                { return GroupJoinGenerator(otherCollection,
                     std::forward<TInnerKeySelector>(innerKeySelector_),
                     std::forward<TOtherKeySelector>(otherKeySelector_),
                     std::forward<TResultSelector>(resultSelector_)); },
-                std::forward<TOtherCollection>(otherCollection),
                 std::forward<TInnerKeySelector>(innerKeySelector),
                 std::forward<TOtherKeySelector>(otherKeySelector),
                 std::forward<TResultSelector>(resultSelector));
@@ -738,8 +739,9 @@ namespace ExtendedCpp::LINQ
         requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqGenerator<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) noexcept
         {
-            return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>([this](const TOtherCollection& otherCollection_)
-                { return ZipGenerator(otherCollection_); }, otherCollection);
+            return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>(
+                    [this, otherCollection]
+                    { return ZipGenerator(otherCollection); });
         }
 
         template<typename TOtherCollection,
@@ -747,8 +749,9 @@ namespace ExtendedCpp::LINQ
         requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqGenerator<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) noexcept
         {
-            return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>([this](TOtherCollection&& otherCollection_)
-                { return ZipGenerator(otherCollection_); }, std::forward<TOtherCollection>(otherCollection));
+            return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>(
+                    [this, otherCollection = std::forward<TOtherCollection>(otherCollection)]
+                    { return ZipGenerator(otherCollection); });
         }
 
         template<Concepts::IsPredicate<TSource> TPredicate>
@@ -770,23 +773,40 @@ namespace ExtendedCpp::LINQ
         }
 
     private:
-        template<Concepts::Iterable TCollection>
+        template<Concepts::ConstIterable TCollection>
         Future<TSource> Generator(TCollection collection) noexcept
         {
-            for (auto& element : collection)
+            for (auto&& element : collection)
                 co_yield std::move(element);
         }
 
         template<Concepts::Iterable TCollection>
+        Future<TSource> Generator(TCollection&& collection) noexcept
+        {
+            auto inner = std::forward<TCollection>(collection);
+            for (auto&& element : inner)
+                co_yield std::move(element);
+        }
+
+        template<Concepts::ConstIterable TCollection>
         Future<TSource> ReverseGenerator(TCollection collection) noexcept
         {
             for (auto it = collection.rbegin(); it != collection.rend(); ++it)
                 co_yield std::move(*it);
         }
 
+        template<Concepts::Iterable TCollection>
+        Future<TSource> ReverseGenerator(TCollection&& collection) noexcept
+        {
+            auto inner = std::forward<TCollection>(collection);
+            for (auto it = inner.rbegin(); it != inner.rend(); ++it)
+                co_yield std::move(*it);
+        }
+
         template<std::invocable<TSource> TSelector,
                  typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
-        Future<TResult> SelectGenerator(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
+        Future<TResult> SelectGenerator(TSelector&& selector)
+        noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             while (_yieldContext)
                 co_yield selector(_yieldContext.Next());
@@ -794,7 +814,8 @@ namespace ExtendedCpp::LINQ
 
         template<std::invocable<TSource> TSelector,
                  typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
-        Future<TResult> SelectManyGenerator(TSelector&& selector) noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
+        Future<TResult> SelectManyGenerator(TSelector&& selector)
+        noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
             while (_yieldContext)
             {
@@ -817,7 +838,7 @@ namespace ExtendedCpp::LINQ
             {
                 auto element = _yieldContext.Next();
                 TCollection tempCollection = collectionSelector(element);
-                for (auto& tempElement : tempCollection)
+                for (auto&& tempElement : tempCollection)
                     co_yield resultSelector(std::move(element), std::move(tempElement));
             }
         }
@@ -923,7 +944,7 @@ namespace ExtendedCpp::LINQ
                 result.at(keySelector(element)).push_back(std::move(element));
             }
 
-            for (auto& kv : result)
+            for (auto&& kv : result)
                 co_yield std::move(kv);
         }
 
@@ -934,7 +955,7 @@ namespace ExtendedCpp::LINQ
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
         requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
-        Future<TResult> JoinGenerator(const TOtherCollection& otherCollection,
+        Future<TResult> JoinGenerator(TOtherCollection otherCollection,
                                       TInnerKeySelector&& innerKeySelector,
                                       TOtherKeySelector&& otherKeySelector,
                                       TResultSelector&& resultSelector)
@@ -942,18 +963,13 @@ namespace ExtendedCpp::LINQ
                  std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
                  std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
-            std::vector<TResult> result;
-
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
-                for (const auto& otherElement : otherCollection)
+                for (auto&& otherElement : otherCollection)
                     if (innerKeySelector(element) == otherKeySelector(otherElement))
-                        result.push_back(resultSelector(std::move(element), otherElement));
+                        co_yield resultSelector(std::move(element), std::move(otherElement));
             }
-
-            for (auto& element : result)
-                co_yield std::move(element);
         }
 
         template<Concepts::Iterable TOtherCollection,
@@ -961,8 +977,7 @@ namespace ExtendedCpp::LINQ
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                              typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
+        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
                  Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
         Future<TResult> JoinGenerator(TOtherCollection&& otherCollection,
                                       TInnerKeySelector&& innerKeySelector,
@@ -972,18 +987,14 @@ namespace ExtendedCpp::LINQ
                  std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
                  std::is_nothrow_invocable_v<TResultSelector, TSource, typename TOtherCollection::value_type>)
         {
-            std::vector<TResult> result;
-
+            auto inner = std::forward<TOtherCollection>(otherCollection);
             while (_yieldContext)
             {
                 auto element = _yieldContext.Next();
-                for (auto& otherElement : otherCollection)
+                for (auto&& otherElement : inner)
                     if (innerKeySelector(element) == otherKeySelector(otherElement))
-                        result.push_back(resultSelector(std::move(element), std::move(otherElement)));
+                        co_yield resultSelector(std::move(element), std::move(otherElement));
             }
-
-            for (auto& element : result)
-                co_yield std::move(element);
         }
 
         template<Concepts::ConstIterable TOtherCollection,
@@ -993,7 +1004,7 @@ namespace ExtendedCpp::LINQ
                  std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
                  typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
         requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
-        Future<TResult> GroupJoinGenerator(const TOtherCollection& otherCollection,
+        Future<TResult> GroupJoinGenerator(TOtherCollection otherCollection,
                                            TInnerKeySelector&& innerKeySelector,
                                            TOtherKeySelector&& otherKeySelector,
                                            TResultSelector&& resultSelector)
@@ -1002,22 +1013,18 @@ namespace ExtendedCpp::LINQ
                  std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
             auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
-            std::vector<TResult> result;
 
             while (groups)
             {
                 auto&& [key, group] = groups.Next();
-                for (const auto& element : otherCollection)
+                for (auto&& element : otherCollection)
                     if (std::move(key) == otherKeySelector(element))
-                        result.push_back(resultSelector(std::move(group), element));
+                        co_yield resultSelector(std::move(group), std::move(element));
             }
-
-            for (auto& element : result)
-                co_yield std::move(element);
         }
 
         template<Concepts::Iterable TOtherCollection,
-                 std::invocable<TSource>  TInnerKeySelector,
+                 std::invocable<TSource> TInnerKeySelector,
                  Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
@@ -1031,34 +1038,26 @@ namespace ExtendedCpp::LINQ
                  std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
                  std::is_nothrow_invocable_v<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>)
         {
+            auto inner = std::forward<TOtherCollection>(otherCollection);
             auto groups = GroupBy(std::forward<TInnerKeySelector>(innerKeySelector));
-            std::vector<TResult> result;
 
             while (groups)
             {
                 auto&& [key, group] = groups.Next();
-                for (const auto& element : otherCollection)
+                for (auto&& element : inner)
                     if (std::move(key) == otherKeySelector(element))
-                        result.push_back(resultSelector(std::move(group), std::move(element)));
+                        co_yield resultSelector(std::move(group), std::move(element));
             }
-
-            for (auto& element : result)
-                co_yield std::move(element);
         }
 
         template<typename TOtherCollection,
                  typename TOtherCollectionValueType = typename TOtherCollection::value_type>
         requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
-        Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(const TOtherCollection& otherCollection) noexcept
+        Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(TOtherCollection otherCollection) noexcept
         {
-            std::vector<std::pair<TSource, TOtherCollectionValueType>> pairs;
-
-            for (const auto& element : otherCollection)
+            for (auto&& element : otherCollection)
                 if (_yieldContext)
-                    pairs.push_back(std::make_pair(_yieldContext.Next(), element));
-
-            for (auto& pair : pairs)
-                co_yield std::move(pair);
+                    co_yield std::make_pair(_yieldContext.Next(), std::move(element));
         }
 
         template<typename TOtherCollection,
@@ -1066,14 +1065,10 @@ namespace ExtendedCpp::LINQ
         requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(TOtherCollection&& otherCollection) noexcept
         {
-            std::vector<std::pair<TSource, TOtherCollectionValueType>> pairs;
-
-            for (auto& element : otherCollection)
+            auto inner = std::forward<TOtherCollection>(otherCollection);
+            for (auto&& element : inner)
                 if (_yieldContext)
-                    pairs.push_back(std::make_pair(_yieldContext.Next(), std::move(element)));
-
-            for (auto& pair : pairs)
-                co_yield std::move(pair);
+                    co_yield std::make_pair(_yieldContext.Next(), std::move(element));
         }
     };
 }

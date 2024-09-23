@@ -10,6 +10,8 @@ namespace ExtendedCpp::LINQ::Concepts
     concept OptionalIter = requires(TIter iter)
     {
         { *(++iter) } -> std::same_as<std::optional<typename TIter::value_type>>;
+        { iter == iter } -> std::convertible_to<bool>;
+        { iter != iter } -> std::convertible_to<bool>;
     };
 
     template<typename TPair>
@@ -55,6 +57,7 @@ namespace ExtendedCpp::LINQ::Concepts
         collection.begin();
         collection.end();
         typename T::iterator;
+        typename T::value_type;
     };
 
     template<typename T>
@@ -63,6 +66,7 @@ namespace ExtendedCpp::LINQ::Concepts
         collection.cbegin();
         collection.cend();
         typename T::const_iterator;
+        typename T::value_type;
     };
 
     template<typename T>

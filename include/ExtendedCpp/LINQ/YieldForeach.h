@@ -16,7 +16,8 @@ namespace ExtendedCpp::LINQ
     template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
     Future<TSource> YieldForeach(TCollection&& collection) noexcept
     {
-        for (auto& element : collection)
+        auto inner = std::move(collection);
+        for (auto&& element : inner)
             co_yield std::move(element);
     }
 
@@ -30,24 +31,32 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     Future<std::pair<TKey, TValue>> YieldForeach(std::map<TKey, TValue>&& collection) noexcept
     {
-        for (const auto& element : collection)
+        auto inner = std::move(collection);
+        for (auto&& element : inner)
             co_yield std::move(element);
     }
 
-    template<typename TConstIterator, typename TSource = typename std::iterator_traits<TConstIterator>::value_type>
-    requires std::is_const<TConstIterator>::value_type
-    Future<TSource> YieldForeach(const TConstIterator& begin, const TConstIterator& end) noexcept
+    template<typename TKey, typename TValue>
+    Future<std::pair<TKey, TValue>> YieldForeach(const std::unordered_map<TKey, TValue>& collection) noexcept
     {
-        for (const auto& it = begin; it != end; ++it)
-            co_yield *it;
+        for (const auto& element : collection)
+            co_yield element;
     }
 
-    template<typename TIterator, typename TSource = typename std::iterator_traits<TIterator>::value_type>
-    requires (!std::is_const<TIterator>::value_type)
-    Future<TSource> YieldForeach(TIterator&& begin, TIterator&& end) noexcept
+    template<typename TKey, typename TValue>
+    Future<std::pair<TKey, TValue>> YieldForeach(std::unordered_map<TKey, TValue>&& collection) noexcept
     {
-        for (auto& it = begin; it != end; ++it)
-            co_yield std::move(*it);
+        auto inner = std::move(collection);
+        for (auto&& element : inner)
+            co_yield std::move(element);
+    }
+
+    template<std::forward_iterator TIterator,
+             typename TSource = typename std::iterator_traits<TIterator>::value_type>
+    Future<TSource> YieldForeach(const TIterator begin, const TIterator end) noexcept
+    {
+        for (auto it = begin; it != end; ++it)
+            co_yield *it;
     }
 }
 

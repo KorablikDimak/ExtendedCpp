@@ -51,7 +51,8 @@ set(LINQ_INCLUDES
         include/ExtendedCpp/LINQ/Future.h
         include/ExtendedCpp/LINQ/YieldForeach.h
         include/ExtendedCpp/LINQ/Concepts.h
-        include/ExtendedCpp/LINQ/LinqView.h)
+        include/ExtendedCpp/LINQ/LinqView.h
+        include/ExtendedCpp/LINQ/Iterators.h)
 
 set(Events_INCLUDES
         include/ExtendedCpp/Events.h
