@@ -37,7 +37,9 @@ namespace ExtendedCpp::Events
     protected:
         bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
-            const auto* methodHandler = static_cast<const MethodHandler*>(&other);
+            const auto* methodHandler = dynamic_cast<const MethodHandler<TObject, TParams...>*>(&other);
+            if (!methodHandler)
+                return false;
             return methodHandler->IsEquals(_object, _method);
         }
     };

@@ -1,29 +1,27 @@
-#include <ctime>
-
 #include <benchmark/benchmark.h>
 
-#include <Common/Matrix.h>
-#include <Common/Random.h>
+#include <ExtendedCpp/Matrix.h>
+#include <ExtendedCpp/Random.h>
 
-Common::MatrixF64 GenerateDoubles(const std::size_t size) noexcept
+ExtendedCpp::MatrixF64 GenerateDoubles(const std::size_t size) noexcept
 {
-    return { Common::MatrixF64(size, size, []{ return Common::RandomInt(1, 10); }) };
+    return { ExtendedCpp::MatrixF64(size, size, []{ return ExtendedCpp::Random::RandomInt(1, 10); }) };
 }
 
-Common::MatrixI32 GenerateInts(const std::size_t size) noexcept
+ExtendedCpp::MatrixI32 GenerateInts(const std::size_t size) noexcept
 {
-    return { Common::MatrixI32(size, size, []{ return Common::RandomInt(1, 10); }) };
+    return { ExtendedCpp::MatrixI32(size, size, []{ return ExtendedCpp::Random::RandomInt(1, 10); }) };
 }
 
 template<typename ...Args>
 void MultiplyBenchmarkDouble(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    const Common::MatrixF64 matrix1(std::move(std::get<0>(argsTuple)));
-    const Common::MatrixF64 matrix2(std::move(std::get<1>(argsTuple)));
+    const ExtendedCpp::MatrixF64 matrix1(std::move(std::get<0>(argsTuple)));
+    const ExtendedCpp::MatrixF64 matrix2(std::move(std::get<1>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const Common::MatrixF64 result = (matrix1.Multiply(matrix2, false)).value();
+        const ExtendedCpp::MatrixF64 result = (matrix1.Multiply(matrix2, false)).value();
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize20, GenerateDoubles(20), GenerateDoubles(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize100, GenerateDoubles(100), GenerateDoubles(100));
@@ -34,11 +32,11 @@ template<typename ...Args>
 void MultiplyBenchmarkInts(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    const Common::MatrixI32 matrix1(std::move(std::get<0>(argsTuple)));
-    const Common::MatrixI32 matrix2(std::move(std::get<1>(argsTuple)));
+    const ExtendedCpp::MatrixI32 matrix1(std::move(std::get<0>(argsTuple)));
+    const ExtendedCpp::MatrixI32 matrix2(std::move(std::get<1>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const Common::MatrixI32 result = (matrix1.Multiply(matrix2, false)).value();
+        const ExtendedCpp::MatrixI32 result = (matrix1.Multiply(matrix2, false)).value();
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize20, GenerateInts(20), GenerateInts(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize100, GenerateInts(100), GenerateInts(100));
@@ -49,7 +47,7 @@ template<typename ...Args>
 void InverseBenchmarkDouble(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    const Common::MatrixF64 matrix(std::move(std::get<0>(argsTuple)));
+    const ExtendedCpp::MatrixF64 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
         const auto result = matrix.Inverse().value();
@@ -63,7 +61,7 @@ template<typename ...Args>
 void InverseBenchmarkInts(benchmark::State& state, Args&&... args)
 {
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
-    const Common::MatrixI32 matrix(std::move(std::get<0>(argsTuple)));
+    const ExtendedCpp::MatrixI32 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
         const auto result = matrix.Inverse().value();

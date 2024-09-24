@@ -1,16 +1,14 @@
-#include <ctime>
-
 #include <benchmark/benchmark.h>
 
-#include <LINQ/Sort.h>
-#include <Common/Random.h>
+#include <ExtendedCpp/LINQ/Sort.h>
+#include <ExtendedCpp/Random.h>
 
 std::vector<int> GenerateInts(const std::size_t count) noexcept
 {
     std::vector<int> result(count);
 
     for (std::size_t i = 0; i < count; ++i)
-        result[i] = static_cast<int>(Common::RandomInt(0, 100000));
+        result[i] = static_cast<int>(ExtendedCpp::Random::RandomInt(0, 100000));
 
     return std::move(result);
 }
@@ -21,7 +19,7 @@ void QuickSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::QuickSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::QuickSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(QuickSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(QuickSortBenchmark, intSize100, GenerateInts(100));
@@ -36,7 +34,7 @@ void SelectionSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::SelectionSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::SelectionSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(SelectionSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(SelectionSortBenchmark, intSize100, GenerateInts(100));
@@ -50,7 +48,7 @@ void InsertionSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::InsertionSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::InsertionSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(InsertionSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(InsertionSortBenchmark, intSize100, GenerateInts(100));
@@ -64,7 +62,7 @@ void BucketSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::BucketSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::BucketSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(BucketSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(BucketSortBenchmark, intSize100, GenerateInts(100));
@@ -79,7 +77,7 @@ void CombSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(CombSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(CombSortBenchmark, intSize100, GenerateInts(100));
@@ -95,7 +93,7 @@ void MergeSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::CombSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(MergeSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(MergeSortBenchmark, intSize100, GenerateInts(100));
@@ -111,7 +109,7 @@ void TimSortBenchmark(benchmark::State& state, Args&&... args)
     auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
     std::vector numbers = std::get<0>(argsTuple);
     for ([[maybe_unused]] auto _ : state)
-        LINQ::Sort::TimSort(numbers.data(), 0, numbers.size() - 1);
+        ExtendedCpp::LINQ::Sort::TimSort(numbers.data(), 0, numbers.size() - 1);
 }
 BENCHMARK_CAPTURE(TimSortBenchmark, intSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(TimSortBenchmark, intSize100, GenerateInts(100));
