@@ -59,7 +59,8 @@ namespace ExtendedCpp::Events
         auto Find(const EventHandler& handler) const noexcept
         {
             for (auto iterator = _handlers.begin(); iterator != _handlers.end(); ++iterator)
-                if (**iterator == *handler) return iterator;
+                if (**iterator == *handler)
+                    return iterator;
             return _handlers.end();
         }
     };
