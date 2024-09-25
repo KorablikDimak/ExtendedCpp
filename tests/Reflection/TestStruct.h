@@ -40,7 +40,7 @@ public:
          METHOD(TestMethodDouble, double, double, double),
          STATIC_METHOD(TestMethodStaticString),
          STATIC_METHOD(TestMethodStatic),
-         STATIC_METHOD(TestMethodStatic, int));
+         STATIC_METHOD(TestMethodStatic, int))
 };
 
 #endif

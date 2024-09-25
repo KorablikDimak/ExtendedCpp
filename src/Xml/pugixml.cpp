@@ -647,7 +647,7 @@ PUGI__NS_BEGIN
 			const size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
 
 			// round size up to block alignment boundary
-			const size_t full_size = size + (xml_memory_block_alignment - 1) & ~(xml_memory_block_alignment - 1);
+			const size_t full_size = size + ((xml_memory_block_alignment - 1) & ~(xml_memory_block_alignment - 1));
 
 			xml_memory_page* page;
 			auto* header = static_cast<xml_memory_string_header*>(allocate_memory(full_size, page));
@@ -7780,7 +7780,7 @@ PUGI__NS_BEGIN
 		void* allocate(size_t size)
 		{
 			// round size up to block alignment boundary
-			size = size + xpath_memory_block_alignment - 1 & ~(xpath_memory_block_alignment - 1);
+			size = size + (xpath_memory_block_alignment - (1 & ~(xpath_memory_block_alignment - 1)));
 
 			if (_root_size + size <= _root->capacity)
 			{
@@ -7815,8 +7815,8 @@ PUGI__NS_BEGIN
 		void* reallocate(void* ptr, size_t old_size, size_t new_size)
 		{
 			// round size up to block alignment boundary
-			old_size = old_size + xpath_memory_block_alignment - 1 & ~(xpath_memory_block_alignment - 1);
-			new_size = new_size + xpath_memory_block_alignment - 1 & ~(xpath_memory_block_alignment - 1);
+			old_size = old_size + xpath_memory_block_alignment - (1 & ~(xpath_memory_block_alignment - 1));
+			new_size = new_size + xpath_memory_block_alignment - (1 & ~(xpath_memory_block_alignment - 1));
 
 			// we can only reallocate the last object
 			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == &_root->data[0] + _root_size);

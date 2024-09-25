@@ -11,7 +11,7 @@ public:
     ~TestSender() override = default;
 
     META(TestSender,
-         CONSTRUCTOR(std::map<std::string, std::string>));
+         CONSTRUCTOR(std::map<std::string, std::string>))
 
 protected:
     void Send(const std::string& message, ExtendedCpp::InfoLog::LogLevel logLevel, const std::string& tag) const noexcept override;

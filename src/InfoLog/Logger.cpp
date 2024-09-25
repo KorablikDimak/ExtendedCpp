@@ -84,6 +84,6 @@ void ExtendedCpp::InfoLog::Logger::AddSender(const ISender::Ptr& sender) noexcep
 
 void ExtendedCpp::InfoLog::Logger::RemoveSender(const ISender::Ptr& sender) noexcept
 {
-    for (int i = 0; i < _senders.size(); ++i)
+    for (std::size_t i = 0; i < _senders.size(); ++i)
         if (sender.get() == _senders[i].get()) _senders.erase(_senders.begin() + i);
 }

@@ -37,14 +37,14 @@ namespace ExtendedCpp::InfoLog
     {
         std::string copy = string;
         std::ranges::transform(copy, copy.begin(),
-            [](const unsigned char c){ return std::tolower(c); });
+            [](const unsigned char c){ return static_cast<char>(std::tolower(c)); });
         return copy;
     }
 
     inline std::string ToLowerCase(std::string&& string) noexcept
     {
         std::ranges::transform(string, string.begin(),
-            [](const unsigned char c){ return std::tolower(c); });
+            [](const unsigned char c){ return static_cast<char>(std::tolower(c)); });
         return string;
     }
 

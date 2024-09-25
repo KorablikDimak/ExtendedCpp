@@ -374,7 +374,7 @@ namespace ExtendedCpp::LINQ
                 {
                     if (element == otherElement)
                         break;
-                    if (j == otherCollection.size() - 1)
+                    if (j == static_cast<long long>(otherCollection.size() - 1))
                         newCollection.insert(element);
                     ++j;
                 }
@@ -1039,7 +1039,7 @@ namespace ExtendedCpp::LINQ
         std::size_t IndexAt(const TSource& target) const noexcept
         requires Concepts::Equatable<TSource>
         {
-            for (int i = 0; i < _collection.size(); ++i)
+            for (std::size_t i = 0; i < _collection.size(); ++i)
                 if (_collection[i] == target)
                     return i;
             return NPOS;
@@ -1050,7 +1050,7 @@ namespace ExtendedCpp::LINQ
         std::size_t IndexAt(const TSource& target, TSelector&& selector)
         const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
-            for (int i = 0; i < _collection.size(); ++i)
+            for (std::size_t i = 0; i < _collection.size(); ++i)
                 if (selector(_collection[i]) == selector(target))
                     return i;
             return NPOS;

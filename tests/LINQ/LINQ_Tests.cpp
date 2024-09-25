@@ -1032,10 +1032,10 @@ TEST(LINQ_Tests, PushBackTest)
     const std::vector result2 = ExtendedCpp::LINQ::From(numbers).PushBack(addNumbers).ToVector();
 
     // Assert
-    for (int i = 0; i < checkVector1.size(); ++i)
+    for (std::size_t i = 0; i < checkVector1.size(); ++i)
         ASSERT_EQ(checkVector1[i], result1[i]);
 
-    for (int i = 0; i < checkVector2.size(); ++i)
+    for (std::size_t i = 0; i < checkVector2.size(); ++i)
         ASSERT_EQ(checkVector2[i], result2[i]);
 }
 
@@ -1053,10 +1053,10 @@ TEST(LINQ_Tests, PushFrontTest)
     const std::vector result2 = ExtendedCpp::LINQ::From(numbers).PushFront(addNumbers).ToVector();
 
     // Assert
-    for (int i = 0; i < checkVector1.size(); ++i)
+    for (std::size_t i = 0; i < checkVector1.size(); ++i)
         ASSERT_EQ(checkVector1[i], result1[i]);
 
-    for (int i = 0; i < checkVector2.size(); ++i)
+    for (std::size_t i = 0; i < checkVector2.size(); ++i)
         ASSERT_EQ(checkVector2[i], result2[i]);
 }
 
@@ -1074,10 +1074,10 @@ TEST(LINQ_Tests, InsertTest)
     const std::vector result2 = ExtendedCpp::LINQ::From(numbers).Insert(addNumbers, 3).ToVector();
 
     // Assert
-    for (int i = 0; i < checkVector1.size(); ++i)
+    for (std::size_t i = 0; i < checkVector1.size(); ++i)
         ASSERT_EQ(checkVector1[i], result1[i]);
 
-    for (int i = 0; i < checkVector2.size(); ++i)
+    for (std::size_t i = 0; i < checkVector2.size(); ++i)
         ASSERT_EQ(checkVector2[i], result2[i]);
 }
 
@@ -1094,10 +1094,10 @@ TEST(LINQ_Tests, EraseTest)
     const std::vector result2 = ExtendedCpp::LINQ::From(numbers).Erase(2, 5).ToVector();
 
     // Assert
-    for (int i = 0; i < checkVector1.size(); ++i)
+    for (std::size_t i = 0; i < checkVector1.size(); ++i)
         ASSERT_EQ(checkVector1[i], result1[i]);
 
-    for (int i = 0; i < checkVector2.size(); ++i)
+    for (std::size_t i = 0; i < checkVector2.size(); ++i)
         ASSERT_EQ(checkVector2[i], result2[i]);
 }
 

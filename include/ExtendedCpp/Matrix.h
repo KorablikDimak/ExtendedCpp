@@ -854,8 +854,8 @@ namespace ExtendedCpp
                 return right.SplitMatrixParallel();
             });
 
-            std::array<Matrix, 4> A = std::move(taskLeft.get());
-            std::array<Matrix, 4> B = std::move(taskRight.get());
+            std::array<Matrix, 4> A = taskLeft.get();
+            std::array<Matrix, 4> B = taskRight.get();
 
             Matrix a11 = std::move(A[0]);
             Matrix a12 = std::move(A[1]);
@@ -888,13 +888,13 @@ namespace ExtendedCpp
             std::future<Matrix> taskP7 = std::async(std::launch::async, [&a12, &a22, &b21, &b22]
             { return ((a12 - a22).value() * (b21 + b22).value()).value(); });
 
-            Matrix p1 = std::move(taskP1.get());
-            Matrix p2 = std::move(taskP2.get());
-            Matrix p3 = std::move(taskP3.get());
-            Matrix p4 = std::move(taskP4.get());
-            Matrix p5 = std::move(taskP5.get());
-            Matrix p6 = std::move(taskP6.get());
-            Matrix p7 = std::move(taskP7.get());
+            Matrix p1 = taskP1.get();
+            Matrix p2 = taskP2.get();
+            Matrix p3 = taskP3.get();
+            Matrix p4 = taskP4.get();
+            Matrix p5 = taskP5.get();
+            Matrix p6 = taskP6.get();
+            Matrix p7 = taskP7.get();
 
             std::future<Matrix> taskC11 = std::async(std::launch::async, [&p1, &p4, &p7, &p5]
             { return ((p1 + p4).value() + (p7 - p5).value()).value(); });
@@ -908,10 +908,10 @@ namespace ExtendedCpp
             std::future<Matrix> taskC22 = std::async(std::launch::async, [&p1, &p2, &p3, &p6]
             { return ((p1 - p2).value() + (p3 + p6).value()).value(); });
 
-            Matrix c11 = std::move(taskC11.get());
-            Matrix c12 = std::move(taskC12.get());
-            Matrix c21 = std::move(taskC21.get());
-            Matrix c22 = std::move(taskC22.get());
+            Matrix c11 = taskC11.get();
+            Matrix c12 = taskC12.get();
+            Matrix c21 = taskC21.get();
+            Matrix c22 = taskC22.get();
 
             return CollectMatrix({ std::move(c11), std::move(c12), std::move(c21), std::move(c22) });
         }

@@ -37,7 +37,7 @@ namespace ExtendedCpp::LINQ
         std::stack<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.top());
             copy.pop();
@@ -50,7 +50,7 @@ namespace ExtendedCpp::LINQ
     LinqContainer<TSource> From(std::stack<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(collection.top());
             collection.pop();
@@ -65,7 +65,7 @@ namespace ExtendedCpp::LINQ
         std::queue<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.front());
             copy.pop();
@@ -78,7 +78,7 @@ namespace ExtendedCpp::LINQ
     LinqContainer<TSource> From(std::queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = collection.front();
             collection.pop();
@@ -93,7 +93,7 @@ namespace ExtendedCpp::LINQ
         std::priority_queue<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.top());
             copy.pop();
@@ -106,7 +106,7 @@ namespace ExtendedCpp::LINQ
     LinqContainer<TSource> From(std::priority_queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(collection.top());
             collection.pop();
@@ -163,7 +163,7 @@ namespace ExtendedCpp::LINQ
         std::stack<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.top());
             copy.pop();
@@ -176,7 +176,7 @@ namespace ExtendedCpp::LINQ
     LinqGenerator<TSource> Generator(std::stack<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(collection.top());
             collection.pop();
@@ -191,7 +191,7 @@ namespace ExtendedCpp::LINQ
         std::queue<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.front());
             copy.pop();
@@ -204,7 +204,7 @@ namespace ExtendedCpp::LINQ
     LinqGenerator<TSource> Generator(std::queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = collection.front();
             collection.pop();
@@ -219,7 +219,7 @@ namespace ExtendedCpp::LINQ
         std::priority_queue<TSource> copy = collection;
 
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(copy.top());
             copy.pop();
@@ -232,7 +232,7 @@ namespace ExtendedCpp::LINQ
     LinqGenerator<TSource> Generator(std::priority_queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
-        for (int i = 0; i < collection.size(); ++i)
+        for (std::size_t i = 0; i < collection.size(); ++i)
         {
             vectorCollection[i] = std::move(collection.top());
             collection.pop();

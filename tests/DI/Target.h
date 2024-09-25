@@ -19,7 +19,7 @@ public:
     }
 
     META(Target,
-         CONSTRUCTOR(std::shared_ptr<IService>));
+         CONSTRUCTOR(std::shared_ptr<IService>))
 };
 
 #endif

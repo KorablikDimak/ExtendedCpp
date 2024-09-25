@@ -9,7 +9,7 @@
 
 namespace ExtendedCpp::LINQ
 {
-    constexpr std::size_t NPOS = -1;
+    constexpr std::size_t NPOS = std::numeric_limits<std::size_t>::max();
 }
 
 namespace ExtendedCpp::LINQ::Algorithm
