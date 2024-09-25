@@ -10,7 +10,7 @@ std::vector<int> GenerateInts(const std::size_t count) noexcept
     for (std::size_t i = 0; i < count; ++i)
         result[i] = static_cast<int>(ExtendedCpp::Random::RandomInt(0, 100000));
 
-    return std::move(result);
+    return result;
 }
 
 template<typename ...Args>

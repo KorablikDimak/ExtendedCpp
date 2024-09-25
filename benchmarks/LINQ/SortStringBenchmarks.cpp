@@ -10,9 +10,9 @@ std::vector<std::string> GenerateStrings(const std::size_t count) noexcept
     std::vector<std::string> result(count);
 
     for (std::size_t i = 0; i < count; ++i)
-        result[i] = std::move(ExtendedCpp::Random::RandomString(20));
+        result[i] = ExtendedCpp::Random::RandomString(20);
 
-    return std::move(result);
+    return result;
 }
 
 template<typename ...Args>

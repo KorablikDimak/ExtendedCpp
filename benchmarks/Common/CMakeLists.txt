@@ -20,7 +20,3 @@ add_executable(Common-benchmarks)
 target_sources(Common-benchmarks PRIVATE ${SOURCES})
 
 target_link_libraries(Common-benchmarks PRIVATE ExtendedCpp::Common benchmark::benchmark)
-
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-    target_compile_options(Common-benchmarks PRIVATE -O3)
-endif()

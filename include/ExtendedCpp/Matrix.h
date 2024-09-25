@@ -558,7 +558,7 @@ namespace ExtendedCpp
 
             for (i = 0; i < _rowCount; ++i)
             {
-                maxA = 0.0;
+                maxA = static_cast<T>(0);
                 imax = i;
 
                 for (k = i; k < _rowCount; ++k)
