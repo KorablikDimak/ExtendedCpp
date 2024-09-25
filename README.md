@@ -56,33 +56,33 @@ Ports LINQ functionality from C# to C++.
 `size`, `empty`, `begin`, `end`, `cbegin`, `cend`,`rbegin`, `rend`, `crbegin`, `crend`
 ```C++
 #include <iostream>
-#include <LINQ/LINQ.h>
+#include <ExtendedCpp/LINQ.h>
 
 const std::vector numbers { 8, 7, 1, 9, 50, 6, 3 };
-const auto linq = LINQ::From(numbers);
+const auto linq = ExtendedCpp::LINQ::From(numbers);
 for (const auto& element : linq)
     std::cout << element << std::endl;
 ```
 ### How it works:
 The main class to work with is [LinqContainer](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/LINQ/LinqContainer.h) 
-that is obtained by the method `LINQ::From(startcollection)`. By calling methods on this class, we perform the necessary operations. 
+that is obtained by the method `ExtendedCpp::LINQ::From(startcollection)`. By calling methods on this class, we perform the necessary operations. 
 Methods are usually passed lambda expressions/std::function.
 At the end, you can use the methods: `.ToVector() .ToArray() .ToList()` etc. 
 (see supported std containers) that return a container stored in the 
 [LinqContainer](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/LINQ/LinqContainer.h). 
 ### Examples:
 ```C++
-#include <LINQ/LINQ.h>
+#include <ExtendedCpp/LINQ.h>
 
 std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
-std::vector selectedNames = LINQ::From(names)
+std::vector selectedNames = ExtendedCpp::LINQ::From(names)
     .Where([](const std::string& name){ return name.size() == 3; })
     .ToVector();
 // result: { "Tom", "Bob", "Sam", "Tim" }
 
 std::vector numbers { 1, 5, 9, 2, 0, 145, 2 };
-std::vector sortedNumbers = LINQ::From(numbers)
-    .OrderBy(OrderType::DESC)
+std::vector sortedNumbers = ExtendedCpp::LINQ::From(numbers)
+    .OrderBy(ExtendedCpp::LINQ::OrderType::DESC)
     .ToVector();
 // result: { 145, 9, 5, 2, 2, 1, 0 }
 ```
@@ -119,22 +119,22 @@ All methods described above are supported except:
 ### Examples:
 ```C++
 #include <iostream>
-#include <LINQ/LINQ.h>
+#include <ExtendedCpp/LINQ.h>
 
 std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
-std::vector selectedNames = LINQ::Generator(names)
+std::vector selectedNames = ExtendedCpp::LINQ::Generator(names)
     .Where([](const std::string& name){ return name.size() == 3; })
     .ToVector();
 // result: { "Tom", "Bob", "Sam", "Tim" }
 
 std::vector numbers { 1, 5, 9, 2, 0, 145, 2 };
-std::vector sortedNumbers = LINQ::Generator(numbers)
-    .OrderBy(OrderType::DESC)
+std::vector sortedNumbers = ExtendedCpp::LINQ::Generator(numbers)
+    .OrderBy(ExtendedCpp::LINQ::OrderType::DESC)
     .ToVector();
 // result: { 145, 9, 5, 2, 2, 1, 0 }
 
 const std::vector numbers { 8, 7, 1, 9, 50, 6, 3 };
-auto linq = LINQ::Generator(numbers);
+auto linq = ExtendedCpp::LINQ::Generator(numbers);
 for (auto& element : linq)
     std::cout << element << std::endl;
 ```
@@ -150,11 +150,11 @@ Library for implementing dynamic reflection.
 Allows you to access constructors, methods, fields, static methods and fields.
 Does not require rewriting existing code. To use it, just add two macros.
 
-`META_DECL` in your .h file and `META_IMPL(NameOfYourType, ...members...)`
+`META` in your .h file
 ### Examples:
 ```C++
 // TestStruct.h
-#include <Reflection/Reflection.h>
+#include <ExtendedCpp/Reflection.h>
 
 struct TestStruct
 {
@@ -185,11 +185,11 @@ struct TestStruct
 // Usage
 
 // Get type info
-TypeInfo typeInfo = Reflection::GetType<TestStruct>();
+ExtendedCpp::Reflection::TypeInfo typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
 // or
-std::vector<TypeInfo> typeInfo = Reflection::GetType("TestStruct");
+std::vector<ExtendedCpp::Reflection::TypeInfo> typeInfo = ExtendedCpp::Reflection::GetType("TestStruct");
 // or
-std::optional<TypeInfo> typeInfo = Reflection::GetType(typeid(TestStruct));
+std::optional<ExtendedCpp::Reflection::TypeInfo> typeInfo = ExtendedCpp::Reflection::GetType(typeid(TestStruct));
 
 // Call constructors
 TestStruct testStruct = std::any_cast<TestStruct>(typeInfo.GetConstructors()[0]->Create());
@@ -237,14 +237,14 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 Library of templates for implementing subscription and unsubscription of events.
 ### Examples:
 ```C++
-#include <Events/Events.h>
+#include <ExtendedCpp/Events.h>
 
-auto event = Events::Event<EventType>(); // EventType should be std::shared_ptr<T>&
+auto event = ExtendedCpp::Events::Event<EventType>(); // EventType should be const std::shared_ptr<T>&
 
 const std::function functor1 = [](EventType){};
 const std::function functor2 = [](EventType){};
 
-const auto handler1 = Events::CreateFunctionHandler(functor1);
+const auto handler1 = ExtendedCpp::Events::CreateFunctionHandler(functor1);
 const auto handler2 = FUNCTION_HANDLER(functor2);
 
 event += handler1;
@@ -272,9 +272,9 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 Template library for implementing dependency container in compile time.
 ### Examples:
 ```C++
-#include <DI/DI.h>
+#include <ExtendedCpp/DI.h>
 
-DI::ServiceProvider serviceProvider;
+ExtendedCpp::DI::ServiceProvider serviceProvider;
 
 // class Service : IService
 serviceProvider.AddSingleton<IService1, Service1>();
@@ -288,11 +288,11 @@ std::shared_ptr<IService3> service3 = serviceProvider.GetServiceRequired<IServic
 
 // constructor of class Target1
 // Target1(const std::shared_ptr<IService1>& service1, const std::shared_ptr<IService2>& service2) {...}
-Target1 target1 = DI::Register<Target1(IService1, IService2)>::CreateRequired(serviceProvider);
+Target1 target1 = ExtendedCpp::DI::Register<Target1(IService1, IService2)>::CreateRequired(serviceProvider);
 
 // constructor of class Target2
 // Target2(const std::shared_ptr<IService1>& service1, const std::shared_ptr<IService3>& service3) {...}
-Target2 target2 = DI::Register<Target2(IService1, IService3)>::CreateRequired(serviceProvider);
+Target2 target2 = ExtendedCpp::DI::Register<Target2(IService1, IService3)>::CreateRequired(serviceProvider);
 
 // or with using Reflection
 
@@ -304,8 +304,8 @@ META(Target1,
 META(Target2,
      CONSTRUCTOR(std::shared_ptr<IService1>, std::shared_ptr<IService3>));
 
-Target1 target1 = DI::Injector<Target1>::CreateRequired(serviceProvider);
-Target2 target2 = DI::Injector<Target2>::CreateRequired(serviceProvider);
+Target1 target1 = ExtendedCpp::DI::Injector<Target1>::CreateRequired(serviceProvider);
+Target2 target2 = ExtendedCpp::DI::Injector<Target2>::CreateRequired(serviceProvider);
 ```
 
 To use dependency injection, the target class must have at least one public constructor that does not take arguments, 
@@ -342,10 +342,10 @@ You can add your own senders with interface class [ISender](https://github.com/K
 See [TestSender.h](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.h) and [TestSender.cpp](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.cpp).
 ### Examples:
 ```C++
-#include <InfoLog/InfoLog.h>
+#include <ExtendedCpp/InfoLog.h>
 
 std::string xmlFilePath = "LogConfig.xml";
-auto factory = InfoLog::LoggerFactory(xmlFilePath);
+auto factory = ExtendedCpp::InfoLog::LoggerFactory(xmlFilePath);
 auto logger = factory.CreateLogger();
 logger->Info("my message!");
 ```
@@ -355,42 +355,41 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 ---
 ## Other libraries
 ### Description
-Other libraries are collected in the catalog [Common](https://github.com/KorablikDimak/ExtendedCpp/tree/master/include/Common)
-They include:
-- `Matrix` for working with matrices. Overridden addition, multiplication, etc. operators are supported. There are functions for finding the inverse matrix, matrix rank, and searching for the determinant. 
-- `Random` to generate numbers in a given range or to generate strings of a given length with random characters.
-- `CancellationTokenSourse` creates thread-safe tokens to gracefully stop the thread from outside.
+Include:
+- `Matrix.h` for working with matrices. Overridden addition, multiplication, etc. operators are supported. There are functions for finding the inverse matrix, matrix rank, and searching for the determinant. 
+- `Random.h` to generate numbers in a given range or to generate strings of a given length with random characters.
+- `Cancellation.h` creates thread-safe tokens to gracefully stop the thread from outside.
 ### Examples:
 ```C++
-#include <Common/Common.h>
+#include <ExtendedCpp/Matrix.h>
 
-Matrix matrix1(2, 3);
+ExtendedCpp::Matrix<int> matrix1(2, 3);
 matrix1.SetRow({ 1, 2, 3 }, 0);
 matrix1.SetRow({ 3, 1, -2 }, 1);
 
-Matrix matrix2(3, 2);
+ExtendedCpp::Matrix<int> matrix2(3, 2);
 matrix2.SetRow({ 1, 2 }, 0);
 matrix2.SetRow({ -3, 1 }, 1);
 matrix2.SetRow({ 2, 0 }, 2);
 
-const Matrix matrix3 = matrix1 * matrix2;
+const ExtendedCpp::Matrix<int> matrix3 = matrix1 * matrix2;
 std::cout << matrix3 << std::endl;
 // output:
 //  1   4
 // -4   7
 
-Matrix matrix4(3, 3);
+ExtendedCpp::Matrix<double> matrix4(3, 3);
 matrix4.SetRow({ 1, 2, 3 }, 0);
 matrix4.SetRow({ 4, 5, 6 }, 1);
 matrix4.SetRow({ 7, 8, 9 }, 2);
 
 const double det = matrix4.Det(); // result: 0
 
-const Matrix matrix5(100, 100, []{ return Common::RandomInt(1, 10); }); // generate random matrix
+const ExtendedCpp::Matrix<double> matrix5(100, 100, []{ return ExtendedCpp::Random(1, 10); }); // generate random matrix
 
-const std::optional<Matrix> invertedMatrix = matrix5.Inverse(); // inverse matrix
+const std::optional<ExtendedCpp::Matrix<double>> invertedMatrix = matrix5.Inverse(); // inverse matrix
 // or
-const std::optional<Matrix> invertedMatrix = ~matrix5; // inverse matrix
+const std::optional<ExtendedCpp::Matrix<double>> invertedMatrix = ~matrix5; // inverse matrix
 ```
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Common).
