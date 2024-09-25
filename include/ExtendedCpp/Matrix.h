@@ -847,7 +847,7 @@ namespace ExtendedCpp
                 return left.SplitMatrixParallel();
             });
 
-            std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [this, &matrix, newDimension]
+            std::future<std::array<Matrix, 4>> taskRight = std::async(std::launch::async, [&matrix, newDimension]
             {
                 Matrix right(matrix);
                 right.Resize(newDimension, newDimension);

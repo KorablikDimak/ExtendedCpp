@@ -127,8 +127,8 @@ TEST(ReflectionTests, ConstructorFromAnyTest)
     // Assert
     ASSERT_TRUE(testStruct1.has_value());
     ASSERT_TRUE(testStruct2);
-    ASSERT_NO_THROW(auto _ = std::any_cast<TestStruct>(testStruct1));
-    ASSERT_NO_THROW(auto _= std::static_pointer_cast<TestStruct>(testStruct2));
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::any_cast<TestStruct>(testStruct1));
+    ASSERT_NO_THROW([[maybe_unused]] auto _= std::static_pointer_cast<TestStruct>(testStruct2));
 }
 
 TEST(ReflectionTests, MetaTemplateTest)
@@ -140,10 +140,10 @@ TEST(ReflectionTests, MetaTemplateTest)
 
     // Act
     // Assert
-    ASSERT_NO_THROW(auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ =
             std::any_cast<TestTemplate<int>>(typeInfo1.GetConstructors()[0]->Create()));
-    ASSERT_NO_THROW(auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ =
             std::any_cast<TestTemplate<double>>(typeInfo2.GetConstructors()[0]->Create()));
-    ASSERT_NO_THROW(auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ =
             std::any_cast<TestTemplate<std::string>>(typeInfo3.GetConstructors()[0]->Create()));
 }

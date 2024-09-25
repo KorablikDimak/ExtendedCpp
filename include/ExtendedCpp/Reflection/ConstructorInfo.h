@@ -125,6 +125,7 @@ namespace ExtendedCpp::Reflection
 
         template<typename THelper>
         ConstructorInfo(const std::string& constructorName, THelper&& constructorHelper, const std::vector<std::type_index>& parameters) noexcept :
+            MemberInfo(constructorName),
             _constructorHelper(std::forward<THelper>(constructorHelper)),
             _constructor([](const std::any& helper, std::any args)
                 { return std::any(std::any_cast<const THelper&>(helper).Create(args)); }),
@@ -138,11 +139,11 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).CreateFromAnyPtr(args)); }),
             _fromAnyPtrNew([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
                 { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromAnyPtr(args)); }),
-            _parameters(parameters),
-            MemberInfo(constructorName) {}
+            _parameters(parameters) {}
 
         template<typename THelper>
         ConstructorInfo(std::string&& constructorName, THelper&& constructorHelper, std::vector<std::type_index>&& parameters) noexcept :
+            MemberInfo(std::move(constructorName)),
             _constructorHelper(std::forward<THelper>(constructorHelper)),
             _constructor([](const std::any& helper, std::any args)
                 { return std::any(std::any_cast<const THelper&>(helper).Create(args)); }),
@@ -156,8 +157,7 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).CreateFromAnyPtr(args)); }),
             _fromAnyPtrNew([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
                 { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromAnyPtr(args)); }),
-            _parameters(std::move(parameters)),
-            MemberInfo(std::move(constructorName)) {}
+            _parameters(std::move(parameters)) {}
 
         ~ConstructorInfo() override = default;
 

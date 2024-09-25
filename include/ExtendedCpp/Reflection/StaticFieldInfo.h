@@ -36,19 +36,19 @@ namespace ExtendedCpp::Reflection
 
         template<typename THelper>
         StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+            MemberInfo(fieldName),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }),
-            MemberInfo(fieldName) {}
+                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }) {}
 
         template<typename THelper>
         StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+            MemberInfo(std::move(fieldName)),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }),
-            MemberInfo(std::move(fieldName)) {}
+                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }) {}
 
         template<typename TField>
         TField* GetField() const

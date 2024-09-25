@@ -74,6 +74,7 @@ namespace ExtendedCpp::Reflection
         template<typename THelper, typename TConstHelper>
         MethodInfo(const std::string& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
                    std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
+            MemberInfo(methodName),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
@@ -97,12 +98,12 @@ namespace ExtendedCpp::Reflection
                         return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _parameters(std::move(parameters)),
-            _methodCvQualifier(methodCvQualifier),
-            MemberInfo(methodName) {}
+            _methodCvQualifier(methodCvQualifier) {}
 
         template<typename THelper, typename TConstHelper>
         MethodInfo(std::string&& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
                    std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
+            MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
@@ -126,8 +127,7 @@ namespace ExtendedCpp::Reflection
                         return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _parameters(std::move(parameters)),
-            _methodCvQualifier(methodCvQualifier),
-            MemberInfo(std::move(methodName)) {}
+            _methodCvQualifier(methodCvQualifier) {}
 
         ~MethodInfo() override = default;
 

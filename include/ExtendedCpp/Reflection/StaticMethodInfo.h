@@ -42,6 +42,7 @@ namespace ExtendedCpp::Reflection
 
         template<typename THelper>
         StaticMethodInfo(const std::string& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            MemberInfo(methodName),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& args)
                 {
@@ -53,11 +54,11 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
                 }),
-            _parameters(std::move(parameters)),
-            MemberInfo(methodName) {}
+            _parameters(std::move(parameters)) {}
 
         template<typename THelper>
         StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
+            MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& args)
                 {
@@ -69,8 +70,7 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
                 }),
-            _parameters(std::move(parameters)),
-            MemberInfo(std::move(methodName)) {}
+            _parameters(std::move(parameters)) {}
 
         ~StaticMethodInfo() override = default;
 
