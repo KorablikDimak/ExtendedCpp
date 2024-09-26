@@ -38,7 +38,7 @@ namespace ExtendedCpp::InfoLog
         explicit Logger(T&& fileName) noexcept
         {
             auto configuration = std::make_unique<Configuration>(std::forward<T>(fileName));
-            for (std::map<std::string, std::string>&& config : configuration->GetConfigs())
+            for (std::map<std::string, std::string>& config : configuration->GetConfigs())
                 AddSender(std::move(config));
         }
 
