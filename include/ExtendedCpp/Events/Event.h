@@ -4,6 +4,7 @@
 #include <memory>
 #include <list>
 #include <shared_mutex>
+#include <mutex>
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
