@@ -4,6 +4,7 @@
 #include <ExtendedCpp/Events/Event.h>
 #include <ExtendedCpp/Events/FunctionHandler.h>
 #include <ExtendedCpp/Events/MethodHandler.h>
+#include <ExtendedCpp/Events/ConstMethodHandler.h>
 #include <ExtendedCpp/Events/StaticMethodHandler.h>
 
 #endif
