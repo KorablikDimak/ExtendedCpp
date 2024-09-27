@@ -369,8 +369,8 @@ namespace ExtendedCpp::LINQ::Sort
 
         using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
 
-        const TSelect min = Aggregate::Min(collection, start, end, selector);
-        const TSelect max = Aggregate::Max(collection, start, end, selector);
+        const TSelect min = Aggregate::Min(collection, start, end, std::forward<TSelector>(selector));
+        const TSelect max = Aggregate::Max(collection, start, end, std::forward<TSelector>(selector));
         const auto blockCount = static_cast<std::size_t>(std::ceil(std::log2(end + 1 - start)));
         if (blockCount == 0) return;
 
@@ -397,11 +397,11 @@ namespace ExtendedCpp::LINQ::Sort
             if (block.second.empty()) continue;
             if (block.second.size() < 1000)
             {
-                InsertionSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
+                InsertionSort(block.second.data(), 0, block.second.size() - 1, std::forward<TSelector>(selector), orderType);
             }
             else
             {
-                CombSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
+                CombSort(block.second.data(), 0, block.second.size() - 1, std::forward<TSelector>(selector), orderType);
             }
         }
 
@@ -638,9 +638,9 @@ namespace ExtendedCpp::LINQ::Sort
     {
         if (start >= end) return;
         const std::size_t mid = (start + end) / 2;
-        MergeSort(collection, start, mid, selector, orderType);
-        MergeSort(collection, mid + 1, end, selector, orderType);
-        Merge(collection, start, mid, end, selector, orderType);
+        MergeSort(collection, start, mid, std::forward<TSelector>(selector), orderType);
+        MergeSort(collection, mid + 1, end, std::forward<TSelector>(selector), orderType);
+        Merge(collection, start, mid, end, std::forward<TSelector>(selector), orderType);
     }
 
     constexpr std::size_t RUN = 64;
@@ -702,8 +702,8 @@ namespace ExtendedCpp::LINQ::Sort
 
         for (std::size_t i = 0; i < count; i += RUN)
         {
-            if (i + RUN - 1 < count - 1) InsertionSort(collection, i, i + RUN - 1, selector, orderType);
-            else InsertionSort(collection, i, count - 1, selector, orderType);
+            if (i + RUN - 1 < count - 1) InsertionSort(collection, i, i + RUN - 1, std::forward<TSelector>(selector), orderType);
+            else InsertionSort(collection, i, count - 1, std::forward<TSelector>(selector), orderType);
         }
 
         for (std::size_t size = RUN; size < count; size = 2 * size)
@@ -712,124 +712,136 @@ namespace ExtendedCpp::LINQ::Sort
                 std::size_t mid = left + size - 1;
                 std::size_t right = left + 2 * size - 1;
                 if (count - 1 < (left + 2 * size - 1)) right = count - 1;
-                if (mid < right) Merge(collection, left, mid, right, selector, orderType);
+                if (mid < right) Merge(collection, left, mid, right, std::forward<TSelector>(selector), orderType);
             }
     }
 
     template<Concepts::Comparable T>
     std::size_t Partition(T *const collection, const std::size_t start, const std::size_t end,
-                          const OrderType orderType) noexcept
+                        const OrderType orderType) noexcept
     {
-        const T pivot = collection[start];
-        std::size_t i = start + 1;
+        auto i = static_cast<long long>(start);
+        auto j = static_cast<long long>(end);
+        const T pivot = collection[(start + end) / 2];
 
         if (orderType == OrderType::ASC)
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (collection[j] < pivot)
+            while (i <= j)
+            {
+                while (collection[i] < pivot)
+                    ++i;
+                while (collection[j] > pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
         else
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (collection[j] > pivot)
+            while (i <= j)
+            {
+                while (collection[i] > pivot)
+                    ++i;
+                while (collection[j] < pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
 
-        std::swap(collection[start], collection[i - 1]);
-        return i - 1;
+        return i;
     }
 
     template<Concepts::Comparable T>
-    void QuickSort(T *const collection, std::size_t start, std::size_t end,
+    void QuickSort(T *const collection, const std::size_t start, const std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
     {
-        while (start < end)
+        if (end - start < 65)
         {
-            if (end - start < 65)
-            {
-                InsertionSort(collection, start, end, orderType);
-                return;
-            }
-
-            const std::size_t mid = Partition(collection, start, end, orderType);
-            if (mid == 0) return;
-
-            if (mid - start < end - mid)
-            {
-                QuickSort(collection, start, mid - 1, orderType);
-                start = mid + 1;
-            }
-            else
-            {
-                QuickSort(collection, mid + 1, end, orderType);
-                end = mid - 1;
-            }
+            InsertionSort(collection, start, end, orderType);
+            return;
         }
+
+        const std::size_t index = Partition(collection, start, end, orderType);
+
+        if (start < index - 1)
+            QuickSort(collection, start, index - 1, orderType);
+        if (index < end)
+            QuickSort(collection, index, end, orderType);
     }
 
     template<Concepts::Comparable T>
     std::size_t Partition(T* *const collection, const std::size_t start, const std::size_t end,
                           const OrderType orderType) noexcept
     {
-        const T* pivot = collection[start];
-        std::size_t i = start + 1;
+        auto i = static_cast<long long>(start);
+        auto j = static_cast<long long>(end);
+        const T pivot = *collection[(start + end) / 2];
 
         if (orderType == OrderType::ASC)
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (*collection[j] < *pivot)
+            while (i <= j)
+            {
+                while (*collection[i] < pivot)
+                    ++i;
+                while (*collection[j] > pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
         else
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (*collection[j] > *pivot)
+            while (i <= j)
+            {
+                while (*collection[i] > pivot)
+                    ++i;
+                while (*collection[j] < pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
 
-        std::swap(collection[start], collection[i - 1]);
-        return i - 1;
+        return i;
     }
 
     template<Concepts::Comparable T>
     void QuickSort(T* *const collection, std::size_t start, std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
     {
-        while (start < end)
+        if (end - start < 65)
         {
-            if (end - start < 65)
-            {
-                InsertionSort(collection, start, end, orderType);
-                return;
-            }
-
-            const std::size_t mid = Partition(collection, start, end, orderType);
-            if (mid == 0) return;
-
-            if (mid - start < end - mid)
-            {
-                QuickSort(collection, start, mid - 1, orderType);
-                start = mid + 1;
-            }
-            else
-            {
-                QuickSort(collection, mid + 1, end, orderType);
-                end = mid - 1;
-            }
+            InsertionSort(collection, start, end, orderType);
+            return;
         }
+
+        const std::size_t index = Partition(collection, start, end, orderType);
+
+        if (start < index - 1)
+            QuickSort(collection, start, index - 1, orderType);
+        if (index < end)
+            QuickSort(collection, index, end, orderType);
     }
 
     template<typename T, std::invocable<T> TSelector>
@@ -840,30 +852,46 @@ namespace ExtendedCpp::LINQ::Sort
     {
         using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
 
-        const TSelect pivot = selector(collection[start]);
-        std::size_t i = start + 1;
+        auto i = static_cast<long long>(start);
+        auto j = static_cast<long long>(end);
+        const TSelect pivot = selector(collection[(start + end) / 2]);
 
         if (orderType == OrderType::ASC)
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (selector(collection[j]) < pivot)
+            while (i <= j)
+            {
+                while (selector(collection[i]) < pivot)
+                    ++i;
+                while (selector(collection[j]) > pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
         else
         {
-            for (std::size_t j = start + 1; j <= end; ++j)
-                if (selector(collection[j]) > pivot)
+            while (i <= j)
+            {
+                while (selector(collection[i]) > pivot)
+                    ++i;
+                while (selector(collection[j]) < pivot)
+                    --j;
+
+                if (i <= j)
                 {
                     std::swap(collection[i], collection[j]);
                     ++i;
+                    --j;
                 }
+            };
         }
 
-        std::swap(collection[start], collection[i - 1]);
-        return i - 1;
+        return i;
     }
 
     template<typename T, std::invocable<T> TSelector>
@@ -872,28 +900,18 @@ namespace ExtendedCpp::LINQ::Sort
                    TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
-        while (start < end)
+        if (end - start < 65)
         {
-            if (end - start < 65)
-            {
-                InsertionSort(collection, start, end, selector, orderType);
-                return;
-            }
-
-            const std::size_t mid = Partition(collection, start, end, selector, orderType);
-            if (mid == 0) return;
-
-            if (mid - start < end - mid)
-            {
-                QuickSort(collection, start, mid - 1, selector, orderType);
-                start = mid + 1;
-            }
-            else
-            {
-                QuickSort(collection, mid + 1, end, selector, orderType);
-                end = mid - 1;
-            }
+            InsertionSort(collection, start, end, std::forward<TSelector>(selector), orderType);
+            return;
         }
+
+        const std::size_t index = Partition(collection, start, end, std::forward<TSelector>(selector), orderType);
+
+        if (start < index - 1)
+            QuickSort(collection, start, index - 1, std::forward<TSelector>(selector), orderType);
+        if (index < end)
+            QuickSort(collection, index, end, std::forward<TSelector>(selector), orderType);
     }
 }
 
