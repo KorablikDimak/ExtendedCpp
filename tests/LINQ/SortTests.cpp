@@ -249,7 +249,7 @@ TEST(SortTests, MergeSortTest)
         ASSERT_TRUE(persons[i].Age == sortedAges[i]);
 }
 
-TEST(SortTests, QuickSortTest)
+TEST(SortTests, QuickSortTest1)
 {
     // Average
     short arr1[10] = { 7, 3, 6, 10, 2, 50, 5, 21, 40, 25 };
@@ -303,6 +303,20 @@ TEST(SortTests, QuickSortTest)
     // Assert
     for (short i = 0; i < 4; ++i)
         ASSERT_TRUE(persons[i].Age == sortedAges[i]);
+}
+
+TEST(SortTests, QuickSortTest2)
+{
+    // Average
+    short arr[8] = { 0, 5, 2, 10, 9, 7, 4, 1 };
+    const short arrCorrect[8] = { 0, 1, 2, 4, 5, 7, 9, 10 };
+
+    // Act
+    ExtendedCpp::LINQ::Sort::QuickSort(arr, 0, 7);
+
+    // Assert
+    for (short i = 0; i < 8; ++i)
+        ASSERT_TRUE(arr[i] == arrCorrect[i]);
 }
 
 TEST(SortTests, TimSortTest)

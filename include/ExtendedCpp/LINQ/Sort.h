@@ -772,12 +772,12 @@ namespace ExtendedCpp::LINQ::Sort
             return;
         }
 
-        const std::size_t index = Partition(collection, start, end, orderType);
+        const std::size_t mid = Partition(collection, start, end, orderType);
 
-        if (start < index - 1)
-            QuickSort(collection, start, index - 1, orderType);
-        if (index < end)
-            QuickSort(collection, index, end, orderType);
+        if (start < mid - 1)
+            QuickSort(collection, start, mid - 1, orderType);
+        if (mid < end)
+            QuickSort(collection, mid, end, orderType);
     }
 
     template<Concepts::Comparable T>
@@ -836,12 +836,12 @@ namespace ExtendedCpp::LINQ::Sort
             return;
         }
 
-        const std::size_t index = Partition(collection, start, end, orderType);
+        const std::size_t mid = Partition(collection, start, end, orderType);
 
-        if (start < index - 1)
-            QuickSort(collection, start, index - 1, orderType);
-        if (index < end)
-            QuickSort(collection, index, end, orderType);
+        if (start < mid - 1)
+            QuickSort(collection, start, mid - 1, orderType);
+        if (mid < end)
+            QuickSort(collection, mid, end, orderType);
     }
 
     template<typename T, std::invocable<T> TSelector>
@@ -906,12 +906,12 @@ namespace ExtendedCpp::LINQ::Sort
             return;
         }
 
-        const std::size_t index = Partition(collection, start, end, std::forward<TSelector>(selector), orderType);
+        const std::size_t mid = Partition(collection, start, end, std::forward<TSelector>(selector), orderType);
 
-        if (start < index - 1)
-            QuickSort(collection, start, index - 1, std::forward<TSelector>(selector), orderType);
-        if (index < end)
-            QuickSort(collection, index, end, std::forward<TSelector>(selector), orderType);
+        if (start < mid - 1)
+            QuickSort(collection, start, mid - 1, std::forward<TSelector>(selector), orderType);
+        if (mid < end)
+            QuickSort(collection, mid, end, std::forward<TSelector>(selector), orderType);
     }
 }
 
