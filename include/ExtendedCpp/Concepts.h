@@ -32,8 +32,7 @@ namespace ExtendedCpp::Concepts
     template<typename T>
     concept ConstructableFromNumber = requires
     {
-        T(0);
-        T(1);
+        T(std::declval<int>());
     };
 
     template<typename T>
