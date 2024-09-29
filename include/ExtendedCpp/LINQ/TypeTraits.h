@@ -5,15 +5,6 @@
 
 namespace ExtendedCpp::LINQ
 {
-    template<typename TFunctor>
-    struct FunctorTraits;
-
-    template<typename TFunctor, typename... Args>
-    struct FunctorTraits<TFunctor(Args...)>
-    {
-        using ReturnType = decltype(std::declval<TFunctor>()(std::declval<Args>()...));
-    };
-
     template<typename TPair, typename = void, typename = void>
     struct PairTraits
     {

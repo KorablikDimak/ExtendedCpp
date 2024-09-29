@@ -38,7 +38,7 @@ namespace ExtendedCpp::LINQ::Aggregate
     }
 
     template<typename T, std::invocable<T> TSelector,
-             Concepts::Summarize TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+             Concepts::Summarize TResult = std::invoke_result_t<TSelector, T>>
     TResult Sum(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
@@ -59,7 +59,7 @@ namespace ExtendedCpp::LINQ::Aggregate
     }
 
     template<typename T, std::invocable<T> TSelector,
-             Concepts::Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+             Concepts::Comparable TResult = std::invoke_result_t<TSelector, T>>
     TResult Min(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
@@ -81,7 +81,7 @@ namespace ExtendedCpp::LINQ::Aggregate
     }
 
     template<typename T, std::invocable<T> TSelector,
-             Concepts::Comparable TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+             Concepts::Comparable TResult = std::invoke_result_t<TSelector, T>>
     TResult Max(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
@@ -102,7 +102,7 @@ namespace ExtendedCpp::LINQ::Aggregate
     }
 
     template<typename T, std::invocable<T> TSelector,
-             Concepts::Divisible TResult = typename FunctorTraits<TSelector(T)>::ReturnType>
+             Concepts::Divisible TResult = std::invoke_result_t<TSelector, T>>
     TResult Average(const T *const collection, std::size_t start, const std::size_t end, TSelector&& selector)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {

@@ -212,7 +212,7 @@ namespace ExtendedCpp::LINQ
             return unorderedMap;
         }
 
-        template<std::invocable<TSource> TSelector, typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        template<std::invocable<TSource> TSelector, typename TResult = std::invoke_result_t<TSelector, TSource>>
         LinqView<SelectorIterator<TResult, TIterator, TSelector>> Select(TSelector&& selector) const noexcept
         {
             return LinqView<SelectorIterator<TResult, TIterator, TSelector>>(
@@ -242,9 +242,9 @@ namespace ExtendedCpp::LINQ
                  std::invocable<TSource> TInnerKeySelector,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector>
-        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                              typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-                 Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
+        requires std::same_as<std::invoke_result_t<TInnerKeySelector, TSource>,
+                              std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
+                 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, TSource>>
         LinqView<JoinIterator<TIterator, TOtherCollection, TInnerKeySelector,
                               TOtherKeySelector, TResultSelector>> Join(const TOtherCollection& otherCollection,
                                                                         TInnerKeySelector&& innerKeySelector,

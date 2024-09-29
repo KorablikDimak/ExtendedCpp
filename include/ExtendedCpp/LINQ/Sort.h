@@ -75,7 +75,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void SelectionSort(T *const collection, const std::size_t start, const std::size_t end, TSelector&& selector,
                        const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -165,7 +165,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void InsertionSort(T *const collection, const std::size_t start, const std::size_t end,
                        TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -259,7 +259,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void CombSort(T *const collection, const std::size_t start, const std::size_t end,
                   TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -359,15 +359,15 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType> &&
-             Concepts::Divisible<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>> &&
+             Concepts::Divisible<std::invoke_result_t<TSelector, T>>
     void BucketSort(T *const collection, const std::size_t start, const std::size_t end,
                     TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (start >= end) return;
 
-        using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
+        using TSelect = std::invoke_result_t<TSelector, T>;
 
         const TSelect min = Aggregate::Min(collection, start, end, std::forward<TSelector>(selector));
         const TSelect max = Aggregate::Max(collection, start, end, std::forward<TSelector>(selector));
@@ -570,7 +570,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void Merge(T *const collection, const std::size_t start, const std::size_t mid, const std::size_t end,
                TSelector&& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -631,7 +631,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void MergeSort(T *const collection, const std::size_t start, const std::size_t end,
                    TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -692,7 +692,7 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void TimSort(T *const collection, const std::size_t start, const std::size_t end,
                  TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
@@ -739,7 +739,7 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
         else
         {
@@ -756,7 +756,7 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
 
         return i;
@@ -803,7 +803,7 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
         else
         {
@@ -820,7 +820,7 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
 
         return i;
@@ -845,12 +845,12 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     std::size_t Partition(T *const collection, const std::size_t start, const std::size_t end,
                           TSelector&& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
-        using TSelect = typename FunctorTraits<TSelector(T)>::ReturnType;
+        using TSelect = std::invoke_result_t<TSelector, T>;
 
         auto i = static_cast<long long>(start);
         auto j = static_cast<long long>(end);
@@ -871,7 +871,7 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
         else
         {
@@ -888,14 +888,14 @@ namespace ExtendedCpp::LINQ::Sort
                     ++i;
                     --j;
                 }
-            };
+            }
         }
 
         return i;
     }
 
     template<typename T, std::invocable<T> TSelector>
-    requires Concepts::Comparable<typename FunctorTraits<TSelector(T)>::ReturnType>
+    requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void QuickSort(T *const collection, std::size_t start, std::size_t end,
                    TSelector&& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)

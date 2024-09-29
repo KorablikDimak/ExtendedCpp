@@ -251,7 +251,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TSelector, TSource>>
         LinqContainer<TResult> Select(TSelector&& selector)
             const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -265,7 +265,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 typename TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType::value_type>
+                 typename TResult = typename std::invoke_result_t<TSelector, TSource>::value_type>
         LinqContainer<TResult> SelectMany(TSelector&& selector)
             const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -282,10 +282,10 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TCollectionSelector,
-                 Concepts::Iterable TCollection = typename FunctorTraits<TCollectionSelector(TSource)>::ReturnType,
+                 Concepts::Iterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
                  typename TCollectionValueType = typename TCollection::value_type,
                  std::invocable<TSource, TCollectionValueType> TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(TSource, TCollectionValueType)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
         LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector)
         const noexcept(std::is_nothrow_invocable_v<TCollectionSelector, TSource> &&
                        std::is_nothrow_invocable_v<TCollectionSelector, TSource, TCollectionValueType>)
@@ -342,7 +342,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector>
-        requires Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::Comparable<std::invoke_result_t<TSelector, TSource>>
         LinqContainer OrderBy(TSelector&& selector, OrderType orderType = OrderType::ASC)
             const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -528,7 +528,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 Concepts::Summarize TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+                 Concepts::Summarize TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Sum(TSelector&& selector) const
         {
             if (_collection.empty())
@@ -545,7 +545,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+                 Concepts::Comparable TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Min(TSelector&& selector) const
         {
             if (_collection.empty())
@@ -563,7 +563,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 Concepts::Comparable TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+                 Concepts::Comparable TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Max(TSelector&& selector) const
         {
             if (_collection.empty())
@@ -580,7 +580,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 Concepts::Divisible TResult = typename FunctorTraits<TSelector(TSource)>::ReturnType>
+                 Concepts::Divisible TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Average(TSelector&& selector) const
         {
             if (_collection.empty())
@@ -811,7 +811,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TKeySelector,
-                 typename TKey = typename FunctorTraits<TKeySelector(TSource)>::ReturnType>
+                 typename TKey = std::invoke_result_t<TKeySelector, TSource>>
         std::map<TKey, std::vector<TSource>> GroupBy(TKeySelector&& keySelector)
         const noexcept(std::is_nothrow_invocable_v<TKeySelector, TSource>)
         {
@@ -831,10 +831,10 @@ namespace ExtendedCpp::LINQ
                  std::invocable<TSource> TInnerKeySelector,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                              typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-                 Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TResultSelector, TSource, typename TOtherCollection::value_type>>
+        requires std::same_as<std::invoke_result_t<TInnerKeySelector, TSource>,
+                              std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
+                 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, TSource>>
         LinqContainer<TResult> Join(const TOtherCollection& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
@@ -860,10 +860,10 @@ namespace ExtendedCpp::LINQ
                  std::invocable<TSource> TInnerKeySelector,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(TSource, typename TOtherCollection::value_type)>::ReturnType>
-        requires std::same_as<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
-                              typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-                 Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TResultSelector, TSource, typename TOtherCollection::value_type>>
+        requires std::same_as<std::invoke_result_t<TInnerKeySelector, TSource>,
+                              std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
+                 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, TSource>>
         LinqContainer<TResult> Join(TOtherCollection&& otherCollection,
                                     TInnerKeySelector&& innerKeySelector,
                                     TOtherKeySelector&& otherKeySelector,
@@ -887,11 +887,11 @@ namespace ExtendedCpp::LINQ
 
         template<Concepts::ConstIterable TOtherCollection,
                  std::invocable<TSource> TInnerKeySelector,
-                 Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
+                 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>>
+        requires std::same_as<TKey, std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>>
         LinqContainer<TResult> GroupJoin(const TOtherCollection& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
@@ -917,11 +917,11 @@ namespace ExtendedCpp::LINQ
 
         template<Concepts::Iterable TOtherCollection,
                  std::invocable<TSource> TInnerKeySelector,
-                 Concepts::Equatable TKey = typename FunctorTraits<TInnerKeySelector(TSource)>::ReturnType,
+                 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
                  std::invocable<const std::vector<TSource>&, typename TOtherCollection::value_type> TResultSelector,
-                 typename TResult = typename FunctorTraits<TResultSelector(const std::vector<TSource>&, typename TOtherCollection::value_type)>::ReturnType>
-        requires std::same_as<TKey, typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType>
+                 typename TResult = std::invoke_result_t<TResultSelector, const std::vector<TSource>&, typename TOtherCollection::value_type>>
+        requires std::same_as<TKey, std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>>
         LinqContainer<TResult> GroupJoin(TOtherCollection&& otherCollection,
                                          TInnerKeySelector&& innerKeySelector,
                                          TOtherKeySelector&& otherKeySelector,
@@ -1018,7 +1018,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector>
-        requires Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::Equatable<std::invoke_result_t<TSelector, TSource>>
         bool Contains(const TSource& target, TSelector&& selector)
             const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -1046,7 +1046,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector>
-        requires Concepts::Equatable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::Equatable<std::invoke_result_t<TSelector, TSource>>
         std::size_t IndexAt(const TSource& target, TSelector&& selector)
         const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -1071,7 +1071,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector>
-        requires Concepts::Comparable<typename FunctorTraits<TSelector(TSource)>::ReturnType>
+        requires Concepts::Comparable<std::invoke_result_t<TSelector, TSource>>
         std::size_t BinarySearch(const TSource& element, TSelector&& selector)
         const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {

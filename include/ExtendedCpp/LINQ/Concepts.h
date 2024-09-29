@@ -51,33 +51,33 @@ namespace ExtendedCpp::LINQ::Concepts
         { value != value } -> std::convertible_to<bool>;
     };
 
-    template<typename T>
-    concept Iterable = requires(T collection)
+    template<typename TCollection>
+    concept Iterable = requires(TCollection collection)
     {
         collection.begin();
         collection.end();
-        typename T::iterator;
-        typename T::value_type;
+        typename TCollection::iterator;
+        typename TCollection::value_type;
     };
 
-    template<typename T>
-    concept ConstIterable = requires(T collection)
+    template<typename TCollection>
+    concept ConstIterable = requires(TCollection collection)
     {
         collection.cbegin();
         collection.cend();
-        typename T::const_iterator;
-        typename T::value_type;
+        typename TCollection::const_iterator;
+        typename TCollection::value_type;
     };
 
-    template<typename T>
-    concept HasSize = requires(T collection)
+    template<typename TCollection>
+    concept HasSize = requires(TCollection collection)
     {
         collection.size();
         collection.empty();
     };
 
-    template<typename T, typename... TArgs>
-    concept IsPredicate = requires(T predicate, TArgs... args)
+    template<typename TPredicate, typename... TArgs>
+    concept IsPredicate = requires(TPredicate predicate, TArgs... args)
     {
         { predicate(std::forward<TArgs>(args)...) } -> std::convertible_to<bool>;
     };

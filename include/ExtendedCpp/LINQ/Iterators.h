@@ -42,7 +42,7 @@ namespace ExtendedCpp::LINQ
     };
 
     template<typename TOut, Concepts::OptionalIter TInIterator, std::invocable<typename TInIterator::value_type> TSelector>
-    requires std::same_as<TOut, typename FunctorTraits<TSelector(typename TInIterator::value_type)>::ReturnType>
+    requires std::same_as<TOut, std::invoke_result_t<TSelector, typename TInIterator::value_type>>
     struct SelectorIterator
     {
     private:
@@ -170,11 +170,12 @@ namespace ExtendedCpp::LINQ
              std::invocable<typename TInIterator::value_type> TInnerKeySelector,
              std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
              std::invocable<typename TInIterator::value_type, typename TOtherCollection::value_type> TResultSelector,
-             typename TResult = typename FunctorTraits<TResultSelector(typename TInIterator::value_type,
-                                                                       typename TOtherCollection::value_type)>::ReturnType>
-    requires std::same_as<typename FunctorTraits<TInnerKeySelector(typename TInIterator::value_type)>::ReturnType,
-             typename FunctorTraits<TOtherKeySelector(typename TOtherCollection::value_type)>::ReturnType> &&
-             Concepts::Equatable<typename FunctorTraits<TInnerKeySelector(typename TInIterator::value_type)>::ReturnType>
+             typename TResult = std::invoke_result_t<TResultSelector,
+                                                     typename TInIterator::value_type,
+                                                     typename TOtherCollection::value_type>>
+    requires std::same_as<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>,
+                          std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
+             Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>>
     struct JoinIterator
     {
     private:
