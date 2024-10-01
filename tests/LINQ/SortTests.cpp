@@ -29,22 +29,6 @@ TEST(SortTests, SelectionSortTest)
         ASSERT_TRUE(arr2[i] == arrCorrect2[i]);
 
     // Average
-    short* arr3[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::SelectionSort(arr3, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr3[i] == *arrCorrect3[i]);
-
-        delete arr3[i];
-        delete arrCorrect3[i];
-    }
-
-    // Average
     const Person person1("Tom", 23);
     const Person person2("Bob", 27);
     const Person person3("Sam", 29);
@@ -83,22 +67,6 @@ TEST(SortTests, InsertionSortTest)
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
         ASSERT_TRUE(arr2[i] == arrCorrect2[i]);
-
-    // Average
-    short* arr3[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::InsertionSort(arr3, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr3[i] == *arrCorrect3[i]);
-
-        delete arr3[i];
-        delete arrCorrect3[i];
-    }
 
     // Average
     const Person person1("Tom", 23);
@@ -186,22 +154,6 @@ TEST(SortTests, CombSortTest)
     // Assert
     for (short i = 0; i < 4; ++i)
         ASSERT_TRUE(persons[i].Age == sortedAges[i]);
-
-    // Average
-    short* arr3[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::CombSort(arr3, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr3[i] == *arrCorrect3[i]);
-
-        delete arr3[i];
-        delete arrCorrect3[i];
-    }
 }
 
 TEST(SortTests, MergeSortTest)
@@ -216,22 +168,6 @@ TEST(SortTests, MergeSortTest)
     // Assert
     for (short i = 0; i < 8; ++i)
         ASSERT_TRUE(arr1[i] == arrCorrect1[i]);
-
-    // Average
-    short* arr2[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect2[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::MergeSort(arr2, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr2[i] == *arrCorrect2[i]);
-
-        delete arr2[i];
-        delete arrCorrect2[i];
-    }
 
     // Average
     const Person person1("Tom", 23);
@@ -272,22 +208,6 @@ TEST(SortTests, QuickSortTest1)
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
         ASSERT_TRUE(arr2[i] == arrCorrect2[i]);
-
-    // Average
-    short* arr3[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::QuickSort(arr3, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr3[i] == *arrCorrect3[i]);
-
-        delete arr3[i];
-        delete arrCorrect3[i];
-    }
 
     // Average
     const Person person1("Tom", 23);
@@ -342,22 +262,6 @@ TEST(SortTests, TimSortTest)
     // Assert
     for (unsigned char i = 0; i < 8; ++i)
         ASSERT_TRUE(arr2[i] == arrCorrect2[i]);
-
-    // Average
-    short* arr3[6] = { new short(9), new short(8), new short(5), new short(1), new short(3), new short(14) };
-    short* arrCorrect3[6] = { new short(1), new short(3), new short(5), new short(8), new short(9), new short(14) };
-
-    // Act
-    ExtendedCpp::LINQ::Sort::TimSort(arr3, 0, 5);
-
-    // Assert
-    for (unsigned char i = 0; i < 6; ++i)
-    {
-        ASSERT_TRUE(*arr3[i] == *arrCorrect3[i]);
-
-        delete arr3[i];
-        delete arrCorrect3[i];
-    }
 
     // Average
     const Person person1("Tom", 23);

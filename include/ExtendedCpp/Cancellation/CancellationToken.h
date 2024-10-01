@@ -1,5 +1,5 @@
-#ifndef Common_CancellationToken_H
-#define Common_CancellationToken_H
+#ifndef Cancellation_CancellationToken_H
+#define Cancellation_CancellationToken_H
 
 #include <atomic>
 

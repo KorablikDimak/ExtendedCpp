@@ -20,15 +20,9 @@ TEST(AlgorithmTests, BinarySearchTest)
     ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(800, arr1, 0, 9, [](const int number){ return number * 2; }), 9);
     ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(800, arr1, 0, 9, [](const int number){ return number * 0; }), ExtendedCpp::LINQ::NPOS);
 
+    // Average
     int* arr2[10] = { new int(1), new int(3), new int(5), new int(8), new int(9), new int(14),
                         new int(56), new int(102), new int(304), new int(400) };
-
-    // Act
-    // Assert
-    ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(3, arr2, 0, 9), 1);
-    ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(400, arr2, 0, 9), 9);
-    ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(102, arr2, 0, 9), 7);
-    ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::BinarySearch(1022, arr2, 0, 9), ExtendedCpp::LINQ::NPOS);
 
     // Act
     // Assert

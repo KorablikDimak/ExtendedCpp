@@ -70,6 +70,12 @@ namespace ExtendedCpp::LINQ::Concepts
     };
 
     template<typename TCollection>
+    concept RandomAccess = requires(TCollection collection)
+    {
+        collection[std::declval<std::size_t>()];
+    };
+
+    template<typename TCollection>
     concept HasSize = requires(TCollection collection)
     {
         collection.size();

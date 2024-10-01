@@ -1,5 +1,5 @@
-#ifndef Common_CancellationTokenSource_H
-#define Common_CancellationTokenSource_H
+#ifndef Cancellation_CancellationTokenSource_H
+#define Cancellation_CancellationTokenSource_H
 
 #include <ExtendedCpp/Cancellation/CancellationToken.h>
 
