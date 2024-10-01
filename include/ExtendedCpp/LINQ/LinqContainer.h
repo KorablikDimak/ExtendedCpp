@@ -25,10 +25,10 @@ namespace ExtendedCpp::LINQ
 
     public:
         using value_type = TSource;
-        using iterator = typename std::vector<TSource>::iterator;
-        using const_iterator = typename std::vector<TSource>::const_iterator;
-        using reverse_iterator = typename std::vector<TSource>::reverse_iterator;
-        using const_reverse_iterator = typename std::vector<TSource>::const_reverse_iterator;
+        using iterator = std::vector<TSource>::iterator;
+        using const_iterator = std::vector<TSource>::const_iterator;
+        using reverse_iterator = std::vector<TSource>::reverse_iterator;
+        using const_reverse_iterator = std::vector<TSource>::const_reverse_iterator;
 
         explicit LinqContainer(const std::vector<TSource>& collection) noexcept
         {
@@ -228,8 +228,8 @@ namespace ExtendedCpp::LINQ
             return unorderedSet;
         }
 
-        template<typename TKey = typename PairTraits<TSource>::FirstType,
-                 typename TValue = typename PairTraits<TSource>::SecondType>
+        template<typename TKey = PairTraits<TSource>::FirstType,
+                 typename TValue = PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
         std::map<TKey, TValue> ToMap() const noexcept
         {
@@ -239,8 +239,8 @@ namespace ExtendedCpp::LINQ
             return map;
         }
 
-        template<typename TKey = typename PairTraits<TSource>::FirstType,
-                 typename TValue = typename PairTraits<TSource>::SecondType>
+        template<typename TKey = PairTraits<TSource>::FirstType,
+                 typename TValue = PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
         std::unordered_map<TKey, TValue> ToUnorderedMap() const noexcept
         {
@@ -265,7 +265,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<std::invocable<TSource> TSelector,
-                 typename TResult = typename std::invoke_result_t<TSelector, TSource>::value_type>
+                 typename TResult = std::invoke_result_t<TSelector, TSource>::value_type>
         LinqContainer<TResult> SelectMany(TSelector&& selector)
             const noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -283,7 +283,7 @@ namespace ExtendedCpp::LINQ
 
         template<std::invocable<TSource> TCollectionSelector,
                  Concepts::Iterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
-                 typename TCollectionValueType = typename TCollection::value_type,
+                 typename TCollectionValueType = TCollection::value_type,
                  std::invocable<TSource, TCollectionValueType> TResultSelector,
                  typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
         LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector)
@@ -362,7 +362,8 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection>
         requires Concepts::ConstIterable<TOtherCollection> &&
                  Concepts::HasSize<TOtherCollection> &&
-                 Concepts::Equatable<TSource>
+                 Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Except(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -388,7 +389,8 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection>
         requires Concepts::Iterable<TOtherCollection> &&
                  Concepts::HasSize<TOtherCollection> &&
-                 Concepts::Equatable<TSource>
+                 Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Except(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -412,7 +414,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Intersect(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -431,7 +434,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Intersect(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -462,7 +466,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Union(const TOtherCollection& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -479,7 +484,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Union(TOtherCollection&& otherCollection) const noexcept
         {
             std::set<TSource> newCollection;
@@ -946,7 +952,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection,
-                 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
+                 typename TOtherCollectionValueType = TOtherCollection::value_type>
         requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) const noexcept
         {
@@ -968,7 +974,7 @@ namespace ExtendedCpp::LINQ
         }
 
         template<typename TOtherCollection,
-                 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
+                 typename TOtherCollectionValueType = TOtherCollection::value_type>
         requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) const noexcept
         {
@@ -1139,7 +1145,7 @@ namespace ExtendedCpp::LINQ
             return Insert(otherCollection, 0);
         }
 
-        LinqContainer Insert(const TSource& element, std::size_t position) const noexcept
+        LinqContainer Insert(const TSource& element, const std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;
             newCollection.reserve(_collection.size() + 1);
@@ -1155,9 +1161,9 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        LinqContainer Insert(TSource&& element, std::size_t position) const noexcept
+        LinqContainer Insert(TSource&& element, const std::size_t position) const noexcept
         {
-            std::vector<TSource> newCollection;
+            std::vector<std::decay_t<TSource>> newCollection;
             newCollection.reserve(_collection.size() + 1);
 
             std::copy(_collection.cbegin(), _collection.cbegin() + position,
@@ -1173,7 +1179,7 @@ namespace ExtendedCpp::LINQ
 
         template<typename TCollection>
         requires Concepts::ConstIterable<TCollection> && Concepts::HasSize<TCollection>
-        LinqContainer Insert(const TCollection& otherCollection, std::size_t position) const noexcept
+        LinqContainer Insert(const TCollection& otherCollection, const std::size_t position) const noexcept
         {
             std::vector<TSource> newCollection;
             newCollection.reserve(_collection.size() + otherCollection.size());
@@ -1195,7 +1201,7 @@ namespace ExtendedCpp::LINQ
             return Erase(position, position);
         }
 
-        LinqContainer Erase(std::size_t begin, std::size_t end) const noexcept
+        LinqContainer Erase(const std::size_t begin, const std::size_t end) const noexcept
         {
             std::vector<TSource> newCollection;
 

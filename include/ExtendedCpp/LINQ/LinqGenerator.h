@@ -314,7 +314,8 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection>
         requires Concepts::ConstIterable<TOtherCollection> &&
                  Concepts::HasSize<TOtherCollection> &&
-                 Concepts::Equatable<TSource>
+                 Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Except(const TOtherCollection& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -339,7 +340,8 @@ namespace ExtendedCpp::LINQ
         template<typename TOtherCollection>
         requires Concepts::Iterable<TOtherCollection> &&
                  Concepts::HasSize<TOtherCollection> &&
-                 Concepts::Equatable<TSource>
+                 Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Except(TOtherCollection&& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -364,7 +366,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Intersect(const TOtherCollection& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -385,7 +388,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Intersect(TOtherCollection&& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -418,7 +422,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::ConstIterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Union(const TOtherCollection& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
@@ -434,7 +439,8 @@ namespace ExtendedCpp::LINQ
         }
 
         template<Concepts::Iterable TOtherCollection>
-        requires Concepts::Equatable<TSource>
+        requires Concepts::Equatable<TSource> &&
+                 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqGenerator Union(TOtherCollection&& otherCollection) noexcept
         {
             std::set<TSource> newCollection;
