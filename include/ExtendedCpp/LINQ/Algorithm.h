@@ -43,7 +43,7 @@ namespace ExtendedCpp::LINQ::Algorithm
     requires std::same_as<std::invoke_result_t<TSelector, TCollectionType>, TTarget>
     std::size_t BinarySearch(TTarget&& target, TCollection&& collection,
                              const std::size_t start, const std::size_t end, TSelector&& selector)
-   noexcept(std::is_nothrow_invocable_v<TSelector, TCollectionType>)
+    noexcept(std::is_nothrow_invocable_v<TSelector, TCollectionType>)
     {
         if (end - start <= 1)
         {

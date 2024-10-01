@@ -362,8 +362,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    static void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
-                      const OrderType orderType) noexcept
+    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
+               const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
         const std::size_t n2 = end - mid;
@@ -440,8 +440,8 @@ namespace ExtendedCpp::LINQ::Sort
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    static void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
-                      TSelector&& selector, const OrderType orderType)
+    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
+               TSelector&& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         const std::size_t n1 = mid - start + 1;
@@ -579,8 +579,8 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    static std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
-                                 const OrderType orderType) noexcept
+    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
+                          const OrderType orderType) noexcept
     {
         auto i = static_cast<long long>(start);
         auto j = static_cast<long long>(end);
@@ -646,7 +646,7 @@ namespace ExtendedCpp::LINQ::Sort
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    static std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
+    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
                                  TSelector&& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
