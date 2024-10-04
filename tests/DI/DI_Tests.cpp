@@ -69,9 +69,11 @@ TEST(DI_Tests, DI_RegisterTest)
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::CreateRequired(serviceProvider));
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::New(serviceProvider);
-    ASSERT_TRUE(target));
+    ASSERT_TRUE(target);
+    delete target);
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::NewRequired(serviceProvider);
-    ASSERT_TRUE(target));
+    ASSERT_TRUE(target);
+    delete target);
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::Ptr(serviceProvider);
     ASSERT_TRUE(target));

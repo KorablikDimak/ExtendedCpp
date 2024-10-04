@@ -177,6 +177,11 @@ set_targets_version(LINQ Events Json Xml InfoLog Common DI Reflection)
 target_link_libraries(InfoLog PRIVATE Xml Reflection)
 target_link_libraries(DI PRIVATE Reflection)
 
+if(MSVC)
+    target_compile_options(Reflection PUBLIC /Zc:preprocessor)
+    target_compile_options(DI PUBLIC /Zc:preprocessor)
+endif()
+
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     configure_package_config_file(
             cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
