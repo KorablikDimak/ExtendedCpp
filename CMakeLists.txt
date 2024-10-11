@@ -186,6 +186,9 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
             INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
+    install(DIRECTORY include/
+            TYPE INCLUDE)
+
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
