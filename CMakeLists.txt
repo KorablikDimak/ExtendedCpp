@@ -29,10 +29,6 @@ option(DI_BUILD_TESTS "Build DI library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
 
-set_if_undefined(ExtendedCpp_INSTALL_CMAKEDIR
-        "${CMAKE_INSTALL_LIBDIR}/extendedcpp" CACHE STRING
-        "Install path for ExtendedCpp package-related CMake files")
-
 set(LINQ_INCLUDES
         include/ExtendedCpp/LINQ.h
         include/ExtendedCpp/LINQ/OrderType.h
@@ -188,16 +184,16 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
 
     configure_package_config_file(
             cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
-            INSTALL_DESTINATION "${ExtendedCpp_INSTALL_CMAKEDIR}")
+            INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
-            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
+            DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     install(EXPORT ExtendedCpp-targets
             NAMESPACE ExtendedCpp::
-            DESTINATION ${ExtendedCpp_INSTALL_CMAKEDIR})
+            DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     export(EXPORT ExtendedCpp-targets
            NAMESPACE ExtendedCPP::

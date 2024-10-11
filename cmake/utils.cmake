@@ -1,9 +1,3 @@
-macro(set_if_undefined variable)
-    if(NOT DEFINED "${variable}")
-        set("${variable}" ${ARGN})
-    endif()
-endmacro()
-
 function(set_interface_include_directories)
     foreach(target ${ARGN})
         target_include_directories(${target} INTERFACE
@@ -27,7 +21,8 @@ function(install_projects)
             EXPORT "${PROJECT_NAME}-targets"
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
             ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            INCLUDES DESTINATION include)
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         foreach(target ${ARGN})
