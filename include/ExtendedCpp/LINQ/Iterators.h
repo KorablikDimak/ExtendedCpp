@@ -7,7 +7,7 @@
 namespace ExtendedCpp::LINQ
 {
     template<typename TInIterator>
-    struct OptionalIterator
+    struct OptionalIterator final
     {
     private:
         TInIterator _inIterator;
@@ -41,9 +41,11 @@ namespace ExtendedCpp::LINQ
         }
     };
 
-    template<typename TOut, Concepts::OptionalIter TInIterator, std::invocable<typename TInIterator::value_type> TSelector>
+    template<typename TOut,
+             Concepts::OptionalIter TInIterator,
+             std::invocable<typename TInIterator::value_type> TSelector>
     requires std::same_as<TOut, std::invoke_result_t<TSelector, typename TInIterator::value_type>>
-    struct SelectorIterator
+    struct SelectorIterator final
     {
     private:
         TInIterator _inIterator;
@@ -56,9 +58,9 @@ namespace ExtendedCpp::LINQ
                 _inIterator(inIterator),
                 _selector(std::forward<TSelector>(selector)) {}
 
-        std::optional<TOut> operator*()
+        std::optional<value_type> operator*()
         const noexcept(std::is_nothrow_invocable_v<TSelector, typename TInIterator::value_type> &&
-                                                              std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+                       std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
         {
             if ((*_inIterator).has_value())
                 return _selector((*_inIterator).value());
@@ -83,8 +85,9 @@ namespace ExtendedCpp::LINQ
         }
     };
 
-    template<Concepts::OptionalIter TInIterator, Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
-    struct WhereIterator
+    template<Concepts::OptionalIter TInIterator,
+             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+    struct WhereIterator final
     {
     private:
         TInIterator _inIterator;
@@ -99,7 +102,7 @@ namespace ExtendedCpp::LINQ
 
         std::optional<value_type> operator*()
         const noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-                                                               std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+                       std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
         {
             if ((*_inIterator).has_value() && _predicate((*_inIterator).value()))
                 return (*_inIterator).value();
@@ -124,8 +127,9 @@ namespace ExtendedCpp::LINQ
         }
     };
 
-    template<Concepts::OptionalIter TInIterator, Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
-    struct RemoveWhereIterator
+    template<Concepts::OptionalIter TInIterator,
+             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+    struct RemoveWhereIterator final
     {
     private:
         TInIterator _inIterator;
@@ -140,7 +144,7 @@ namespace ExtendedCpp::LINQ
 
         std::optional<value_type> operator*()
         const noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-                                                               std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+                       std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
         {
             if ((*_inIterator).has_value() && !_predicate((*_inIterator).value()))
                 return (*_inIterator).value();
@@ -166,17 +170,33 @@ namespace ExtendedCpp::LINQ
     };
 
     template<Concepts::OptionalIter TInIterator,
+             typename TKeySelector,
+             typename TValue = TInIterator::value_type,
+             typename TKey = std::invoke_result_t<TKeySelector, TValue>>
+    requires std::invocable<TKeySelector, TValue>
+    struct GroupByIterator final
+    {
+    private:
+
+
+    public:
+        using value_type = std::pair<std::invoke_result_t<TKeySelector, TValue>, std::vector<TValue>>;
+    };
+
+
+    template<Concepts::OptionalIter TInIterator,
              Concepts::ConstIterable TOtherCollection,
              std::invocable<typename TInIterator::value_type> TInnerKeySelector,
-             std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
-             std::invocable<typename TInIterator::value_type, typename TOtherCollection::value_type> TResultSelector,
+             std::invocable<typename std::decay_t<TOtherCollection>::value_type> TOtherKeySelector,
+             std::invocable<typename TInIterator::value_type,
+                            typename std::decay_t<TOtherCollection>::value_type> TResultSelector,
              typename TResult = std::invoke_result_t<TResultSelector,
                                                      typename TInIterator::value_type,
-                                                     typename TOtherCollection::value_type>>
+                                                     typename std::decay_t<TOtherCollection>::value_type>>
     requires std::same_as<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>,
-                          std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
+                          std::invoke_result_t<TOtherKeySelector, typename std::decay_t<TOtherCollection>::value_type>> &&
              Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>>
-    struct JoinIterator
+    struct JoinIterator final
     {
     private:
         TInIterator _inIterator;
@@ -200,12 +220,12 @@ namespace ExtendedCpp::LINQ
                 _otherKeySelector(std::forward<TOtherKeySelector>(otherKeySelector)),
                 _resultSelector(std::forward<TResultSelector>(resultSelector)) {}
 
-        std::optional<TResult> operator*()
+        std::optional<value_type> operator*()
         const noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
-                                                                      std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-                                                                                                                     std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type,
-                typename TOtherCollection::value_type> &&
-                std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+                       std::is_nothrow_invocable_v<TOtherKeySelector, typename std::decay_t<TOtherCollection>::value_type> &&
+                       std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type,
+                                                                    typename std::decay_t<TOtherCollection>::value_type> &&
+                       std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
         {
             const auto& opt = *_inIterator;
             if (!opt.has_value() || (_otherCollection.cbegin() + _otherPosition) == _otherCollection.cend())
@@ -238,6 +258,51 @@ namespace ExtendedCpp::LINQ
         bool operator==(const JoinIterator& other) const noexcept
         {
             return _inIterator == other._inIterator;
+        }
+    };
+
+    template<Concepts::OptionalIter TLeftIterator,
+             Concepts::ConstIterable TOtherCollection,
+             typename TLeft = std::decay_t<TLeftIterator>::value_type,
+             typename TRight = std::decay_t<TOtherCollection>::value_type>
+    struct ZipIterator final
+    {
+    private:
+        TLeftIterator _leftIterator;
+        TOtherCollection _otherCollection;
+        std::size_t _otherPosition = 0;
+
+    public:
+        using value_type = std::pair<TLeft, TRight>;
+
+        ZipIterator(TLeftIterator leftIterator, const TOtherCollection& otherCollection) noexcept :
+            _leftIterator(leftIterator), _otherCollection(otherCollection) {}
+
+        std::optional<value_type> operator*()
+        const noexcept(std::is_nothrow_invocable_v<decltype(&TLeftIterator::operator*)> &&
+                       std::is_nothrow_invocable_v<decltype(&std::decay_t<TOtherCollection>::const_iterator::operator*)>)
+        {
+            if ((*_leftIterator).has_value() && _otherCollection.cbegin() + _otherPosition != _otherCollection.cend())
+                return std::make_pair((*_leftIterator).value(), *(_otherCollection.cbegin() + _otherPosition));
+            else
+                return std::nullopt;
+        }
+
+        ZipIterator& operator++() noexcept
+        {
+            ++_leftIterator;
+            ++_otherPosition;
+            return *this;
+        }
+
+        bool operator!=(const ZipIterator& other) const noexcept
+        {
+            return _leftIterator != other._leftIterator;
+        }
+
+        bool operator==(const ZipIterator& other) const noexcept
+        {
+            return _leftIterator == other._leftIterator;
         }
     };
 }

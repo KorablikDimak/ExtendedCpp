@@ -1,22 +1,13 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.28)
 
-project(Common-benchmarks)
+project(Common-benchmarks LANGUAGES CXX)
 
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
-
-if(is_top_level)
-    find_package(ExtendedCpp REQUIRED)
-endif()
-
+find_package(ExtendedCpp REQUIRED)
 find_package(benchmark REQUIRED)
 
-set(SOURCES
+set(Common_BENCHMARKS_SOURCE
         main.cpp
         MatrixBenchmark.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
-
-add_executable(Common-benchmarks)
-target_sources(Common-benchmarks PRIVATE ${SOURCES})
-
+add_executable(Common-benchmarks ${Common_BENCHMARKS_SOURCE})
 target_link_libraries(Common-benchmarks PRIVATE ExtendedCpp::Common benchmark::benchmark)

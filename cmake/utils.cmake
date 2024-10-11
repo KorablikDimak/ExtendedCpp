@@ -18,22 +18,13 @@ function(set_public_include_directories)
         target_include_directories(${target} PUBLIC
                 "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
                 "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>"
-                "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-                PRIVATE "${PROJECT_SOURCE_DIR}/src")
-    endforeach()
-endfunction()
-
-function(set_targets_version)
-    foreach(target ${ARGN})
-        set_target_properties(${target} PROPERTIES
-                SOVERSION ${PROJECT_VERSION_MAJOR}
-                VERSION ${PROJECT_VERSION})
+                "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
     endforeach()
 endfunction()
 
 function(install_projects)
     install(TARGETS ${ARGN}
-            EXPORT "${PROJECT_NAME}_export"
+            EXPORT "${PROJECT_NAME}-targets"
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
             ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")

@@ -85,3 +85,22 @@ TEST(LINQ_View_Tests, JoinTest)
     ASSERT_EQ("C++", employees[3].Language);
     ASSERT_EQ("C++", employees[4].Language);
 }
+
+TEST(LINQ_View_Tests, ZipTest)
+{
+    // Average
+    const std::vector numbers1 { 4, 3, 6, 1, 5 };
+    const std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+    // Act
+    const std::vector result = ExtendedCpp::LINQ::View(numbers1)
+            .Zip(numbers2)
+            .ToVector();
+
+    // Assert
+    ASSERT_EQ(4, result[0].first);
+    ASSERT_EQ(3, result[0].second);
+
+    ASSERT_EQ(3, result[1].first);
+    ASSERT_EQ(2, result[1].second);
+}

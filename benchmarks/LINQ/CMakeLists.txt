@@ -1,24 +1,15 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.28)
 
-project(LINQ-benchmarks)
+project(LINQ-benchmarks LANGUAGES CXX)
 
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
-
-if(is_top_level)
-    find_package(ExtendedCpp REQUIRED)
-endif()
-
+find_package(ExtendedCpp REQUIRED)
 find_package(benchmark REQUIRED)
 
-set(SOURCES
+set(LINQ_BENCHMARKS_SOURCE
         main.cpp
         SortDoubleBenchmarks.cpp
         SortIntBenchmarks.cpp
         SortStringBenchmarks.cpp)
 
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
-
-add_executable(LINQ-benchmarks)
-target_sources(LINQ-benchmarks PRIVATE ${SOURCES})
-
+add_executable(LINQ-benchmarks ${LINQ_BENCHMARKS_SOURCE})
 target_link_libraries(LINQ-benchmarks PRIVATE ExtendedCpp::LINQ ExtendedCpp::Common benchmark::benchmark)
