@@ -175,32 +175,32 @@ if(MSVC)
 endif()
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
-    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection)
-
     write_basic_package_version_file(
-            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
+            ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake
             VERSION ${PROJECT_VERSION}
             COMPATIBILITY SameMajorVersion)
 
-    configure_package_config_file(
-            cmake/extendedcpp-config.cmake.in extendedcpp-config.cmake
-            INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(FILES
+            ${CMAKE_MODULE_PATH}/extendedcpp-config.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/extendedcpp)
 
     install(DIRECTORY include/
             TYPE INCLUDE)
 
-    install(FILES
-            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake"
-            DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
     install(EXPORT ExtendedCpp-targets
             NAMESPACE ExtendedCpp::
-            DESTINATION ${CMAKE_INSTALL_LIBDIR})
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/extendedcpp)
 
     export(EXPORT ExtendedCpp-targets
-           NAMESPACE ExtendedCPP::
-           FILE "${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-targets.cmake")
+            NAMESPACE ExtendedCPP::
+            FILE ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-targets.cmake)
+
+    configure_file(${CMAKE_MODULE_PATH}/extendedcpp-config.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/libpqxx-config.cmake
+            COPYONLY)
+
+    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
