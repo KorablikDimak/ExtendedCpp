@@ -170,7 +170,7 @@ if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-if(MSVC)
+if(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(Reflection PUBLIC /Zc:preprocessor)
 endif()
 
@@ -197,7 +197,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             FILE ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-targets.cmake)
 
     configure_file(${CMAKE_MODULE_PATH}/extendedcpp-config.cmake
-            ${CMAKE_CURRENT_BINARY_DIR}/libpqxx-config.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake
             COPYONLY)
 
     install_projects(LINQ Events Json Xml InfoLog Common DI Reflection)
