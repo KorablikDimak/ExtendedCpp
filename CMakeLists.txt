@@ -171,7 +171,7 @@ if(WIN32)
 endif()
 
 if(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(Reflection /Zc:preprocessor)
+    add_compile_options(/Zc:preprocessor)
 endif()
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
