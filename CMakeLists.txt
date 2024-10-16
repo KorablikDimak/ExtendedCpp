@@ -149,7 +149,7 @@ add_library(ExtendedCpp::Json ALIAS Json)
 add_library(Xml ${Xml_INCLUDES} ${Xml_SOURCE})
 add_library(ExtendedCpp::Xml ALIAS Xml)
 
-add_library(Reflection ${Reflection_SOURCE} ${Reflection_INCLUDES})
+add_library(Reflection ${Reflection_INCLUDES} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 
 add_library(InfoLog ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
@@ -171,7 +171,7 @@ if(WIN32)
 endif()
 
 if(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(Reflection PUBLIC /Zc:preprocessor)
+    add_compile_options(Reflection /Zc:preprocessor)
 endif()
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
