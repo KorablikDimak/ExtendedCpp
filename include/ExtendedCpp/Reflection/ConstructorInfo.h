@@ -70,11 +70,14 @@ namespace ExtendedCpp::Reflection
             }
 
             TClass CreateFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
-            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
                 if constexpr (!Size)
                 {
                     return TClass();
+                }
+                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                {
+                    throw std::runtime_error("Class can not construct from shared_ptr");
                 }
                 else
                 {
@@ -107,11 +110,14 @@ namespace ExtendedCpp::Reflection
             }
 
             TClass* NewFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
-            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
                 if constexpr (!Size)
                 {
                     return new TClass();
+                }
+                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                {
+                    throw std::runtime_error("Class can not construct from shared_ptr");
                 }
                 else
                 {
