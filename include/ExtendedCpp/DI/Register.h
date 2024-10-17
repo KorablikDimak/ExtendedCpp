@@ -2,6 +2,7 @@
 #define DI_Register_H
 
 #include <optional>
+#include <tuple>
 
 #include <ExtendedCpp/DI/ServiceProvider.h>
 #include <ExtendedCpp/DI/Concepts.h>

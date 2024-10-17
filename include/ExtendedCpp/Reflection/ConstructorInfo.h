@@ -6,6 +6,7 @@
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <ExtendedCpp/Reflection/TypeTraits.h>
+#include <ExtendedCpp/Reflection/Concepts.h>
 
 namespace ExtendedCpp::Reflection
 {
@@ -34,91 +35,93 @@ namespace ExtendedCpp::Reflection
 
             TClass Create(const std::any& args) const
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                     return TClass();
                 else
-                    return std::apply([](TArgs... args)
+                    return std::apply([](TArgs&&... args)
                         { return TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(args));
             }
 
             TClass* New(const std::any& args) const
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                     return new TClass();
                 else
                     return std::apply([](TArgs&&... args)
                         { return new TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(args));
             }
 
-            template<std::size_t... Index>
-            decltype(auto) Get(const std::vector<std::any>& args, std::index_sequence<Index...>) const
-            {
-                return std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type...>(args[Index]...);
-            }
-
-            template<std::size_t... Index>
-            decltype(auto) Get(const std::vector<std::shared_ptr<void>>& args, std::index_sequence<Index...>) const noexcept
-            {
-                return std::static_pointer_cast<typename std::tuple_element<Index, TuppleArgs>::type::element_type...>(args[Index]...);
-            }
-
             TClass CreateFromAny(const std::vector<std::any>& args) const
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                 {
                     return TClass();
                 }
                 else
                 {
-                    if (args.size() != Size) throw std::range_error("Incorrect args size in constructor");
-                    return TClass(Get(args, std::make_index_sequence<Size>()));
+                    if (args.size() != Size)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
+                    {
+                        return TClass(std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type>(args[Index])...);
+                    }(std::make_index_sequence<Size>());
                 }
             }
 
             TClass CreateFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
+            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                 {
                     return TClass();
                 }
-                else if constexpr (!IsSharedPtr<TArgs...>::value)
-                {
-                    throw std::runtime_error("Class can not construct from shared_ptr");
-                }
                 else
                 {
-                    if (args.size() != Size) throw std::range_error("Incorrect args size in constructor");
-                    return TClass(Get(args, std::make_index_sequence<Size>()));
+                    if (args.size() != Size)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
+                    {
+                        return TClass(std::static_pointer_cast<typename std::tuple_element<Index, TuppleArgs>::type::element_type>(args[Index])...);
+                    }(std::make_index_sequence<Size>());
                 }
             }
 
             TClass* NewFromAny(const std::vector<std::any>& args) const
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                 {
                     return new TClass();
                 }
                 else
                 {
-                    if (args.size() != Size) throw std::range_error("Incorrect args size in constructor");
-                    return new TClass(Get(args, std::make_index_sequence<Size>()));
+                    if (args.size() != Size)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
+                    {
+                        return new TClass(std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type>(args[Index])...);
+                    }(std::make_index_sequence<Size>());
                 }
             }
 
             TClass* NewFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
+            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
-                if constexpr (std::tuple_size_v<TuppleArgs> == 0)
+                if constexpr (!Size)
                 {
                     return new TClass();
                 }
-                else if constexpr (!IsSharedPtr<TArgs...>::value)
-                {
-                    throw std::runtime_error("Class can not construct from shared_ptr");
-                }
                 else
                 {
-                    if (args.size() != Size) throw std::range_error("Incorrect args size in constructor");
-                    return new TClass(Get(args, std::make_index_sequence<Size>()));
+                    if (args.size() != Size)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
+                    {
+                        return new TClass(std::static_pointer_cast<typename std::tuple_element<Index, TuppleArgs>::type::element_type>(args[Index])...);
+                    }(std::make_index_sequence<Size>());
                 }
             }
         };

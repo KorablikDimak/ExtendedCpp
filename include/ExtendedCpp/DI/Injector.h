@@ -21,11 +21,13 @@ namespace ExtendedCpp::DI
                 for (const std::type_index& param : constructor->Parameters())
                 {
                     std::shared_ptr<void> service = serviceProvider.GetService(param);
-                    if (!service) break;
+                    if (!service)
+                        break;
                     args.push_back(std::move(service));
                 }
 
-                if (args.size() != constructor->Parameters().size()) continue;
+                if (args.size() != constructor->Parameters().size())
+                    continue;
 
                 try
                 {
@@ -50,11 +52,13 @@ namespace ExtendedCpp::DI
                 for (const std::type_index& param : constructor->Parameters())
                 {
                     std::shared_ptr<void> service = serviceProvider.GetService(param);
-                    if (!service) break;
+                    if (!service)
+                        break;
                     args.push_back(std::move(service));
                 }
 
-                if (args.size() != constructor->Parameters().size()) continue;
+                if (args.size() != constructor->Parameters().size())
+                    continue;
                 return constructor->CreateFromAny<TTarget>(args);
             }
 
@@ -71,11 +75,13 @@ namespace ExtendedCpp::DI
                 for (const std::type_index& param : constructor->Parameters())
                 {
                     std::shared_ptr<void> service = serviceProvider.GetService(param);
-                    if (!service) break;
+                    if (!service)
+                        break;
                     args.push_back(std::move(service));
                 }
 
-                if (args.size() != constructor->Parameters().size()) continue;
+                if (args.size() != constructor->Parameters().size())
+                    continue;
 
                 try
                 {
@@ -100,11 +106,13 @@ namespace ExtendedCpp::DI
                 for (const std::type_index& param : constructor->Parameters())
                 {
                     std::shared_ptr<void> service = serviceProvider.GetService(param);
-                    if (!service) break;
+                    if (!service)
+                        break;
                     args.push_back(std::move(service));
                 }
 
-                if (args.size() != constructor->Parameters().size()) continue;
+                if (args.size() != constructor->Parameters().size())
+                    continue;
                 return constructor->NewFromAny<TTarget>(args);
             }
 

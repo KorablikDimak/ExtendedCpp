@@ -12,8 +12,11 @@ find_package(GTest REQUIRED)
 
 set(DI_TESTS_INCLUDES
         IService.h
+        IService2.h
         Service.h
-        Target.h)
+        Service2.h
+        Target.h
+        Target2.h)
 
 set(DI_TESTS_SOURCE
         main.cpp

@@ -263,8 +263,8 @@ namespace ExtendedCpp::LINQ
 
     template<Concepts::OptionalIter TLeftIterator,
              Concepts::ConstIterable TOtherCollection,
-             typename TLeft = std::decay_t<TLeftIterator>::value_type,
-             typename TRight = std::decay_t<TOtherCollection>::value_type>
+             typename TLeft = typename std::decay_t<TLeftIterator>::value_type,
+             typename TRight = typename std::decay_t<TOtherCollection>::value_type>
     struct ZipIterator final
     {
     private:

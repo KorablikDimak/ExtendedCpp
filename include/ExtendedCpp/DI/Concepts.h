@@ -9,7 +9,7 @@ namespace ExtendedCpp::DI::Concepts
     template<typename TTarget, typename... TDependencies>
     concept ConstructableFromSharedPtr = requires
     {
-        TTarget(std::declval<std::shared_ptr<TDependencies...>>());
+        TTarget(std::declval<std::shared_ptr<TDependencies>>()...);
     };
 }
 

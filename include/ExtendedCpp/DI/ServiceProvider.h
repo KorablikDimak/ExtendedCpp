@@ -22,6 +22,8 @@ namespace ExtendedCpp::DI
         mutable std::map<std::type_index, std::shared_ptr<void>> _instances;
 
     public:
+        typedef std::shared_ptr<ServiceProvider> Ptr;
+
         ServiceProvider() noexcept = default;
         ServiceProvider(const ServiceProvider& serviceProvider) noexcept;
         ServiceProvider(ServiceProvider&& serviceProvider) noexcept;
