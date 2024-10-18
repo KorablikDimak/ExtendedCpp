@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <limits>
 
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 #include <ExtendedCpp/LINQ/Concepts.h>
