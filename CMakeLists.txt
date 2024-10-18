@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(ExtendedCpp
-        VERSION 2.1.1
+        VERSION 2.1.2
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -61,7 +61,9 @@ set(Json_INCLUDES
         include/ExtendedCpp/Json.h
         include/ExtendedCpp/Json/json.hpp
         include/ExtendedCpp/Json/json_fwd.hpp
-        include/ExtendedCpp/Json/JsonMacros.h)
+        include/ExtendedCpp/Json/JsonMacros.h
+        include/ExtendedCpp/Json/Concepts.h
+)
 
 set(Xml_INCLUDES
         include/ExtendedCpp/Xml.h

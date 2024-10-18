@@ -20,9 +20,9 @@ inline void from_json(const ExtendedCpp::Json& json, ValueObject& object)
 
 inline void to_json(ExtendedCpp::Json& json, const std::shared_ptr<ValueObject>& object)
 {
-    VALUES_TO_JSON(intField)
-    VALUES_TO_JSON(boolField)
-    VALUES_TO_JSON(stringField)
+    VALUE_TO_JSON(intField)
+    VALUE_TO_JSON(boolField)
+    VALUE_TO_JSON(stringField)
 }
 
 #endif

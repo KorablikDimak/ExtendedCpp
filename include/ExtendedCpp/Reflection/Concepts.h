@@ -12,7 +12,7 @@ namespace ExtendedCpp::Reflection::Concepts
     };
 
     template<typename T>
-    concept IsSharedPtr = std::same_as<T, std::shared_ptr<typename T::element_type>>;
+    concept IsSharedPtr = std::same_as<std::decay_t<T>, std::shared_ptr<typename std::decay_t<T>::element_type>>;
 }
 
 #endif
