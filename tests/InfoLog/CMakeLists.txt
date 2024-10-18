@@ -21,3 +21,9 @@ set(InfoLog_TESTS_SOURCE
 
 add_executable(InfoLog-tests ${InfoLog_TESTS_INCLUDES} ${InfoLog_TESTS_SOURCE})
 target_link_libraries(InfoLog-tests PRIVATE ExtendedCpp::InfoLog ExtendedCpp::Xml ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)
+
+add_custom_command(
+        TARGET InfoLog-tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/LogConfig.xml
+        ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.xml)
