@@ -11,6 +11,7 @@
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
+#include <stdexcept>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
 #include <ExtendedCpp/LINQ/Sort.h>

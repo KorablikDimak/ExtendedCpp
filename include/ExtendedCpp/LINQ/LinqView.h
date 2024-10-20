@@ -1,6 +1,8 @@
 #ifndef LINQ_LinqView_H
 #define LINQ_LinqView_H
 
+#include <stdexcept>
+
 #include <ExtendedCpp/LINQ/Iterators.h>
 
 namespace ExtendedCpp::LINQ

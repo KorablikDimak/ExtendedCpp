@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
 if(WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
@@ -62,8 +61,7 @@ set(Json_INCLUDES
         include/ExtendedCpp/Json/json.hpp
         include/ExtendedCpp/Json/json_fwd.hpp
         include/ExtendedCpp/Json/JsonMacros.h
-        include/ExtendedCpp/Json/Concepts.h
-)
+        include/ExtendedCpp/Json/Concepts.h)
 
 set(Xml_INCLUDES
         include/ExtendedCpp/Xml.h
@@ -157,6 +155,9 @@ add_library(ExtendedCpp::Xml ALIAS Xml)
 
 add_library(Reflection ${Reflection_INCLUDES} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    target_compile_options(Reflection INTERFACE /Zc:preprocessor)
+endif()
 
 add_library(InfoLog ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
@@ -171,10 +172,6 @@ target_link_libraries(DI PUBLIC Reflection)
 
 set_interface_include_directories(LINQ Events Json)
 set_public_include_directories(Xml InfoLog Common Reflection DI)
-
-if(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(Reflection INTERFACE /Zc:preprocessor)
-endif()
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
