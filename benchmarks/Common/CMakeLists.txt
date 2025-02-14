@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.28)
 
 project(Common-benchmarks LANGUAGES CXX)
 
-find_package(ExtendedCpp REQUIRED)
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
+if(is_top_level)
+    enable_testing()
+    find_package(ExtendedCpp REQUIRED)
+endif()
+
 find_package(benchmark REQUIRED)
 
 set(Common_BENCHMARKS_SOURCE
