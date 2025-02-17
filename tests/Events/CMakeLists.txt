@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 
 project(Events-tests LANGUAGES CXX)
 
@@ -19,3 +19,7 @@ set(Events_TESTS_SOURCE
 
 add_executable(Events-tests ${Events_TESTS_INCLUDES} ${Events_TESTS_SOURCE})
 target_link_libraries(Events-tests PRIVATE ExtendedCpp::Events GTest::gtest GTest::gtest_main)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(Events-tests)

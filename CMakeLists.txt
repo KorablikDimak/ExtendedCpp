@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 
 project(ExtendedCpp
         VERSION 2.1.2
@@ -203,22 +203,18 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/LINQ)
 endif()
 
 if(Events_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/Events)
 endif()
 
 if(Json_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/Json)
 endif()
 
 if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/Reflection)
 
     if(BUILD_SHARED_LIBS)
@@ -231,7 +227,6 @@ if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
 endif()
 
 if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/InfoLog)
 
     if(BUILD_SHARED_LIBS)
@@ -256,12 +251,10 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
 endif()
 
 if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/Common)
 endif()
 
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
     add_subdirectory(tests/DI)
 
     if(BUILD_SHARED_LIBS)

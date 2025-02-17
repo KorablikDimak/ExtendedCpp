@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 
 project(DI-tests LANGUAGES CXX)
 
@@ -24,3 +24,7 @@ set(DI_TESTS_SOURCE
 
 add_executable(DI-tests ${DI_TESTS_INCLUDES} ${DI_TESTS_SOURCE})
 target_link_libraries(DI-tests PRIVATE ExtendedCpp::DI ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(DI-tests)

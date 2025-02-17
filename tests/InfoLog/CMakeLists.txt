@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 
 project(InfoLog-tests LANGUAGES CXX)
 
@@ -27,3 +27,7 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/LogConfig.xml
         ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.xml)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(InfoLog-tests)

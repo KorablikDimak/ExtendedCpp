@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 
 project(Common-tests LANGUAGES CXX)
 
@@ -17,3 +17,7 @@ set(Common_TESTS_SOURCE
 
 add_executable(Common-tests ${Common_TESTS_SOURCE})
 target_link_libraries(Common-tests PRIVATE ExtendedCpp::Common GTest::gtest GTest::gtest_main)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(Common-tests)
