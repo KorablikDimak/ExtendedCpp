@@ -23,6 +23,5 @@ set(Json_TESTS_SOURCE
 add_executable(Json-tests ${Json_TESTS_INCLUDES} ${Json_TESTS_SOURCE})
 target_link_libraries(Json-tests PRIVATE ExtendedCpp::Json GTest::gtest GTest::gtest_main)
 
-enable_testing()
 include(GoogleTest)
 gtest_discover_tests(Json-tests)

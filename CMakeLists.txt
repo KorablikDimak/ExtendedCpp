@@ -47,6 +47,9 @@ set(LINQ_INCLUDES
         include/ExtendedCpp/LINQ/LinqView.h
         include/ExtendedCpp/LINQ/Iterators.h)
 
+set(LINQ_SOURCE
+        src/LINQ/LINQ.cpp)
+
 set(Events_INCLUDES
         include/ExtendedCpp/Events.h
         include/ExtendedCpp/Events/Event.h
@@ -56,12 +59,18 @@ set(Events_INCLUDES
         include/ExtendedCpp/Events/StaticMethodHandler.h
         include/ExtendedCpp/Events/ConstMethodHandler.h)
 
+set(Events_SOURCE
+        src/Events/Events.cpp)
+
 set(Json_INCLUDES
         include/ExtendedCpp/Json.h
         include/ExtendedCpp/Json/json.hpp
         include/ExtendedCpp/Json/json_fwd.hpp
         include/ExtendedCpp/Json/JsonMacros.h
         include/ExtendedCpp/Json/Concepts.h)
+
+set(Json_INCLUDES
+        src/Json/Json.cpp)
 
 set(Xml_INCLUDES
         include/ExtendedCpp/Xml.h
@@ -141,13 +150,13 @@ set(DI_INCLUDES
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
 
-add_library(LINQ INTERFACE ${LINQ_INCLUDES})
+add_library(LINQ ${LINQ_INCLUDES} ${LINQ_SOURCE})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
-add_library(Events INTERFACE ${Events_INCLUDES})
+add_library(Events ${Events_INCLUDES} ${Events_SOURCE})
 add_library(ExtendedCpp::Events ALIAS Events)
 
-add_library(Json INTERFACE ${Json_INCLUDES})
+add_library(Json ${Json_INCLUDES} ${Json_SOURCE})
 add_library(ExtendedCpp::Json ALIAS Json)
 
 add_library(Xml ${Xml_INCLUDES} ${Xml_SOURCE})
@@ -156,7 +165,7 @@ add_library(ExtendedCpp::Xml ALIAS Xml)
 add_library(Reflection ${Reflection_INCLUDES} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    target_compile_options(Reflection INTERFACE /Zc:preprocessor)
+    target_compile_options(Reflection PUBLIC /Zc:preprocessor)
 endif()
 
 add_library(InfoLog ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
@@ -170,8 +179,7 @@ add_library(DI ${DI_SOURCE} ${DI_INCLUDES})
 add_library(ExtendedCpp::DI ALIAS DI)
 target_link_libraries(DI PUBLIC Reflection)
 
-set_interface_include_directories(LINQ Events Json)
-set_public_include_directories(Xml InfoLog Common Reflection DI)
+set_include_directories(LINQ Events Json Xml InfoLog Common Reflection DI)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
@@ -203,18 +211,22 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/LINQ)
 endif()
 
 if(Events_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/Events)
 endif()
 
 if(Json_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/Json)
 endif()
 
 if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/Reflection)
 
     if(BUILD_SHARED_LIBS)
@@ -227,6 +239,7 @@ if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
 endif()
 
 if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/InfoLog)
 
     if(BUILD_SHARED_LIBS)
@@ -251,10 +264,12 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
 endif()
 
 if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/Common)
 endif()
 
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
     add_subdirectory(tests/DI)
 
     if(BUILD_SHARED_LIBS)

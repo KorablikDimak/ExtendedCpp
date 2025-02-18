@@ -28,6 +28,5 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/LogConfig.xml
         ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.xml)
 
-enable_testing()
 include(GoogleTest)
 gtest_discover_tests(InfoLog-tests)

@@ -1,13 +1,4 @@
-function(set_interface_include_directories)
-    foreach(target ${ARGN})
-        target_include_directories(${target} INTERFACE
-                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-                $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-                $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-    endforeach()
-endfunction()
-
-function(set_public_include_directories)
+function(set_include_directories)
     foreach(target ${ARGN})
         target_include_directories(${target} PUBLIC
                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>

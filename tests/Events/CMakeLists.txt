@@ -20,6 +20,5 @@ set(Events_TESTS_SOURCE
 add_executable(Events-tests ${Events_TESTS_INCLUDES} ${Events_TESTS_SOURCE})
 target_link_libraries(Events-tests PRIVATE ExtendedCpp::Events GTest::gtest GTest::gtest_main)
 
-enable_testing()
 include(GoogleTest)
 gtest_discover_tests(Events-tests)

@@ -22,6 +22,5 @@ set(Reflection_TESTS_SOURCE
 add_executable(Reflection-tests ${Reflection_TESTS_INCLUDES} ${Reflection_TESTS_SOURCE})
 target_link_libraries(Reflection-tests PRIVATE ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)
 
-enable_testing()
 include(GoogleTest)
 gtest_discover_tests(Reflection-tests)
