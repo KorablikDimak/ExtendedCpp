@@ -7,6 +7,9 @@
 A set of libraries that extend standard C++ functionality. The libraries have no dependencies and is written in pure C++.
 Contains the following libraries:
 
+## Documentation
+https://korablikdimak.github.io/ExtendedCpp/
+
 ## LINQ
 ### Description
 Ports LINQ functionality from C# to C++.
