@@ -7,6 +7,9 @@
 
 namespace ExtendedCpp::Events
 {
+    /// @brief 
+    /// @tparam TObject 
+    /// @tparam ...TParams 
     template<typename TObject, typename ...TParams>
     class ConstMethodHandler final : public IEventHandler<TParams...>
     {
@@ -15,26 +18,39 @@ namespace ExtendedCpp::Events
         void (TObject::*_method)(TParams... params) const;
 
     public:
+        /// @brief 
+        /// @param object 
+        /// @param method 
         ConstMethodHandler(TObject* object, void(TObject::*method)(TParams...) const) noexcept
         {
             _object = object;
             _method = method;
         }
 
+        /// @brief 
         ~ConstMethodHandler() override = default;
 
+        /// @brief 
+        /// @param ...params 
         void Call(TParams... params) const override
         {
             if (_object != nullptr)
                 (_object->*_method)(std::forward<TParams>(params)...);
         }
 
+        /// @brief 
+        /// @param object 
+        /// @param method 
+        /// @return 
         bool IsEquals(TObject* object, void(TObject::*method)(TParams...) const) const noexcept
         {
             return _object == object && _method == method;
         }
 
     protected:
+        /// @brief 
+        /// @param other 
+        /// @return 
         bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
             const auto* methodHandler = dynamic_cast<const ConstMethodHandler<TObject, TParams...>*>(&other);
@@ -44,6 +60,12 @@ namespace ExtendedCpp::Events
         }
     };
 
+    /// @brief 
+    /// @tparam TObject 
+    /// @tparam ...TParams 
+    /// @param object 
+    /// @param method 
+    /// @return 
     template<typename TObject, typename ...TParams>
     std::shared_ptr<IEventHandler<TParams...>> CreateConstMethodHandler(TObject* object, void(TObject::*method)(TParams...) const) noexcept
     {

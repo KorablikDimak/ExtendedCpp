@@ -13,6 +13,7 @@
 
 namespace ExtendedCpp::DI
 {
+    /// @brief 
     class ServiceProvider final
     {
     private:
@@ -22,44 +23,71 @@ namespace ExtendedCpp::DI
         mutable std::map<std::type_index, std::shared_ptr<void>> _instances;
 
     public:
+        /// @brief 
         typedef std::shared_ptr<ServiceProvider> Ptr;
 
+        /// @brief 
         ServiceProvider() noexcept = default;
+
+        /// @brief 
+        /// @param serviceProvider 
         ServiceProvider(const ServiceProvider& serviceProvider) noexcept;
+
+        /// @brief 
+        /// @param serviceProvider 
         ServiceProvider(ServiceProvider&& serviceProvider) noexcept;
 
+        /// @brief 
         ~ServiceProvider() = default;
 
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         ServiceProvider& operator=(const ServiceProvider& serviceProvider) noexcept = default;
+
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         ServiceProvider& operator=(ServiceProvider&& serviceProvider) noexcept;
 
+        /// @brief 
+        /// @tparam TService 
+        /// @tparam TImplementation 
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
-                std::is_base_of_v<TService, TImplementation>
+                 std::is_base_of_v<TService, TImplementation>
         void AddSingleton() noexcept
         {
             AddSingleton<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @tparam TImplementation 
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
-                std::is_base_of_v<TService, TImplementation>
+                 std::is_base_of_v<TService, TImplementation>
         void AddTransient() noexcept
         {
             AddTransient<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @tparam TImplementation 
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
-                std::is_base_of_v<TService, TImplementation>
+                 std::is_base_of_v<TService, TImplementation>
         void AddScoped() noexcept
         {
             AddScoped<TService>([](const ServiceProvider&)
                 { return std::make_shared<TImplementation>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddSingleton() noexcept
@@ -68,6 +96,8 @@ namespace ExtendedCpp::DI
                 { return std::make_shared<TService>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddTransient() noexcept
@@ -76,6 +106,8 @@ namespace ExtendedCpp::DI
                 { return std::make_shared<TService>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddScoped() noexcept
@@ -84,6 +116,9 @@ namespace ExtendedCpp::DI
                 { return std::make_shared<TService>(); });
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddSingleton(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -100,6 +135,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddSingleton(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -116,6 +154,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddTransient(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -132,6 +173,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddTransient(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -148,6 +192,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddScoped(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -164,6 +211,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @param serviceFactory 
         template<typename TService>
         void AddScoped(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -180,6 +230,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @return 
         template<typename TService>
         std::shared_ptr<TService> GetService() const noexcept
         {
@@ -196,6 +249,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @tparam TService 
+        /// @return 
         template<typename TService>
         std::shared_ptr<TService> GetServiceRequired() const
         {
@@ -204,7 +260,14 @@ namespace ExtendedCpp::DI
             return GetServiceImplementation<TService>();
         }
 
+        /// @brief 
+        /// @param typeIndex 
+        /// @return 
         std::shared_ptr<void> GetService(std::type_index typeIndex) const noexcept;
+
+        /// @brief 
+        /// @param typeIndex 
+        /// @return 
         std::shared_ptr<void> GetServiceRequired(std::type_index typeIndex) const;
 
     private:

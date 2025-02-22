@@ -9,9 +9,14 @@
 
 namespace ExtendedCpp::DI
 {
+    /// @brief 
+    /// @tparam TTarget 
     template<typename TTarget>
     class Register;
 
+    /// @brief 
+    /// @tparam TTarget 
+    /// @tparam ...TDependencies 
     template<typename TTarget, typename... TDependencies>
     requires Concepts::ConstructableFromSharedPtr<TTarget, TDependencies...>
     class Register<TTarget(TDependencies...)>
@@ -46,8 +51,12 @@ namespace ExtendedCpp::DI
         }
 
     public:
+        /// @brief 
         Register() noexcept = delete;
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static std::optional<TTarget> Create(const ServiceProvider& provider) noexcept
         {
             try
@@ -61,12 +70,18 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static TTarget CreateRequired(const ServiceProvider& provider)
         {
             auto dependencyTuple = CreateDependencyTupleRequired(provider, std::make_tuple());
             return CallConstructor(std::make_index_sequence<sizeof...(TDependencies)>{}, std::move(dependencyTuple));
         }
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static TTarget* New(const ServiceProvider& provider) noexcept
         {
             try
@@ -80,12 +95,18 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static TTarget* NewRequired(const ServiceProvider& provider)
         {
             auto dependencyTuple = CreateDependencyTupleRequired(provider, std::make_tuple());
             return CallConstructorNew(std::make_index_sequence<sizeof...(TDependencies)>{}, std::move(dependencyTuple));
         }
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static std::shared_ptr<TTarget> Ptr(const ServiceProvider& provider) noexcept
         {
             try
@@ -99,6 +120,9 @@ namespace ExtendedCpp::DI
             }
         }
 
+        /// @brief 
+        /// @param provider 
+        /// @return 
         static std::shared_ptr<TTarget> PtrRequired(const ServiceProvider& provider)
         {
             auto dependencyTuple = CreateDependencyTupleRequired(provider, std::make_tuple());

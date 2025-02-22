@@ -8,6 +8,7 @@
 
 namespace ExtendedCpp::Reflection
 {
+    /// @brief 
     class Assembly final
     {
     private:
@@ -15,9 +16,15 @@ namespace ExtendedCpp::Reflection
         static std::mutex _listMutex;
 
     public:
+        /// @brief 
         Assembly() = delete;
 
+        /// @brief 
+        /// @param typeInfo 
         static void AddType(const TypeInfo& typeInfo) noexcept;
+
+        /// @brief 
+        /// @return 
         static std::vector<TypeInfo> GetTypes() noexcept;
     };
 }

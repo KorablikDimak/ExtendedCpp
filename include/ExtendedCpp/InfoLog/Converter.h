@@ -7,6 +7,10 @@
 
 namespace ExtendedCpp::InfoLog
 {
+    /// @brief 
+    /// @tparam TSource 
+    /// @param source 
+    /// @return 
     template<Concepts::ConvertableToString TSource>
     std::string ToString(TSource&& source) noexcept
     {
@@ -15,6 +19,10 @@ namespace ExtendedCpp::InfoLog
         return stream.str();
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @param source 
+    /// @return 
     template<Concepts::ConvertableFromString T>
     T FromString(const std::string& source) noexcept
     {
@@ -24,6 +32,10 @@ namespace ExtendedCpp::InfoLog
         return result;
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @param source 
+    /// @return 
     template<Concepts::ConvertableFromString T>
     T FromString(std::string&& source) noexcept
     {
@@ -33,6 +45,9 @@ namespace ExtendedCpp::InfoLog
         return result;
     }
 
+    /// @brief 
+    /// @param string 
+    /// @return 
     inline std::string ToLowerCase(const std::string& string) noexcept
     {
         std::string copy = string;
@@ -41,6 +56,9 @@ namespace ExtendedCpp::InfoLog
         return copy;
     }
 
+    /// @brief 
+    /// @param string 
+    /// @return 
     inline std::string ToLowerCase(std::string&& string) noexcept
     {
         std::ranges::transform(string, string.begin(),
@@ -48,6 +66,10 @@ namespace ExtendedCpp::InfoLog
         return string;
     }
 
+    /// @brief 
+    /// @param str 
+    /// @param from 
+    /// @param to 
     inline void ReplaceAll(std::string& str, const std::string& from, const std::string& to) noexcept
     {
         if (str.empty() || from.empty() || to.empty()) return;

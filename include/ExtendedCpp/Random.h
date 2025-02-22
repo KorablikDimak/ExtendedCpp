@@ -8,6 +8,11 @@
 
 namespace ExtendedCpp::Random
 {
+    /// @brief 
+    /// @tparam TReal 
+    /// @param min 
+    /// @param max 
+    /// @return 
     template<typename TReal>
     TReal RandomReal(const TReal min, const TReal max) noexcept
     {
@@ -18,6 +23,11 @@ namespace ExtendedCpp::Random
         return distribution(generator);
     }
 
+    /// @brief 
+    /// @tparam TInteger 
+    /// @param min 
+    /// @param max 
+    /// @return 
     template<typename TInteger>
     TInteger RandomInt(const TInteger min, const TInteger max) noexcept
     {
@@ -28,6 +38,9 @@ namespace ExtendedCpp::Random
         return distribution(generator);
     }
 
+    /// @brief 
+    /// @param size 
+    /// @return 
     inline std::string RandomString(const std::size_t size) noexcept
     {
         if (size == 0)
@@ -48,6 +61,11 @@ namespace ExtendedCpp::Random
         return randomString;
     }
 
+    /// @brief 
+    /// @tparam TChar 
+    /// @param size 
+    /// @param charSet 
+    /// @return 
     template<typename TChar>
     std::basic_string<TChar> RandomString(const std::size_t size, const std::vector<TChar>& charSet) noexcept
     {
@@ -62,6 +80,11 @@ namespace ExtendedCpp::Random
         return randomString;
     }
 
+    /// @brief 
+    /// @tparam TNumber 
+    /// @param min 
+    /// @param max 
+    /// @return 
     template<typename TNumber>
     TNumber Random(const TNumber min, const TNumber max) noexcept
     {
@@ -71,6 +94,12 @@ namespace ExtendedCpp::Random
             return RandomInt<TNumber>(min, max);
     }
 
+    /// @brief 
+    /// @tparam TNumber 
+    /// @param min 
+    /// @param max 
+    /// @param size 
+    /// @return 
     template<typename TNumber>
     std::vector<TNumber> RandomSequence(const TNumber min, const TNumber max, const std::size_t size) noexcept
     {

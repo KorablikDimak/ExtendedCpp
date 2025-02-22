@@ -8,6 +8,8 @@
 
 namespace ExtendedCpp::Events
 {
+    /// @brief 
+    /// @tparam ...TParams 
     template<typename ...TParams>
     class FunctionHandler final : public IEventHandler<TParams...>
     {
@@ -15,18 +17,26 @@ namespace ExtendedCpp::Events
         std::function<void(TParams...)> _function;
 
     public:
+        /// @brief 
+        /// @param function 
         explicit FunctionHandler(std::function<void(TParams...)> function) noexcept
         {
             _function = function;
         }
 
+        /// @brief 
         ~FunctionHandler() override = default;
 
+        /// @brief 
+        /// @param ...params 
         void Call(TParams... params) const override
         {
             _function(std::forward<TParams>(params)...);
         }
 
+        /// @brief 
+        /// @param function 
+        /// @return 
         bool IsEquals(std::function<void(TParams...)> function) const noexcept
         {
             typedef void(Fn)(TParams...);
@@ -34,6 +44,9 @@ namespace ExtendedCpp::Events
         }
 
     protected:
+        /// @brief 
+        /// @param other 
+        /// @return 
         bool IsEquals(const IEventHandler<TParams...>& other) const noexcept override
         {
             const auto* functionHandler = static_cast<const FunctionHandler*>(&other);
@@ -41,6 +54,10 @@ namespace ExtendedCpp::Events
         }
     };
 
+    /// @brief 
+    /// @tparam ...TParams 
+    /// @param function 
+    /// @return 
     template<typename ...TParams>
     std::shared_ptr<IEventHandler<TParams...>> CreateFunctionHandler(std::function<void(TParams...)> function) noexcept
     {

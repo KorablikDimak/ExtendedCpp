@@ -10,6 +10,7 @@
 
 namespace ExtendedCpp::Reflection
 {
+    /// @brief 
     class StaticFieldInfo final : public MemberInfo
     {
     private:
@@ -18,6 +19,8 @@ namespace ExtendedCpp::Reflection
         std::any (*_fieldGetter)(const std::any& helper);
 
     public:
+        /// @brief 
+        /// @tparam TField 
         template<typename TField>
         struct Helper final
         {
@@ -25,15 +28,24 @@ namespace ExtendedCpp::Reflection
             TField* _fieldPtr;
 
         public:
+            /// @brief 
+            /// @param fieldPtr 
             explicit Helper(TField* fieldPtr) noexcept :
                 _fieldPtr(fieldPtr) {}
 
+            /// @brief 
+            /// @return 
             TField* GetField() const noexcept
             {
                 return _fieldPtr;
             }
         };
 
+        /// @brief 
+        /// @tparam THelper 
+        /// @param fieldName 
+        /// @param typeIndex 
+        /// @param fieldHelper 
         template<typename THelper>
         StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             MemberInfo(fieldName),
@@ -42,6 +54,11 @@ namespace ExtendedCpp::Reflection
             _fieldGetter([](const std::any& helper)
                 { return std::any(std::any_cast<const THelper&>(helper).GetField()); }) {}
 
+        /// @brief 
+        /// @tparam THelper 
+        /// @param fieldName 
+        /// @param typeIndex 
+        /// @param fieldHelper 
         template<typename THelper>
         StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             MemberInfo(std::move(fieldName)),
@@ -50,27 +67,47 @@ namespace ExtendedCpp::Reflection
             _fieldGetter([](const std::any& helper)
                 { return std::any(std::any_cast<const THelper&>(helper).GetField()); }) {}
 
+        /// @brief 
+        /// @tparam TField 
+        /// @return 
         template<typename TField>
         TField* GetField() const
         {
             return std::any_cast<TField*>(_fieldGetter(_fieldHelper));
         }
 
+        /// @brief 
+        /// @return 
         [[nodiscard]]
         std::any GetField() const noexcept;
 
+        /// @brief 
+        /// @return 
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;
+
+        /// @brief 
+        /// @return 
         [[nodiscard]]
         Reflection::MemberType MemberType() const noexcept override;
     };
 
+    /// @brief 
+    /// @tparam TField 
+    /// @param name 
+    /// @param fieldPtr 
+    /// @return 
     template<typename TField>
     std::shared_ptr<MemberInfo> CreateStaticFieldInfo(const std::string& name, TField* fieldPtr) noexcept
     {
         return std::make_shared<StaticFieldInfo>(std::move(name), typeid(TField), StaticFieldInfo::Helper(fieldPtr));
     }
 
+    /// @brief 
+    /// @tparam TField 
+    /// @param name 
+    /// @param fieldPtr 
+    /// @return 
     template<typename TField>
     std::shared_ptr<MemberInfo> CreateStaticFieldInfo(std::string&& name, TField* fieldPtr) noexcept
     {

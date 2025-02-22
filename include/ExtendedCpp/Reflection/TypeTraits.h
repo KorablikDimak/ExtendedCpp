@@ -9,6 +9,9 @@
 
 namespace ExtendedCpp::Reflection
 {
+    /// @brief 
+    /// @tparam ...TParams 
+    /// @return 
     template<typename... TParams>
     std::vector<std::type_index> ToTypeIndexes() noexcept
     {

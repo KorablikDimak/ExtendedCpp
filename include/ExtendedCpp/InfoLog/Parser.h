@@ -7,12 +7,18 @@
 
 namespace ExtendedCpp::InfoLog
 {
+    /// @brief 
     class Parser final
     {
     public:
         Parser() noexcept = default;
         ~Parser() = default;
 
+        /// @brief 
+        /// @param layout 
+        /// @param message 
+        /// @param logLevel 
+        /// @param tag 
         static void ParseLayout(std::string& layout, const std::string& message,
                                 LogLevel logLevel, const std::string& tag) noexcept;
     };

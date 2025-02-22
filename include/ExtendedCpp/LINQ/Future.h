@@ -6,6 +6,8 @@
 
 namespace ExtendedCpp::LINQ
 {
+    /// @brief 
+    /// @tparam TSource 
     template<typename TSource>
     struct Future final
     {

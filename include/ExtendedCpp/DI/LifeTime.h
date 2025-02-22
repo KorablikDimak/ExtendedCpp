@@ -3,6 +3,7 @@
 
 namespace ExtendedCpp::DI
 {
+    /// @brief 
     enum class LifeTime
     {
         Singleton,

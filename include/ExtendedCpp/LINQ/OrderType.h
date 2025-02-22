@@ -3,6 +3,7 @@
 
 namespace ExtendedCpp::LINQ
 {
+    /// @brief 
     enum class OrderType
     {
         ASC = true,

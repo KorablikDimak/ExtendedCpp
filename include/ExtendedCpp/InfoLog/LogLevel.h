@@ -3,6 +3,7 @@
 
 namespace ExtendedCpp::InfoLog
 {
+    /// @brief 
     enum class LogLevel
     {
         Trace = 0,

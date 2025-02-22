@@ -13,6 +13,12 @@ namespace ExtendedCpp::LINQ::Sort
     static constexpr std::size_t RUN = 64;
     static constexpr double FACTOR = 1.2473309;
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
     void SelectionSort(TCollection&& collection, const std::size_t start, const std::size_t end,
@@ -46,6 +52,15 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -82,6 +97,12 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
     void InsertionSort(TCollection&& collection, const std::size_t start, const std::size_t end,
@@ -111,6 +132,15 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -143,6 +173,12 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
     void CombSort(TCollection&& collection, const std::size_t start, const std::size_t end,
@@ -176,6 +212,15 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -212,6 +257,13 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>>
     requires Concepts::Comparable<T> && Concepts::Divisible<T>
@@ -284,6 +336,15 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -361,6 +422,14 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam T 
+    /// @param collection 
+    /// @param start 
+    /// @param mid 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
     void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
                const OrderType orderType) noexcept
@@ -424,6 +493,12 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<typename TCollection>
     void MergeSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
@@ -436,6 +511,16 @@ namespace ExtendedCpp::LINQ::Sort
         Merge(std::forward<TCollection>(collection), start, mid, end, orderType);
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param mid 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -503,6 +588,15 @@ namespace ExtendedCpp::LINQ::Sort
         }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -518,6 +612,13 @@ namespace ExtendedCpp::LINQ::Sort
         Merge(std::forward<TCollection>(collection), start, mid, end, std::forward<TSelector>(selector), orderType);
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam T 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
     void TimSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                  const OrderType orderType = OrderType::ASC) noexcept
@@ -546,6 +647,15 @@ namespace ExtendedCpp::LINQ::Sort
             }
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -578,6 +688,14 @@ namespace ExtendedCpp::LINQ::Sort
             }
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam T 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
+    /// @return 
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
     std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
                           const OrderType orderType) noexcept
@@ -624,6 +742,12 @@ namespace ExtendedCpp::LINQ::Sort
         return i;
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param orderType 
     template<typename TCollection>
     void QuickSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
@@ -642,6 +766,16 @@ namespace ExtendedCpp::LINQ::Sort
             QuickSort(std::forward<TCollection>(collection), mid, end, orderType);
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
+    /// @return 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
@@ -694,6 +828,15 @@ namespace ExtendedCpp::LINQ::Sort
         return i;
     }
 
+    /// @brief 
+    /// @tparam T 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @param orderType 
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>

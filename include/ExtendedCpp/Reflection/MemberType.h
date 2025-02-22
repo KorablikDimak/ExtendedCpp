@@ -3,6 +3,7 @@
 
 namespace ExtendedCpp::Reflection
 {
+    /// @brief 
     enum class MemberType
     {
         Unknown,

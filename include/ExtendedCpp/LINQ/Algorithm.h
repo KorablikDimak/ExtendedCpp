@@ -10,11 +10,20 @@
 
 namespace ExtendedCpp::LINQ
 {
+    /// @brief 
     constexpr std::size_t NPOS = std::numeric_limits<std::size_t>::max();
 }
 
 namespace ExtendedCpp::LINQ::Algorithm
 {
+    /// @brief 
+    /// @tparam TTarget 
+    /// @tparam TCollection 
+    /// @param target 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @return 
     template<Concepts::Comparable TTarget, Concepts::RandomAccess TCollection>
     requires std::same_as<TTarget, RandomAccessValueType<TCollection>>
     std::size_t BinarySearch(TTarget&& target, TCollection&& collection,
@@ -37,6 +46,17 @@ namespace ExtendedCpp::LINQ::Algorithm
         return mid;
     }
 
+    /// @brief 
+    /// @tparam TCollectionType 
+    /// @tparam TTarget 
+    /// @tparam TCollection 
+    /// @tparam TSelector 
+    /// @param target 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @param selector 
+    /// @return 
     template<Concepts::Comparable TTarget,
              Concepts::RandomAccess TCollection,
              typename TCollectionType = RandomAccessValueType<TCollection>,
@@ -65,6 +85,13 @@ namespace ExtendedCpp::LINQ::Algorithm
         return mid;
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam T 
+    /// @param collection 
+    /// @param start 
+    /// @param end 
+    /// @return 
     template<Concepts::RandomAccess TCollection, Concepts::Equatable T = RandomAccessValueType<TCollection>>
     std::map<T, std::size_t> CountEqualKeys(TCollection&& collection, const std::size_t start, const std::size_t end) noexcept
     {
@@ -80,6 +107,14 @@ namespace ExtendedCpp::LINQ::Algorithm
         return equalKeyCounts;
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam TOtherCollection 
+    /// @param firstSequence 
+    /// @param firstSize 
+    /// @param secondSequence 
+    /// @param secondSize 
+    /// @return 
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TOtherCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TOtherCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>
@@ -114,6 +149,14 @@ namespace ExtendedCpp::LINQ::Algorithm
         return LCSTable[firstSize][secondSize];
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam TSubCollection 
+    /// @param collection 
+    /// @param collectionSize 
+    /// @param subCollection 
+    /// @param subCollectionSize 
+    /// @return 
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TSubCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TSubCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>
@@ -150,6 +193,14 @@ namespace ExtendedCpp::LINQ::Algorithm
         return false;
     }
 
+    /// @brief 
+    /// @tparam TCollection 
+    /// @tparam TOtherCollection 
+    /// @param collection 
+    /// @param collectionSize 
+    /// @param subCollection 
+    /// @param subCollectionSize 
+    /// @return 
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TOtherCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TOtherCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>

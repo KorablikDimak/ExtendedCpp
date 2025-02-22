@@ -5,6 +5,7 @@
 
 namespace ExtendedCpp::Cancellation
 {
+    /// @brief 
     class CancellationTokenSource final
     {
     private:
@@ -12,11 +13,18 @@ namespace ExtendedCpp::Cancellation
         CancellationToken* _token;
 
     public:
+        /// @brief 
         CancellationTokenSource() noexcept;
+
+        /// @brief 
         ~CancellationTokenSource();
 
+        /// @brief 
+        /// @return 
         [[nodiscard]]
         const CancellationToken* Token() const noexcept;
+
+        /// @brief 
         void Cancel() noexcept;
     };
 }

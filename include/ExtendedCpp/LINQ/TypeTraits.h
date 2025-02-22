@@ -7,6 +7,10 @@
 
 namespace ExtendedCpp::LINQ
 {
+    /// @brief 
+    /// @tparam TPair 
+    /// @tparam  
+    /// @tparam  
     template<typename TPair, typename = void, typename = void>
     struct PairTraits
     {
@@ -14,6 +18,8 @@ namespace ExtendedCpp::LINQ
         using SecondType = void;
     };
 
+    /// @brief 
+    /// @tparam TPair 
     template<typename TPair>
     struct PairTraits<TPair, std::void_t<decltype(std::declval<TPair>().first)>,
                              std::void_t<decltype(std::declval<TPair>().second)>>
@@ -22,12 +28,16 @@ namespace ExtendedCpp::LINQ
         using SecondType = std::decay_t<decltype(std::declval<TPair>().second)>;
     };
 
+    /// @brief
+    /// @tparam TCollection 
     template<Concepts::RandomAccess TCollection>
     struct RandomAccessValue
     {
         using Type = std::decay_t<decltype(std::declval<TCollection>()[std::declval<std::size_t>()])>;
     };
 
+    /// @brief 
+    /// @tparam TCollection 
     template <Concepts::RandomAccess TCollection>
     using RandomAccessValueType = typename RandomAccessValue<TCollection>::Type;
 }

@@ -10,6 +10,8 @@
 
 namespace ExtendedCpp::Events
 {
+    /// @brief 
+    /// @tparam ...TParams 
     template<typename ...TParams>
     class Event final
     {
@@ -20,9 +22,14 @@ namespace ExtendedCpp::Events
         mutable std::shared_mutex _listMutex;
 
     public:
+        /// @brief 
         Event() noexcept = default;
+
+        /// @brief 
         ~Event() = default;
 
+        /// @brief 
+        /// @param ...params 
         void operator()(TParams... params) const
         {
             std::shared_lock lock(_listMutex);
@@ -30,6 +37,8 @@ namespace ExtendedCpp::Events
                 handler->Call(std::forward<TParams>(params)...);
         }
 
+        /// @brief 
+        /// @param handler 
         void operator+=(const EventHandler& handler) noexcept
         {
             if (!Contains(handler))
@@ -39,6 +48,8 @@ namespace ExtendedCpp::Events
             }
         }
 
+        /// @brief 
+        /// @param handler 
         void operator-=(const EventHandler& handler) noexcept
         {
             if (Contains(handler))
@@ -48,6 +59,9 @@ namespace ExtendedCpp::Events
             }
         }
 
+        /// @brief 
+        /// @param handler 
+        /// @return 
         bool Contains(const EventHandler& handler) const noexcept
         {
             std::shared_lock lock(_listMutex);

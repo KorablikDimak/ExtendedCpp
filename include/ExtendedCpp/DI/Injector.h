@@ -5,12 +5,18 @@
 
 namespace ExtendedCpp::DI
 {
+    /// @brief 
+    /// @tparam TTarget 
     template<typename TTarget>
     class Injector
     {
     public:
+        /// @brief 
         Injector() noexcept = delete;
 
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         static std::optional<TTarget> Create(const ServiceProvider& serviceProvider) noexcept
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -42,6 +48,9 @@ namespace ExtendedCpp::DI
             return std::nullopt;
         }
 
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         static TTarget CreateRequired(const ServiceProvider& serviceProvider)
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -65,6 +74,9 @@ namespace ExtendedCpp::DI
             throw std::runtime_error("Can not create type " + std::string(typeid(TTarget).name()));
         }
 
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         static std::shared_ptr<TTarget> Ptr(const ServiceProvider& serviceProvider) noexcept
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -96,6 +108,9 @@ namespace ExtendedCpp::DI
             return { nullptr };
         }
 
+        /// @brief 
+        /// @param serviceProvider 
+        /// @return 
         static std::shared_ptr<TTarget> PtrRequired(const ServiceProvider& serviceProvider)
         {
             auto typeInfo = Reflection::GetType<TTarget>();
