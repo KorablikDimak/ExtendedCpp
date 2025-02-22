@@ -6,6 +6,7 @@
 #include <string>
 #include <chrono>
 
+/// @brief 
 namespace ExtendedCpp::Random
 {
     /// @brief 

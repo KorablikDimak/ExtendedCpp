@@ -4,6 +4,7 @@
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 #include <ExtendedCpp/LINQ/Concepts.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ::Aggregate
 {
     /// @brief 

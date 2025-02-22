@@ -6,6 +6,7 @@
 
 #include <ExtendedCpp/Reflection/TypeInfo.h>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/InfoLog/ISender.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

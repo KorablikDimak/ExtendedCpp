@@ -17,6 +17,7 @@
 #include <ExtendedCpp/LINQ/Algorithm.h>
 #include <ExtendedCpp/LINQ/Sort.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief Owning thread-safe container

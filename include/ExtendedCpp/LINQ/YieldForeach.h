@@ -6,6 +6,7 @@
 #include <ExtendedCpp/LINQ/Future.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/InfoLog/LogLevel.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

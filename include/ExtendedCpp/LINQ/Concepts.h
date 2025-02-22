@@ -4,6 +4,7 @@
 #include <utility>
 #include <optional>
 
+/// @brief 
 namespace ExtendedCpp::LINQ::Concepts
 {
     template<typename TIter>

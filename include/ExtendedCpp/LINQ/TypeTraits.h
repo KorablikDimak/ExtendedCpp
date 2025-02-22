@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/LINQ/Concepts.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

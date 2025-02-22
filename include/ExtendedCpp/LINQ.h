@@ -5,6 +5,7 @@
 #include <ExtendedCpp/LINQ/LinqGenerator.h>
 #include <ExtendedCpp/LINQ/LinqView.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

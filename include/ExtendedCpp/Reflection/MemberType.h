@@ -1,6 +1,7 @@
 #ifndef Reflection_MemberType_H
 #define Reflection_MemberType_H
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/InfoLog/Concepts.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

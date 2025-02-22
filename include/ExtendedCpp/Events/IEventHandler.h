@@ -1,6 +1,7 @@
 #ifndef Events_EventHandler_H
 #define Events_EventHandler_H
 
+/// @brief 
 namespace ExtendedCpp::Events
 {
     /// @brief 

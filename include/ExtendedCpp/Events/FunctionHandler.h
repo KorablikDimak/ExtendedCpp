@@ -6,6 +6,7 @@
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
+/// @brief 
 namespace ExtendedCpp::Events
 {
     /// @brief 

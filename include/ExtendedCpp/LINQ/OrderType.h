@@ -1,6 +1,7 @@
 #ifndef LINQ_OrderType_H
 #define LINQ_OrderType_H
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

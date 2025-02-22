@@ -10,6 +10,7 @@
 #include <ExtendedCpp/Reflection/StaticMethodInfo.h>
 #include <ExtendedCpp/Reflection/StaticFieldInfo.h>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

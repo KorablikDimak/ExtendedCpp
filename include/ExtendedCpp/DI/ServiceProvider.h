@@ -11,6 +11,7 @@
 #include <ExtendedCpp/DI/LifeTime.h>
 #include <ExtendedCpp/Reflection.h>
 
+/// @brief 
 namespace ExtendedCpp::DI
 {
     /// @brief 

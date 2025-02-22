@@ -6,6 +6,7 @@
 #include <ExtendedCpp/Reflection/Assembly.h>
 #include <ExtendedCpp/Reflection/Concepts.h>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

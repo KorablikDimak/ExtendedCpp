@@ -11,6 +11,7 @@
 #include <ExtendedCpp/InfoLog/Converter.h>
 #include <ExtendedCpp/InfoLog/Configuration.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

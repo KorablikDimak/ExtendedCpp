@@ -4,6 +4,7 @@
 #include <ExtendedCpp/LINQ/Concepts.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 
+/// @brief
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

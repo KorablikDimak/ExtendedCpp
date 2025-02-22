@@ -17,6 +17,7 @@
 #include <ExtendedCpp/LINQ/Sort.h>
 #include <ExtendedCpp/LINQ/YieldForeach.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

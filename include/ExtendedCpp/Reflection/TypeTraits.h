@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

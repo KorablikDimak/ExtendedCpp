@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/Reflection/MemberType.h>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

@@ -8,6 +8,7 @@
 #include <ExtendedCpp/LINQ/OrderType.h>
 #include <ExtendedCpp/LINQ/Aggregate.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ::Sort
 {
     static constexpr std::size_t RUN = 64;

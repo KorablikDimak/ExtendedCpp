@@ -8,6 +8,7 @@
 #include <ExtendedCpp/Reflection/TypeTraits.h>
 #include <ExtendedCpp/Reflection/Concepts.h>
 
+/// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 

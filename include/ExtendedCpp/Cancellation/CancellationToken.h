@@ -3,6 +3,7 @@
 
 #include <atomic>
 
+/// @brief 
 namespace ExtendedCpp::Cancellation
 {
     /// @brief 

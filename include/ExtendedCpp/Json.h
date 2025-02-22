@@ -3,6 +3,7 @@
 
 #include <ExtendedCpp/Json/JsonMacros.h>
 
+/// @brief 
 namespace ExtendedCpp
 {
     typedef nlohmann::json Json;

@@ -1,6 +1,7 @@
 #ifndef InfoLog_LogLevel_H
 #define InfoLog_LogLevel_H
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

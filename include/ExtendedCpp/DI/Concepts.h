@@ -4,6 +4,7 @@
 #include <utility>
 #include <memory>
 
+/// @brief 
 namespace ExtendedCpp::DI::Concepts
 {
     template<typename TTarget, typename... TDependencies>

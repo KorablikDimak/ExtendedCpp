@@ -5,6 +5,7 @@
 
 #include <ExtendedCpp/LINQ/Iterators.h>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

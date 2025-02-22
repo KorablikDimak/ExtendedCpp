@@ -4,6 +4,7 @@
 #include <coroutine>
 #include <exception>
 
+/// @brief 
 namespace ExtendedCpp::LINQ
 {
     /// @brief 

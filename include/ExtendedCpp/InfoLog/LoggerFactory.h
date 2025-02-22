@@ -3,6 +3,7 @@
 
 #include <ExtendedCpp/InfoLog/Logger.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

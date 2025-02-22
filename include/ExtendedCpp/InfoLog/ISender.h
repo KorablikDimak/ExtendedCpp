@@ -7,6 +7,7 @@
 #include <ExtendedCpp/InfoLog/Parser.h>
 #include <ExtendedCpp/InfoLog/LogLevel.h>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog
 {
     /// @brief 

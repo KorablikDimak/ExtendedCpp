@@ -3,6 +3,7 @@
 
 #include <sstream>
 
+/// @brief 
 namespace ExtendedCpp::InfoLog::Concepts
 {
     template<typename T>
