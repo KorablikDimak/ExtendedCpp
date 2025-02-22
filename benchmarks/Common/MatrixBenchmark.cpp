@@ -21,7 +21,7 @@ void MultiplyBenchmarkDouble(benchmark::State& state, Args&&... args)
     const ExtendedCpp::MatrixF64 matrix2(std::move(std::get<1>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const ExtendedCpp::MatrixF64 result = (matrix1.Multiply(matrix2, false)).value();
+        const ExtendedCpp::MatrixF64 result = matrix1.Multiply(matrix2, false);
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize20, GenerateDoubles(20), GenerateDoubles(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkDouble, matrixDoubleSize100, GenerateDoubles(100), GenerateDoubles(100));
@@ -36,7 +36,7 @@ void MultiplyBenchmarkInts(benchmark::State& state, Args&&... args)
     const ExtendedCpp::MatrixI32 matrix2(std::move(std::get<1>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const ExtendedCpp::MatrixI32 result = (matrix1.Multiply(matrix2, false)).value();
+        const ExtendedCpp::MatrixI32 result = matrix1.Multiply(matrix2, false);
 }
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize20, GenerateInts(20), GenerateInts(20));
 BENCHMARK_CAPTURE(MultiplyBenchmarkInts, matrixIntsSize100, GenerateInts(100), GenerateInts(100));
@@ -50,7 +50,7 @@ void InverseBenchmarkDouble(benchmark::State& state, Args&&... args)
     const ExtendedCpp::MatrixF64 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const auto result = matrix.Inverse().value();
+        const auto result = matrix.SafeInverse().value();
 }
 BENCHMARK_CAPTURE(InverseBenchmarkDouble, matrixDoubleSize20, GenerateDoubles(20));
 BENCHMARK_CAPTURE(InverseBenchmarkDouble, matrixDoubleSize100, GenerateDoubles(100));
@@ -64,7 +64,7 @@ void InverseBenchmarkInts(benchmark::State& state, Args&&... args)
     const ExtendedCpp::MatrixI32 matrix(std::move(std::get<0>(argsTuple)));
 
     for ([[maybe_unused]] auto _ : state)
-        const auto result = matrix.Inverse().value();
+        const auto result = matrix.SafeInverse().value();
 }
 BENCHMARK_CAPTURE(InverseBenchmarkInts, matrixIntSize20, GenerateInts(20));
 BENCHMARK_CAPTURE(InverseBenchmarkInts, matrixIntSize100, GenerateInts(100));

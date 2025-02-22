@@ -5,12 +5,6 @@
 
 namespace ExtendedCpp::Concepts
 {
-    template<typename TFunctor, typename ...Args>
-    concept IsFunctor = requires
-    {
-        std::declval<TFunctor>()(std::declval<Args>()...);
-    };
-
     template<typename T>
     concept Equatable = requires(T value)
     {
@@ -27,12 +21,6 @@ namespace ExtendedCpp::Concepts
         { value >= value } -> std::convertible_to<bool>;
         { value == value } -> std::convertible_to<bool>;
         { value != value } -> std::convertible_to<bool>;
-    };
-
-    template<typename T>
-    concept ConstructableFromNumber = requires
-    {
-        T(std::declval<int>());
     };
 
     template<typename T>

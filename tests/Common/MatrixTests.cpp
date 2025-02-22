@@ -19,7 +19,7 @@ TEST(MatrixTests, SumMatrixTest)
     matrix2.SetRow({ 1, 2, 3 }, 2);
 
     // Act
-    const Matrix matrix3 = (matrix1 + matrix2).value();
+    const Matrix matrix3 = matrix1 + matrix2;
 
     // Assert
     Matrix matrix4(3, 3);
@@ -70,7 +70,7 @@ TEST(MatrixTests, MultiplyMatrixTest)
     matrix2.SetRow({ 2, 0 }, 2);
 
     // Act
-    const Matrix matrix3 = (matrix1 * matrix2).value();
+    const Matrix matrix3 = matrix1 * matrix2;
 
     // Assert
     Matrix matrix4(2, 2);
@@ -87,11 +87,11 @@ TEST(MatrixTests, BigMatrixTest)
     const Matrix matrix2 = E_MATRIX_F64(500, 500);
 
     // Act
-    const Matrix matrix3 = (matrix1 * matrix2).value();
+    const Matrix matrix3 = matrix1 * matrix2;
 
     // Assert
-    ASSERT_TRUE(matrix3.RowCount() == 500);
-    ASSERT_TRUE(matrix3.ColumnCount() == 500);
+    ASSERT_EQ(matrix3.RowCount(), 500);
+    ASSERT_EQ(matrix3.ColumnCount(), 500);
 }
 
 TEST(MatrixTests, MultiplyPTest)
@@ -101,8 +101,8 @@ TEST(MatrixTests, MultiplyPTest)
     const ExtendedCpp::MatrixI64 matrix2(500, 500, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
 
     // Act
-    const ExtendedCpp::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true).value();
-    const ExtendedCpp::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false).value();
+    const ExtendedCpp::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true);
+    const ExtendedCpp::MatrixI64 matrix4 = matrix1.Multiply(matrix2, false);
 
     // Assert
     ASSERT_TRUE(matrix3 == matrix4);

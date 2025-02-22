@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(ExtendedCpp
-        VERSION 2.1.2
+        VERSION 2.2.0
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -20,6 +20,12 @@ include(cmake/utils.cmake)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ON)
 option(BUILD_SHARED_LIBS "Build libs as shared" ON)
 
+if(BUILD_SHARED_LIBS)
+    set(LIBRARY_TYPE SHARED)
+else()
+    set(LIBRARY_TYPE STATIC)
+endif()
+
 option(BUILD_ALL_TESTS "Build all tests for ExtendedCpp" OFF)
 option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
 option(Events_BUILD_TESTS "Build Events library tests" OFF)
@@ -32,67 +38,17 @@ option(DI_BUILD_TESTS "Build DI library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
 
-set(LINQ_INCLUDES
-        include/ExtendedCpp/LINQ.h
-        include/ExtendedCpp/LINQ/OrderType.h
-        include/ExtendedCpp/LINQ/Algorithm.h
-        include/ExtendedCpp/LINQ/LinqContainer.h
-        include/ExtendedCpp/LINQ/TypeTraits.h
-        include/ExtendedCpp/LINQ/Sort.h
-        include/ExtendedCpp/LINQ/Aggregate.h
-        include/ExtendedCpp/LINQ/LinqGenerator.h
-        include/ExtendedCpp/LINQ/Future.h
-        include/ExtendedCpp/LINQ/YieldForeach.h
-        include/ExtendedCpp/LINQ/Concepts.h
-        include/ExtendedCpp/LINQ/LinqView.h
-        include/ExtendedCpp/LINQ/Iterators.h)
-
 set(LINQ_SOURCE
         src/LINQ/LINQ.cpp)
-
-set(Events_INCLUDES
-        include/ExtendedCpp/Events.h
-        include/ExtendedCpp/Events/Event.h
-        include/ExtendedCpp/Events/FunctionHandler.h
-        include/ExtendedCpp/Events/IEventHandler.h
-        include/ExtendedCpp/Events/MethodHandler.h
-        include/ExtendedCpp/Events/StaticMethodHandler.h
-        include/ExtendedCpp/Events/ConstMethodHandler.h)
 
 set(Events_SOURCE
         src/Events/Events.cpp)
 
-set(Json_INCLUDES
-        include/ExtendedCpp/Json.h
-        include/ExtendedCpp/Json/json.hpp
-        include/ExtendedCpp/Json/json_fwd.hpp
-        include/ExtendedCpp/Json/JsonMacros.h
-        include/ExtendedCpp/Json/Concepts.h)
-
-set(Json_INCLUDES
+set(Json_SOURCE
         src/Json/Json.cpp)
-
-set(Xml_INCLUDES
-        include/ExtendedCpp/Xml.h
-        include/ExtendedCpp/Xml/pugixml.hpp
-        include/ExtendedCpp/Xml/pugiconfig.hpp)
 
 set(Xml_SOURCE
         src/Xml/pugixml.cpp)
-
-set(Reflection_INCLUDES
-        include/ExtendedCpp/Reflection/MemberInfo.h
-        include/ExtendedCpp/Reflection/FieldInfo.h
-        include/ExtendedCpp/Reflection/TypeInfo.h
-        include/ExtendedCpp/Reflection.h
-        include/ExtendedCpp/Reflection/TypeTraits.h
-        include/ExtendedCpp/Reflection/MemberType.h
-        include/ExtendedCpp/Reflection/ConstructorInfo.h
-        include/ExtendedCpp/Reflection/Assembly.h
-        include/ExtendedCpp/Reflection/StaticMethodInfo.h
-        include/ExtendedCpp/Reflection/StaticFieldInfo.h
-        include/ExtendedCpp/Reflection/MethodInfo.h
-        include/ExtendedCpp/Reflection/Concepts.h)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
@@ -105,19 +61,6 @@ set(Reflection_SOURCE
         src/Reflection/Reflection.cpp
         src/Reflection/StaticMethodInfo.cpp)
 
-set(InfoLog_INCLUDES
-        include/ExtendedCpp/InfoLog.h
-        include/ExtendedCpp/InfoLog/Configuration.h
-        include/ExtendedCpp/InfoLog/FileSender.h
-        include/ExtendedCpp/InfoLog/ISender.h
-        include/ExtendedCpp/InfoLog/Logger.h
-        include/ExtendedCpp/InfoLog/LoggerFactory.h
-        include/ExtendedCpp/InfoLog/LogLevel.h
-        include/ExtendedCpp/InfoLog/Parser.h
-        include/ExtendedCpp/InfoLog/Converter.h
-        include/ExtendedCpp/InfoLog/ConsoleSender.h
-        include/ExtendedCpp/InfoLog/Concepts.h)
-
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
         src/InfoLog/FileSender.cpp
@@ -127,55 +70,39 @@ set(InfoLog_SOURCE
         src/InfoLog/Parser.cpp
         src/InfoLog/ConsoleSender.cpp)
 
-set(Common_INCLUDES
-        include/ExtendedCpp/Cancellation/CancellationToken.h
-        include/ExtendedCpp/Cancellation/CancellationTokenSource.h
-        include/ExtendedCpp/Random.h
-        include/ExtendedCpp/Matrix.h
-        include/ExtendedCpp/Cancellation.h
-        include/ExtendedCpp/Concepts.h)
-
 set(Common_SOURCE
         src/Cancellation/CancellationToken.cpp
         src/Cancellation/CancellationTokenSource.cpp)
 
-set(DI_INCLUDES
-        include/ExtendedCpp/DI/ServiceProvider.h
-        include/ExtendedCpp/DI/Register.h
-        include/ExtendedCpp/DI/LifeTime.h
-        include/ExtendedCpp/DI.h
-        include/ExtendedCpp/DI/Injector.h
-        include/ExtendedCpp/DI/Concepts.h)
-
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
 
-add_library(LINQ ${LINQ_INCLUDES} ${LINQ_SOURCE})
+add_library(LINQ ${LIBRARY_TYPE} ${LINQ_SOURCE})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
-add_library(Events ${Events_INCLUDES} ${Events_SOURCE})
+add_library(Events ${LIBRARY_TYPE} ${Events_SOURCE})
 add_library(ExtendedCpp::Events ALIAS Events)
 
-add_library(Json ${Json_INCLUDES} ${Json_SOURCE})
+add_library(Json ${LIBRARY_TYPE} ${Json_SOURCE})
 add_library(ExtendedCpp::Json ALIAS Json)
 
-add_library(Xml ${Xml_INCLUDES} ${Xml_SOURCE})
+add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
 add_library(ExtendedCpp::Xml ALIAS Xml)
 
-add_library(Reflection ${Reflection_INCLUDES} ${Reflection_SOURCE})
+add_library(Reflection ${LIBRARY_TYPE} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(Reflection PUBLIC /Zc:preprocessor)
 endif()
 
-add_library(InfoLog ${InfoLog_INCLUDES} ${InfoLog_SOURCE})
+add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 target_link_libraries(InfoLog PUBLIC Xml Reflection)
 
-add_library(Common ${Common_INCLUDES} ${Common_SOURCE})
+add_library(Common ${LIBRARY_TYPE} ${Common_SOURCE})
 add_library(ExtendedCpp::Common ALIAS Common)
 
-add_library(DI ${DI_SOURCE} ${DI_INCLUDES})
+add_library(DI ${LIBRARY_TYPE} ${DI_SOURCE})
 add_library(ExtendedCpp::DI ALIAS DI)
 target_link_libraries(DI PUBLIC Reflection)
 
