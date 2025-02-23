@@ -8,54 +8,13 @@ A set of libraries that extend standard C++ functionality. The libraries have no
 Contains the following libraries:
 
 ## Documentation
-https://korablikdimak.github.io/ExtendedCpp/namespaceExtendedCpp.html
+https://korablikdimak.github.io/ExtendedCpp/
 
 ## LINQ
-### Description
+### Description:
 Ports LINQ functionality from C# to C++.
-### Methods currently supported:
-- `Select` allows you to convert an object of one type to an object of another type
-- `SelectMany` allows you to reduce a set of collections into a single collection
-- `Where` to select elements from some set by condition
-- `RemoveWhere` to remove elements from some set by condition
-- `Order` sorts the elements of a collection
-- `OrderBy` sorts the elements of a collection with selector
-- `Reverse` reverse the collection
-- `Except` can get the difference of two sequences
-- `Intersect` to get the intersection of sequences
-- `Distinct` to remove duplicates in a set
-- `Union` to join two sequences
-- `Aggregate` performs a general aggregation of the elements of the collection depending on the specified expression
-- `Count` to get the number of elements (you may use predicate)
-- `Sum` to get the sum of values (you may use selector)
-- `Min` to find element with the minimum value (you may use selector)
-- `Max` to find element with the maximum value (you may use selector)
-- `Average` to find the average value of the collection (you may use selector)
-- `First` to get first element of collection (you may use predicate)
-- `FirstOrDefault` to get first element of collection, return default if not found (you may use predicate)
-- `Last`to get last element of collection (you may use predicate)
-- `LastOrDefault`to get last element of collection, return default if not found (you may use predicate)
-- `IsEmpty` same as stl method empty()
-- `Skip` skips a certain number of elements
-- `SkipLast` skips a certain number of elements from the end of the collection
-- `SkipWhile` skips a chain of elements, starting with the first element, as long as they satisfy a certain condition
-- `Take` retrieves a certain number of elements
-- `TakeLast` retrieves a certain number of elements from the end of the collection
-- `TakeWhile` selects a chain of elements, starting with the first element, as long as they satisfy a certain condition
-- `GroupBy` to group data by certain parameters
-- `Join` to merge two different types of sets into one
-- `GroupJoin` in addition to joining sequences, it also performs grouping
-- `Zip` sequentially concatenates the corresponding elements of the current sequence with the second sequence
-- `All` checks if all elements match a condition. If all elements match the condition, then true is returned
-- `Any` returns true if at least one element of the collection meets a certain condition
-- `Contains` returns true if the collection contains a specific element or subcollection
-- `IndexAt`
-- `BinarySearch`
-- `PushBack`
-- `PushFront`
-- `Insert`
-- `Erase`
-### STL-like methods currently supported:
+
+### STL-like methods:
 `size`, `empty`, `begin`, `end`, `cbegin`, `cend`,`rbegin`, `rend`, `crbegin`, `crend`
 ```C++
 #include <iostream>
@@ -67,12 +26,12 @@ for (const auto& element : linq)
     std::cout << element << std::endl;
 ```
 ### How it works:
-The main class to work with is [LinqContainer](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/LINQ/LinqContainer.h) 
+The main class to work with is [LinqContainer](https://korablikdimak.github.io/ExtendedCpp/classExtendedCpp_1_1LINQ_1_1LinqContainer.html) 
 that is obtained by the method `ExtendedCpp::LINQ::From(startcollection)`. By calling methods on this class, we perform the necessary operations. 
 Methods are usually passed lambda expressions/std::function.
 At the end, you can use the methods: `.ToVector() .ToArray() .ToList()` etc. 
 (see supported std containers) that return a container stored in the 
-[LinqContainer](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/LINQ/LinqContainer.h). 
+[LinqContainer](https://korablikdimak.github.io/ExtendedCpp/classExtendedCpp_1_1LINQ_1_1LinqContainer.html). 
 ### Examples:
 ```C++
 #include <ExtendedCpp/LINQ.h>
@@ -119,6 +78,7 @@ All methods described above are supported except:
 `PushFront`
 `Insert`
 `Erase`
+See more [here](https://korablikdimak.github.io/ExtendedCpp/classExtendedCpp_1_1LINQ_1_1LinqGenerator.html).
 ### Examples:
 ```C++
 #include <iostream>
@@ -141,6 +101,21 @@ auto linq = ExtendedCpp::LINQ::Generator(numbers);
 for (auto& element : linq)
     std::cout << element << std::endl;
 ```
+### Views
+A partial analogue of std::view. Based on iterators. Non-possessing type offering even more efficient use of resources. See more [here](https://korablikdimak.github.io/ExtendedCpp/classExtendedCpp_1_1LINQ_1_1LinqView.html).
+### Examples:
+```C++
+#include <ExtendedCpp/LINQ.h>
+
+const std::vector names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
+
+const std::vector selectedNames = ExtendedCpp::LINQ::View(names)
+        .RemoveWhere([](const std::string& name){ return name.size() == 3; })
+        .ToVector();
+
+// result: Alice Tomas Bill
+```
+
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/LINQ).
 ### Benchmarks
@@ -151,9 +126,7 @@ All benchmarks are in the directory [benchmarks](https://github.com/KorablikDima
 ### Description
 Library for implementing dynamic reflection.
 Allows you to access constructors, methods, fields, static methods and fields.
-Does not require rewriting existing code. To use it, just add two macros.
-
-`META` in your .h file
+Does not require rewriting existing code. To use it, just add macros `META()` in your .h file. For more information see [documentation](https://korablikdimak.github.io/ExtendedCpp/namespaceExtendedCpp_1_1Reflection.html)
 ### Examples:
 ```C++
 // TestStruct.h
@@ -237,7 +210,7 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 ---
 ## Events
 ### Description
-Library of templates for implementing subscription and unsubscription of events.
+Library of templates for implementing subscription and unsubscription of events. For more information see [documentation](https://korablikdimak.github.io/ExtendedCpp/namespaceExtendedCpp_1_1Events.html)
 ### Examples:
 ```C++
 #include <ExtendedCpp/Events.h>
@@ -272,7 +245,7 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 ---
 ## DI
 ### Description
-Template library for implementing dependency container in compile time.
+Template library for implementing dependency container in compile time. For more information see [documentation](https://korablikdimak.github.io/ExtendedCpp/namespaceExtendedCpp_1_1DI.html)
 ### Examples:
 ```C++
 #include <ExtendedCpp/DI.h>
@@ -321,7 +294,7 @@ All unit tests are in the directory [tests](https://github.com/KorablikDimak/Ext
 ---
 ## Json
 ### Description
-See [nlohmann json](https://github.com/nlohmann/json). Added [macros](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/Json/JsonMacros.h) for more convenient serialization and deserialization.
+See [nlohmann json](https://github.com/nlohmann/json). Added [macros](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/ExtendedCpp/Json/JsonMacros.h) for more convenient serialization and deserialization.
 ### Unit tests
 All unit tests are in the directory [tests](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/Json).
 
@@ -341,7 +314,7 @@ The **.xml** file is a convenient way to set the type of output message and its 
 ### Creating a logger
 Basic way to get logger with [example xml](https://github.com/KorablikDimak/ExtendedCpp/blob/master/LogConfig.xml):
 
-You can add your own senders with interface class [ISender](https://github.com/KorablikDimak/ExtendedCpp/blob/master/include/InfoLog/ISender.h) with using my reflection library.
+You can add your own senders with interface class [ISender](https://korablikdimak.github.io/ExtendedCpp/classExtendedCpp_1_1InfoLog_1_1ISender.html) with using my reflection library.
 See [TestSender.h](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.h) and [TestSender.cpp](https://github.com/KorablikDimak/ExtendedCpp/tree/master/tests/InfoLog/TestSender.cpp).
 ### Examples:
 ```C++
@@ -415,18 +388,18 @@ target_link_libraries(MyExec PRIVATE
         ExtendedCpp::DI
         ExtendedCpp::Reflection)
 ```
-Assemblies tested using g++ and MSVC (CLang does not fully support C++20, so you can not build all of this)
+Assemblies tested using `GCC`, `MinGW`, `MSVC`, `Clang`, `Apple Clang` with static analizers and sanitizers on `Windows x64`, `Linux x64`, `Arm macOS`, `Arm Linux`.
 Testing and benchmarks also require appropriate libraries.
 Build CMake options:
-- ExtendedCpp_SHARED_LIBS
-- BUILD_ALL_TESTS
-- LINQ_BUILD_TESTS
-- Events_BUILD_TESTS
-- Json_BUILD_TESTS
-- InfoLog_BUILD_TESTS
-- Common_BUILD_TESTS
-- Reflection_BUILD_TESTS
-- LINQ_BUILD_BENCHMARKS
-- Common_BUILD_BENCHMARKS
+- BUILD_SHARED_LIBS (default true)
+- BUILD_ALL_TESTS (default false)
+- LINQ_BUILD_TESTS (default false)
+- Events_BUILD_TESTS (default false)
+- Json_BUILD_TESTS (default false)
+- InfoLog_BUILD_TESTS (default false)
+- Common_BUILD_TESTS (default false)
+- Reflection_BUILD_TESTS (default false)
+- LINQ_BUILD_BENCHMARKS (default false)
+- Common_BUILD_BENCHMARKS (default false)
 
 The project can be installed using [my vcpkg fork](https://github.com/KorablikDimak/vcpkg).

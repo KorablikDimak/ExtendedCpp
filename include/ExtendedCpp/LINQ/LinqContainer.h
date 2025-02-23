@@ -29,10 +29,19 @@ namespace ExtendedCpp::LINQ
         std::vector<TSource> _collection;
 
     public:
+        /// @brief 
         using value_type = TSource;
+
+        /// @brief 
         using iterator = std::vector<TSource>::iterator;
+
+        /// @brief 
         using const_iterator = std::vector<TSource>::const_iterator;
+
+        /// @brief 
         using reverse_iterator = std::vector<TSource>::reverse_iterator;
+
+        /// @brief 
         using const_reverse_iterator = std::vector<TSource>::const_reverse_iterator;
 
         /// @brief Copy data from vector into LINQ conainer
@@ -62,6 +71,9 @@ namespace ExtendedCpp::LINQ
         {
             _collection = std::move(container.ToVector());
         }
+
+        /// @brief Default destructor
+        ~LinqContainer() = default;
 
         /// @brief Copy asign
         /// @param collection Copy data from vector into LINQ conainer
@@ -99,9 +111,6 @@ namespace ExtendedCpp::LINQ
             _collection = std::move(container.ToVector());
             return *this;
         }
-
-        /// @brief Default destructor
-        ~LinqContainer() = default;
 
         /// @brief Get container size
         /// @return Number of elements
@@ -310,7 +319,7 @@ namespace ExtendedCpp::LINQ
         /// @brief Get copy of collection data. The method is only valid for std::pair
         /// @tparam TKey decltype(pair.first)
         /// @tparam TValue decltype(pair.second)
-        /// @return Map<TKey, TValue> from vector<std::pair<TKey, TValue>>
+        /// @return map<TKey, TValue> from vector<std::pair<TKey, TValue>>
         template<typename TKey = PairTraits<TSource>::FirstType,
                  typename TValue = PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
@@ -325,7 +334,7 @@ namespace ExtendedCpp::LINQ
         /// @brief Get copy of collection data. The method is only valid for std::pair
         /// @tparam TKey decltype(pair.first)
         /// @tparam TValue decltype(pair.second)
-        /// @return Map<TKey, TValue> from vector<std::pair<TKey, TValue>>
+        /// @return unordered_map<TKey, TValue> from vector<std::pair<TKey, TValue>>
         template<typename TKey = PairTraits<TSource>::FirstType,
                  typename TValue = PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
@@ -424,7 +433,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Select elements from some set by condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -441,7 +450,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Remove elements from some set by condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -461,7 +470,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Sorts the elements of a collection
         /// @param orderType 
         /// @return 
         LinqContainer Order(OrderType orderType = OrderType::ASC) const noexcept
@@ -474,7 +483,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Sorts the elements of a collection with selector
         /// @tparam TSelector 
         /// @param selector 
         /// @param orderType 
@@ -491,7 +500,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Reverse the collection
         /// @return 
         LinqContainer Reverse() const noexcept
         {
@@ -499,7 +508,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Get the difference of two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -530,7 +539,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Get the difference of two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -561,7 +570,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Get the intersection of sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -585,7 +594,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Get the intersection of sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -609,7 +618,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Remove duplicates in a set
         /// @return 
         LinqContainer Distinct() const noexcept
         requires Concepts::Equatable<TSource>
@@ -623,7 +632,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Join two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -645,7 +654,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Join two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -667,7 +676,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(assignCollection));
         }
 
-        /// @brief 
+        /// @brief Performs a general aggregation of the elements of the collection depending on the specified expression
         /// @tparam TResult 
         /// @tparam TAggregate 
         /// @param aggregateFunction 
@@ -681,7 +690,7 @@ namespace ExtendedCpp::LINQ
                                                  std::forward<TAggregate>(aggregateFunction));
         }
 
-        /// @brief 
+        /// @brief Get the number of elements
         /// @return 
         [[nodiscard]]
         std::size_t Count() const noexcept
@@ -689,7 +698,7 @@ namespace ExtendedCpp::LINQ
             return _collection.size();
         }
 
-        /// @brief 
+        /// @brief Get the number of elements
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -702,7 +711,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Count(_collection.data(), 0, _collection.size() - 1, std::forward<TPredicate>(predicate));
         }
 
-        /// @brief 
+        /// @brief Get the sum of values
         /// @return 
         TSource Sum() const
         requires Concepts::Summarize<TSource>
@@ -712,7 +721,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Sum(_collection.data(), 0, _collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Get the sum of values
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -726,7 +735,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Sum(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Find element with the minimum value
         /// @return 
         TSource Min() const
         requires Concepts::Comparable<TSource>
@@ -736,7 +745,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Min(_collection.data(), 0, _collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find element with the minimum value
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -751,7 +760,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Min(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Find element with the maximum value
         /// @return 
         TSource Max() const
         requires Concepts::Comparable<TSource>
@@ -761,7 +770,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Max(_collection.data(), 0, _collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find element with the maximum value
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -775,7 +784,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Max(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Find the average value of the collection
         /// @return 
         TSource Average() const
         requires Concepts::Divisible<TSource>
@@ -785,7 +794,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Average(_collection.data(), 0, _collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find the average value of the collection
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -799,7 +808,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Average(_collection.data(), 0, _collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Get first element of collection
         /// @return 
         TSource First() const
         {
@@ -808,7 +817,7 @@ namespace ExtendedCpp::LINQ
             return _collection[0];
         }
 
-        /// @brief 
+        /// @brief Get first element of collection
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -821,7 +830,7 @@ namespace ExtendedCpp::LINQ
             throw std::out_of_range("Element not found");
         }
 
-        /// @brief 
+        /// @brief Get first element of collection, return default if not found
         /// @return 
         TSource FirstOrDefault() const noexcept
         requires std::is_default_constructible_v<TSource>
@@ -831,7 +840,7 @@ namespace ExtendedCpp::LINQ
             return _collection[0];
         }
 
-        /// @brief 
+        /// @brief Get first element of collection, return default if not found
         /// @param defaultValue 
         /// @return 
         TSource FirstOrDefault(const TSource& defaultValue) const noexcept
@@ -841,7 +850,7 @@ namespace ExtendedCpp::LINQ
             return _collection[0];
         }
 
-        /// @brief 
+        /// @brief Get first element of collection, return default if not found
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -856,7 +865,7 @@ namespace ExtendedCpp::LINQ
             return {};
         }
 
-        /// @brief 
+        /// @brief Get first element of collection, return default if not found
         /// @tparam TPredicate 
         /// @param predicate 
         /// @param defaultValue 
@@ -871,7 +880,7 @@ namespace ExtendedCpp::LINQ
             return defaultValue;
         }
 
-        /// @brief 
+        /// @brief Get last element of collection
         /// @return 
         TSource Last() const
         {
@@ -880,7 +889,7 @@ namespace ExtendedCpp::LINQ
             return _collection[_collection.size() - 1];
         }
 
-        /// @brief 
+        /// @brief Get last element of collection
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -893,7 +902,7 @@ namespace ExtendedCpp::LINQ
             throw std::out_of_range("Element not found");
         }
 
-        /// @brief 
+        /// @brief Get last element of collection, return default if not found
         /// @return 
         TSource LastOrDefault() const noexcept
         requires std::is_default_constructible_v<TSource>
@@ -903,7 +912,7 @@ namespace ExtendedCpp::LINQ
             return _collection[_collection.size() - 1];
         }
 
-        /// @brief 
+        /// @brief Get last element of collection, return default if not found
         /// @param defaultValue 
         /// @return 
         TSource LastOrDefault(const TSource& defaultValue) const noexcept
@@ -913,7 +922,7 @@ namespace ExtendedCpp::LINQ
             return _collection[_collection.size() - 1];
         }
 
-        /// @brief 
+        /// @brief Get last element of collection, return default if not found
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -928,7 +937,7 @@ namespace ExtendedCpp::LINQ
             return {};
         }
 
-        /// @brief 
+        /// @brief Get last element of collection, return default if not found
         /// @tparam TPredicate 
         /// @param predicate 
         /// @param defaultValue 
@@ -975,7 +984,7 @@ namespace ExtendedCpp::LINQ
             return _collection[position];
         }
 
-        /// @brief 
+        /// @brief Same as stl method empty()
         /// @return 
         [[nodiscard]]
         bool IsEmpty() const noexcept
@@ -983,7 +992,7 @@ namespace ExtendedCpp::LINQ
             return _collection.empty();
         }
 
-        /// @brief 
+        /// @brief Skips a certain number of elements
         /// @param count 
         /// @return 
         LinqContainer Skip(const std::size_t count) const noexcept
@@ -1000,7 +1009,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Skips a certain number of elements from the end of the collection
         /// @param count 
         /// @return 
         LinqContainer SkipLast(const std::size_t count) const noexcept
@@ -1018,7 +1027,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Skips a chain of elements, starting with the first element, as long as they satisfy a certain condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -1039,7 +1048,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Retrieves a certain number of elements
         /// @param count 
         /// @return 
         LinqContainer Take(const std::size_t count) const noexcept
@@ -1056,7 +1065,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Retrieves a certain number of elements from the end of the collection
         /// @param count 
         /// @return 
         LinqContainer TakeLast(const std::size_t count) const noexcept
@@ -1073,7 +1082,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Selects a chain of elements, starting with the first element, as long as they satisfy a certain condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -1093,7 +1102,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Group data by certain parameters
         /// @tparam TKey 
         /// @tparam TKeySelector 
         /// @param keySelector 
@@ -1115,7 +1124,7 @@ namespace ExtendedCpp::LINQ
             return result;
         }
 
-        /// @brief 
+        /// @brief Merge two different types of sets into one
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -1155,7 +1164,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Merge two different types of sets into one
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -1195,7 +1204,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief In addition to joining sequences, it also performs grouping
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -1237,7 +1246,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief In addition to joining sequences, it also performs grouping
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -1279,7 +1288,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<TResult>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Sequentially concatenates the corresponding elements of the current sequence with the second sequence
         /// @tparam TOtherCollection 
         /// @tparam TOtherCollectionValueType 
         /// @param otherCollection 
@@ -1306,7 +1315,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Sequentially concatenates the corresponding elements of the current sequence with the second sequence
         /// @tparam TOtherCollection 
         /// @tparam TOtherCollectionValueType 
         /// @param otherCollection 
@@ -1333,7 +1342,7 @@ namespace ExtendedCpp::LINQ
             return LinqContainer<std::pair<TSource, TOtherCollectionValueType>>(std::move(newCollection));
         }
 
-        /// @brief 
+        /// @brief Checks if all elements match a condition. If all elements match the condition, then true is returned
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -1347,7 +1356,7 @@ namespace ExtendedCpp::LINQ
             return true;
         }
 
-        /// @brief 
+        /// @brief Returns true if at least one element of the collection meets a certain condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -1361,7 +1370,7 @@ namespace ExtendedCpp::LINQ
             return false;
         }
 
-        /// @brief 
+        /// @brief Returns true if the collection contains a specific element
         /// @param target 
         /// @return 
         bool Contains(const TSource& target) const noexcept
@@ -1372,7 +1381,7 @@ namespace ExtendedCpp::LINQ
             return false;
         }
 
-        /// @brief 
+        /// @brief Returns true if the collection contains a specific element
         /// @tparam TSelector 
         /// @param target 
         /// @param selector 
@@ -1388,7 +1397,7 @@ namespace ExtendedCpp::LINQ
             return false;
         }
 
-        /// @brief 
+        /// @brief Returns true if the collection contains a specific element or subcollection
         /// @param subCollection 
         /// @return 
         bool Contains(const std::vector<TSource>& subCollection) const noexcept

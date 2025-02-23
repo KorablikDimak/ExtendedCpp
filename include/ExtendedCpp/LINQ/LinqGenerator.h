@@ -73,10 +73,13 @@ namespace ExtendedCpp::LINQ
     public:
         /// @brief 
         using value_type = TSource;
+
         /// @brief 
         using iterator = Iterator;
+
         /// @brief 
         using promise_type = typename Future<TSource>::promise_type;
+
         /// @brief 
         using handle_type = typename Future<TSource>::handle_type;
 
@@ -90,14 +93,14 @@ namespace ExtendedCpp::LINQ
         explicit LinqGenerator(TGenerator&& generator, Args... args) noexcept :
             _yieldContext(generator(std::forward<Args>(args)...)) {}
 
-        /// @brief 
+        /// @brief Copy data from vector into LINQ generator
         /// @tparam TCollection 
         /// @param collection 
         template<Concepts::ConstIterable TCollection>
         explicit LinqGenerator(const TCollection& collection) noexcept :
             _yieldContext(YieldForeach(collection)) {}
 
-        /// @brief 
+        /// @brief Move data from vector into LINQ generator
         /// @tparam TCollection 
         /// @param collection 
         template<Concepts::Iterable TCollection>
@@ -112,7 +115,7 @@ namespace ExtendedCpp::LINQ
         LinqGenerator(const TIterator begin, const TIterator end) noexcept :
             _yieldContext(YieldForeach(begin, end)) {}
 
-        /// @brief 
+        /// @brief Default destructor
         ~LinqGenerator() = default;
 
         /// @brief 
@@ -152,9 +155,9 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @tparam SIZE 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @tparam SIZE SIZE Size of returned array
+        /// @return Copies of elements from 0 to min of array size or LINQ generator size
         template<std::size_t SIZE>
         std::array<TSource, SIZE> ToArray() noexcept
         {
@@ -164,8 +167,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::list<TSource> ToList() noexcept
         {
             std::list<TSource> collection;
@@ -174,8 +177,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::forward_list<TSource> ToForwardList() noexcept
         {
             std::forward_list<TSource> collection;
@@ -184,8 +187,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::stack<TSource> ToStack() noexcept
         {
             std::stack<TSource> collection;
@@ -194,8 +197,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::queue<TSource> ToQueue() noexcept
         {
             std::queue<TSource> collection;
@@ -204,8 +207,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::deque<TSource> ToDeque() noexcept
         {
             std::deque<TSource> collection;
@@ -214,8 +217,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Copies of elements from LINQ generator, maintaining order
         std::priority_queue<TSource> ToPriorityQueue() noexcept
         {
             std::priority_queue<TSource> collection;
@@ -224,8 +227,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Unique elements from LINQ generator
         std::set<TSource> ToSet() noexcept
         {
             std::set<TSource> collection;
@@ -234,8 +237,8 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief Get copy of collection data. After this method generator became invalid
+        /// @return Unique elements from LINQ generator
         std::unordered_set<TSource> ToUnorderedSet() noexcept
         {
             std::unordered_set<TSource> collection;
@@ -244,10 +247,10 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
+        /// @brief Get copy of collection data. After this method generator became invalid
         /// @tparam TKey 
         /// @tparam TValue 
-        /// @return 
+        /// @return map<TKey, TValue> from vector<std::pair<TKey, TValue>>
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
@@ -259,10 +262,10 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
+        /// @brief Get copy of collection data. After this method generator became invalid
         /// @tparam TKey 
         /// @tparam TValue 
-        /// @return 
+        /// @return unordered_map<TKey, TValue> from vector<std::pair<TKey, TValue>>
         template<typename TKey = typename PairTraits<TSource>::FirstType,
                  typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
@@ -274,11 +277,11 @@ namespace ExtendedCpp::LINQ
             return collection;
         }
 
-        /// @brief 
-        /// @tparam TResult 
-        /// @tparam TSelector 
-        /// @param selector 
-        /// @return 
+        /// @brief Iterates through all elements and applies a selector to each
+        /// @tparam TResult Result of selector invoke
+        /// @tparam TSelector Any functional object with TSource argument
+        /// @param selector Any functional object with TSource argument
+        /// @return New collection LinqGenerator<TResult>
         template<std::invocable<TSource> TSelector,
                  typename TResult = std::invoke_result_t<TSelector, TSource>>
         LinqGenerator<TResult> Select(TSelector&& selector)
@@ -289,11 +292,11 @@ namespace ExtendedCpp::LINQ
                         std::forward<TSelector>(selector));
         }
 
-        /// @brief 
-        /// @tparam TResult 
-        /// @tparam TSelector 
-        /// @param selector 
-        /// @return 
+        /// @brief Iterates through all elements and applies a selector to each
+        /// @tparam TResult value_type of selector invoke result
+        /// @tparam TSelector Any functional object with TSource argument
+        /// @param selector Any functional object with TSource argument
+        /// @return New collection LinqGenerator<TResult>
         template<std::invocable<TSource> TSelector,
                  typename TResult = typename std::invoke_result_t<TSelector, TSource>::value_type>
         LinqGenerator<TResult> SelectMany(TSelector&& selector)
@@ -329,7 +332,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TResultSelector>(resultSelector));
         }
 
-        /// @brief 
+        /// @brief Select elements from some set by condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -342,7 +345,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TPredicate>(predicate));
         }
 
-        /// @brief 
+        /// @brief Remove elements from some set by condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -355,7 +358,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TPredicate>(predicate));
         }
 
-        /// @brief 
+        /// @brief Sorts the elements of a collection
         /// @param orderType 
         /// @return 
         LinqGenerator Order(OrderType orderType = OrderType::ASC) noexcept
@@ -373,7 +376,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Sorts the elements of a collection with selector
         /// @tparam TSelector 
         /// @param selector 
         /// @param orderType 
@@ -396,7 +399,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Reverse the collection
         /// @return 
         LinqGenerator Reverse() noexcept
         {
@@ -408,7 +411,7 @@ namespace ExtendedCpp::LINQ
                 { return ReverseGenerator(collection); });
         }
 
-        /// @brief 
+        /// @brief Get the difference of two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -438,7 +441,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Get the difference of two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -470,7 +473,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Get the intersection of sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -496,7 +499,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Get the intersection of sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -523,7 +526,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Remove duplicates in a set
         /// @return 
         LinqGenerator Distinct() noexcept
         requires Concepts::Equatable<TSource>
@@ -536,7 +539,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Join two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -557,7 +560,7 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Join two sequences
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
@@ -578,7 +581,8 @@ namespace ExtendedCpp::LINQ
                 { return Generator(newCollection); });
         }
 
-        /// @brief 
+        /// @brief Performs a general aggregation of the elements of the collection depending on the specified expression. 
+        /// After this method generator became invalid
         /// @tparam TResult 
         /// @tparam TAggregate 
         /// @param aggregateFunction 
@@ -597,7 +601,7 @@ namespace ExtendedCpp::LINQ
                                                  std::forward<TAggregate>(aggregateFunction));
         }
 
-        /// @brief 
+        /// @brief Get the number of elements. After this method generator became invalid
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -612,7 +616,7 @@ namespace ExtendedCpp::LINQ
             return result;
         }
 
-        /// @brief 
+        /// @brief Get the sum of values. After this method generator became invalid
         /// @return 
         TSource Sum()
         requires Concepts::Summarize<TSource>
@@ -627,7 +631,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Sum(collection.data(), 0, collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Get the sum of values. After this method generator became invalid
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -646,7 +650,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Sum(collection.data(), 0, collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief
+        /// @brief Find element with the minimum value. After this method generator became invalid
         /// @return 
         TSource Min()
         requires Concepts::Comparable<TSource>
@@ -661,7 +665,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Min(collection.data(), 0, collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find element with the minimum value. After this method generator became invalid
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -680,7 +684,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Min(collection.data(), 0, collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Find element with the maximum value. After this method generator became invalid
         /// @return 
         TSource Max()
         requires Concepts::Comparable<TSource>
@@ -695,7 +699,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Max(collection.data(), 0, collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find element with the maximum value. After this method generator became invalid
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -714,7 +718,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Max(collection.data(), 0, collection.size() - 1, std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Find the average value of the collection. After this method generator became invalid
         /// @return 
         TSource Average()
         requires Concepts::Divisible<TSource>
@@ -729,7 +733,7 @@ namespace ExtendedCpp::LINQ
             return Aggregate::Average(collection.data(), 0, collection.size() - 1);
         }
 
-        /// @brief 
+        /// @brief Find the average value of the collection. After this method generator became invalid
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
@@ -749,7 +753,7 @@ namespace ExtendedCpp::LINQ
                                       std::forward<TSelector>(selector));
         }
 
-        /// @brief 
+        /// @brief Skips a certain number of elements
         /// @param count 
         /// @return 
         LinqGenerator Skip(const std::size_t count) noexcept
@@ -758,7 +762,7 @@ namespace ExtendedCpp::LINQ
                 { return SkipGenerator(count_); }, count);
         }
 
-        /// @brief 
+        /// @brief Skips a chain of elements, starting with the first element, as long as they satisfy a certain condition
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -771,7 +775,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TPredicate>(predicate));
         }
 
-        /// @brief 
+        /// @brief Retrieves a certain number of elements
         /// @param count 
         /// @return 
         LinqGenerator Take(const std::size_t count)
@@ -780,7 +784,7 @@ namespace ExtendedCpp::LINQ
                 { return TakeGenerator(count_); }, count);
         }
 
-        /// @brief 
+        /// @brief Retrieves a certain number of elements from the end of the collection
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -792,7 +796,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TPredicate>(predicate));
         }
 
-        /// @brief 
+        /// @brief Group data by certain parameters
         /// @tparam TKey 
         /// @tparam TKeySelector 
         /// @param keySelector 
@@ -807,7 +811,7 @@ namespace ExtendedCpp::LINQ
                         std::forward<TKeySelector>(keySelector));
         }
 
-        /// @brief 
+        /// @brief Merge two different types of sets into one
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -847,7 +851,7 @@ namespace ExtendedCpp::LINQ
                 std::forward<TResultSelector>(resultSelector));
         }
 
-        /// @brief 
+        /// @brief Merge two different types of sets into one
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -887,7 +891,7 @@ namespace ExtendedCpp::LINQ
                 std::forward<TResultSelector>(resultSelector));
         }
 
-        /// @brief 
+        /// @brief In addition to joining sequences, it also performs grouping
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -927,7 +931,7 @@ namespace ExtendedCpp::LINQ
                 std::forward<TResultSelector>(resultSelector));
         }
 
-        /// @brief 
+        /// @brief In addition to joining sequences, it also performs grouping
         /// @tparam TResult 
         /// @tparam TOtherCollection 
         /// @tparam TInnerKeySelector 
@@ -967,7 +971,7 @@ namespace ExtendedCpp::LINQ
                 std::forward<TResultSelector>(resultSelector));
         }
 
-        /// @brief 
+        /// @brief Sequentially concatenates the corresponding elements of the current sequence with the second sequence
         /// @tparam TOtherCollection 
         /// @tparam TOtherCollectionValueType 
         /// @param otherCollection 
@@ -982,7 +986,7 @@ namespace ExtendedCpp::LINQ
                     { return ZipGenerator(otherCollection); });
         }
 
-        /// @brief 
+        /// @brief Sequentially concatenates the corresponding elements of the current sequence with the second sequence
         /// @tparam TOtherCollection 
         /// @tparam TOtherCollectionValueType 
         /// @param otherCollection 
@@ -997,7 +1001,8 @@ namespace ExtendedCpp::LINQ
                     { return ZipGenerator(otherCollection); });
         }
 
-        /// @brief 
+        /// @brief Checks if all elements match a condition. If all elements match the condition, then true is returned.
+        /// After this method generator became invalid
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
@@ -1010,7 +1015,8 @@ namespace ExtendedCpp::LINQ
             return true;
         }
 
-        /// @brief 
+        /// @brief Returns true if at least one element of the collection meets a certain condition. 
+        /// After this method generator became invalid
         /// @tparam TPredicate 
         /// @param predicate 
         /// @return 
