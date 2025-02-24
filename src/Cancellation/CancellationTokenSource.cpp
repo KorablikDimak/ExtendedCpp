@@ -1,4 +1,5 @@
 #include <ExtendedCpp/Cancellation/CancellationTokenSource.h>
+#include <ExtendedCpp/Cancellation/CancellationToken.h>
 
 ExtendedCpp::Cancellation::CancellationTokenSource::CancellationTokenSource() noexcept
 {

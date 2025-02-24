@@ -37,7 +37,7 @@ namespace ExtendedCpp::Reflection
 
             /// @brief 
             /// @param method 
-            explicit Helper(TMethod&& method) noexcept :
+            explicit Helper(TMethod method) noexcept :
                 _method(std::forward<TMethod>(method)) {}
 
             /// @brief 
@@ -143,7 +143,7 @@ namespace ExtendedCpp::Reflection
                                                        TReturnType(*methodPtr)(TArgs...)) noexcept
     {
         return std::make_shared<StaticMethodInfo>(name,
-            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
+            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>());
     }
 
@@ -158,7 +158,7 @@ namespace ExtendedCpp::Reflection
                                                        TReturnType(*methodPtr)(TArgs...)) noexcept
     {
         return std::make_shared<StaticMethodInfo>(std::move(name),
-            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
+            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>());
     }
 }

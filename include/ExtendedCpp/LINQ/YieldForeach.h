@@ -2,9 +2,12 @@
 #define LINQ_YieldForeach_H
 
 #include <map>
+#include <unordered_map>
+#include <utility>
+#include <iterator>
 
 #include <ExtendedCpp/LINQ/Future.h>
-#include <ExtendedCpp/LINQ/TypeTraits.h>
+#include <ExtendedCpp/LINQ/Concepts.h>
 
 /// @brief 
 namespace ExtendedCpp::LINQ

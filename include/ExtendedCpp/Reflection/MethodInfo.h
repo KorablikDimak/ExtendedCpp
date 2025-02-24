@@ -49,8 +49,8 @@ namespace ExtendedCpp::Reflection
 
             /// @brief 
             /// @param method 
-            explicit Helper(TMethod&& method) noexcept :
-                _method(std::forward<TMethod>(method)) {}
+            explicit Helper(TMethod method) noexcept :
+                _method(method) {}
 
             /// @brief 
             /// @param object 
@@ -82,8 +82,8 @@ namespace ExtendedCpp::Reflection
 
             /// @brief 
             /// @param method 
-            explicit ConstHelper(TMethod&& method) noexcept :
-                _method(std::forward<TMethod>(method)) {}
+            explicit ConstHelper(TMethod method) noexcept :
+                _method(method) {}
 
             /// @brief 
             /// @param object 
@@ -92,9 +92,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(args)...);
                 else
-                    return (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    return (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(args)...);
             }
         };
 
@@ -276,8 +276,8 @@ namespace ExtendedCpp::Reflection
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
         return std::make_shared<MethodInfo>(name,
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyConst);
     }
 
@@ -293,8 +293,8 @@ namespace ExtendedCpp::Reflection
                                                  TReturnType(TObject::*methodPtr)(TArgs...)) noexcept
     {
         return std::make_shared<MethodInfo>(name,
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyNoConst);
     }
 
@@ -313,8 +313,8 @@ namespace ExtendedCpp::Reflection
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
         return std::make_shared<MethodInfo>(name,
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::ConstNoConst);
     }
 
@@ -330,8 +330,8 @@ namespace ExtendedCpp::Reflection
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
         return std::make_shared<MethodInfo>(std::move(name),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyConst);
     }
 
@@ -347,8 +347,8 @@ namespace ExtendedCpp::Reflection
                                                  TReturnType(TObject::*methodPtr)(TArgs...)) noexcept
     {
         return std::make_shared<MethodInfo>(std::move(name),
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyNoConst);
     }
 
@@ -367,8 +367,8 @@ namespace ExtendedCpp::Reflection
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
         return std::make_shared<MethodInfo>(std::move(name),
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(std::move(methodPtr)),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(std::move(constMethodPtr)),
+            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
+            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::ConstNoConst);
     }
 }

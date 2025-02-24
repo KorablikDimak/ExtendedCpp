@@ -1,13 +1,16 @@
 #ifndef ValueObject_H
 #define ValueObject_H
 
+#include <string>
+#include <memory>
+
 #include <ExtendedCpp/Json.h>
 
 class ValueObject
 {
 public:
-    int intField;
-    bool boolField;
+    int intField{};
+    bool boolField{};
     std::string stringField;
 };
 

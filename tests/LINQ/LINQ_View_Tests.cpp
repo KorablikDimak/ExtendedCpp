@@ -104,3 +104,71 @@ TEST(LINQ_View_Tests, ZipTest)
     ASSERT_EQ(3, result[1].first);
     ASSERT_EQ(2, result[1].second);
 }
+
+TEST(LINQ_View_Tests, SkipTest)
+{
+    // Average
+    const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+    // Act
+    const std::vector result = ExtendedCpp::LINQ::View(numbers)
+        .Skip(3)
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(4, result[0]);
+    ASSERT_EQ(5, result[1]);
+    ASSERT_EQ(6, result[2]);
+}
+
+TEST(LINQ_View_Tests, SkipWhileTest)
+{
+    // Average
+    const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+    // Act
+    const std::vector result = ExtendedCpp::LINQ::View(numbers)
+        .SkipWhile([](const int n) { return n < 4; })
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(4, result[0]);
+    ASSERT_EQ(5, result[1]);
+    ASSERT_EQ(6, result[2]);
+}
+
+TEST(LINQ_View_Tests, TakeTest)
+{
+    // Average
+    const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+    // Act
+    const std::vector result = ExtendedCpp::LINQ::View(numbers)
+        .Take(3)
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(1, result[0]);
+    ASSERT_EQ(2, result[1]);
+    ASSERT_EQ(3, result[2]);
+}
+
+TEST(LINQ_View_Tests, TakeWhileTest)
+{
+    // Average
+    const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+    // Act
+    const std::vector result = ExtendedCpp::LINQ::View(numbers)
+        .TakeWhile([](const int n) { return n < 4; })
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(1, result[0]);
+    ASSERT_EQ(2, result[1]);
+    ASSERT_EQ(3, result[2]);
+}

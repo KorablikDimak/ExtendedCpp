@@ -4,6 +4,8 @@
 #include <map>
 #include <memory>
 #include <limits>
+#include <concepts>
+#include <type_traits>
 
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 #include <ExtendedCpp/LINQ/Concepts.h>

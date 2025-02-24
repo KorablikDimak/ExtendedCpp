@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <vector>
+#include <map>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
 

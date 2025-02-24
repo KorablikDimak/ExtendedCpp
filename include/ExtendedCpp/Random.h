@@ -6,14 +6,14 @@
 #include <string>
 #include <chrono>
 
-/// @brief 
+/// @brief Namespace for random number and string generation utilities
 namespace ExtendedCpp::Random
 {
-    /// @brief 
-    /// @tparam TReal 
-    /// @param min 
-    /// @param max 
-    /// @return 
+    /// @brief Generates a random real number within the specified range
+    /// @tparam TReal The type of the real number
+    /// @param min The minimum value of the range
+    /// @param max The maximum value of the range
+    /// @return A random real number within the specified range
     template<typename TReal>
     TReal RandomReal(const TReal min, const TReal max) noexcept
     {
@@ -24,11 +24,11 @@ namespace ExtendedCpp::Random
         return distribution(generator);
     }
 
-    /// @brief 
-    /// @tparam TInteger 
-    /// @param min 
-    /// @param max 
-    /// @return 
+    /// @brief Generates a random integer within the specified range
+    /// @tparam TInteger The type of the integer
+    /// @param min The minimum value of the range
+    /// @param max The maximum value of the range
+    /// @return A random integer within the specified range
     template<typename TInteger>
     TInteger RandomInt(const TInteger min, const TInteger max) noexcept
     {
@@ -39,9 +39,9 @@ namespace ExtendedCpp::Random
         return distribution(generator);
     }
 
-    /// @brief 
-    /// @param size 
-    /// @return 
+    /// @brief Generates a random string of the specified size using alphanumeric characters
+    /// @param size The size of the random string
+    /// @return A random string of the specified size
     inline std::string RandomString(const std::size_t size) noexcept
     {
         if (size == 0)
@@ -62,11 +62,11 @@ namespace ExtendedCpp::Random
         return randomString;
     }
 
-    /// @brief 
-    /// @tparam TChar 
-    /// @param size 
-    /// @param charSet 
-    /// @return 
+    /// @brief Generates a random string of the specified size using characters from the provided character set
+    /// @tparam TChar The type of the characters
+    /// @param size The size of the random string
+    /// @param charSet The character set to use for generating the random string
+    /// @return A random string of the specified size
     template<typename TChar>
     std::basic_string<TChar> RandomString(const std::size_t size, const std::vector<TChar>& charSet) noexcept
     {
@@ -81,11 +81,11 @@ namespace ExtendedCpp::Random
         return randomString;
     }
 
-    /// @brief 
-    /// @tparam TNumber 
-    /// @param min 
-    /// @param max 
-    /// @return 
+    /// @brief Generates a random number within the specified range
+    /// @tparam TNumber The type of the number
+    /// @param min The minimum value of the range
+    /// @param max The maximum value of the range
+    /// @return A random number within the specified range
     template<typename TNumber>
     TNumber Random(const TNumber min, const TNumber max) noexcept
     {
@@ -95,12 +95,12 @@ namespace ExtendedCpp::Random
             return RandomInt<TNumber>(min, max);
     }
 
-    /// @brief 
-    /// @tparam TNumber 
-    /// @param min 
-    /// @param max 
-    /// @param size 
-    /// @return 
+    /// @brief Generates a sequence of random numbers within the specified range
+    /// @tparam TNumber The type of the numbers
+    /// @param min The minimum value of the range
+    /// @param max The maximum value of the range
+    /// @param size The size of the sequence
+    /// @return A vector containing the sequence of random numbers
     template<typename TNumber>
     std::vector<TNumber> RandomSequence(const TNumber min, const TNumber max, const std::size_t size) noexcept
     {

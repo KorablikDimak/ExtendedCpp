@@ -1,11 +1,17 @@
 #ifndef LINQ_Sort_H
 #define LINQ_Sort_H
 
-#include <cmath>
 #include <map>
 #include <memory>
+#include <vector>
+#include <cmath>
+#include <utility>
+#include <type_traits>
+#include <concepts>
 
 #include <ExtendedCpp/LINQ/OrderType.h>
+#include <ExtendedCpp/LINQ/TypeTraits.h>
+#include <ExtendedCpp/LINQ/Concepts.h>
 #include <ExtendedCpp/LINQ/Aggregate.h>
 
 /// @brief 
@@ -360,8 +366,8 @@ namespace ExtendedCpp::LINQ::Sort
 
         using TSelect = std::invoke_result_t<TSelector, T>;
 
-        const TSelect min = Aggregate::Min(collection, start, end, std::forward<TSelector>(selector));
-        const TSelect max = Aggregate::Max(collection, start, end, std::forward<TSelector>(selector));
+        const TSelect min = Aggregate::Min(collection, start, end, selector);
+        const TSelect max = Aggregate::Max(collection, start, end, selector);
         const auto blockCount = static_cast<std::size_t>(std::ceil(std::log2(end + 1 - start)));
         if (blockCount == 0)
             return;
@@ -390,9 +396,9 @@ namespace ExtendedCpp::LINQ::Sort
             if (block.second.empty())
                 continue;
             if (block.second.size() < 1000)
-                InsertionSort(block.second.data(), 0, block.second.size() - 1, std::forward<TSelector>(selector), orderType);
+                InsertionSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
             else
-                CombSort(block.second.data(), 0, block.second.size() - 1, std::forward<TSelector>(selector), orderType);
+                CombSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
         }
 
         std::size_t count = 0;
@@ -608,9 +614,9 @@ namespace ExtendedCpp::LINQ::Sort
         if (start >= end)
             return;
         const std::size_t mid = (start + end) / 2;
-        MergeSort(std::forward<TCollection>(collection), start, mid, std::forward<TSelector>(selector), orderType);
-        MergeSort(std::forward<TCollection>(collection), mid + 1, end, std::forward<TSelector>(selector), orderType);
-        Merge(std::forward<TCollection>(collection), start, mid, end, std::forward<TSelector>(selector), orderType);
+        MergeSort(std::forward<TCollection>(collection), start, mid, selector, orderType);
+        MergeSort(std::forward<TCollection>(collection), mid + 1, end, selector, orderType);
+        Merge(std::forward<TCollection>(collection), start, mid, end, selector, orderType);
     }
 
     /// @brief 
@@ -672,9 +678,9 @@ namespace ExtendedCpp::LINQ::Sort
         for (std::size_t i = 0; i < count; i += RUN)
         {
             if (i + RUN - 1 < count - 1)
-                InsertionSort(std::forward<TCollection>(collection), i, i + RUN - 1, std::forward<TSelector>(selector), orderType);
+                InsertionSort(std::forward<TCollection>(collection), i, i + RUN - 1, selector, orderType);
             else
-                InsertionSort(std::forward<TCollection>(collection), i, count - 1, std::forward<TSelector>(selector), orderType);
+                InsertionSort(std::forward<TCollection>(collection), i, count - 1, selector, orderType);
         }
 
         for (std::size_t size = RUN; size < count; size = 2 * size)
@@ -685,7 +691,7 @@ namespace ExtendedCpp::LINQ::Sort
                 if (count - 1 < (left + 2 * size - 1))
                     right = count - 1;
                 if (mid < right)
-                    Merge(collection, left, mid, right, std::forward<TSelector>(selector), orderType);
+                    Merge(collection, left, mid, right, selector, orderType);
             }
     }
 
@@ -855,9 +861,9 @@ namespace ExtendedCpp::LINQ::Sort
         const std::size_t mid = Partition(std::forward<TCollection>(collection), start, end, std::forward<TSelector>(selector), orderType);
 
         if (start < mid - 1)
-            QuickSort(std::forward<TCollection>(collection), start, mid - 1, std::forward<TSelector>(selector), orderType);
+            QuickSort(std::forward<TCollection>(collection), start, mid - 1, selector, orderType);
         if (mid < end)
-            QuickSort(std::forward<TCollection>(collection), mid, end, std::forward<TSelector>(selector), orderType);
+            QuickSort(std::forward<TCollection>(collection), mid, end, selector, orderType);
     }
 }
 

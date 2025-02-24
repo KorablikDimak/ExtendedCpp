@@ -1,6 +1,7 @@
 #ifndef LINQ_LinqContainer_H
 #define LINQ_LinqContainer_H
 
+#include <vector>
 #include <array>
 #include <list>
 #include <forward_list>
@@ -13,9 +14,15 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <iterator>
+#include <type_traits>
+#include <concepts>
+#include <utility>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
 #include <ExtendedCpp/LINQ/Sort.h>
+#include <ExtendedCpp/LINQ/Concepts.h>
+#include <ExtendedCpp/LINQ/TypeTraits.h>
+#include <ExtendedCpp/LINQ/OrderType.h>
 
 /// @brief 
 namespace ExtendedCpp::LINQ
@@ -237,9 +244,10 @@ namespace ExtendedCpp::LINQ
         /// @tparam SIZE Size of returned array
         /// @return Copies of elements from 0 to min of array size or LINQ container size
         template<std::size_t SIZE>
+        requires std::is_default_constructible_v<TSource>
         std::array<TSource, SIZE> ToArray() const noexcept
         {
-            std::array<TSource, SIZE> array;
+            std::array<TSource, SIZE> array{};
             for (std::size_t i = 0; i < SIZE && i < _collection.size(); ++i)
                 array[i] = _collection[i];
             return array;
