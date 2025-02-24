@@ -399,8 +399,8 @@ namespace ExtendedCpp::LINQ
     LinqView<OptionalIterator<TIterator>> View(const TCollection& collection) noexcept
     {
         return LinqView<OptionalIterator<TIterator>>(
-                OptionalIterator<TIterator>(collection.cbegin()),
-                OptionalIterator<TIterator>(collection.cend()));
+            OptionalIterator<TIterator>(collection.cbegin()),
+            OptionalIterator<TIterator>(collection.cend()));
     }
 
     /// @brief 
@@ -412,8 +412,8 @@ namespace ExtendedCpp::LINQ
     LinqView<OptionalIterator<TIterator>> View(TCollection& collection) noexcept
     {
         return LinqView<OptionalIterator<TIterator>>(
-                OptionalIterator<TIterator>(collection.begin()),
-                OptionalIterator<TIterator>(collection.end()));
+            OptionalIterator<TIterator>(collection.begin()),
+            OptionalIterator<TIterator>(collection.end()));
     }
 
     /// @brief 
@@ -425,8 +425,8 @@ namespace ExtendedCpp::LINQ
     LinqView<OptionalIterator<TIterator>> View(const TIterator begin, const TIterator end) noexcept
     {
         return LinqView<OptionalIterator<TIterator>>(
-                OptionalIterator<TIterator>(begin),
-                OptionalIterator<TIterator>(end));
+            OptionalIterator<TIterator>(begin),
+            OptionalIterator<TIterator>(end));
     }
 
     /// @brief 

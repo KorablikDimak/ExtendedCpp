@@ -2,6 +2,14 @@
 #define LINQ_LinqView_H
 
 #include <stdexcept>
+#include <list>
+#include <forward_list>
+#include <stack>
+#include <queue>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
 
 #include <ExtendedCpp/LINQ/Iterators.h>
 
@@ -28,8 +36,8 @@ namespace ExtendedCpp::LINQ
         /// @brief 
         /// @param begin 
         /// @param end 
-        LinqView(const TIterator begin, const TIterator end) noexcept
-            : _begin(begin), _end(end) {}
+        LinqView(const TIterator begin, const TIterator end) noexcept : 
+            _begin(begin), _end(end) {}
 
         /// @brief 
         /// @return 
@@ -268,8 +276,8 @@ namespace ExtendedCpp::LINQ
         LinqView<SelectorIterator<TResult, TIterator, TSelector>> Select(TSelector&& selector) const noexcept
         {
             return LinqView<SelectorIterator<TResult, TIterator, TSelector>>(
-                    SelectorIterator<TResult, TIterator, TSelector>(_begin, std::forward<TSelector>(selector)),
-                    SelectorIterator<TResult, TIterator, TSelector>(_end, std::forward<TSelector>(selector)));
+                SelectorIterator<TResult, TIterator, TSelector>(_begin, std::forward<TSelector>(selector)),
+                SelectorIterator<TResult, TIterator, TSelector>(_end, std::forward<TSelector>(selector)));
         }
 
         /// @brief 
@@ -281,8 +289,8 @@ namespace ExtendedCpp::LINQ
         LinqView<WhereIterator<TIterator, TPredicate>> Where(TPredicate&& predicate) const noexcept
         {
             return LinqView<WhereIterator<TIterator, TPredicate>>(
-                    WhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
-                    WhereIterator<TIterator, TPredicate>(_end, std::forward<TPredicate>(predicate)));
+                WhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
+                WhereIterator<TIterator, TPredicate>(_end, std::forward<TPredicate>(predicate)));
         }
 
         /// @brief 
@@ -294,8 +302,8 @@ namespace ExtendedCpp::LINQ
         LinqView<RemoveWhereIterator<TIterator, TPredicate>> RemoveWhere(TPredicate&& predicate) const noexcept
         {
             return LinqView<RemoveWhereIterator<TIterator, TPredicate>>(
-                    RemoveWhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
-                    RemoveWhereIterator<TIterator, TPredicate>(_end, std::forward<TPredicate>(predicate)));
+                RemoveWhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
+                RemoveWhereIterator<TIterator, TPredicate>(_end, std::forward<TPredicate>(predicate)));
         }
 
         /// @brief 
@@ -350,18 +358,18 @@ namespace ExtendedCpp::LINQ
         {
             return LinqView<JoinIterator<TIterator, TOtherCollection, TInnerKeySelector,
                                          TOtherKeySelector, TResultSelector>>(
-                    JoinIterator<TIterator, TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>(
-                            _begin,
-                            otherCollection,
-                            std::forward<TInnerKeySelector>(innerKeySelector),
-                            std::forward<TOtherKeySelector>(otherKeySelector),
-                            std::forward<TResultSelector>(resultSelector)),
-                    JoinIterator<TIterator, TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>(
-                            _end,
-                            otherCollection,
-                            std::forward<TInnerKeySelector>(innerKeySelector),
-                            std::forward<TOtherKeySelector>(otherKeySelector),
-                            std::forward<TResultSelector>(resultSelector)));
+                JoinIterator<TIterator, TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>(
+                    _begin,
+                    otherCollection,
+                    std::forward<TInnerKeySelector>(innerKeySelector),
+                    std::forward<TOtherKeySelector>(otherKeySelector),
+                    std::forward<TResultSelector>(resultSelector)),
+                JoinIterator<TIterator, TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>(
+                    _end,
+                    otherCollection,
+                    std::forward<TInnerKeySelector>(innerKeySelector),
+                    std::forward<TOtherKeySelector>(otherKeySelector),
+                    std::forward<TResultSelector>(resultSelector)));
         }
 
         /// @brief 
@@ -372,8 +380,19 @@ namespace ExtendedCpp::LINQ
         LinqView<ZipIterator<TIterator, TOtherCollection>> Zip(const TOtherCollection& otherCollection) const noexcept
         {
             return LinqView<ZipIterator<TIterator, TOtherCollection>>(
-                    ZipIterator<TIterator, TOtherCollection>(_begin, otherCollection),
-                    ZipIterator<TIterator, TOtherCollection>(_end, otherCollection));
+                ZipIterator<TIterator, TOtherCollection>(_begin, otherCollection),
+                ZipIterator<TIterator, TOtherCollection>(_end, otherCollection));
+        }
+
+        LinqView& Skip(std::size_t count) noexcept
+        {
+            for (std::size_t i = 0; i < count; ++i)
+            {
+                if (_begin == _end)
+                    return *this;
+                ++_begin;
+            }
+            return *this;
         }
     };
 }
