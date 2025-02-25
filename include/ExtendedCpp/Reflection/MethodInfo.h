@@ -59,9 +59,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    (std::any_cast<TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
                 else
-                    return (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    return (std::any_cast<TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
             }
         };
 
@@ -92,9 +92,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(args)...);
+                    (std::any_cast<const TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
                 else
-                    return (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(args)...);
+                    return (std::any_cast<const TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
             }
         };
 
@@ -107,69 +107,32 @@ namespace ExtendedCpp::Reflection
         /// @param parameters 
         /// @param methodCvQualifier 
         template<typename THelper, typename TConstHelper>
-        MethodInfo(const std::string& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
-                   std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
-            MemberInfo(methodName),
-            _methodHelper(std::forward<THelper>(methodHelper)),
-            _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
-            _method([](const std::any& helper, std::any&& object, std::any&& args)
-                {
-                    if constexpr (std::same_as<void, typename THelper::ReturnType>)
-                    {
-                        std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args));
-                        return std::any();
-                    }
-                    else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
-                }),
-            _constMethod([](const std::any& helper, std::any&& object, std::any&& args)
-                {
-                    if constexpr (std::same_as<void, typename TConstHelper::ReturnType>)
-                    {
-                        std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args));
-                        return std::any();
-                    }
-                    else
-                        return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args)));
-                }),
-            _parameters(std::move(parameters)),
-            _methodCvQualifier(methodCvQualifier) {}
-
-        /// @brief 
-        /// @tparam THelper 
-        /// @tparam TConstHelper 
-        /// @param methodName 
-        /// @param methodHelper 
-        /// @param constMethodHelper 
-        /// @param parameters 
-        /// @param methodCvQualifier 
-        template<typename THelper, typename TConstHelper>
         MethodInfo(std::string&& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
                    std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
-            MemberInfo(std::move(methodName)),
+            MemberInfo(std::forward<std::string>(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
                 {
                     if constexpr (std::same_as<void, typename THelper::ReturnType>)
                     {
-                        std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args));
+                        std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args)));
                 }),
             _constMethod([](const std::any& helper, std::any&& object, std::any&& args)
                 {
                     if constexpr (std::same_as<void, typename TConstHelper::ReturnType>)
                     {
-                        std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args));
+                        std::any_cast<const TConstHelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args)));
+                        return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args)));
                 }),
-            _parameters(std::move(parameters)),
+            _parameters(std::forward<std::vector<std::type_index>>(parameters)),
             _methodCvQualifier(methodCvQualifier) {}
 
         /// @brief 
@@ -272,64 +235,10 @@ namespace ExtendedCpp::Reflection
     /// @param constMethodPtr 
     /// @return 
     template<typename TObject, typename TConstReturnType, typename... TArgs>
-    std::shared_ptr<MemberInfo> CreateMethodInfo(const std::string& name,
-                                                 TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
-    {
-        return std::make_shared<MethodInfo>(name,
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
-            ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyConst);
-    }
-
-    /// @brief 
-    /// @tparam TObject 
-    /// @tparam TReturnType 
-    /// @tparam ...TArgs 
-    /// @param name 
-    /// @param methodPtr 
-    /// @return 
-    template<typename TObject, typename TReturnType, typename... TArgs>
-    std::shared_ptr<MemberInfo> CreateMethodInfo(const std::string& name,
-                                                 TReturnType(TObject::*methodPtr)(TArgs...)) noexcept
-    {
-        return std::make_shared<MethodInfo>(name,
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
-            ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyNoConst);
-    }
-
-    /// @brief 
-    /// @tparam TObject 
-    /// @tparam TReturnType 
-    /// @tparam TConstReturnType 
-    /// @tparam ...TArgs 
-    /// @param name 
-    /// @param methodPtr 
-    /// @param constMethodPtr 
-    /// @return 
-    template<typename TObject, typename TReturnType, typename TConstReturnType, typename... TArgs>
-    std::shared_ptr<MemberInfo> CreateMethodInfo(const std::string& name,
-                                                 TReturnType(TObject::*methodPtr)(TArgs...),
-                                                 TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
-    {
-        return std::make_shared<MethodInfo>(name,
-            MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
-            MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
-            ToTypeIndexes<TArgs...>(), MethodCVQualifier::ConstNoConst);
-    }
-
-    /// @brief 
-    /// @tparam TObject 
-    /// @tparam TConstReturnType 
-    /// @tparam ...TArgs 
-    /// @param name 
-    /// @param constMethodPtr 
-    /// @return 
-    template<typename TObject, typename TConstReturnType, typename... TArgs>
     std::shared_ptr<MemberInfo> CreateMethodInfo(std::string&& name,
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
-        return std::make_shared<MethodInfo>(std::move(name),
+        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyConst);
@@ -346,7 +255,7 @@ namespace ExtendedCpp::Reflection
     std::shared_ptr<MemberInfo> CreateMethodInfo(std::string&& name,
                                                  TReturnType(TObject::*methodPtr)(TArgs...)) noexcept
     {
-        return std::make_shared<MethodInfo>(std::move(name),
+        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyNoConst);
@@ -366,7 +275,7 @@ namespace ExtendedCpp::Reflection
                                                  TReturnType(TObject::*methodPtr)(TArgs...),
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
-        return std::make_shared<MethodInfo>(std::move(name),
+        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::ConstNoConst);

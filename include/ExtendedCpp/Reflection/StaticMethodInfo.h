@@ -46,9 +46,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    _method(std::any_cast<TArgs>(std::move(args))...);
+                    _method(std::any_cast<TArgs>(std::forward<std::any>(args))...);
                 else
-                    return _method(std::any_cast<TArgs>(std::move(args))...);
+                    return _method(std::any_cast<TArgs>(std::forward<std::any>(args))...);
             }
         };
 
@@ -58,41 +58,20 @@ namespace ExtendedCpp::Reflection
         /// @param methodHelper 
         /// @param parameters 
         template<typename THelper>
-        StaticMethodInfo(const std::string& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
-            MemberInfo(methodName),
-            _methodHelper(std::forward<THelper>(methodHelper)),
-            _method([](const std::any& helper, std::any&& args)
-                {
-                    if constexpr (std::same_as<void, typename THelper::ReturnType>)
-                    {
-                        std::any_cast<const THelper&>(helper).Invoke(std::move(args));
-                        return std::any();
-                    }
-                    else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
-                }),
-            _parameters(std::move(parameters)) {}
-
-        /// @brief 
-        /// @tparam THelper 
-        /// @param methodName 
-        /// @param methodHelper 
-        /// @param parameters 
-        template<typename THelper>
         StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
-            MemberInfo(std::move(methodName)),
+            MemberInfo(std::forward<std::string>(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& args)
                 {
                     if constexpr (std::same_as<void, typename THelper::ReturnType>)
                     {
-                        std::any_cast<const THelper&>(helper).Invoke(std::move(args));
+                        std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(args)));
                 }),
-            _parameters(std::move(parameters)) {}
+            _parameters(std::forward<std::vector<std::type_index>>(parameters)) {}
 
         /// @brief 
         ~StaticMethodInfo() override = default;
@@ -139,25 +118,10 @@ namespace ExtendedCpp::Reflection
     /// @param methodPtr 
     /// @return 
     template<typename TReturnType, typename... TArgs>
-    std::shared_ptr<MemberInfo> CreateStaticMethodInfo(const std::string& name,
-                                                       TReturnType(*methodPtr)(TArgs...)) noexcept
-    {
-        return std::make_shared<StaticMethodInfo>(name,
-            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
-            ToTypeIndexes<TArgs...>());
-    }
-
-    /// @brief 
-    /// @tparam TReturnType 
-    /// @tparam ...TArgs 
-    /// @param name 
-    /// @param methodPtr 
-    /// @return 
-    template<typename TReturnType, typename... TArgs>
     std::shared_ptr<MemberInfo> CreateStaticMethodInfo(std::string&& name,
                                                        TReturnType(*methodPtr)(TArgs...)) noexcept
     {
-        return std::make_shared<StaticMethodInfo>(std::move(name),
+        return std::make_shared<StaticMethodInfo>(std::forward<std::string>(name),
             StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>());
     }

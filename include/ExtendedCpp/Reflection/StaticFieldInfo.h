@@ -48,21 +48,8 @@ namespace ExtendedCpp::Reflection
         /// @param typeIndex 
         /// @param fieldHelper 
         template<typename THelper>
-        StaticFieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
-            MemberInfo(fieldName),
-            _typeIndex(typeIndex),
-            _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](const std::any& helper)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField()); }) {}
-
-        /// @brief 
-        /// @tparam THelper 
-        /// @param fieldName 
-        /// @param typeIndex 
-        /// @param fieldHelper 
-        template<typename THelper>
         StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
-            MemberInfo(std::move(fieldName)),
+            MemberInfo(std::forward<std::string>(fieldName)),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper)
@@ -99,20 +86,9 @@ namespace ExtendedCpp::Reflection
     /// @param fieldPtr 
     /// @return 
     template<typename TField>
-    std::shared_ptr<MemberInfo> CreateStaticFieldInfo(const std::string& name, TField* fieldPtr) noexcept
-    {
-        return std::make_shared<StaticFieldInfo>(std::move(name), typeid(TField), StaticFieldInfo::Helper(fieldPtr));
-    }
-
-    /// @brief 
-    /// @tparam TField 
-    /// @param name 
-    /// @param fieldPtr 
-    /// @return 
-    template<typename TField>
     std::shared_ptr<MemberInfo> CreateStaticFieldInfo(std::string&& name, TField* fieldPtr) noexcept
     {
-        return std::make_shared<StaticFieldInfo>(std::move(name), typeid(TField), StaticFieldInfo::Helper(fieldPtr));
+        return std::make_shared<StaticFieldInfo>(std::forward<std::string>(name), typeid(TField), StaticFieldInfo::Helper(fieldPtr));
     }
 }
 

@@ -17,10 +17,6 @@ namespace ExtendedCpp::Reflection
     public:
         /// @brief 
         /// @param name 
-        explicit MemberInfo(const std::string& name) noexcept;
-
-        /// @brief 
-        /// @param name 
         explicit MemberInfo(std::string&& name) noexcept;
 
         /// @brief 

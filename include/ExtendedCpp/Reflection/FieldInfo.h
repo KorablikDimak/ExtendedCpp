@@ -42,7 +42,7 @@ namespace ExtendedCpp::Reflection
             /// @return 
             TField* GetField(std::any&& object) const
             {
-                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+                return &(std::any_cast<TObject*>(std::forward<std::any>(object))->*_fieldPtr);
             }
 
             /// @brief 
@@ -50,7 +50,7 @@ namespace ExtendedCpp::Reflection
             /// @return 
             const TField* ReadField(std::any&& object) const
             {
-                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+                return &(std::any_cast<TObject*>(std::forward<std::any>(object))->*_fieldPtr);
             }
         };
 
@@ -60,29 +60,14 @@ namespace ExtendedCpp::Reflection
         /// @param typeIndex 
         /// @param fieldHelper 
         template<typename THelper>
-        FieldInfo(const std::string& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
-            MemberInfo(fieldName),
-            _typeIndex(typeIndex),
-            _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _fieldGetter([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
-            _fieldReader([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }) {}
-
-        /// @brief 
-        /// @tparam THelper 
-        /// @param fieldName 
-        /// @param typeIndex 
-        /// @param fieldHelper 
-        template<typename THelper>
         FieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
-            MemberInfo(std::move(fieldName)),
+            MemberInfo(std::forward<std::string>(fieldName)),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
+                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::forward<std::any>(object))); }),
             _fieldReader([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }) {}
+                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::forward<std::any>(object))); }) {}
 
         /// @brief 
         ~FieldInfo() override = default;
@@ -155,21 +140,9 @@ namespace ExtendedCpp::Reflection
     /// @param fieldPtr 
     /// @return 
     template<typename TObject, typename TField>
-    std::shared_ptr<MemberInfo> CreateFieldInfo(const std::string& name, TField TObject::*fieldPtr) noexcept
-    {
-        return std::make_shared<FieldInfo>(name, typeid(TField), FieldInfo::Helper(fieldPtr));
-    }
-
-    /// @brief 
-    /// @tparam TObject 
-    /// @tparam TField 
-    /// @param name 
-    /// @param fieldPtr 
-    /// @return 
-    template<typename TObject, typename TField>
     std::shared_ptr<MemberInfo> CreateFieldInfo(std::string&& name, TField TObject::*fieldPtr) noexcept
     {
-        return std::make_shared<FieldInfo>(std::move(name), typeid(TField), FieldInfo::Helper(fieldPtr));
+        return std::make_shared<FieldInfo>(std::forward<std::string>(name), typeid(TField), FieldInfo::Helper(fieldPtr));
     }
 }
 
