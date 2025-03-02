@@ -1117,3 +1117,19 @@ TEST(LINQ_Tests, ForeachTest)
     for (auto& element : linq)
         ASSERT_TRUE(element > 0);
 }
+
+TEST(LINQ_Tests, EmptyCollectionTest)
+{
+    // Average
+    const std::vector<char> emptyVector;
+
+    // Act
+    const auto linq = ExtendedCpp::LINQ::From(emptyVector);
+    const auto emptyResultVector = linq
+        .Where([](char){ return true; })
+        .Select([](const char& element){ return element; })
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(emptyResultVector.size(), 0);
+}

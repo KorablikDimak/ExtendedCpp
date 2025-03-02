@@ -1,14 +1,9 @@
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <utility>
 
-ExtendedCpp::Reflection::MemberInfo::MemberInfo(const std::string& name) noexcept
-{
-    _name = name;
-}
-
 ExtendedCpp::Reflection::MemberInfo::MemberInfo(std::string&& name) noexcept
 {
-    _name = std::move(name);
+    _name = std::forward<std::string>(name);
 }
 
 std::string ExtendedCpp::Reflection::MemberInfo::Name() const noexcept

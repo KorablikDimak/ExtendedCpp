@@ -1096,3 +1096,19 @@ TEST(LINQ_Generator_Tests, ForeachTest)
     for (auto element : linq3)
         ASSERT_EQ(element, 8);
 }
+
+TEST(LINQ_Generator_Tests, EmptyCollectionTest)
+{
+    // Average
+    const std::vector<char> emptyVector;
+
+    // Act
+    auto linq = ExtendedCpp::LINQ::Generator(emptyVector);
+    const auto emptyResultVector = linq
+        .Where([](char){ return true; })
+        .Select([](const char& element){ return element; })
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(emptyResultVector.size(), 0);
+}

@@ -40,7 +40,7 @@ namespace ExtendedCpp::LINQ
 		{
 		public:
 			Iterator(Future<TSource>& yieldContext, bool isEnd) noexcept :
-					_yieldContext(yieldContext), _isEnd(isEnd)
+				_yieldContext(yieldContext), _isEnd(isEnd)
 			{
 				if (_yieldContext)
 					_value = _yieldContext.Value();
@@ -97,8 +97,8 @@ namespace ExtendedCpp::LINQ
 		/// @param generator 
 		/// @param ...args 
 		template<typename TGenerator, typename... Args>
-		requires std::invocable<TGenerator, Args...>
-		explicit LinqGenerator(TGenerator&& generator, Args... args) noexcept :
+		requires std::same_as<std::invoke_result_t<TGenerator, Args...>, Future<TSource>>
+		explicit LinqGenerator(TGenerator&& generator, Args&&... args) noexcept :
 			_yieldContext(generator(std::forward<Args>(args)...)) {}
 
 		/// @brief Copy data from vector into LINQ generator

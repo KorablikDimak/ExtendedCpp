@@ -172,3 +172,19 @@ TEST(LINQ_View_Tests, TakeWhileTest)
     ASSERT_EQ(2, result[1]);
     ASSERT_EQ(3, result[2]);
 }
+
+TEST(LINQ_View_Tests, EmptyCollectionTest)
+{
+    // Average
+    const std::vector<char> emptyVector;
+
+    // Act
+    const auto linq = ExtendedCpp::LINQ::View(emptyVector);
+    const auto emptyResultVector = linq
+        .Where([](char){ return true; })
+        .Select([](const char& element){ return element; })
+        .ToVector();
+
+    // Assert
+    ASSERT_EQ(emptyResultVector.size(), 0);
+}

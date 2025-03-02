@@ -10,12 +10,12 @@ namespace ExtendedCpp::Cancellation
     class CancellationToken final
     {
     private:
-        std::atomic<bool*> _isCancellationRequested;
+        const std::atomic<bool>* _cancellationRequest;
 
     public:
         /// @brief 
         /// @param cancellationRequest 
-        explicit CancellationToken(bool* cancellationRequest) noexcept;
+        explicit CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept;
         
         /// @brief 
         ~CancellationToken() = default;

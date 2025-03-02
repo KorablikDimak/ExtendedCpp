@@ -57,7 +57,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(const std::stack<TSource>& collection) noexcept
+    LinqContainer<TSource> From(const std::stack<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::stack<TSource>>)
     {
         std::stack<TSource> copy = collection;
 
@@ -76,7 +77,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(std::stack<TSource>&& collection) noexcept
+    LinqContainer<TSource> From(std::stack<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -93,7 +95,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(const std::queue<TSource>& collection) noexcept
+    LinqContainer<TSource> From(const std::queue<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::queue<TSource>>)
     {
         std::queue<TSource> copy = collection;
 
@@ -112,12 +115,13 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(std::queue<TSource>&& collection) noexcept
+    LinqContainer<TSource> From(std::queue<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
         {
-            vectorCollection[i] = collection.front();
+            vectorCollection[i] = std::move(collection.front());
             collection.pop();
         }
 
@@ -129,7 +133,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(const std::priority_queue<TSource>& collection) noexcept
+    LinqContainer<TSource> From(const std::priority_queue<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::priority_queue<TSource>>)
     {
         std::priority_queue<TSource> copy = collection;
 
@@ -148,7 +153,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqContainer<TSource> From(std::priority_queue<TSource>&& collection) noexcept
+    LinqContainer<TSource> From(std::priority_queue<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -223,7 +229,7 @@ namespace ExtendedCpp::LINQ
     template<Concepts::Iterable TCollection, typename TSource = std::decay_t<TCollection>::value_type>
     LinqGenerator<TSource> Generator(TCollection&& collection) noexcept
     {
-        return LinqGenerator<TSource>(std::forward<TCollection>(collection));
+        return LinqGenerator<TSource>(std::move(collection));
     }
 
     /// @brief 
@@ -243,7 +249,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::stack<TSource>& collection) noexcept
+    LinqGenerator<TSource> Generator(const std::stack<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::stack<TSource>>)
     {
         std::stack<TSource> copy = collection;
 
@@ -262,7 +269,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::stack<TSource>&& collection) noexcept
+    LinqGenerator<TSource> Generator(std::stack<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -279,7 +287,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::queue<TSource>& collection) noexcept
+    LinqGenerator<TSource> Generator(const std::queue<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::queue<TSource>>)
     {
         std::queue<TSource> copy = collection;
 
@@ -298,7 +307,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::queue<TSource>&& collection) noexcept
+    LinqGenerator<TSource> Generator(std::queue<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -315,7 +325,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::priority_queue<TSource>& collection) noexcept
+    LinqGenerator<TSource> Generator(const std::priority_queue<TSource>& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource> && std::is_nothrow_copy_assignable_v<std::priority_queue<TSource>>)
     {
         std::priority_queue<TSource> copy = collection;
 
@@ -334,7 +345,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::priority_queue<TSource>&& collection) noexcept
+    LinqGenerator<TSource> Generator(std::priority_queue<TSource>&& collection) 
+    noexcept(std::is_nothrow_move_assignable_v<TSource>)
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -365,7 +377,7 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     LinqGenerator<std::pair<TKey, TValue>> Generator(std::map<TKey, TValue>&& collection) noexcept
     {
-    return LinqGenerator<std::pair<TKey, TValue>>(std::move(collection));
+        return LinqGenerator<std::pair<TKey, TValue>>(std::move(collection));
     }
 
     /// @brief 

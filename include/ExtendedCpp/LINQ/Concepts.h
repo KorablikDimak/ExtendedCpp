@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <optional>
+#include <coroutine>
 
 /// @brief 
 namespace ExtendedCpp::LINQ::Concepts

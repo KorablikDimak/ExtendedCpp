@@ -34,6 +34,7 @@ option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
 option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
 option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(DI_BUILD_TESTS "Build DI library tests" OFF)
+option(Asio_BUILD_TESTS "Build Asio library tests" OFF)
 
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
@@ -77,6 +78,9 @@ set(Common_SOURCE
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
 
+set(Asio_SOURCE
+        src/Asio/Asio.cpp)
+
 add_library(LINQ ${LIBRARY_TYPE} ${LINQ_SOURCE})
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
@@ -106,7 +110,10 @@ add_library(DI ${LIBRARY_TYPE} ${DI_SOURCE})
 add_library(ExtendedCpp::DI ALIAS DI)
 target_link_libraries(DI PUBLIC Reflection)
 
-set_include_directories(LINQ Events Json Xml InfoLog Common Reflection DI)
+add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
+add_library(ExtendedCpp::Asio ALIAS Asio)
+
+set_include_directories(LINQ Events Json Xml InfoLog Common Reflection DI Asio)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
@@ -134,7 +141,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake
             COPYONLY)
 
-    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection)
+    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection Asio)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
@@ -155,39 +162,11 @@ endif()
 if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Reflection)
-
-    if(BUILD_SHARED_LIBS)
-        add_custom_command(
-                TARGET Reflection POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/Reflection/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
 endif()
 
 if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/InfoLog)
-
-    if(BUILD_SHARED_LIBS)
-        add_custom_command(
-                TARGET InfoLog POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}InfoLog${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}InfoLog${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-        add_custom_command(
-                TARGET InfoLog POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Xml${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-        add_custom_command(
-                TARGET InfoLog POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
 endif()
 
 if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
@@ -198,20 +177,11 @@ endif()
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/DI)
+endif()
 
-    if(BUILD_SHARED_LIBS)
-        add_custom_command(
-                TARGET DI POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-        add_custom_command(
-                TARGET DI POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}DI${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
+if(Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/Asio)
 endif()
 
 if(LINQ_BUILD_BENCHMARKS)

@@ -1,11 +1,11 @@
 #include <ExtendedCpp/Cancellation/CancellationToken.h>
 
-ExtendedCpp::Cancellation::CancellationToken::CancellationToken(bool* cancellationRequest) noexcept
+ExtendedCpp::Cancellation::CancellationToken::CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept
 {
-    _isCancellationRequested.store(cancellationRequest);
+    _cancellationRequest = cancellationRequest;
 }
 
 bool ExtendedCpp::Cancellation::CancellationToken::IsCancellationRequested() const noexcept
 {
-    return *_isCancellationRequested.load();
+    return _cancellationRequest->load();
 }
