@@ -1,8 +1,8 @@
 #include <fstream>
+#include <future>
 #include <gtest/gtest.h>
 
 #include <ExtendedCpp/Asio.h>
-
 
 TEST(AsioTests, AifstramTest)
 {
@@ -12,25 +12,28 @@ TEST(AsioTests, AifstramTest)
     file.close();
 
     // Act
-    ExtendedCpp::Asio::Aifstream aifstream("AifstramTest.txt");
-    ExtendedCpp::Future<std::vector<char>> future = aifstream.ReadAsync(14);
-    std::vector<char> result = future.Result();
+    auto task = []()->ExtendedCpp::Task<std::vector<char>>
+    {
+        ExtendedCpp::Asio::Aifstream aifstream("AifstramTest.txt");
+        co_return co_await aifstream.ReadAsync(14);
+    }();
 
     // Assert
-    ASSERT_EQ(result.size(), 14);
+    ASSERT_EQ(task.Result().size(), 14);
 }
 
 TEST(AsioTests, AofstramTest)
 {
     // Average
     // Act
-    ExtendedCpp::Asio::Aofstream aofstream("AofstramTest.txt");
-    ExtendedCpp::Future<ssize_t> future = 
-        aofstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
-    ssize_t result = future.Result();
+    auto task = []()->ExtendedCpp::Task<ssize_t>
+    {
+        ExtendedCpp::Asio::Aofstream aofstream("AofstramTest.txt");
+        co_return co_await aofstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
+    }();
 
     // Assert
-    ASSERT_EQ(result, 14);
+    ASSERT_EQ(task.Result(), 14);
     std::ifstream file("AofstramTest.txt");
     std::string line;
     std::getline(file, line);
@@ -43,16 +46,21 @@ TEST(AsioTests, AfstramTest)
     // Act
     ExtendedCpp::Asio::Afstream afstream("AfstramTest.txt");
 
-    ExtendedCpp::Future<ssize_t> writeFuture = 
-        afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
-    ssize_t writeResult = writeFuture.Result();
+    auto taskWrite = [&afstream]()->ExtendedCpp::Task<ssize_t>
+    {
+        co_return co_await afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
+    }();
+    taskWrite.Wait();
 
     afstream.ResetOffest();
 
-    ExtendedCpp::Future<std::vector<char>> readFuture = afstream.ReadAsync(14);
-    std::vector<char> readResult = readFuture.Result();
+    auto taskRead = [&afstream]()->ExtendedCpp::Task<std::vector<char>>
+    {
+        co_return co_await afstream.ReadAsync(14);
+    }();
+    taskRead.Wait();
 
     // Assert
-    ASSERT_EQ(writeResult, 14);
-    ASSERT_EQ(readResult.size(), 14);
+    ASSERT_EQ(taskWrite.Result(), 14);
+    ASSERT_EQ(taskRead.Result().size(), 14);
 }

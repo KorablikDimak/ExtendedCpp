@@ -188,3 +188,35 @@ TEST(LINQ_View_Tests, EmptyCollectionTest)
     // Assert
     ASSERT_EQ(emptyResultVector.size(), 0);
 }
+
+TEST(LINQ_View_Tests, TransformTest)
+{
+    // Average
+    const std::vector<int> numbers = { 1, 2, 3, 4 };
+    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+
+    // Act
+    const auto transformed = ExtendedCpp::LINQ::View(numbers)
+        .Transform([](int& number){ number *= 2; })
+        .ToVector();
+
+    // Assert
+    for (std::size_t i = 0; i < assertVector.size(); ++i)
+        ASSERT_EQ(transformed[i], assertVector[i]);
+}
+
+TEST(LINQ_View_Tests, MapTest)
+{
+    // Average
+    const std::vector<int> numbers = { 1, 2, 3, 4 };
+    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+
+    // Act
+    const auto mapped = ExtendedCpp::LINQ::View(numbers)
+        .Map([](int number){ return number * 2; })
+        .ToVector();
+
+    // Assert
+    for (std::size_t i = 0; i < assertVector.size(); ++i)
+        ASSERT_EQ(mapped[i], assertVector[i]);
+}

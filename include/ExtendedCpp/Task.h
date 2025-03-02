@@ -38,12 +38,13 @@ namespace ExtendedCpp
         /// @return 
         bool await_ready() const noexcept 
         { 
-            return true;
+            std::lock_guard lock(_mutex);
+            return _result.has_value();
         }
 
         /// @brief 
         /// @param handle 
-        void await_suspend(std::coroutine_handle<> handle) noexcept
+        void await_suspend(std::coroutine_handle<> handle)
         {
             std::lock_guard lock(_mutex);
             if (_result.has_value())
@@ -59,25 +60,11 @@ namespace ExtendedCpp
             return std::move(_result.value());
         }
 
-        TResult Result() const noexcept
-        {
-            while (true) 
-            {
-                {
-                    std::lock_guard lock(_mutex);
-                    if (_result.has_value())
-                        break;
-                }
-                std::this_thread::sleep_for(std::chrono::microseconds(10));
-            }
-            return std::move(_result.value());
-        }
-
     private:
         std::future<void> _asyncTask;
         mutable std::mutex _mutex;
         std::optional<std::coroutine_handle<>> _handle = std::nullopt;
-        std::optional<TResult> _result  = std::nullopt;
+        std::optional<TResult> _result = std::nullopt;
     };
 
     /// @brief 
@@ -109,12 +96,13 @@ namespace ExtendedCpp
         /// @return 
         bool await_ready() const noexcept 
         { 
-            return true;
+            std::lock_guard lock(_mutex);
+            return _isFinished;
         }
 
         /// @brief 
         /// @param handle 
-        void await_suspend(std::coroutine_handle<> handle) noexcept
+        void await_suspend(std::coroutine_handle<> handle)
         {
             std::lock_guard lock(_mutex);
             if (_isFinished)
@@ -126,19 +114,6 @@ namespace ExtendedCpp
         /// @brief 
         void await_resume() const noexcept {}
 
-        void Wait() const noexcept
-        {
-            while (true) 
-            {
-                {
-                    std::lock_guard lock(_mutex);
-                    if (_isFinished)
-                        break;
-                }
-                std::this_thread::sleep_for(std::chrono::microseconds(10));
-            }
-        }
-
     private:
         std::future<void> _asyncTask;
         mutable std::mutex _mutex;
@@ -147,7 +122,108 @@ namespace ExtendedCpp
     };
 
     /// @brief 
+    template<typename TResult>
     struct Task final
+    {
+        /// @brief 
+        struct promise_type final
+        {
+            /// @brief 
+            /// @return 
+            std::suspend_never initial_suspend() noexcept { return {}; }
+
+            /// @brief 
+            /// @return 
+            std::suspend_never final_suspend() noexcept { return {}; }
+
+            /// @brief 
+            /// @param result 
+            void return_value(TResult&& result) noexcept 
+            { 
+                _result = std::move(result); 
+                _isDone.store(true);
+            }
+
+            /// @brief 
+            void unhandled_exception() 
+            { 
+                std::rethrow_exception(std::current_exception()); 
+            }
+
+            /// @brief 
+            /// @return 
+            Task get_return_object()    
+            { 
+                return Task(std::coroutine_handle<promise_type>::from_promise(*this)); 
+            }
+
+            /// @brief 
+            /// @return 
+            bool IsDone() const noexcept
+            {
+                return _isDone.load(); 
+            }
+
+            /// @brief 
+            /// @return 
+            TResult Result() noexcept 
+            { 
+                return std::move(_result); 
+            }
+
+        private:
+            TResult _result;
+            std::atomic<bool> _isDone;
+        };
+
+        /// @brief 
+        /// @param handle 
+        explicit Task(std::coroutine_handle<promise_type> handle) noexcept : _handle(handle) {};
+
+        /// @brief 
+        void Wait() const noexcept
+        {
+            while (true)
+            {
+                if (_handle.promise().IsDone()) 
+                    return;
+                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            }
+        }
+
+        /// @brief 
+        /// @return 
+        TResult Result() const noexcept
+        {
+            while (true)
+            {
+                if (_handle.promise().IsDone())
+                    return _handle.promise().Result();
+                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            }
+        }
+
+        /// @brief 
+        /// @tparam TOperation 
+        /// @tparam ...Args 
+        /// @param operation 
+        /// @param ...args 
+        /// @return 
+        template<typename TOperation, typename... Args>
+        requires std::invocable<TOperation, Args...>
+        static Future<std::invoke_result_t<TOperation, Args...>> Run(TOperation&& operation, Args&&... args)
+        {
+            return Future<std::invoke_result_t<TOperation, Args...>>
+                (std::forward<TOperation>(operation), std::forward<Args>(args)...);
+        }
+
+    private:
+        std::coroutine_handle<promise_type> _handle;
+    };
+
+    /// @brief 
+    template<>
+    struct Task<void> final
     {
         /// @brief 
         struct promise_type final
@@ -161,18 +237,47 @@ namespace ExtendedCpp
             std::suspend_never final_suspend() noexcept { return {}; }
                 
             /// @brief 
-            void return_void() noexcept {}
+            void return_void() noexcept 
+            { 
+                _isDone.store(true); 
+            }
 
             /// @brief 
-            void unhandled_exception()
-            {
-                std::rethrow_exception(std::current_exception());
+            void unhandled_exception() 
+            { 
+                std::rethrow_exception(std::current_exception()); 
             }
 
             /// @brief 
             /// @return 
-            Task get_return_object() noexcept { return {}; }
+            Task get_return_object() 
+            { 
+                return Task(std::coroutine_handle<promise_type>::from_promise(*this)); 
+            }
+
+            bool IsDone() const noexcept
+            {
+                return _isDone.load();
+            }
+
+        private:
+            std::atomic<bool> _isDone;
         };
+
+        /// @brief 
+        /// @param handle 
+        explicit Task(std::coroutine_handle<promise_type> handle) noexcept : _handle(handle) {};
+
+        /// @brief 
+        void Wait() const noexcept
+        {
+            while (true)
+            {
+                if (_handle.promise().IsDone()) 
+                    return;
+                std::this_thread::sleep_for(std::chrono::microseconds(10));
+            }
+        }
 
         /// @brief 
         /// @tparam TOperation 
@@ -181,11 +286,14 @@ namespace ExtendedCpp
         /// @param ...args 
         /// @return 
         template<typename TOperation, typename... Args>
-        static Future<std::invoke_result_t<TOperation, Args...>> Run(TOperation&& operation, Args&&... args)
+        requires std::same_as<std::invoke_result_t<TOperation, Args...>, void>
+        static Future<void> Run(TOperation&& operation, Args&&... args)
         {
-            return Future<std::invoke_result_t<TOperation, Args...>>
-                (std::forward<TOperation>(operation), std::forward<Args>(args)...);
+            return Future<void>(std::forward<TOperation>(operation), std::forward<Args>(args)...);
         }
+
+    private:
+        std::coroutine_handle<promise_type> _handle;
     };
 }
 

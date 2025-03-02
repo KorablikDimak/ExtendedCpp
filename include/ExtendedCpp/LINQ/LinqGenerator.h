@@ -98,7 +98,8 @@ namespace ExtendedCpp::LINQ
 		/// @param ...args 
 		template<typename TGenerator, typename... Args>
 		requires std::same_as<std::invoke_result_t<TGenerator, Args...>, Future<TSource>>
-		explicit LinqGenerator(TGenerator&& generator, Args&&... args) noexcept :
+		explicit LinqGenerator(TGenerator&& generator, Args&&... args) 
+		noexcept(std::is_nothrow_invocable_v<TGenerator, Args...>) :
 			_yieldContext(generator(std::forward<Args>(args)...)) {}
 
 		/// @brief Copy data from vector into LINQ generator
@@ -285,6 +286,26 @@ namespace ExtendedCpp::LINQ
 			while (_yieldContext)
 				collection.insert(_yieldContext.Next());
 			return collection;
+		}
+
+		template<std::invocable<TSource> TMap>
+        requires std::same_as<std::invoke_result_t<TMap, TSource>, TSource>
+        LinqGenerator Map(TMap&& mapFunction) 
+		noexcept(std::is_nothrow_invocable_v<TMap, TSource>)
+		{
+			return LinqGenerator([this](TMap&& mapFunction_)
+				{ return SelectGenerator(std::forward<TMap>(mapFunction_)); },
+						std::forward<TMap>(mapFunction));
+		}
+
+		template<std::invocable<TSource&> TTransform>
+        requires std::same_as<std::invoke_result_t<TTransform, TSource&>, void>
+        LinqGenerator Transform(TTransform&& transform) 
+		noexcept(std::is_nothrow_invocable_v<TTransform, TSource&>)
+		{
+			return LinqGenerator([this](TTransform&& transform_)
+				{ return TransformGenerator(std::forward<TTransform>(transform_)); },
+						std::forward<TTransform>(transform));
 		}
 
 		/// @brief Iterates through all elements and applies a selector to each
@@ -1068,6 +1089,19 @@ namespace ExtendedCpp::LINQ
 			auto inner = std::forward<TCollection>(collection);
 			for (auto it = inner.rbegin(); it != inner.rend(); ++it)
 				co_yield std::move(*it);
+		}
+
+		template<std::invocable<TSource&> TTransform>
+        requires std::same_as<std::invoke_result_t<TTransform, TSource&>, void>
+        Future<TSource> TransformGenerator(TTransform&& transform)
+        noexcept(std::is_nothrow_invocable_v<TTransform, TSource&>)
+		{
+			while (_yieldContext)
+			{
+				auto value = _yieldContext.Next();
+				transform(value);
+				co_yield std::move(value);
+			}
 		}
 
 		template<std::invocable<TSource> TSelector,

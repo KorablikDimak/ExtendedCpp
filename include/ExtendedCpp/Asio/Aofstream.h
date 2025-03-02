@@ -210,7 +210,7 @@ namespace ExtendedCpp::Asio
         Future<ssize_t> WriteAsync(std::vector<TChar> buffer)
         {
 #ifdef UNIX_IO
-            return Task::Run([this](std::vector<TChar> buffer)
+            return Task<ssize_t>::Run([this](std::vector<TChar> buffer)
             {
                 aiocb controlBlock;
                 memset(&controlBlock, 0, sizeof(aiocb));

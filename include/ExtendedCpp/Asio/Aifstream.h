@@ -161,7 +161,7 @@ namespace ExtendedCpp::Asio
         Future<std::vector<TChar>> ReadAsync(size_t count)
         {
 #ifdef UNIX_IO
-            return Task::Run([this](ssize_t count)
+            return Task<std::vector<TChar>>::Run([this](ssize_t count)
             {
                 std::vector<TChar> buffer(count);
 

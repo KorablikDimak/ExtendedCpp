@@ -130,6 +130,75 @@ namespace ExtendedCpp::LINQ
 
 	/// @brief 
 	/// @tparam TInIterator 
+	/// @tparam TTransform 
+	template<Concepts::OptionalIter TInIterator,
+			 std::invocable<typename TInIterator::value_type&> TTransform>
+	requires std::same_as<std::invoke_result_t<TTransform, typename TInIterator::value_type&>, void>
+	struct TransformIterator final
+	{
+	private:
+		TInIterator _inIterator;
+		TTransform _transform;
+
+	public:
+		/// @brief 
+		using value_type = typename TInIterator::value_type;
+
+		/// @brief 
+		/// @param inIterator 
+		/// @param transform 
+		TransformIterator(TInIterator inIterator, TTransform&& transform) noexcept :
+			_inIterator(inIterator),
+			_transform(std::forward<TTransform>(transform)) {}
+
+		/// @brief 
+		/// @param inIterator 
+		TransformIterator(TInIterator inIterator) noexcept :
+			_inIterator(inIterator) {}
+
+		/// @brief 
+		/// @return 
+		std::optional<value_type> operator*() const 
+		noexcept(std::is_nothrow_invocable_v<TTransform, typename TInIterator::value_type&> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		{
+			if ((*_inIterator).has_value())
+			{
+				auto value = (*_inIterator).value();
+				_transform(value);
+				return value;
+			}
+			else
+				return std::nullopt;
+		}
+
+		/// @brief 
+		/// @return 
+		TransformIterator& operator++() noexcept
+		{
+			++_inIterator;
+			return *this;
+		}
+
+		/// @brief 
+		/// @param other 
+		/// @return 
+		bool operator!=(const TransformIterator& other) const noexcept
+		{
+			return _inIterator != other._inIterator;
+		}
+
+		/// @brief 
+		/// @param other 
+		/// @return 
+		bool operator==(const TransformIterator& other) const noexcept
+		{
+			return _inIterator == other._inIterator;
+		}
+	};
+
+	/// @brief 
+	/// @tparam TInIterator 
 	/// @tparam TPredicate 
 	template<Concepts::OptionalIter TInIterator,
 			 Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>

@@ -277,6 +277,32 @@ namespace ExtendedCpp::LINQ
 			return unorderedMap;
 		}
 
+		/// @brief 
+		/// @tparam TMap 
+		/// @param mapFunction 
+		/// @return 
+		template<std::invocable<value_type> TMap>
+		requires std::same_as<std::invoke_result_t<TMap, value_type>, value_type>
+		LinqView<SelectorIterator<value_type, TIterator, TMap>> Map(TMap&& mapFunction) const noexcept
+		{
+			return LinqView<SelectorIterator<value_type, TIterator, TMap>>(
+				SelectorIterator<value_type, TIterator, TMap>(_begin, std::forward<TMap>(mapFunction)),
+				SelectorIterator<value_type, TIterator, TMap>(_end));
+		}
+
+		/// @brief 
+		/// @tparam TTransform 
+		/// @param transform 
+		/// @return 
+		template<std::invocable<value_type&> TTransform>
+		requires std::same_as<std::invoke_result_t<TTransform, value_type&>, void>
+		LinqView<TransformIterator<TIterator, TTransform>> Transform(TTransform&& transform) const noexcept
+		{
+			return LinqView<TransformIterator<TIterator, TTransform>>(
+				TransformIterator<TIterator, TTransform>(_begin, std::forward<TTransform>(transform)),
+				TransformIterator<TIterator, TTransform>(_end));
+		}
+
 		/// @brief
 		/// @tparam TResult 
 		/// @tparam TSelector 

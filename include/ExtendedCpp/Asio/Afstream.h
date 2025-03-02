@@ -211,7 +211,7 @@ namespace ExtendedCpp::Asio
         Future<std::vector<TChar>> ReadAsync(size_t count)
         {
 #ifdef UNIX_IO
-            return Task::Run([this](size_t count)
+            return Task<std::vector<TChar>>::Run([this](size_t count)
             {
                 std::vector<TChar> buffer(count);
 
@@ -262,7 +262,7 @@ namespace ExtendedCpp::Asio
         Future<ssize_t> WriteAsync(std::vector<TChar> buffer)
         {
 #ifdef UNIX_IO
-            return Task::Run([this](std::vector<TChar> buffer)
+            return Task<ssize_t>::Run([this](std::vector<TChar> buffer)
             {
                 aiocb controlBlock;
                 memset(&controlBlock, 0, sizeof(aiocb));

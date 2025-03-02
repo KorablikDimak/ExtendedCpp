@@ -354,17 +354,36 @@ namespace ExtendedCpp::LINQ
             return unorderedMap;
         }
 
+        /// @brief 
+        /// @tparam TMap 
+        /// @param mapFunction 
+        /// @return 
+        template<std::invocable<TSource> TMap>
+        requires std::same_as<std::invoke_result_t<TMap, TSource>, TSource>
+        LinqContainer Map(TMap&& mapFunction) const
+        noexcept(std::is_nothrow_invocable_v<TMap, TSource>)
+        {
+            std::vector<TSource> newCollection;
+            newCollection.reserve(_collection.size());
+
+            for (const TSource& element : _collection)
+                newCollection.push_back(mapFunction(element));
+
+            return LinqContainer(std::move(newCollection));
+        }
+
         /// @brief Applies an action to each item in the collection
         /// @tparam TTransform Any functional object with TSource argument
         /// @param transform Any functional object with TSource argument
         /// @return New collection LinqContainer<TSource>
-        template<std::invocable<TSource> TTransform>
+        template<std::invocable<TSource&> TTransform>
+        requires std::same_as<std::invoke_result_t<TTransform, TSource&>, void>
         LinqContainer Transform(TTransform&& transform) const
-        noexcept(std::is_nothrow_invocable_v<TTransform, TSource>)
+        noexcept(std::is_nothrow_invocable_v<TTransform, TSource&>)
         {
             std::vector<TSource> newCollection(_collection);
 
-            for (const TSource& element : newCollection)
+            for (TSource& element : newCollection)
                 transform(element);
 
             return LinqContainer(std::move(newCollection));
