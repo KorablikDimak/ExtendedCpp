@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <concepts>
 #include <utility>
+#include <locale>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
 #include <ExtendedCpp/LINQ/Sort.h>

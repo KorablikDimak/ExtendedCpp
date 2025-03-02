@@ -16,6 +16,7 @@
 #include <optional>
 #include <type_traits>
 #include <utility>
+#include <locale>
 
 #include <ExtendedCpp/LINQ/Iterators.h>
 #include <ExtendedCpp/LINQ/Concepts.h>

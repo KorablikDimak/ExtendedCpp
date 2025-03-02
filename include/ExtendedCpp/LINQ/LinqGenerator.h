@@ -16,6 +16,7 @@
 #include <type_traits>
 #include <vector>
 #include <concepts>
+#include <locale>
 
 #include <ExtendedCpp/LINQ/YieldForeach.h>
 #include <ExtendedCpp/LINQ/Aggregate.h>
