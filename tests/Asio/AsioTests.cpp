@@ -12,10 +12,38 @@ TEST(AsioTests, AifstramTest)
     file.close();
 
     // Act
-    auto task = []()->ExtendedCpp::Task<std::vector<char>>
+    auto innerInnerTask = []()->ExtendedCpp::Task<std::vector<char>>
     {
         ExtendedCpp::Asio::Aifstream aifstream("AifstramTest.txt");
         co_return co_await aifstream.ReadAsync(14);
+    }();
+
+    auto innerTask = [&]()->ExtendedCpp::Task<std::vector<char>>
+    {
+        co_return co_await innerInnerTask;
+    }();
+
+    auto task = [&]()->ExtendedCpp::Task<std::vector<char>>
+    {
+        co_return co_await innerTask;
+    }();
+
+    // Assert
+    ASSERT_EQ(task.Result().size(), 14);
+}
+
+TEST(AsioTests, ReadAllAsyncTest)
+{
+    // Average
+    std::ofstream file("ReadAllAsyncTest.txt");
+    file.write("Correct test.", 14);
+    file.close();
+
+    // Act
+    auto task = []()->ExtendedCpp::Task<std::vector<char>>
+    {
+        ExtendedCpp::Asio::Aifstream aifstream("ReadAllAsyncTest.txt");
+        co_return co_await aifstream.ReadAllAsync();
     }();
 
     // Assert

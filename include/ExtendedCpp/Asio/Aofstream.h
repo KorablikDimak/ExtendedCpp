@@ -207,7 +207,7 @@ namespace ExtendedCpp::Asio
         /// @brief 
         /// @param buffer 
         /// @return 
-        Future<ssize_t> WriteAsync(std::vector<TChar> buffer)
+        Task<ssize_t> WriteAsync(std::vector<TChar> buffer)
         {
 #ifdef UNIX_IO
             return Task<ssize_t>::Run([this](std::vector<TChar> buffer)

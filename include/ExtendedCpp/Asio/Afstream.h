@@ -208,7 +208,7 @@ namespace ExtendedCpp::Asio
         /// @brief 
         /// @param count 
         /// @return 
-        Future<std::vector<TChar>> ReadAsync(size_t count)
+        Task<std::vector<TChar>> ReadAsync(size_t count)
         {
 #ifdef UNIX_IO
             return Task<std::vector<TChar>>::Run([this](size_t count)
@@ -245,7 +245,7 @@ namespace ExtendedCpp::Asio
 
         /// @brief 
         /// @return 
-        Future<std::vector<TChar>> ReadAllAsync()
+        Task<std::vector<TChar>> ReadAllAsync()
         {
 #ifdef UNIX_IO
             struct stat fileStat;
@@ -259,7 +259,7 @@ namespace ExtendedCpp::Asio
         /// @brief 
         /// @param buffer 
         /// @return 
-        Future<ssize_t> WriteAsync(std::vector<TChar> buffer)
+        Task<ssize_t> WriteAsync(std::vector<TChar> buffer)
         {
 #ifdef UNIX_IO
             return Task<ssize_t>::Run([this](std::vector<TChar> buffer)

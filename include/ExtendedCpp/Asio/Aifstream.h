@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <filesystem>
+#include <fstream>
 
 #ifdef __APPLE__
     #define UNIX_IO
@@ -17,6 +18,7 @@
 
 #ifdef UNIX_IO
     #include <aio.h>
+    #include <sys/stat.h>
 #elif WINDOWS_IO
     #include <windows.h>
 #endif
@@ -155,13 +157,35 @@ namespace ExtendedCpp::Asio
             return *this;
         }
 
+        template<typename TTarget>
+        BasicAifstream& operator>>(TTarget& target)
+        {
+            const std::vector<TChar> buffer = [this]()->Task<std::vector<TChar>>
+            {
+                co_return co_await ReadAsync(sizeof(TTarget));
+            }().Result();
+
+            if (buffer.size() != sizeof(TTarget))
+                throw std::runtime_error("BasicAifstream::operator>> error: cannot convert to target type.");
+
+            target = *std::bit_cast<TTarget*>(buffer.data());
+        }
+
+        BasicAifstream& operator>>(std::vector<TChar>& buffer)
+        {
+            buffer = [this]()->Task<std::vector<TChar>>
+            {
+                co_return co_await ReadAllAsync();
+            }().Result();
+        }
+
         /// @brief 
         /// @param count 
         /// @return 
-        Future<std::vector<TChar>> ReadAsync(size_t count)
+        Task<std::vector<TChar>> ReadAsync(std::size_t count)
         {
 #ifdef UNIX_IO
-            return Task<std::vector<TChar>>::Run([this](ssize_t count)
+            return Task<std::vector<TChar>>::Run([this](std::size_t count)
             {
                 std::vector<TChar> buffer(count);
 
@@ -195,12 +219,12 @@ namespace ExtendedCpp::Asio
 
         /// @brief 
         /// @return 
-        Future<std::vector<TChar>> ReadAllAsync()
+        Task<std::vector<TChar>> ReadAllAsync()
         {
 #ifdef UNIX_IO
             struct stat fileStat;
             fstat(fileno(_file), &fileStat);
-            off_t size = fileStat.st_size;
+            const off_t size = fileStat.st_size;
             return ReadAsync(size - _offset);
 #elif WINDOWS_IO
 #endif
