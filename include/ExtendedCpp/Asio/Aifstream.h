@@ -1,28 +1,37 @@
 #ifndef Asio_Aifstream_H
 #define Asio_Aifstream_H
 
-#include <cstdio>
-#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 #include <filesystem>
-#include <fstream>
+#include <format>
+#include <ios>
+#include <string>
+#include <cstring>
 
-#ifdef __APPLE__
-    #define UNIX_IO
+#if __APPLE__
+    #define UNIX_IO 1
 #elif __linux__
-    #define UNIX_IO
+    #define UNIX_IO 1
 #elif _WIN32
-    #define WINDOWS_IO
+    #define WINDOWS_IO 1
 #endif
 
-#ifdef UNIX_IO
+#if UNIX_IO
+    #include <cstdio>
     #include <aio.h>
     #include <sys/stat.h>
 #elif WINDOWS_IO
     #include <windows.h>
+    #include <fileapi.h>
+    #include <synchapi.h>
+    #include <minwinbase.h>
+	#include <handleapi.h>
+    #include <io.h>
+    #include <fcntl.h>
 #endif
 
+#include <ExtendedCpp/Asio/Aistream.h>
 #include <ExtendedCpp/Task.h>
 
 /// @brief 
@@ -31,7 +40,7 @@ namespace ExtendedCpp::Asio
     /// @brief 
     /// @tparam TChar 
     template<typename TChar>
-    class BasicAifstream final
+    class BasicAifstream final : public BasicAistream<TChar>
     {
     public:
         /// @brief 
@@ -39,6 +48,7 @@ namespace ExtendedCpp::Asio
         /// @param mode 
         explicit BasicAifstream(const char* fileName, std::ios_base::openmode mode = std::ios_base::in)
         {
+#if UNIX_IO
             switch (mode)
             {
                 case std::ios_base::in:
@@ -56,6 +66,29 @@ namespace ExtendedCpp::Asio
 
             if (_file == nullptr)
                 throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#elif WINDOWS_IO
+            switch (mode)
+            {
+                case std::ios_base::in:
+                    _file = CreateFileA(fileName, GENERIC_READ, 0, NULL,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
+                    _offset = 0;
+                    break;
+                case std::ios_base::binary:
+                case std::ios_base::in | std::ios_base::binary:
+                    _file = CreateFileA(fileName, GENERIC_READ, 0, NULL,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
+                    _offset = 0;
+                    break;
+                default:
+                    throw std::invalid_argument("Incorrect openmode.");
+            }
+
+            if (_file == nullptr)
+                throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#endif
         }
 
         /// @brief 
@@ -63,6 +96,7 @@ namespace ExtendedCpp::Asio
         /// @param mode 
         explicit BasicAifstream(const std::string_view fileName, std::ios_base::openmode mode = std::ios_base::in)
         {
+#if UNIX_IO
             switch (mode)
             {
                 case std::ios_base::in:
@@ -77,6 +111,29 @@ namespace ExtendedCpp::Asio
 
             if (_file == nullptr)
                 throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#elif WINDOWS_IO
+            switch (mode)
+            {
+                case std::ios_base::in:
+                    _file = CreateFileA(fileName.data(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
+                    _offset = 0;
+                    break;
+                case std::ios_base::binary:
+                case std::ios_base::in | std::ios_base::binary:
+                    _file = CreateFileA(fileName.data(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
+                    _offset = 0;
+                    break;
+                default:
+                    throw std::invalid_argument("Incorrect openmode.");
+            }
+
+            if (_file == nullptr)
+                throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#endif
         }
 
         /// @brief 
@@ -84,6 +141,7 @@ namespace ExtendedCpp::Asio
         /// @param mode 
         explicit BasicAifstream(const std::string& fileName, std::ios_base::openmode mode = std::ios_base::in)
         {
+#if UNIX_IO
             switch (mode)
             {
                 case std::ios_base::in:
@@ -98,6 +156,29 @@ namespace ExtendedCpp::Asio
 
             if (_file == nullptr)
                 throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#elif WINDOWS_IO
+            switch (mode)
+            {
+                case std::ios_base::in:
+                    _file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
+                    _offset = 0;
+                    break;
+                case std::ios_base::binary:
+                case std::ios_base::in | std::ios_base::binary:
+                    _file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
+                    _offset = 0;
+                    break;
+                default:
+                    throw std::invalid_argument("Incorrect openmode.");
+            }
+
+            if (_file == nullptr)
+                throw std::invalid_argument(std::format("Cannot open file {}", fileName));
+#endif
         }
 
         /// @brief 
@@ -105,13 +186,14 @@ namespace ExtendedCpp::Asio
         /// @param mode 
         explicit BasicAifstream(const std::filesystem::path& fileName, std::ios_base::openmode mode = std::ios_base::in)
         {
+#if UNIX_IO
             switch (mode)
             {
                 case std::ios_base::in:
-                    _file = std::fopen(fileName.c_str(), "r");
+                    _file = std::fopen(fileName.string().c_str(), "r");
                     _offset = 0;
                 case std::ios_base::in | std::ios_base::binary:
-                    _file = std::fopen(fileName.c_str(), "rb");
+                    _file = std::fopen(fileName.string().c_str(), "rb");
                     _offset = 0;
                 default:
                     throw std::invalid_argument("Incorrect openmode.");
@@ -119,6 +201,29 @@ namespace ExtendedCpp::Asio
 
             if (_file == nullptr)
                 throw std::invalid_argument(std::format("Cannot open file {}", fileName.string()));
+#elif WINDOWS_IO
+            switch (mode)
+            {
+                case std::ios_base::in:
+                    _file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
+                    _offset = 0;
+                    break;
+                case std::ios_base::binary:
+                case std::ios_base::in | std::ios_base::binary:
+                    _file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, NULL,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+                    _fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
+                    _offset = 0;
+                    break;
+                default:
+                    throw std::invalid_argument("Incorrect openmode.");
+            }
+
+            if (_file == nullptr)
+                throw std::invalid_argument(std::format("Cannot open file {}", fileName.string()));
+#endif
         }
 
         /// @brief 
@@ -131,14 +236,22 @@ namespace ExtendedCpp::Asio
         {
             _file = other._file;
             other._file = nullptr;
+            other._fileDescriptor = -1;
             _offset = other._offset;
         }
         
         /// @brief 
-        ~BasicAifstream() 
+        virtual ~BasicAifstream() 
         {
+#if UNIX_IO
             if (_file != nullptr)
                 std::fclose(_file);
+#elif WINDOWS_IO
+            if (_fileDescriptor != -1)
+                _close(_fileDescriptor);
+            else if (_file != nullptr)
+                CloseHandle(_file);
+#endif
         }
 
         /// @brief 
@@ -153,30 +266,14 @@ namespace ExtendedCpp::Asio
         {
             _file = other._file;
             other._file = nullptr;
+            other._fileDescriptor = -1;
             _offset = other._offset;
             return *this;
         }
 
-        template<typename TTarget>
-        BasicAifstream& operator>>(TTarget& target)
+        Task<void> operator>>(std::vector<TChar>& buffer) override
         {
-            const std::vector<TChar> buffer = [this]()->Task<std::vector<TChar>>
-            {
-                co_return co_await ReadAsync(sizeof(TTarget));
-            }().Result();
-
-            if (buffer.size() != sizeof(TTarget))
-                throw std::runtime_error("BasicAifstream::operator>> error: cannot convert to target type.");
-
-            target = *std::bit_cast<TTarget*>(buffer.data());
-        }
-
-        BasicAifstream& operator>>(std::vector<TChar>& buffer)
-        {
-            buffer = [this]()->Task<std::vector<TChar>>
-            {
-                co_return co_await ReadAllAsync();
-            }().Result();
+            buffer = co_await ReadAllAsync();
         }
 
         /// @brief 
@@ -214,6 +311,25 @@ namespace ExtendedCpp::Asio
                 return buffer;
             }, count);
 #elif WINDOWS_IO
+            return Task<std::vector<TChar>>::Run([this](const std::size_t count)
+			{
+				std::vector<TChar> buffer(count);
+
+				OVERLAPPED fileReadOverlapped;
+				memset(&fileReadOverlapped, 0, sizeof(OVERLAPPED));
+                fileReadOverlapped.Offset = _offset;
+
+				BOOL readFileResult = ReadFileEx(_file, buffer.data(), static_cast<DWORD>(count * sizeof(TChar)), &fileReadOverlapped, NULL);
+				if (readFileResult == FALSE)
+					throw std::runtime_error(std::string("Error at ReadFileEx()."));
+
+				DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
+				if (waitResult != WAIT_OBJECT_0)
+					throw std::runtime_error(std::string("Error at WaitForSingleObjectEx()."));
+
+                _offset += static_cast<off_t>(count * sizeof(TChar));
+				return buffer;
+			}, count);
 #endif
         }
 
@@ -225,8 +341,31 @@ namespace ExtendedCpp::Asio
             struct stat fileStat;
             fstat(fileno(_file), &fileStat);
             const off_t size = fileStat.st_size;
-            return ReadAsync(size - _offset);
+            return ReadAsync(_offset);
 #elif WINDOWS_IO
+            return Task<std::vector<TChar>>::Run([this]
+			{
+				LARGE_INTEGER fileSize;
+				GetFileSizeEx(_file, &fileSize);
+				DWORD truncatedSize = fileSize.LowPart * sizeof(TChar);
+
+				std::vector<TChar> buffer(truncatedSize);
+
+				OVERLAPPED fileReadOverlapped;
+				memset(&fileReadOverlapped, 0, sizeof(OVERLAPPED));
+                fileReadOverlapped.Offset = _offset;
+
+				BOOL readFileResult = ReadFileEx(_file, buffer.data(), truncatedSize, &fileReadOverlapped, NULL);
+				if (readFileResult == FALSE)
+					throw std::runtime_error(std::string("Error at ReadFileEx()."));
+
+				DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
+				if (waitResult != WAIT_OBJECT_0)
+					throw std::runtime_error(std::string("Error at WaitForSingleObjectEx()."));
+
+                _offset += truncatedSize * sizeof(TChar);
+				return buffer;
+			});
 #endif
         }
 
@@ -237,8 +376,14 @@ namespace ExtendedCpp::Asio
         }
 
     private:
-        FILE* _file;
-        off_t _offset;
+#if UNIX_IO
+        FILE* _file = nullptr;
+#elif WINDOWS_IO
+        HANDLE _file = nullptr;
+        int _fileDescriptor = -1;
+#endif
+
+        off_t _offset = 0;
     };
 
     typedef BasicAifstream<char> Aifstream;
