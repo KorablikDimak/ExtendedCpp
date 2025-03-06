@@ -86,17 +86,39 @@ TEST(AsioTests, AfstramTest)
 	ASSERT_EQ(writeResult, 14);
 }
 
-TEST(AsioTests, StreamOpeatorTest)
+TEST(AsioTests, StreamOpeatorTest1)
 {
 	double data = 6.89;
 	double result = 0;
 
 	auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
 	{
-		ExtendedCpp::Asio::Afstream afstream("StreamOpeatorTest.txt");
-		co_await(dynamic_cast<ExtendedCpp::Asio::Aostream&>(afstream) << data);
+		ExtendedCpp::Asio::Afstream afstream("StreamOpeatorTest1.txt");
+		co_await (afstream << data);
 		afstream.ResetOffest();
-		co_await(dynamic_cast<ExtendedCpp::Asio::Aistream&>(afstream) >> result);
+		co_await (afstream >> result);
+	}(data, result);
+
+	task.Wait();
+	ASSERT_EQ(data, result);
+}
+
+TEST(AsioTests, StreamOpeatorTest2)
+{
+	double data = 0.8134;
+	double result = 0;
+
+	auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
+	{
+		ExtendedCpp::Asio::Afstream afstreamOut("StreamOpeatorTest2.out.txt");
+		co_await (afstreamOut << data);
+		afstreamOut.ResetOffest();
+
+		ExtendedCpp::Asio::Afstream afstreamIn("StreamOpeatorTest2.in.txt");
+		co_await (afstreamIn << afstreamOut);
+		afstreamIn.ResetOffest();
+
+		co_await (afstreamIn >> result);
 	}(data, result);
 
 	task.Wait();

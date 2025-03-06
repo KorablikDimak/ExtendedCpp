@@ -8,14 +8,10 @@
 #include <ios>
 #include <string>
 #include <cstring>
+#include <mutex>
 
-#if __APPLE__
-	#define UNIX_IO 1
-#elif __linux__
-	#define UNIX_IO 1
-#elif _WIN32
-	#define WINDOWS_IO 1
-#endif
+#include <ExtendedCpp/Asio/Astream.h>
+#include <ExtendedCpp/Task.h>
 
 #if UNIX_IO
 	#include <cstdio>
@@ -31,9 +27,6 @@
 	#include <fcntl.h>
 	#include <sys/types.h>
 #endif
-
-#include <ExtendedCpp/Asio/Astream.h>
-#include <ExtendedCpp/Task.h>
 
 /// @brief 
 namespace ExtendedCpp::Asio
@@ -336,6 +329,7 @@ namespace ExtendedCpp::Asio
 		/// @param other 
 		BasicAfstream(BasicAfstream&& other) noexcept
 		{
+			std::lock_guard lock(_mutex);
 			_file = other._file;
 			other._file = nullptr;
 			_offset = other._offset;
@@ -346,12 +340,45 @@ namespace ExtendedCpp::Asio
 		{
 #if UNIX_IO
 			if (_file != nullptr)
+			{
 				std::fclose(_file);
+				_file = nullptr;
+			}
 #elif WINDOWS_IO
 			if (_fileDescriptor != -1)
+			{
 				_close(_fileDescriptor);
+				_fileDescriptor = -1;
+			}
 			else if (_file != nullptr)
+			{
 				CloseHandle(_file);
+				_file = nullptr;
+			}
+#endif
+		}
+
+		/// @brief 
+		void Close()
+		{
+			std::lock_guard lock(_mutex);
+#if UNIX_IO
+			if (_file != nullptr)
+			{
+				std::fclose(_file);
+				_file = nullptr;
+			}
+#elif WINDOWS_IO
+			if (_fileDescriptor != -1)
+			{
+				_close(_fileDescriptor);
+				_fileDescriptor = -1;
+			}
+			else if (_file != nullptr)
+			{
+				CloseHandle(_file);
+				_file = nullptr;
+			}
 #endif
 		}
 
@@ -365,6 +392,7 @@ namespace ExtendedCpp::Asio
 		/// @return 
 		BasicAfstream& operator=(BasicAfstream&& other) noexcept
 		{
+			std::lock_guard lock(_mutex);
 			_file = other._file;
 			other._file = nullptr;
 			_offset = other._offset;
@@ -389,6 +417,7 @@ namespace ExtendedCpp::Asio
 #if UNIX_IO
 			return Task<std::vector<TChar>>::Run([this](std::size_t count)
 			{
+				std::lock_guard lock(_mutex);
 				std::vector<TChar> buffer(count);
 
 				aiocb controlBlock;
@@ -418,6 +447,7 @@ namespace ExtendedCpp::Asio
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this](const std::size_t count)
 			{
+				std::lock_guard lock(_mutex);
 				std::vector<TChar> buffer(count);
 
 				OVERLAPPED fileReadOverlapped;
@@ -449,6 +479,7 @@ namespace ExtendedCpp::Asio
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this]
 			{
+				std::lock_guard lock(_mutex);
 				LARGE_INTEGER fileSize;
 				GetFileSizeEx(_file, &fileSize);
 				DWORD truncatedSize = fileSize.LowPart * sizeof(TChar);
@@ -481,6 +512,7 @@ namespace ExtendedCpp::Asio
 #if UNIX_IO
 			return Task<std::size_t>::Run([this](std::vector<TChar> buffer)
 			{
+				std::lock_guard lock(_mutex);
 				aiocb controlBlock;
 				memset(&controlBlock, 0, sizeof(aiocb));
 				controlBlock.aio_fildes = fileno(_file);
@@ -508,6 +540,7 @@ namespace ExtendedCpp::Asio
 #elif WINDOWS_IO
 			return Task<std::size_t>::Run([this](std::vector<TChar> buffer)
 			{
+				std::lock_guard lock(_mutex);
 				OVERLAPPED fileReadOverlapped;
 				memset(&fileReadOverlapped, 0, sizeof(OVERLAPPED));
 				fileReadOverlapped.Offset = _offset;
@@ -528,6 +561,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		void ResetOffest() noexcept
 		{
+			std::lock_guard lock(_mutex);
 			_offset = 0;
 		}
 
@@ -540,6 +574,7 @@ namespace ExtendedCpp::Asio
 #endif
 
 		off_t _offset = 0;
+		mutable std::mutex _mutex;
 	};
 
 	typedef BasicAfstream<char> Afstream;
