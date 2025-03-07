@@ -371,7 +371,7 @@ namespace ExtendedCpp::Asio
 			struct stat fileStat;
 			fstat(fileno(_file), &fileStat);
 			const off_t size = fileStat.st_size;
-			return ReadAsync(_offset);
+			return ReadAsync(size - _offset);
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this]
 			{
