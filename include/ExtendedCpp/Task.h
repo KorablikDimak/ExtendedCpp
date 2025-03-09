@@ -8,8 +8,17 @@
 #include <concepts>
 #include <type_traits>
 #include <mutex>
-#include <thread>
 #include <chrono>
+
+#if __GNUG__ && !__llvm__ || __MINGW32__
+	#define GNU_COMPILER 1
+#endif
+
+#if GNU_COMPILER
+	#include <thread>
+#else
+	#include <future>
+#endif
 
 /// @brief 
 namespace ExtendedCpp
@@ -96,10 +105,16 @@ namespace ExtendedCpp
 			requires std::convertible_to<std::invoke_result_t<TOperation, Args...>, TResult>
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args) 
 			{
-				_asyncTask = std::thread([this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#if GNU_COMPILER
+				_asyncTask = std::thread(
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#else
+				_asyncTask = std::async(std::launch::async,
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#endif
 				{
 					TResult temp = operation(args...);
-				
+
 					std::lock_guard lock(_mutex);
 					_result = std::move(temp);
 					if (_handle)
@@ -133,13 +148,21 @@ namespace ExtendedCpp
 				return std::move(_result.value());
 			}
 
+#if GNU_COMPILER
+			/// @brief 
 			~InitialAwaiter()
 			{
 				_asyncTask.detach();
 			}
+#endif
 
 		private:
+#if GNU_COMPILER
 			std::thread _asyncTask;
+#else
+			std::future<void> _asyncTask;
+#endif
+
 			mutable std::mutex _mutex;
 			std::coroutine_handle<> _handle;
 			std::optional<TResult> _result = std::nullopt;
@@ -299,7 +322,13 @@ namespace ExtendedCpp
 			requires std::same_as<std::invoke_result_t<TOperation, Args...>, void>
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args)
 			{
-				_asyncTask = std::thread([this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#if GNU_COMPILER
+				_asyncTask = std::thread(
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#else
+				_asyncTask = std::async(std::launch::async,
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+#endif
 				{
 					operation(args...);
 
@@ -333,13 +362,20 @@ namespace ExtendedCpp
 			/// @return 
 			void await_resume() const noexcept {}
 
+#if GNU_COMPILER
 			~InitialAwaiter()
 			{
 				_asyncTask.detach();
 			}
+#endif
 
 		private:
-			std::thread _asyncTask;
+#if GNU_COMPILER
+		std::thread _asyncTask;
+#else
+		std::future<void> _asyncTask;
+#endif
+
 			mutable std::mutex _mutex;
 			std::coroutine_handle<> _handle;
 			bool _isFinished = false;
