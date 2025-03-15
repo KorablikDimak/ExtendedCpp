@@ -145,7 +145,7 @@ namespace ExtendedCpp::Reflection
         /// @param object 
         /// @return 
         template<typename TObject>
-        void* ReadFieldPtr(TObject* object) const
+        const void* ReadFieldPtr(TObject* object) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
