@@ -59,7 +59,7 @@ namespace ExtendedCpp::Reflection
         /// @param parameters 
         template<typename THelper>
         StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
-            MemberInfo(std::forward<std::string>(methodName)),
+            MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& args)
                 {
@@ -71,7 +71,7 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any(std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(args)));
                 }),
-            _parameters(std::forward<std::vector<std::type_index>>(parameters)) {}
+            _parameters(std::move(parameters)) {}
 
         /// @brief 
         ~StaticMethodInfo() override = default;
@@ -121,7 +121,7 @@ namespace ExtendedCpp::Reflection
     std::shared_ptr<MemberInfo> CreateStaticMethodInfo(std::string&& name,
                                                        TReturnType(*methodPtr)(TArgs...)) noexcept
     {
-        return std::make_shared<StaticMethodInfo>(std::forward<std::string>(name),
+        return std::make_shared<StaticMethodInfo>(std::move(name),
             StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>());
     }

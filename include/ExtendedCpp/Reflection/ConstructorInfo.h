@@ -162,7 +162,7 @@ namespace ExtendedCpp::Reflection
         /// @param parameters 
         template<typename THelper>
         ConstructorInfo(std::string&& constructorName, THelper&& constructorHelper, std::vector<std::type_index>&& parameters) noexcept :
-            MemberInfo(std::forward<std::string>(constructorName)),
+            MemberInfo(std::move(constructorName)),
             _constructorHelper(std::forward<THelper>(constructorHelper)),
             _constructor([](const std::any& helper, std::any args)
                 { return std::any(std::any_cast<const THelper&>(helper).Create(args)); }),
@@ -176,7 +176,7 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).CreateFromAnyPtr(args)); }),
             _fromAnyPtrNew([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
                 { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromAnyPtr(args)); }),
-            _parameters(std::forward<std::vector<std::type_index>>(parameters)) {}
+            _parameters(std::move(parameters)) {}
 
         /// @brief 
         ~ConstructorInfo() override = default;

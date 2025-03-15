@@ -109,7 +109,7 @@ namespace ExtendedCpp::Reflection
         template<typename THelper, typename TConstHelper>
         MethodInfo(std::string&& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
                    std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
-            MemberInfo(std::forward<std::string>(methodName)),
+            MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
             _method([](const std::any& helper, std::any&& object, std::any&& args)
@@ -132,7 +132,7 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args)));
                 }),
-            _parameters(std::forward<std::vector<std::type_index>>(parameters)),
+            _parameters(std::move(parameters)),
             _methodCvQualifier(methodCvQualifier) {}
 
         /// @brief 
@@ -238,7 +238,7 @@ namespace ExtendedCpp::Reflection
     std::shared_ptr<MemberInfo> CreateMethodInfo(std::string&& name,
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
-        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
+        return std::make_shared<MethodInfo>(std::move(name),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyConst);
@@ -255,7 +255,7 @@ namespace ExtendedCpp::Reflection
     std::shared_ptr<MemberInfo> CreateMethodInfo(std::string&& name,
                                                  TReturnType(TObject::*methodPtr)(TArgs...)) noexcept
     {
-        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
+        return std::make_shared<MethodInfo>(std::move(name),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::OnlyNoConst);
@@ -275,7 +275,7 @@ namespace ExtendedCpp::Reflection
                                                  TReturnType(TObject::*methodPtr)(TArgs...),
                                                  TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
     {
-        return std::make_shared<MethodInfo>(std::forward<std::string>(name),
+        return std::make_shared<MethodInfo>(std::move(name),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
             MethodInfo::ConstHelper<TObject, decltype(constMethodPtr), TConstReturnType, TArgs...>(constMethodPtr),
             ToTypeIndexes<TArgs...>(), MethodCVQualifier::ConstNoConst);

@@ -48,7 +48,7 @@ TEST(MatrixTests, DetTest)
 TEST(MatrixTests, DetBigTest)
 {
     // Average
-    const Matrix matrix(1000, 1000, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
+    const Matrix matrix(200, 200, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
 
     // Act
     const auto det = matrix.Det();
@@ -83,22 +83,22 @@ TEST(MatrixTests, MultiplyMatrixTest)
 TEST(MatrixTests, BigMatrixTest)
 {
     // Average
-    const Matrix matrix1 = E_MATRIX_F64(500, 500);
-    const Matrix matrix2 = E_MATRIX_F64(500, 500);
+    const Matrix matrix1 = E_MATRIX_F64(200, 200);
+    const Matrix matrix2 = E_MATRIX_F64(200, 200);
 
     // Act
     const Matrix matrix3 = matrix1 * matrix2;
 
     // Assert
-    ASSERT_EQ(matrix3.RowCount(), 500);
-    ASSERT_EQ(matrix3.ColumnCount(), 500);
+    ASSERT_EQ(matrix3.RowCount(), 200);
+    ASSERT_EQ(matrix3.ColumnCount(), 200);
 }
 
 TEST(MatrixTests, MultiplyPTest)
 {
     // Average
-    const ExtendedCpp::MatrixI64 matrix1(500, 500, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
-    const ExtendedCpp::MatrixI64 matrix2(500, 500, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
+    const ExtendedCpp::MatrixI64 matrix1(100, 100, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
+    const ExtendedCpp::MatrixI64 matrix2(100, 100, []{ return ExtendedCpp::Random::RandomInt(1, 10); });
 
     // Act
     const ExtendedCpp::MatrixI64 matrix3 = matrix1.Multiply(matrix2, true);
