@@ -111,7 +111,7 @@ namespace ExtendedCpp::Reflection
 
 #define META(className, ...) \
 using ThisClassType = className; \
-static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
+inline static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
 { \
     return ExtendedCpp::Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__}); \
 } \
