@@ -46,9 +46,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    _method(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    _method(std::any_cast<TArgs>(std::move(args))...);
                 else
-                    return _method(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    return _method(std::any_cast<TArgs>(std::move(args))...);
             }
         };
 
@@ -65,11 +65,11 @@ namespace ExtendedCpp::Reflection
                 {
                     if constexpr (std::same_as<void, typename THelper::ReturnType>)
                     {
-                        std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(args));
+                        std::any_cast<const THelper&>(helper).Invoke(std::move(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(args)));
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
                 }),
             _parameters(std::move(parameters)) {}
 

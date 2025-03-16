@@ -59,9 +59,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    (std::any_cast<TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
                 else
-                    return (std::any_cast<TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    return (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
             }
         };
 
@@ -92,9 +92,9 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
-                    (std::any_cast<const TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
                 else
-                    return (std::any_cast<const TObject*>(std::forward<std::any>(object))->*_method)(std::any_cast<TArgs>(std::forward<std::any>(args))...);
+                    return (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
             }
         };
 
@@ -116,21 +116,21 @@ namespace ExtendedCpp::Reflection
                 {
                     if constexpr (std::same_as<void, typename THelper::ReturnType>)
                     {
-                        std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args));
+                        std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args)));
+                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _constMethod([](const std::any& helper, std::any&& object, std::any&& args)
                 {
                     if constexpr (std::same_as<void, typename TConstHelper::ReturnType>)
                     {
-                        std::any_cast<const TConstHelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args));
+                        std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::forward<std::any>(object), std::forward<std::any>(args)));
+                        return std::any(std::any_cast<const TConstHelper&>(helper).Invoke(std::move(object), std::move(args)));
                 }),
             _parameters(std::move(parameters)),
             _methodCvQualifier(methodCvQualifier) {}

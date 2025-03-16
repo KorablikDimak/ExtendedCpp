@@ -3,7 +3,7 @@
 
 ExtendedCpp::Reflection::MemberInfo::MemberInfo(std::string&& name) noexcept
 {
-    _name = std::forward<std::string>(name);
+    _name = std::move(name);
 }
 
 std::string ExtendedCpp::Reflection::MemberInfo::Name() const noexcept

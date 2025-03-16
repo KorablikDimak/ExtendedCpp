@@ -44,7 +44,7 @@ namespace ExtendedCpp::Reflection
             /// @return 
             TField* GetField(std::any&& object) const
             {
-                return &(std::any_cast<TObject*>(std::forward<std::any>(object))->*_fieldPtr);
+                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
             }
 
             /// @brief 
@@ -52,7 +52,7 @@ namespace ExtendedCpp::Reflection
             /// @return 
             const TField* ReadField(std::any&& object) const
             {
-                return &(std::any_cast<TObject*>(std::forward<std::any>(object))->*_fieldPtr);
+                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
             }
         };
 
@@ -67,13 +67,13 @@ namespace ExtendedCpp::Reflection
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
             _fieldGetter([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::forward<std::any>(object))); }),
+                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
             _fieldReader([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::forward<std::any>(object))); }),
+                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
             _fieldGetterPtr([](const std::any& helper, std::any&& object)
-                { return static_cast<void*>(std::any_cast<const THelper&>(helper).GetField(std::forward<std::any>(object))); }),
+                { return static_cast<void*>(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
             _fieldReaderPtr([](const std::any& helper, std::any&& object)
-                { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::forward<std::any>(object))); }) {}
+                { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }) {}
 
         /// @brief 
         ~FieldInfo() override = default;
