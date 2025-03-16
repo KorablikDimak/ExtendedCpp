@@ -13,8 +13,8 @@ namespace ExtendedCpp::Reflection
     class Assembly final
     {
     private:
-        static std::map<std::type_index, TypeInfo>  _typeList;
-        static std::mutex _listMutex;
+        static std::map<std::type_index, TypeInfo>&  TypeList() noexcept;
+        static std::mutex& ListMutex() noexcept;
 
     public:
         /// @brief 
