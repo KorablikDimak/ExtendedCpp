@@ -1,0 +1,1 @@
+#include <ExtendedCpp/Reflection/CollectionFieldInfo.h>

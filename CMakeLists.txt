@@ -60,7 +60,8 @@ set(Reflection_SOURCE
         src/Reflection/ConstructorInfo.cpp
         src/Reflection/MethodInfo.cpp
         src/Reflection/Reflection.cpp
-        src/Reflection/StaticMethodInfo.cpp)
+        src/Reflection/StaticMethodInfo.cpp
+        src/Reflection/CollectionFieldInfo.cpp)
 
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
