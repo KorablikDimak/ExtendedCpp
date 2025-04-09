@@ -147,3 +147,62 @@ TEST(ReflectionTests, MetaTemplateTest)
     ASSERT_NO_THROW([[maybe_unused]] auto _ =
             std::any_cast<TestTemplate<std::string>>(typeInfo3.GetConstructors()[0]->Create()));
 }
+
+TEST(ReflectionTests, GetCollectionInfoTest)
+{
+    // Average
+    auto typeInfo = TestTemplate<int>::MetaInfo;
+
+    // Act
+    const auto fieldInfo = typeInfo.GetField("data");
+    const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
+
+    // Assert
+    ASSERT_TRUE(fieldInfo);
+    ASSERT_TRUE(fieldInfo->IsCollection());
+    ASSERT_TRUE(collectionFieldInfo);
+}
+
+TEST(ReflectionTests, GetElementTest)
+{
+    // Average
+    auto typeInfo = TestTemplate<int>::MetaInfo;
+    const auto fieldInfo = typeInfo.GetField("data");
+    const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
+
+    // Act
+    TestTemplate<int> object;
+    object.data = { 1, 2, 3, 4 };
+    const int element0 = collectionFieldInfo->GetElementValue<int>(&object, 0);
+    const int element1 = collectionFieldInfo->GetElementValue<int>(&object, 1);
+    const int element2 = collectionFieldInfo->GetElementValue<int>(&object, 2);
+    const int element3 = collectionFieldInfo->GetElementValue<int>(&object, 3);
+
+    // Assert
+    ASSERT_EQ(element0, object.data[0]);
+    ASSERT_EQ(element1, object.data[1]);
+    ASSERT_EQ(element2, object.data[2]);
+    ASSERT_EQ(element3, object.data[3]);
+}
+
+TEST(ReflectionTests, InsertionFieldTest)
+{
+    // Average
+    auto typeInfo = TestTemplate<int>::MetaInfo;
+    const auto fieldInfo = typeInfo.GetField("data");
+    const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
+
+    // Act
+    TestTemplate<int> object;
+    collectionFieldInfo->InsertBack(&object, 1);
+    collectionFieldInfo->InsertBack(&object, 3);
+    collectionFieldInfo->InsertBack(&object, 6);
+    collectionFieldInfo->InsertBack(&object, 9);
+
+    // Assert
+    ASSERT_EQ(object.data.size(), 4);
+    ASSERT_EQ(1, object.data[0]);
+    ASSERT_EQ(3, object.data[1]);
+    ASSERT_EQ(6, object.data[2]);
+    ASSERT_EQ(9, object.data[3]);
+}

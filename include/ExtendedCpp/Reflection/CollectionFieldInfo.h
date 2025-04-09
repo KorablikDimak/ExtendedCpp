@@ -17,14 +17,15 @@ namespace ExtendedCpp::Reflection
 	private:	
 		std::type_index _valueTypeIndex;
 
+		std::any (*_valueGetter)(const std::any& helper, std::any&& object, const std::size_t position);
 		std::any (*_elementGetter)(const std::any& helper, std::any&& object, const std::size_t position);
 		std::any (*_elementReader)(const std::any& helper, std::any&& object, const std::size_t position);
 		void* (*_elementGetterPtr)(const std::any& helper, std::any&& object, const std::size_t position);
 		const void* (*_elementReaderPtr)(const std::any& helper, std::any&& object, const std::size_t position);
 
-		void (*_inserter)(const std::any& helper, std::any&& object, const std::size_t position);
-		void (*_fontInserter)(const std::any& helper, std::any&& object);
-		void (*_backInserter)(const std::any& helper, std::any&& object);
+		void (*_inserter)(const std::any& helper, std::any&& object, std::any&& element, const std::size_t position);
+		void (*_frontInserter)(const std::any& helper, std::any&& object, std::any&& element);
+		void (*_backInserter)(const std::any& helper, std::any&& object, std::any&& element);
 
 		std::size_t (*_sizeGetter)(const std::any& helper, std::any&& object);
 
@@ -70,10 +71,21 @@ namespace ExtendedCpp::Reflection
 			/// @param position 
 			/// @return 
 			[[nodiscard]]
+			value_type Value(std::any&& object, const std::size_t position) const
+			{
+				const TField* field = &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
+				return *(field->begin() + position);
+			}
+
+			/// @brief 
+			/// @param object 
+			/// @param position 
+			/// @return 
+			[[nodiscard]]
 			value_type* Get(std::any&& object, const std::size_t position) const
 			{
-				TField& field = std::any_cast<TObject*>(std::move(object))->*_fieldPtr;
-				return &*(field.begin() + position);
+				TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+				return &*(field->begin() + position);
 			}
 
 			/// @brief 
@@ -83,40 +95,43 @@ namespace ExtendedCpp::Reflection
 			[[nodiscard]]
 			const value_type* Read(std::any&& object, const std::size_t position) const
 			{
-				const TField& field = std::any_cast<const TObject*>(std::move(object))->*_fieldPtr;
-				return &*(field.begin() + position);
+				const TField* field = &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
+				return &*(field->begin() + position);
 			}
 
 			/// @brief 
 			/// @param object 
+			/// @param element 
 			/// @param position 
-			void Insert(std::any&& object, const std::size_t position) const
+			void Insert(std::any&& object, std::any&& element, const std::size_t position) const
 			{
-				TField& field = std::any_cast<TObject*>(std::move(object))->*_fieldPtr;
-				std::copy(field.begin(), field.end(), std::inserter(field, field.begin() + position));
+				TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+				field->insert(field->begin() + position, std::any_cast<value_type>(std::move(element)));
 			}
 
 			/// @brief 
 			/// @param object 
-			void InsertFront(std::any&& object) const
+			/// @param element 
+			void InsertFront(std::any&& object, std::any&& element) const
 			{
-				TField& field = std::any_cast<TObject*>(std::move(object))->*_fieldPtr;
-				std::copy(field.begin(), field.end(), std::front_inserter(field));
+				TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+				field->insert(field->begin(), std::any_cast<value_type>(std::move(element)));
 			}
 
 			/// @brief 
 			/// @param object 
-			void InsertBack(std::any&& object) const
+			/// @param element 
+			void InsertBack(std::any&& object, std::any&& element) const
 			{
-				TField& field = std::any_cast<TObject*>(std::move(object))->*_fieldPtr;
-				std::copy(field.begin(), field.end(), std::back_inserter(field));
+				TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+				field->insert(field->end(), std::any_cast<value_type>(std::move(element)));
 			}
 
 			/// @brief 
 			/// @param object 
 			/// @return 
 			[[nodiscard]]
-			const std::size_t Size(std::any&& object) const
+			std::size_t Size(std::any&& object) const
 			{
 				return (std::any_cast<const TObject*>(std::move(object))->*_fieldPtr).size();
 			}
@@ -130,7 +145,9 @@ namespace ExtendedCpp::Reflection
 		template<typename THelper>
 		CollectionFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
 			FieldInfo(std::move(fieldName), std::move(typeIndex), std::forward<THelper>(fieldHelper)),
-			_valueTypeIndex(typeid(THelper::value_type)),
+			_valueTypeIndex(typeid(typename THelper::value_type)),
+			_valueGetter([](const std::any& helper, std::any&& object, const std::size_t position)
+				{ return std::any(std::any_cast<const THelper&>(helper).Value(std::move(object), position)); }),
 			_elementGetter([](const std::any& helper, std::any&& object, const std::size_t position)
 				{ return std::any(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
 			_elementReader([](const std::any& helper, std::any&& object, const std::size_t position)
@@ -139,20 +156,208 @@ namespace ExtendedCpp::Reflection
 				{ return static_cast<void*>(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
 			_elementReaderPtr([](const std::any& helper, std::any&& object, const std::size_t position)
 				{ return static_cast<const void*>(std::any_cast<const THelper&>(helper).Read(std::move(object), position)); }),
-			_inserter([](const std::any& helper, std::any&& object, const std::size_t position)
-				{ std::any_cast<const THelper&>(helper).Insert(std::move(object), position); }),
-			_fontInserter([](const std::any& helper, std::any&& object)
-				{ std::any_cast<const THelper&>(helper).InsertFront(std::move(object)); }),
-			_backInserter([](const std::any& helper, std::any&& object)
-				{ std::any_cast<const THelper&>(helper).InsertBack(std::move(object)); }),
+			_inserter([](const std::any& helper, std::any&& object, std::any&& element, const std::size_t position)
+				{ std::any_cast<const THelper&>(helper).Insert(std::move(object), std::move(element), position); }),
+			_frontInserter([](const std::any& helper, std::any&& object, std::any&& element)
+				{ std::any_cast<const THelper&>(helper).InsertFront(std::move(object), std::move(element)); }),
+			_backInserter([](const std::any& helper, std::any&& object, std::any&& element)
+				{ std::any_cast<const THelper&>(helper).InsertBack(std::move(object), std::move(element)); }),
 			_sizeGetter([](const std::any& helper, std::any&& object)
 				{ return std::any_cast<const THelper&>(helper).Size(std::move(object)); }) {}
 
 		/// @brief 
 		~CollectionFieldInfo() override = default;
 
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType, typename TObject>
+		TValueType GetElementValue(const TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return std::any_cast<TValueType>(_valueGetter(_fieldHelper, object, position));
+		}
 
+		/// @brief 
+		/// @tparam TObject 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TObject>
+		std::any GetElementValue(const TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return _valueGetter(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType, typename TObject>
+		TValueType* GetElement(TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return std::any_cast<TValueType*>(_elementGetter(_fieldHelper, object, position));
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TObject>
+		std::any GetElement(TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return _elementGetter(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TObject>
+		void* GetElementPtr(TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return _elementGetterPtr(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType, typename TObject>
+		const TValueType* ReadElement(const TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return std::any_cast<const TValueType*>(_elementReader(_fieldHelper, object, position));
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TObject>
+		std::any ReadElement(const TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return _elementReader(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TObject>
+		const void* ReadElementPtr(const TObject* object, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			return _elementReaderPtr(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		/// @param position 
+		template<typename TObject, typename TElement>
+		void Insert(TObject* object, TElement&& element, const std::size_t position) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			_inserter(_fieldHelper, object, std::forward<TElement>(element), position);
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		template<typename TObject, typename TElement>
+		void InsertFront(TObject* object, TElement&& element) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			_frontInserter(_fieldHelper, object, std::forward<TElement>(element));
+		}
+
+		/// @brief 
+		/// @tparam TObject 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		template<typename TObject, typename TElement>
+		void InsertBack(TObject* object, TElement&& element) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			_backInserter(_fieldHelper, object, std::forward<TElement>(element));
+		}
+
+		/// @brief
+		/// @tparam TObject 
+		/// @param object 
+		/// @return 
+		template<typename TObject>
+		std::size_t Size(const TObject* object) const
+		{
+			if (!object)
+				throw std::invalid_argument("Object is null");
+			_sizeGetter(_fieldHelper, object);
+		}
+
+		/// @brief 
+		/// @return 
+		[[nodiscard]]
+		std::type_index ValueTypeIndex() const noexcept;
+
+		/// @brief 
+		/// @return 
+		[[nodiscard]]
+		bool IsCollection() const noexcept override;
 	};
+
+	/// @brief 
+	/// @tparam TObject 
+	/// @tparam TField 
+	/// @param name 
+	/// @param fieldPtr 
+	/// @return 
+	template<typename TObject, typename TField>
+	std::shared_ptr<MemberInfo> CreateCollectionFieldInfo(std::string&& name, TField TObject::*fieldPtr) noexcept
+	{
+		return std::make_shared<CollectionFieldInfo>(std::move(name), typeid(TField), CollectionFieldInfo::Helper(fieldPtr));
+	}
 }
+
+#define FIELD(name) \
+[]() \
+{ \
+	if constexpr (ExtendedCpp::Reflection::Concepts::Insertable<decltype(name)>) \
+		return ExtendedCpp::Reflection::CreateCollectionFieldInfo(#name, &ThisClassType::name); \
+	else \
+		return ExtendedCpp::Reflection::CreateFieldInfo(#name, &ThisClassType::name); \
+}()
 
 #endif

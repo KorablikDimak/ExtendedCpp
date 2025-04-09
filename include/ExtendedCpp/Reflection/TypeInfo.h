@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <ExtendedCpp/Reflection/FieldInfo.h>
+#include <ExtendedCpp/Reflection/CollectionFieldInfo.h>
 #include <ExtendedCpp/Reflection/MethodInfo.h>
 #include <ExtendedCpp/Reflection/ConstructorInfo.h>
 #include <ExtendedCpp/Reflection/StaticMethodInfo.h>

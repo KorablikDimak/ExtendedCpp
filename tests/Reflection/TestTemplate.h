@@ -7,6 +7,7 @@ template<typename T>
 struct TestTemplate
 {
     T field;
+    std::vector<T> data;
 
     TestTemplate() noexcept = default;
 
@@ -25,6 +26,7 @@ public:
     META(TestTemplate,
          CONSTRUCTOR(),
          FIELD(field),
+         FIELD(data),
          METHOD(GetT),
          METHOD(SetT, T))
 };

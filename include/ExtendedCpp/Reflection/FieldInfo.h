@@ -176,6 +176,11 @@ namespace ExtendedCpp::Reflection
 		/// @return 
 		[[nodiscard]]
 		Reflection::MemberType MemberType() const noexcept override;
+
+		/// @brief 
+		/// @return 
+		[[nodiscard]]
+		virtual bool IsCollection() const noexcept;
 	};
 
 	/// @brief 
@@ -190,8 +195,5 @@ namespace ExtendedCpp::Reflection
 		return std::make_shared<FieldInfo>(std::move(name), typeid(TField), FieldInfo::Helper(fieldPtr));
 	}
 }
-
-#define FIELD(name) \
-ExtendedCpp::Reflection::CreateFieldInfo(#name, &ThisClassType::name)
 
 #endif
