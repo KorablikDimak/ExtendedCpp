@@ -90,7 +90,7 @@ namespace ExtendedCpp::Reflection
 		{
 			if (!object)
 				throw std::invalid_argument("Object is null");
-			return *std::any_cast<TField*>(_fieldReader(_fieldHelper, object));
+			return *std::any_cast<const TField*>(_fieldReader(_fieldHelper, object));
 		}
 
 		/// @brief 
@@ -140,7 +140,7 @@ namespace ExtendedCpp::Reflection
 		{
 			if (!object)
 				throw std::invalid_argument("Object is null");
-			return std::any_cast<TField*>(_fieldReader(_fieldHelper, object));
+			return std::any_cast<const TField*>(_fieldReader(_fieldHelper, object));
 		}
 
 		/// @brief 
