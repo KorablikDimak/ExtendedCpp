@@ -39,6 +39,7 @@ namespace ExtendedCpp::Reflection
 
             /// @brief 
             /// @return 
+            [[nodiscard]]
             TField* GetField() const noexcept
             {
                 return _fieldPtr;
@@ -46,6 +47,7 @@ namespace ExtendedCpp::Reflection
 
             /// @brief 
             /// @return 
+            [[nodiscard]]
             const TField* ReadField() const noexcept
             {
                 return _fieldPtr;
@@ -70,6 +72,15 @@ namespace ExtendedCpp::Reflection
                 { return static_cast<void*>(std::any_cast<const THelper&>(helper).GetField()); }),
             _fieldReaderPtr([](const std::any& helper)
                 { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField()); }) {}
+
+        /// @brief 
+        /// @tparam TField 
+        /// @return 
+        template<typename TField>
+        TField GetValue() const
+        {
+            return *std::any_cast<TField*>(_fieldGetter(_fieldHelper));
+        }
 
         /// @brief 
         /// @tparam TField 

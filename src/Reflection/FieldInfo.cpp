@@ -9,3 +9,8 @@ ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::FieldInfo::MemberTy
 {
     return MemberType::Field;
 }
+
+bool ExtendedCpp::Reflection::FieldInfo::IsCollection() const noexcept
+{
+    return false;
+}

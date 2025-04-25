@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(ExtendedCpp
-        VERSION 2.2.3
+        VERSION 2.2.4
         DESCRIPTION "Library which extends C++"
         LANGUAGES CXX)
 
@@ -60,7 +60,8 @@ set(Reflection_SOURCE
         src/Reflection/ConstructorInfo.cpp
         src/Reflection/MethodInfo.cpp
         src/Reflection/Reflection.cpp
-        src/Reflection/StaticMethodInfo.cpp)
+        src/Reflection/StaticMethodInfo.cpp
+        src/Reflection/CollectionFieldInfo.cpp)
 
 set(InfoLog_SOURCE
         src/InfoLog/Configuration.cpp
