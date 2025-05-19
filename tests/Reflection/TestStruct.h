@@ -1,6 +1,8 @@
 #ifndef TestStruct_H
 #define TestStruct_H
 
+#include <string>
+
 #include <ExtendedCpp/Reflection.h>
 
 struct TestStruct

@@ -17,7 +17,7 @@ namespace ExtendedCpp::Reflection
 	private:	
 		std::type_index _valueTypeIndex;
 
-		std::any (*_valueGetter)(const std::any& helper, std::any&& object, const std::size_t position);
+		std::any (*_elementValueGetter)(const std::any& helper, std::any&& object, const std::size_t position);
 		std::any (*_elementGetter)(const std::any& helper, std::any&& object, const std::size_t position);
 		std::any (*_elementReader)(const std::any& helper, std::any&& object, const std::size_t position);
 		void* (*_elementGetterPtr)(const std::any& helper, std::any&& object, const std::size_t position);
@@ -47,6 +47,15 @@ namespace ExtendedCpp::Reflection
 			/// @param fieldPtr 
 			explicit Helper(TField TObject::* fieldPtr) noexcept :
 				_fieldPtr(fieldPtr) {}
+
+			/// @brief 
+			/// @param object 
+			/// @return 
+			[[nodiscard]]
+			TField GetValue(std::any&& object) const
+			{
+				return std::any_cast<const TObject*>(std::move(object))->*_fieldPtr;
+			}
 
 			/// @brief 
 			/// @param object 
@@ -146,7 +155,7 @@ namespace ExtendedCpp::Reflection
 		CollectionFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
 			FieldInfo(std::move(fieldName), std::move(typeIndex), std::forward<THelper>(fieldHelper)),
 			_valueTypeIndex(typeid(typename THelper::value_type)),
-			_valueGetter([](const std::any& helper, std::any&& object, const std::size_t position)
+			_elementValueGetter([](const std::any& helper, std::any&& object, const std::size_t position)
 				{ return std::any(std::any_cast<const THelper&>(helper).Value(std::move(object), position)); }),
 			_elementGetter([](const std::any& helper, std::any&& object, const std::size_t position)
 				{ return std::any(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
@@ -169,6 +178,23 @@ namespace ExtendedCpp::Reflection
 		~CollectionFieldInfo() override = default;
 
 		/// @brief 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType>
+		TValueType GetElementValue(std::any object, const std::size_t position) const
+		{
+			return std::any_cast<TValueType>(_elementValueGetter(_fieldHelper, std::move(object), position));
+		}
+
+		/// @brief 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		std::any GetElementValue(std::any object, const std::size_t position) const;
+
+		/// @brief 
 		/// @tparam TObject 
 		/// @tparam TValueType 
 		/// @param object 
@@ -179,7 +205,7 @@ namespace ExtendedCpp::Reflection
 		{
 			if (!object)
 				throw std::invalid_argument("Object is null");
-			return std::any_cast<TValueType>(_valueGetter(_fieldHelper, object, position));
+			return std::any_cast<TValueType>(_elementValueGetter(_fieldHelper, object, position));
 		}
 
 		/// @brief 
@@ -192,8 +218,25 @@ namespace ExtendedCpp::Reflection
 		{
 			if (!object)
 				throw std::invalid_argument("Object is null");
-			return _valueGetter(_fieldHelper, object, position);
+			return _elementValueGetter(_fieldHelper, object, position);
 		}
+
+		/// @brief 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType>
+		TValueType* GetElement(std::any object, const std::size_t position) const
+		{
+			return std::any_cast<TValueType*>(_elementGetter(_fieldHelper, std::move(object), position));
+		}
+
+		/// @brief 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		std::any GetElement(std::any object, const std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -223,6 +266,12 @@ namespace ExtendedCpp::Reflection
 		}
 
 		/// @brief 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		void* GetElementPtr(std::any object, const std::size_t position) const;
+
+		/// @brief 
 		/// @tparam TObject 
 		/// @param object 
 		/// @param position 
@@ -234,6 +283,23 @@ namespace ExtendedCpp::Reflection
 				throw std::invalid_argument("Object is null");
 			return _elementGetterPtr(_fieldHelper, object, position);
 		}
+
+		/// @brief 
+		/// @tparam TValueType 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		template<typename TValueType>
+		const TValueType* ReadElement(std::any object, const std::size_t position) const
+		{
+			return std::any_cast<const TValueType*>(_elementReader(_fieldHelper, std::move(object), position));
+		}
+
+		/// @brief 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		std::any ReadElement(std::any object, const std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -263,6 +329,12 @@ namespace ExtendedCpp::Reflection
 		}
 
 		/// @brief 
+		/// @param object 
+		/// @param position 
+		/// @return 
+		const void* ReadElementPtr(std::any object, const std::size_t position) const;
+
+		/// @brief 
 		/// @tparam TObject 
 		/// @param object 
 		/// @param position 
@@ -273,6 +345,17 @@ namespace ExtendedCpp::Reflection
 			if (!object)
 				throw std::invalid_argument("Object is null");
 			return _elementReaderPtr(_fieldHelper, object, position);
+		}
+
+		/// @brief 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		/// @param position 
+		template<typename TElement>
+		void Insert(std::any object, TElement&& element, const std::size_t position) const
+		{
+			_inserter(_fieldHelper, std::move(object), std::forward<TElement>(element), position);
 		}
 
 		/// @brief 
@@ -290,6 +373,16 @@ namespace ExtendedCpp::Reflection
 		}
 
 		/// @brief 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		template<typename TElement>
+		void InsertFront(std::any object, TElement&& element) const
+		{
+			_frontInserter(_fieldHelper, std::move(object), std::forward<TElement>(element));
+		}
+
+		/// @brief 
 		/// @tparam TObject 
 		/// @tparam TElement 
 		/// @param object 
@@ -300,6 +393,16 @@ namespace ExtendedCpp::Reflection
 			if (!object)
 				throw std::invalid_argument("Object is null");
 			_frontInserter(_fieldHelper, object, std::forward<TElement>(element));
+		}
+
+		/// @brief 
+		/// @tparam TElement 
+		/// @param object 
+		/// @param element 
+		template<typename TElement>
+		void InsertBack(std::any object, TElement&& element) const
+		{
+			_backInserter(_fieldHelper, std::move(object), std::forward<TElement>(element));
 		}
 
 		/// @brief 
@@ -314,6 +417,11 @@ namespace ExtendedCpp::Reflection
 				throw std::invalid_argument("Object is null");
 			_backInserter(_fieldHelper, object, std::forward<TElement>(element));
 		}
+
+		/// @brief 
+		/// @param object 
+		/// @return 
+		std::size_t Size(std::any object) const;
 
 		/// @brief
 		/// @tparam TObject 
