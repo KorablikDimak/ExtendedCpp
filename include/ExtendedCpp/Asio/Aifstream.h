@@ -14,7 +14,6 @@
 #include <ExtendedCpp/Task.h>
 
 #if UNIX_IO
-	#include <cstdio>
 	#include <aio.h>
 	#include <sys/stat.h>
 #elif WINDOWS_IO
@@ -101,9 +100,6 @@ namespace ExtendedCpp::Asio
 				default:
 					throw std::invalid_argument("Incorrect openmode.");
 			}
-
-			if (_file == nullptr)
-				throw std::invalid_argument(std::format("Cannot open file {}", fileName));
 #elif WINDOWS_IO
 			switch (mode)
 			{
@@ -146,9 +142,6 @@ namespace ExtendedCpp::Asio
 				default:
 					throw std::invalid_argument("Incorrect openmode.");
 			}
-
-			if (_file == nullptr)
-				throw std::invalid_argument(std::format("Cannot open file {}", fileName));
 #elif WINDOWS_IO
 			switch (mode)
 			{
@@ -191,9 +184,6 @@ namespace ExtendedCpp::Asio
 				default:
 					throw std::invalid_argument("Incorrect openmode.");
 			}
-
-			if (_file == nullptr)
-				throw std::invalid_argument(std::format("Cannot open file {}", fileName.string()));
 #elif WINDOWS_IO
 			switch (mode)
 			{
@@ -235,7 +225,7 @@ namespace ExtendedCpp::Asio
 		}
 		
 		/// @brief 
-		virtual ~BasicAifstream() 
+		~BasicAifstream() override
 		{
 #if UNIX_IO
 			if (_file != nullptr)
@@ -310,12 +300,12 @@ namespace ExtendedCpp::Asio
 		Task<std::vector<TChar>> ReadAsync(std::size_t count)
 		{
 #ifdef UNIX_IO
-			return Task<std::vector<TChar>>::Run([this](std::size_t count)
+			return Task<std::vector<TChar>>::Run([this, count]
 			{
 				std::lock_guard lock(_mutex);
 				std::vector<TChar> buffer(count);
 
-				aiocb controlBlock;
+				aiocb controlBlock{};
 				controlBlock.aio_fildes = fileno(_file);
 				controlBlock.aio_offset = _offset;
 				controlBlock.aio_buf = buffer.data();
@@ -338,7 +328,7 @@ namespace ExtendedCpp::Asio
 				buffer.resize(bytesRead / sizeof(TChar));
 				_offset += bytesRead;
 				return buffer;
-			}, count);
+			});
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this](const std::size_t count)
 			{
@@ -368,7 +358,7 @@ namespace ExtendedCpp::Asio
 		Task<std::vector<TChar>> ReadAllAsync()
 		{
 #ifdef UNIX_IO
-			struct stat fileStat;
+			struct stat fileStat{};
 			fstat(fileno(_file), &fileStat);
 			const off_t size = fileStat.st_size;
 			return ReadAsync(size - _offset);

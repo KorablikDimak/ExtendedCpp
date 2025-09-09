@@ -14,7 +14,6 @@
 #include <ExtendedCpp/Task.h>
 
 #if UNIX_IO
-	#include <cstdio>
 	#include <aio.h>
 	#include <sys/stat.h>
 #elif WINDOWS_IO
@@ -336,7 +335,7 @@ namespace ExtendedCpp::Asio
 		}
 		
 		/// @brief 
-		virtual ~BasicAfstream()
+		~BasicAfstream() override
 		{
 #if UNIX_IO
 			if (_file != nullptr)
@@ -415,12 +414,12 @@ namespace ExtendedCpp::Asio
 		Task<std::vector<TChar>> ReadAsync(const std::size_t count)
 		{
 #if UNIX_IO
-			return Task<std::vector<TChar>>::Run([this](std::size_t count)
+			return Task<std::vector<TChar>>::Run([this, count]
 			{
 				std::lock_guard lock(_mutex);
 				std::vector<TChar> buffer(count);
 
-				aiocb controlBlock;
+				aiocb controlBlock{};
 				controlBlock.aio_fildes = fileno(_file);
 				controlBlock.aio_offset = _offset;
 				controlBlock.aio_buf = buffer.data();
@@ -443,7 +442,7 @@ namespace ExtendedCpp::Asio
 				buffer.resize(bytesRead / sizeof(TChar));
 				_offset += bytesRead;
 				return buffer;
-			}, count);
+			});
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this](const std::size_t count)
 			{
@@ -472,9 +471,9 @@ namespace ExtendedCpp::Asio
 		Task<std::vector<TChar>> ReadAllAsync()
 		{
 #if UNIX_IO
-			struct stat fileStat;
+			struct stat fileStat{};
 			fstat(fileno(_file), &fileStat);
-			off_t size = fileStat.st_size;
+			const off_t size = fileStat.st_size;
 			return ReadAsync(size - _offset);
 #elif WINDOWS_IO
 			return Task<std::vector<TChar>>::Run([this]
@@ -513,7 +512,7 @@ namespace ExtendedCpp::Asio
 			return Task<std::size_t>::Run([this](std::vector<TChar> buffer)
 			{
 				std::lock_guard lock(_mutex);
-				aiocb controlBlock;
+				aiocb controlBlock{};
 				memset(&controlBlock, 0, sizeof(aiocb));
 				controlBlock.aio_fildes = fileno(_file);
 				controlBlock.aio_offset = _offset;
@@ -536,7 +535,7 @@ namespace ExtendedCpp::Asio
 	
 				_offset += bytesWrited;
 				return bytesWrited / sizeof(TChar);
-			}, buffer);
+			}, std::move(buffer));
 #elif WINDOWS_IO
 			return Task<std::size_t>::Run([this](std::vector<TChar> buffer)
 			{
@@ -554,7 +553,7 @@ namespace ExtendedCpp::Asio
 					throw std::runtime_error(std::string("Error at WaitForSingleObjectEx()."));
 
 				return buffer.size();
-			}, buffer);
+			}, std::move(buffer));
 #endif
 		}
 

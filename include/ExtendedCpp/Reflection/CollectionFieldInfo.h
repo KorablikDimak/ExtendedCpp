@@ -11,28 +11,28 @@
 /// @brief 
 namespace ExtendedCpp::Reflection
 {
-	/// @brief 
+	/// @brief
 	class CollectionFieldInfo final : public FieldInfo
 	{
-	private:	
+	private:
 		std::type_index _valueTypeIndex;
 
-		std::any (*_elementValueGetter)(const std::any& helper, std::any&& object, const std::size_t position);
-		std::any (*_elementGetter)(const std::any& helper, std::any&& object, const std::size_t position);
-		std::any (*_elementReader)(const std::any& helper, std::any&& object, const std::size_t position);
-		void* (*_elementGetterPtr)(const std::any& helper, std::any&& object, const std::size_t position);
-		const void* (*_elementReaderPtr)(const std::any& helper, std::any&& object, const std::size_t position);
+		std::any (*_elementValueGetter)(const std::any& helper, std::any&& object, std::size_t position);
+		std::any (*_elementGetter)(const std::any& helper, std::any&& object, std::size_t position);
+		std::any (*_elementReader)(const std::any& helper, std::any&& object, std::size_t position);
+		void* (*_elementGetterPtr)(const std::any& helper, std::any&& object, std::size_t position);
+		const void* (*_elementReaderPtr)(const std::any& helper, std::any&& object, std::size_t position);
 
-		void (*_inserter)(const std::any& helper, std::any&& object, std::any&& element, const std::size_t position);
+		void (*_inserter)(const std::any& helper, std::any&& object, std::any&& element, std::size_t position);
 		void (*_frontInserter)(const std::any& helper, std::any&& object, std::any&& element);
 		void (*_backInserter)(const std::any& helper, std::any&& object, std::any&& element);
 
 		std::size_t (*_sizeGetter)(const std::any& helper, std::any&& object);
 
 	public:
-		/// @brief 
-		/// @tparam TObject 
-		/// @tparam TField 
+		/// @brief
+		/// @tparam TObject
+		/// @tparam TField
 		template<typename TObject, Concepts::Insertable TField>
 		struct Helper final
 		{
@@ -40,10 +40,10 @@ namespace ExtendedCpp::Reflection
 			TField TObject::*_fieldPtr;
 
 		public:
-			/// @brief 
-			using value_type = TField::value_type;
+			/// @brief
+			using value_type = typename TField::value_type;
 
-			/// @brief 
+			/// @brief
 			/// @param fieldPtr 
 			explicit Helper(TField TObject::* fieldPtr) noexcept :
 				_fieldPtr(fieldPtr) {}
@@ -192,7 +192,8 @@ namespace ExtendedCpp::Reflection
 		/// @param object 
 		/// @param position 
 		/// @return 
-		std::any GetElementValue(std::any object, const std::size_t position) const;
+		[[nodiscard]]
+		std::any GetElementValue(std::any object, std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -236,7 +237,8 @@ namespace ExtendedCpp::Reflection
 		/// @param object 
 		/// @param position 
 		/// @return 
-		std::any GetElement(std::any object, const std::size_t position) const;
+		[[nodiscard]]
+		std::any GetElement(std::any object, std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -269,7 +271,8 @@ namespace ExtendedCpp::Reflection
 		/// @param object 
 		/// @param position 
 		/// @return 
-		void* GetElementPtr(std::any object, const std::size_t position) const;
+		[[nodiscard]]
+		void* GetElementPtr(std::any object, std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -299,7 +302,8 @@ namespace ExtendedCpp::Reflection
 		/// @param object 
 		/// @param position 
 		/// @return 
-		std::any ReadElement(std::any object, const std::size_t position) const;
+		[[nodiscard]]
+		std::any ReadElement(std::any object, std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -332,7 +336,8 @@ namespace ExtendedCpp::Reflection
 		/// @param object 
 		/// @param position 
 		/// @return 
-		const void* ReadElementPtr(std::any object, const std::size_t position) const;
+		[[nodiscard]]
+		const void* ReadElementPtr(std::any object, std::size_t position) const;
 
 		/// @brief 
 		/// @tparam TObject 
@@ -421,6 +426,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		std::size_t Size(std::any object) const;
 
 		/// @brief
@@ -432,7 +438,7 @@ namespace ExtendedCpp::Reflection
 		{
 			if (!object)
 				throw std::invalid_argument("Object is null");
-			_sizeGetter(_fieldHelper, object);
+			return _sizeGetter(_fieldHelper, object);
 		}
 
 		/// @brief 

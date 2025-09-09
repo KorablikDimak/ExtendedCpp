@@ -2,7 +2,6 @@
 #define Reflection_StaticMethodInfo_H
 
 #include <any>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -24,7 +23,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TMethod 
         /// @tparam TReturnType 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         template<typename TMethod, typename TReturnType, typename... TArgs>
         struct Helper final
         {
@@ -46,7 +45,10 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
+                {
                     _method(std::any_cast<TArgs>(std::move(args))...);
+                    return;
+                }
                 else
                     return _method(std::any_cast<TArgs>(std::move(args))...);
             }
@@ -78,21 +80,24 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TResult 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename TResult, typename... TArgs>
         TResult Invoke(TArgs&&... args) const
         {
             if constexpr (std::same_as<TResult, void>)
+            {
                 _method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...));
+                return;
+            }
             else
                 return std::any_cast<TResult>(_method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         /// @brief 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename... TArgs>
         std::any Invoke(TArgs&&... args) const
@@ -113,7 +118,7 @@ namespace ExtendedCpp::Reflection
 
     /// @brief 
     /// @tparam TReturnType 
-    /// @tparam ...TArgs 
+    /// @tparam TArgs
     /// @param name 
     /// @param methodPtr 
     /// @return 

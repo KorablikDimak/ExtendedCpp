@@ -118,13 +118,4 @@ inline static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
 } \
 inline static const ExtendedCpp::Reflection::TypeInfo MetaInfo = GetMetaInfo();
 
-#define MEMBER(memberName, ...) \
-[]() \
-{ \
-    if constexpr(std::tuple_size_v<std::tuple<__VA_ARGS__>>) \
-    { \
-\
-    }\
-}()
-
 #endif

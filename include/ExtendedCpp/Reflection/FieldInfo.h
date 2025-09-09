@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
-#include <ExtendedCpp/Reflection/TypeTraits.h>
 
 /// @brief 
 namespace ExtendedCpp::Reflection
@@ -74,7 +73,7 @@ namespace ExtendedCpp::Reflection
 		/// @param typeIndex 
 		/// @param fieldHelper 
 		template<typename THelper>
-		FieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+		FieldInfo(std::string&& fieldName, const std::type_index typeIndex, THelper&& fieldHelper) noexcept :
 			MemberInfo(std::move(fieldName)),
 			_typeIndex(typeIndex),
 			_fieldHelper(std::forward<THelper>(fieldHelper)),
@@ -90,7 +89,7 @@ namespace ExtendedCpp::Reflection
 				{ return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }) {}
 
 		/// @brief 
-		virtual ~FieldInfo() = default;
+		~FieldInfo() override = default;
 
 		/// @brief 
 		/// @tparam TField 
@@ -105,6 +104,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		std::any GetValue(std::any object) const;
 
 		/// @brief 
@@ -145,6 +145,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		std::any GetField(std::any object) const;
 
 		/// @brief 
@@ -175,6 +176,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		void* GetFieldPtr(std::any object) const;
 
 		/// @brief 
@@ -202,6 +204,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		std::any ReadField(std::any object) const;
 
 		/// @brief 
@@ -232,6 +235,7 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @param object 
 		/// @return 
+		[[nodiscard]]
 		const void* ReadFieldPtr(std::any object) const;
 
 		/// @brief 

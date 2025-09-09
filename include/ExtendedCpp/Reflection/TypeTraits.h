@@ -1,17 +1,14 @@
 #ifndef Reflection_TypeTraits_H
 #define Reflection_TypeTraits_H
 
-#include <utility>
-#include <tuple>
 #include <typeindex>
 #include <vector>
-#include <memory>
 
 /// @brief 
 namespace ExtendedCpp::Reflection
 {
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     /// @return 
     template<typename... TParams>
     std::vector<std::type_index> ToTypeIndexes() noexcept

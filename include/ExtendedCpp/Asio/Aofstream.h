@@ -14,7 +14,6 @@
 #include <ExtendedCpp/Task.h>
 
 #if UNIX_IO
-	#include <cstdio>
 	#include <aio.h>
 #elif WINDOWS_IO
 	#include <windows.h>
@@ -335,7 +334,7 @@ namespace ExtendedCpp::Asio
 		}
 		
 		/// @brief 
-		~BasicAofstream() 
+		~BasicAofstream() override
 		{
 #if UNIX_IO
 			if (_file != nullptr)
@@ -412,7 +411,7 @@ namespace ExtendedCpp::Asio
 			return Task<std::size_t>::Run([this](std::vector<TChar> buffer)
 			{
 				std::lock_guard lock(_mutex);
-				aiocb controlBlock;
+				aiocb controlBlock{};
 				memset(&controlBlock, 0, sizeof(aiocb));
 				controlBlock.aio_fildes = fileno(_file);
 				controlBlock.aio_offset = _offset;

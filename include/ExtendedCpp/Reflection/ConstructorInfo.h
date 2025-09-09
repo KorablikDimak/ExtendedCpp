@@ -31,7 +31,7 @@ namespace ExtendedCpp::Reflection
     public:
         /// @brief 
         /// @tparam TClass 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         template<typename TClass, typename... TArgs>
         struct Helper final
         {
@@ -78,7 +78,7 @@ namespace ExtendedCpp::Reflection
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
                     {
-                        return TClass(std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type>(args[Index])...);
+                        return TClass(std::any_cast<std::tuple_element_t<Index, TuppleArgs>>(args[Index])...);
                     }(std::make_index_sequence<Size>());
                 }
             }
@@ -103,7 +103,7 @@ namespace ExtendedCpp::Reflection
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
                     {
-                        return TClass(std::static_pointer_cast<typename std::tuple_element<Index, TuppleArgs>::type::element_type>(args[Index])...);
+                        return TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TuppleArgs>::element_type>(args[Index])...);
                     }(std::make_index_sequence<Size>());
                 }
             }
@@ -124,7 +124,7 @@ namespace ExtendedCpp::Reflection
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
                     {
-                        return new TClass(std::any_cast<typename std::tuple_element<Index, TuppleArgs>::type>(args[Index])...);
+                        return new TClass(std::any_cast<std::tuple_element_t<Index, TuppleArgs>>(args[Index])...);
                     }(std::make_index_sequence<Size>());
                 }
             }
@@ -149,7 +149,7 @@ namespace ExtendedCpp::Reflection
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
                     {
-                        return new TClass(std::static_pointer_cast<typename std::tuple_element<Index, TuppleArgs>::type::element_type>(args[Index])...);
+                        return new TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TuppleArgs>::element_type>(args[Index])...);
                     }(std::make_index_sequence<Size>());
                 }
             }
@@ -183,8 +183,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TTarget 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename TTarget, typename... TArgs>
         TTarget Create(TArgs&&... args) const
@@ -194,8 +194,8 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename... TArgs>
         std::any Create(TArgs&&... args) const
@@ -205,8 +205,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TTarget 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename TTarget, typename... TArgs>
         std::shared_ptr<TTarget> New(TArgs&&... args) const
@@ -216,8 +216,8 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @tparam ...TArgs 
-        /// @param ...args 
+        /// @tparam TArgs
+        /// @param args
         /// @return 
         template<typename... TArgs>
         std::shared_ptr<void> New(TArgs&&... args) const
@@ -238,7 +238,7 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TTarget 
-        /// @param args 
+        /// @param args
         /// @return 
         template<typename TTarget>
         std::shared_ptr<TTarget> NewFromAny(const std::vector<std::any>& args) const

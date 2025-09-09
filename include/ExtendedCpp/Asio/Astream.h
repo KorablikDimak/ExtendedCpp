@@ -14,7 +14,7 @@ namespace ExtendedCpp::Asio
 	{
 	public:
 		/// @brief 
-		virtual ~BasicAstream() = default;
+		~BasicAstream() override = default;
 	};
 
 	/// @brief 

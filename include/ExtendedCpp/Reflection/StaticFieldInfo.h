@@ -6,7 +6,6 @@
 #include <functional>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
-#include <ExtendedCpp/Reflection/TypeTraits.h>
 
 /// @brief 
 namespace ExtendedCpp::Reflection
@@ -60,7 +59,7 @@ namespace ExtendedCpp::Reflection
         /// @param typeIndex 
         /// @param fieldHelper 
         template<typename THelper>
-        StaticFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
+        StaticFieldInfo(std::string&& fieldName, const std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             MemberInfo(std::move(fieldName)),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),

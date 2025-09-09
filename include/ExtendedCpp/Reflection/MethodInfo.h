@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
-#include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/TypeTraits.h>
 
 /// @brief 
@@ -36,7 +35,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TObject 
         /// @tparam TMethod 
         /// @tparam TReturnType 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         template<typename TObject, typename TMethod, typename TReturnType, typename... TArgs>
         struct Helper final
         {
@@ -59,7 +58,10 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
+                {
                     (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    return;
+                }
                 else
                     return (std::any_cast<TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
             }
@@ -69,7 +71,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TObject 
         /// @tparam TMethod 
         /// @tparam TReturnType 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         template<typename TObject, typename TMethod, typename TReturnType, typename... TArgs>
         struct ConstHelper final
         {
@@ -92,7 +94,10 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(std::any&& object, std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
+                {
                     (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
+                    return;
+                }
                 else
                     return (std::any_cast<const TObject*>(std::move(object))->*_method)(std::any_cast<TArgs>(std::move(args))...);
             }
@@ -108,7 +113,7 @@ namespace ExtendedCpp::Reflection
         /// @param methodCvQualifier 
         template<typename THelper, typename TConstHelper>
         MethodInfo(std::string&& methodName, THelper&& methodHelper, TConstHelper&& constMethodHelper,
-                   std::vector<std::type_index>&& parameters, MethodCVQualifier methodCvQualifier) noexcept :
+                   std::vector<std::type_index>&& parameters, const MethodCVQualifier methodCvQualifier) noexcept :
             MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
             _constMethodHelper(std::forward<TConstHelper>(constMethodHelper)),
@@ -141,9 +146,9 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TResult 
         /// @tparam TObject 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         /// @param object 
-        /// @param ...args 
+        /// @param args
         /// @return 
         template<typename TResult, typename TObject, typename... TArgs>
         TResult Invoke(TObject* object, TArgs&&... args) const
@@ -151,7 +156,10 @@ namespace ExtendedCpp::Reflection
             if (!object)
                 throw std::invalid_argument("Object is null");
             if constexpr (std::same_as<TResult, void>)
+            {
                 _method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...));
+                return;
+            }
             else
                 return std::any_cast<TResult>(_method(_methodHelper, object, std::make_tuple(std::forward<TArgs>(args)...)));
         }
@@ -159,9 +167,9 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TResult 
         /// @tparam TObject 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         /// @param object 
-        /// @param ...args 
+        /// @param args
         /// @return 
         template<typename TResult, typename TObject, typename... TArgs>
         TResult Invoke(const TObject* object, TArgs&&... args) const
@@ -171,16 +179,19 @@ namespace ExtendedCpp::Reflection
             if (_methodCvQualifier == MethodCVQualifier::OnlyNoConst)
                 throw std::runtime_error("Object has not const method " + _name);
             if constexpr (std::same_as<TResult, void>)
+            {
                 _constMethod(_constMethodHelper, object, std::make_tuple(std::forward<TArgs>(args)...));
+                return;
+            }
             else
                 return std::any_cast<TResult>(_constMethod(_constMethodHelper, object, std::make_tuple(std::forward<TArgs>(args)...)));
         }
         
         /// @brief 
         /// @tparam TObject 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         /// @param object 
-        /// @param ...args 
+        /// @param args
         /// @return 
         template<typename TObject, typename... TArgs>
         std::any Invoke(TObject* object, TArgs&&... args) const
@@ -192,9 +203,9 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TObject 
-        /// @tparam ...TArgs 
+        /// @tparam TArgs
         /// @param object 
-        /// @param ...args 
+        /// @param args
         /// @return 
         template<typename TObject, typename... TArgs>
         std::any Invoke(const TObject* object, TArgs&&... args) const
@@ -230,7 +241,7 @@ namespace ExtendedCpp::Reflection
     /// @brief 
     /// @tparam TObject 
     /// @tparam TConstReturnType 
-    /// @tparam ...TArgs 
+    /// @tparam TArgs
     /// @param name 
     /// @param constMethodPtr 
     /// @return 
@@ -247,7 +258,7 @@ namespace ExtendedCpp::Reflection
     /// @brief 
     /// @tparam TObject 
     /// @tparam TReturnType 
-    /// @tparam ...TArgs 
+    /// @tparam TArgs
     /// @param name 
     /// @param methodPtr 
     /// @return 
@@ -265,7 +276,7 @@ namespace ExtendedCpp::Reflection
     /// @tparam TObject 
     /// @tparam TReturnType 
     /// @tparam TConstReturnType 
-    /// @tparam ...TArgs 
+    /// @tparam TArgs
     /// @param name 
     /// @param methodPtr 
     /// @param constMethodPtr 

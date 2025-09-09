@@ -30,7 +30,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return 
         [[nodiscard]]
-        virtual Reflection::MemberType MemberType() const noexcept;
+        virtual MemberType MemberType() const noexcept;
     };
 }
 

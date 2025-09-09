@@ -8,7 +8,6 @@
 
 #include <ExtendedCpp/Asio/Aio.h>
 #include <ExtendedCpp/Task.h>
-#include <ExtendedCpp/Asio/Aistream.h>
 
 /// @brief 
 namespace ExtendedCpp::Asio
@@ -20,7 +19,7 @@ namespace ExtendedCpp::Asio
 	{
 	public:
 		/// @brief 
-		virtual ~BasicAostream() = default;
+		~BasicAostream() override = default;
 
 		/// @brief 
 		/// @param  
@@ -41,7 +40,7 @@ namespace ExtendedCpp::Asio
 	/// @param aostream 
 	/// @param target 
 	/// @return 
-	template<typename TAostream, typename TTarget, typename TChar = TAostream::char_type>
+	template<typename TAostream, typename TTarget, typename TChar = typename TAostream::char_type>
 	requires (std::is_base_of_v<BasicAostream<TChar>, TAostream> &&
 			 !std::is_base_of_v<BasicAistream<TChar>, TTarget> &&
 			 !std::is_base_of_v<std::basic_istream<TChar>, TTarget>)
@@ -60,7 +59,7 @@ namespace ExtendedCpp::Asio
 	/// @param aostream 
 	/// @param aistream 
 	/// @return 
-	template<typename TAostream, typename TChar = TAostream::char_type>
+	template<typename TAostream, typename TChar = typename TAostream::char_type>
 	requires std::is_base_of_v<BasicAostream<TChar>, TAostream>
 	Task<void> operator<<(TAostream& aostream, BasicAistream<TChar>& aistream)
 	{
@@ -75,7 +74,7 @@ namespace ExtendedCpp::Asio
 	/// @param aostream 
 	/// @param istream 
 	/// @return 
-	template<typename TAostream, typename TChar = TAostream::char_type>
+	template<typename TAostream, typename TChar = typename TAostream::char_type>
 	requires std::is_base_of_v<BasicAostream<TChar>, TAostream>
 	Task<void> operator<<(TAostream& aostream, std::basic_istream<TChar>& istream)
 	{
@@ -90,7 +89,7 @@ namespace ExtendedCpp::Asio
 	/// @param istream 
 	/// @param aostream 
 	/// @return 
-	template<typename TAostream, typename TChar = TAostream::char_type>
+	template<typename TAostream, typename TChar = typename TAostream::char_type>
 	requires std::is_base_of_v<BasicAostream<TChar>, TAostream>
 	Task<void> operator>>(std::basic_istream<TChar>& istream, TAostream& aostream)
 	{
