@@ -4,6 +4,7 @@
 #include <any>
 #include <utility>
 #include <vector>
+#include <memory>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <ExtendedCpp/Reflection/TypeTraits.h>

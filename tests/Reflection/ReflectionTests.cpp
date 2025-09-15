@@ -12,11 +12,11 @@ TEST(ReflectionTests, MetaFieldTest)
     testStruct.IntField = 0;
     TestStruct::StaticDoubleField = 0;
 
-    auto fieldPtr =
+    const auto fieldPtr =
             std::any_cast<int*>(TestStruct::MetaInfo.GetField("IntField")->GetField(&testStruct));
     *fieldPtr = 5;
 
-    auto staticFieldPtr =
+    const auto staticFieldPtr =
             std::any_cast<double*>(TestStruct::MetaInfo.GetStaticField("StaticDoubleField")->GetField());
     *staticFieldPtr = 8;
 
@@ -32,8 +32,8 @@ TEST(ReflectionTests, MetaMethodTest)
     testStruct.IntField = 7;
 
     // Act
-    auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
-    auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
+    const auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
+    const auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
 
     // Assert
     ASSERT_EQ(result1, 6);
@@ -47,8 +47,8 @@ TEST(ReflectionTests, ConstMetaMethodTest)
     const TestStruct testStruct;
 
     // Act
-    auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
-    auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
+    const auto result1 = std::any_cast<int>(TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke(&testStruct));
+    const auto result2 = TestStruct::MetaInfo.GetMethods("TestMethodInt")[0]->Invoke<int>(&testStruct);
 
     // Assert
     ASSERT_EQ(result1, 0);
@@ -59,10 +59,10 @@ TEST(ReflectionTests, ConstMetaMethodTest)
 TEST(ReflectionTests, MetaStaticMethodTest)
 {
     // Average
-    auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
+    const auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
 
     // Act
-    auto staticMethodInfo = typeInfo.GetStaticMethods();
+    const auto staticMethodInfo = typeInfo.GetStaticMethods();
 
     // Assert
     ASSERT_FALSE(staticMethodInfo.empty());
@@ -84,7 +84,7 @@ TEST(ReflectionTests, MetaConstructorTest)
 
     // Act
     auto createdStruct = std::any_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->Create());
-    auto newStruct = std::static_pointer_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->New());
+    const auto newStruct = std::static_pointer_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->New());
 
     // Assert
     ASSERT_TRUE(newStruct.get() != nullptr);
@@ -93,12 +93,11 @@ TEST(ReflectionTests, MetaConstructorTest)
 TEST(ReflectionTests, GetTypeTest)
 {
     // Average
-    auto typeInfo1 = ExtendedCpp::Reflection::GetType<TestStruct>();
-    TestStruct testStruct;
-    auto typeInfo2 = ExtendedCpp::Reflection::GetType(typeid(testStruct));
+    const auto typeInfo1 = ExtendedCpp::Reflection::GetType<TestStruct>();
+    const auto typeInfo2 = ExtendedCpp::Reflection::GetType(typeid(TestStruct));
 
     // Act
-    auto staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
+    const auto staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
     *staticField1 = 6;
 
     // Assert
@@ -106,7 +105,7 @@ TEST(ReflectionTests, GetTypeTest)
     ASSERT_TRUE(typeInfo2.has_value());
 
     // Act
-    auto staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
+    const auto staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
     *staticField2 = 9;
 
     // Assert
@@ -128,7 +127,7 @@ TEST(ReflectionTests, ConstructorFromAnyTest)
     ASSERT_TRUE(testStruct1.has_value());
     ASSERT_TRUE(testStruct2);
     ASSERT_NO_THROW([[maybe_unused]] auto _ = std::any_cast<TestStruct>(testStruct1));
-    ASSERT_NO_THROW([[maybe_unused]] auto _= std::static_pointer_cast<TestStruct>(testStruct2));
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::static_pointer_cast<TestStruct>(testStruct2));
 }
 
 TEST(ReflectionTests, MetaTemplateTest)
@@ -151,7 +150,7 @@ TEST(ReflectionTests, MetaTemplateTest)
 TEST(ReflectionTests, GetCollectionInfoTest)
 {
     // Average
-    auto typeInfo = TestTemplate<int>::MetaInfo;
+    const auto typeInfo = TestTemplate<int>::MetaInfo;
 
     // Act
     const auto fieldInfo = typeInfo.GetField("data");
@@ -166,7 +165,7 @@ TEST(ReflectionTests, GetCollectionInfoTest)
 TEST(ReflectionTests, GetElementTest)
 {
     // Average
-    auto typeInfo = TestTemplate<int>::MetaInfo;
+    const auto typeInfo = TestTemplate<int>::MetaInfo;
     const auto fieldInfo = typeInfo.GetField("data");
     const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
 
@@ -188,7 +187,7 @@ TEST(ReflectionTests, GetElementTest)
 TEST(ReflectionTests, InsertionFieldTest)
 {
     // Average
-    auto typeInfo = TestTemplate<int>::MetaInfo;
+    const auto typeInfo = TestTemplate<int>::MetaInfo;
     const auto fieldInfo = typeInfo.GetField("data");
     const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
 

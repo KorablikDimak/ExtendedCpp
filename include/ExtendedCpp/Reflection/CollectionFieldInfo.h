@@ -449,7 +449,10 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @return 
 		[[nodiscard]]
-		bool IsCollection() const noexcept override;
+		bool IsCollection() const noexcept override
+		{
+			return true;
+		}
 	};
 
 	/// @brief 

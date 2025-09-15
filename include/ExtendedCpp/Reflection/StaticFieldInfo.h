@@ -4,6 +4,7 @@
 #include <any>
 #include <typeindex>
 #include <functional>
+#include <memory>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 

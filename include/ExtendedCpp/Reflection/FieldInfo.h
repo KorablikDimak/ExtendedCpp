@@ -4,6 +4,7 @@
 #include <any>
 #include <typeindex>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
@@ -263,7 +264,10 @@ namespace ExtendedCpp::Reflection
 		/// @brief 
 		/// @return 
 		[[nodiscard]]
-		virtual bool IsCollection() const noexcept;
+		virtual bool IsCollection() const noexcept
+		{
+			return false;
+		}
 	};
 
 	/// @brief 
