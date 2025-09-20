@@ -5,37 +5,37 @@
 
 TEST(ChannelTests, ChannelCounterTest)
 {
-    auto [sender, reciver] = ExtendedCpp::Channel<int>::Create();
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
     {
         auto sender2(sender);
-        auto reciver2(reciver);
+        auto receiver2(receiver);
     }
 
     [](ExtendedCpp::Channel<int, ExtendedCpp::ChannelType::Sender>){}(std::move(sender));
 
-    ASSERT_TRUE(reciver.Closed());
+    ASSERT_TRUE(receiver.Closed());
 }
 
 TEST(ChannelTests, SendReciveTest)
 {
     std::vector<int> result;
-    auto [sender, reciver] = ExtendedCpp::Channel<int>::Create();
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
-    std::thread senderThread([&sender]()
+    std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
             sender.Send(i);
-    });
+    }, std::move(sender));
 
-    std::thread reciverThread([&result, &reciver]()
+    std::thread receiverThread([&result](auto receiver)
     {
         for (int i = 0; i < 1000; ++i)
-            result.push_back(reciver.Recive());
-    });
+            result.push_back(receiver.Receive());
+    }, std::move(receiver));
 
     senderThread.join();
-    reciverThread.join();
+    receiverThread.join();
 
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
@@ -44,26 +44,26 @@ TEST(ChannelTests, SendReciveTest)
 TEST(ChannelTests, SendReciveOperatorTest)
 {
     std::vector<int> result;
-    auto [sender, reciver] = ExtendedCpp::Channel<int>::Create();
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
-    std::thread senderThread([&sender]()
+    std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
             sender << i;
-    });
+    }, std::move(sender));
 
-    std::thread reciverThread([&result, &reciver]()
+    std::thread receiverThread([&result](auto receiver)
     {
         for (int i = 0; i < 1000; ++i)
         {
-            int recivedValue;
-            reciver >> recivedValue;
-            result.push_back(recivedValue);
+            int receivedValue;
+            receiver >> receivedValue;
+            result.push_back(receivedValue);
         }
-    });
+    }, std::move(receiver));
 
     senderThread.join();
-    reciverThread.join();
+    receiverThread.join();
 
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
@@ -72,35 +72,34 @@ TEST(ChannelTests, SendReciveOperatorTest)
 TEST(ChannelTests, WhiheChannelTest)
 {
     std::vector<int> result;
-    auto [sender, reciver] = ExtendedCpp::Channel<int>::Create();
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
-    std::thread senderThread([](ExtendedCpp::Channel<int, ExtendedCpp::ChannelType::Sender> sender)
+    std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
         {
             sender.Send(i);
             std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
-            
     }, std::move(sender));
 
-    std::thread reciverThread([&result, &reciver]()
+    std::thread receiverThread([&result](auto receiver)
     {
-        while (reciver)
+        while (receiver)
         {
             try
             {
-                result.push_back(reciver.Recive());
+                result.push_back(receiver.Receive());
             }
             catch(const std::domain_error&)
             {
                 break;
             }
         }
-    });
+    }, std::move(receiver));
 
     senderThread.join();
-    reciverThread.join();
+    receiverThread.join();
 
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
@@ -109,30 +108,29 @@ TEST(ChannelTests, WhiheChannelTest)
 TEST(ChannelTests, TryReciveTest)
 {
     std::vector<int> result;
-    auto [sender, reciver] = ExtendedCpp::Channel<int>::Create();
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
-    std::thread senderThread([](ExtendedCpp::Channel<int, ExtendedCpp::ChannelType::Sender> sender)
+    std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
         {
             sender.Send(i);
             std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
-            
     }, std::move(sender));
 
-    std::thread reciverThread([&result, &reciver]()
+    std::thread receiverThread([&result](auto receiver)
     {
-        while (reciver)
+        while (receiver)
         {
-            std::optional<int> recived = reciver.TryRecive();
-            if (recived.has_value())
-                result.push_back(recived.value());
+            std::optional<int> received = receiver.TryReceive();
+            if (received.has_value())
+                result.push_back(received.value());
         }
-    });
+    }, std::move(receiver));
 
     senderThread.join();
-    reciverThread.join();
+    receiverThread.join();
 
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
