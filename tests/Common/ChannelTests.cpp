@@ -5,6 +5,7 @@
 
 TEST(ChannelTests, ChannelCounterTest)
 {
+    // Average
     auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
     {
@@ -12,21 +13,27 @@ TEST(ChannelTests, ChannelCounterTest)
         auto receiver2(receiver);
     }
 
+    // Act
     [](ExtendedCpp::Channel<int, ExtendedCpp::ChannelType::Sender>){}(std::move(sender));
 
+    // Assert
     ASSERT_TRUE(receiver.Closed());
 }
 
 TEST(ChannelTests, SendReciveTest)
 {
+    // Average
     std::vector<int> result;
     auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
+    // Act
     std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
             sender.Send(i);
     }, std::move(sender));
+
+    senderThread.join();
 
     std::thread receiverThread([&result](auto receiver)
     {
@@ -34,23 +41,27 @@ TEST(ChannelTests, SendReciveTest)
             result.push_back(receiver.Receive());
     }, std::move(receiver));
 
-    senderThread.join();
     receiverThread.join();
 
+    // Assert
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
 }
 
 TEST(ChannelTests, SendReciveOperatorTest)
 {
+    // Average
     std::vector<int> result;
     auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
+    // Act
     std::thread senderThread([](auto sender)
     {
         for (int i = 0; i < 1000; ++i)
             sender << i;
     }, std::move(sender));
+
+    senderThread.join();
 
     std::thread receiverThread([&result](auto receiver)
     {
@@ -62,15 +73,16 @@ TEST(ChannelTests, SendReciveOperatorTest)
         }
     }, std::move(receiver));
 
-    senderThread.join();
     receiverThread.join();
 
+    // Assert
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
 }
 
 TEST(ChannelTests, WhiheChannelTest)
 {
+    // Average
     std::vector<int> result;
     auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
@@ -83,6 +95,7 @@ TEST(ChannelTests, WhiheChannelTest)
         }
     }, std::move(sender));
 
+    // Act
     std::thread receiverThread([&result](auto receiver)
     {
         while (receiver)
@@ -101,12 +114,14 @@ TEST(ChannelTests, WhiheChannelTest)
     senderThread.join();
     receiverThread.join();
 
+    // Assert
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
 }
 
 TEST(ChannelTests, TryReciveTest)
 {
+    // Average
     std::vector<int> result;
     auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
 
@@ -119,6 +134,7 @@ TEST(ChannelTests, TryReciveTest)
         }
     }, std::move(sender));
 
+    // Act
     std::thread receiverThread([&result](auto receiver)
     {
         while (receiver)
@@ -132,6 +148,38 @@ TEST(ChannelTests, TryReciveTest)
     senderThread.join();
     receiverThread.join();
 
+    // Assert
+    for (int i = 0; i < 1000; ++i)
+        ASSERT_EQ(result[i], i);
+}
+
+TEST(ChannelTests, ReceiveAsyncTest)
+{
+    // Average
+    auto [sender, receiver] = ExtendedCpp::Channel<int>::Create();
+
+    std::thread senderThread([](auto sender)
+    {
+        for (int i = 0; i < 1000; ++i)
+        {
+            sender.Send(i);
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
+        }
+    },std::move(sender));
+
+    // Act
+    const auto task = [](auto receiver)->ExtendedCpp::Task<std::vector<int>>
+    {
+        std::vector<int> result;
+        for (int i = 0; i < 1000; ++i)
+            result.push_back(co_await receiver.ReceiveAsync());
+        co_return std::move(result);
+    }(std::move(receiver));
+
+    senderThread.join();
+    const std::vector<int> result = task.Result();
+
+    // Assert
     for (int i = 0; i < 1000; ++i)
         ASSERT_EQ(result[i], i);
 }

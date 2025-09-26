@@ -1,12 +1,13 @@
 #ifndef Common_Channel_H
 #define Common_Channel_H
 
-#include <optional>
-#include <tuple>
-#include <queue>
-#include <mutex>
-#include <memory>
 #include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <queue>
+
+#include <ExtendedCpp/Task.h>
 
 /// @brief 
 namespace ExtendedCpp
@@ -29,11 +30,10 @@ namespace ExtendedCpp
         /// @brief 
         using MessageType = TMessageType;
 
-        /// @brief 
+        /// @brief
         struct ControlBlock final
         {
             std::queue<MessageType> messageBus;
-            bool hasMessage = false;
             mutable std::mutex mutex;
             std::condition_variable messageAvailable;
 
@@ -42,7 +42,7 @@ namespace ExtendedCpp
             bool closed = false;
         };
 
-        /// @brief 
+        /// @brief
         using ControlBlockType = typename Channel<MessageType>::ControlBlock;
 
         /// @brief 
@@ -116,17 +116,15 @@ namespace ExtendedCpp
             if (_controlBlock == nullptr)
                 return;
 
-            {
-                std::lock_guard lock(_controlBlock->mutex);
+            std::lock_guard lock(_controlBlock->mutex);
 
-                if constexpr (IsSender)
-                    --_controlBlock->sendersCount;
-                else if constexpr (IsReceiver)
-                    --_controlBlock->receiversCount;
-        
-                if (!_controlBlock->sendersCount || !_controlBlock->receiversCount)
-                    _controlBlock->closed = true;
-            }
+            if constexpr (IsSender)
+                --_controlBlock->sendersCount;
+            else if constexpr (IsReceiver)
+                --_controlBlock->receiversCount;
+
+            if (!_controlBlock->sendersCount || !_controlBlock->receiversCount)
+                _controlBlock->closed = true;
 
             _controlBlock->messageAvailable.notify_one();
         }
@@ -135,13 +133,10 @@ namespace ExtendedCpp
         /// @param message 
         void Send(const MessageType& message) noexcept requires IsSender
         {
-            {
-                std::lock_guard lock(_controlBlock->mutex);
-                if (_controlBlock->closed)
-                    return;
-                _controlBlock->messageBus.push(message);
-                _controlBlock->hasMessage = true;
-            }
+            std::lock_guard lock(_controlBlock->mutex);
+            if (_controlBlock->closed)
+                return;
+            _controlBlock->messageBus.push(message);
             _controlBlock->messageAvailable.notify_one();
         }
 
@@ -149,13 +144,10 @@ namespace ExtendedCpp
         /// @param message 
         void Send(MessageType&& message) noexcept requires IsSender
         {
-            {
-                std::lock_guard lock(_controlBlock->mutex);
-                if (_controlBlock->closed)
-                    return;
-                _controlBlock->messageBus.push(std::move(message));
-                _controlBlock->hasMessage = true;
-            }
+            std::lock_guard lock(_controlBlock->mutex);
+            if (_controlBlock->closed)
+                return;
+            _controlBlock->messageBus.push(std::move(message));
             _controlBlock->messageAvaible.notify_one();
         }
 
@@ -166,16 +158,32 @@ namespace ExtendedCpp
             std::unique_lock lock(_controlBlock->mutex);
             _controlBlock->messageAvailable.wait(lock, [this]
             { 
-                if (_controlBlock->closed && !_controlBlock->hasMessage)
+                if (_controlBlock->closed && _controlBlock->messageBus.empty())
                     throw std::domain_error("Channel was closed.");
-                return _controlBlock->hasMessage; 
+                return !_controlBlock->messageBus.empty();
             });
 
             MessageType message = _controlBlock->messageBus.front();
             _controlBlock->messageBus.pop();
-            if (_controlBlock->messageBus.empty())
-                _controlBlock->hasMessage = false;
             return message;
+        }
+
+        Task<MessageType> ReceiveAsync() requires IsReceiver
+        {
+            return Task<MessageType>::Run([this]
+            {
+                std::unique_lock lock(_controlBlock->mutex);
+                _controlBlock->messageAvailable.wait(lock, [this]
+                {
+                    if (_controlBlock->closed && _controlBlock->messageBus.empty())
+                        throw std::domain_error("Channel was closed.");
+                    return !_controlBlock->messageBus.empty();
+                });
+
+                MessageType message = _controlBlock->messageBus.front();
+                _controlBlock->messageBus.pop();
+                return message;
+            });
         }
 
         /// @brief 
@@ -183,43 +191,43 @@ namespace ExtendedCpp
         std::optional<MessageType> TryReceive() noexcept requires IsReceiver
         {
             std::lock_guard lock(_controlBlock->mutex);
-            if (_controlBlock->closed && !_controlBlock->hasMessage)
+            if (_controlBlock->messageBus.empty())
                 return std::nullopt;
                 
             MessageType message = _controlBlock->messageBus.front();
             _controlBlock->messageBus.pop();
-            if (_controlBlock->messageBus.empty())
-                _controlBlock->hasMessage = false;
             return message;
         }
 
-        /// @brief 
-        /// @return 
+        /// @brief
+        /// @return
         [[nodiscard]]
-        bool Closed() const noexcept
+        bool Closed() const noexcept requires IsSender
         {
             std::lock_guard lock(_controlBlock->mutex);
             return _controlBlock->closed;
         }
 
-        /// @brief 
+        /// @brief
+        /// @return
         [[nodiscard]]
-        explicit operator bool() const noexcept requires IsSender
-        {
-            return Closed();
-        }
-
-        /// @brief 
-        [[nodiscard]]
-        explicit operator bool() const noexcept requires IsReceiver
+        bool Closed() const noexcept requires IsReceiver
         {
             std::lock_guard lock(_controlBlock->mutex);
-            return !_controlBlock->closed || _controlBlock->hasMessage;
+            return _controlBlock->closed && _controlBlock->messageBus.empty();
         }
 
         /// @brief 
-        /// @param controlBlock 
-        explicit Channel(std::shared_ptr<ControlBlockType> controlBlock) noexcept requires IsSender || IsReceiver
+        [[nodiscard]]
+        explicit operator bool() const noexcept
+        {
+            return !Closed();
+        }
+
+        /// @brief
+        /// @param controlBlock
+        explicit Channel(std::shared_ptr<ControlBlockType> controlBlock) noexcept
+        requires IsSender || IsReceiver
         {
             _controlBlock = controlBlock;
 

@@ -31,13 +31,13 @@ namespace ExtendedCpp
 		/// @brief 
 		struct Promise final
 		{
-			/// @brief 
-			/// @return 
-			std::suspend_never initial_suspend() noexcept { return {}; }
+			/// @brief
+			/// @return
+			static std::suspend_never initial_suspend() noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
-			std::suspend_always final_suspend() noexcept { return {}; }
+			static std::suspend_always final_suspend() noexcept { return {}; }
 
 			/// @brief
 			/// @param result 
@@ -51,7 +51,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief 
-			void unhandled_exception() 
+			static void unhandled_exception()
 			{ 
 				std::rethrow_exception(std::current_exception()); 
 			}
@@ -65,7 +65,7 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param continuation 
-			void SetContinuation(std::coroutine_handle<> continuation)
+			void SetContinuation(const std::coroutine_handle<> continuation)
 			{
 				_continuation = continuation;
 			}
@@ -98,9 +98,9 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @tparam TOperation 
-			/// @tparam ...Args 
+			/// @tparam Args
 			/// @param operation 
-			/// @param ...args 
+			/// @param args
 			template<typename TOperation, typename... Args>
 			requires std::convertible_to<std::invoke_result_t<TOperation, Args...>, TResult>
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args) 
@@ -110,7 +110,7 @@ namespace ExtendedCpp
 				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
 #else
 				_asyncTask = std::async(std::launch::async,
-				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
 #endif
 				{
 					TResult temp = operation(args...);
@@ -132,7 +132,7 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param handle 
-			void await_suspend(std::coroutine_handle<> handle)
+			void await_suspend(const std::coroutine_handle<> handle)
 			{
 				std::lock_guard lock(_mutex);
 				if (_result.has_value())
@@ -173,7 +173,8 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @return 
-			bool await_ready() const noexcept 
+			[[nodiscard]]
+			bool await_ready() const noexcept
 			{ 
 				return !_handle || _handle.promise().IsDone();
 			}
@@ -194,7 +195,7 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param handle 
-			explicit ContinueAwaiter(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {};
+			explicit ContinueAwaiter(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
 		private:
 			std::coroutine_handle<Promise> _handle;
@@ -202,7 +203,7 @@ namespace ExtendedCpp
 
 		/// @brief 
 		/// @param handle 
-		explicit Task(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {};
+		explicit Task(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
 		/// @brief 
 		/// @return 
@@ -237,9 +238,9 @@ namespace ExtendedCpp
 		
 		/// @brief 
 		/// @tparam TOperation 
-		/// @tparam ...Args 
+		/// @tparam Args
 		/// @param operation 
-		/// @param ...args 
+		/// @param args
 		/// @return 
 		template<typename TOperation, typename... Args>
 		requires std::convertible_to<std::invoke_result_t<TOperation, Args...>, TResult>
@@ -261,11 +262,11 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @return 
-			std::suspend_never initial_suspend() noexcept { return {}; }
+			static std::suspend_never initial_suspend() noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
-			std::suspend_always final_suspend() noexcept { return {}; }
+			static std::suspend_always final_suspend() noexcept { return {}; }
 
 			void return_void() noexcept 
 			{
@@ -276,7 +277,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief 
-			void unhandled_exception()
+			static void unhandled_exception()
 			{
 				std::rethrow_exception(std::current_exception());
 			}
@@ -290,7 +291,7 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param continuation 
-			void SetContinuation(std::coroutine_handle<> continuation)
+			void SetContinuation(const std::coroutine_handle<> continuation)
 			{
 				_continuation = continuation;
 			}
@@ -315,9 +316,9 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @tparam TOperation 
-			/// @tparam ...Args 
+			/// @tparam Args
 			/// @param operation 
-			/// @param ...args 
+			/// @param args
 			template<typename TOperation, typename... Args>
 			requires std::same_as<std::invoke_result_t<TOperation, Args...>, void>
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args)
@@ -327,7 +328,7 @@ namespace ExtendedCpp
 				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
 #else
 				_asyncTask = std::async(std::launch::async,
-				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]()
+				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
 #endif
 				{
 					operation(args...);
@@ -349,7 +350,7 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param handle 
-			void await_suspend(std::coroutine_handle<> handle)
+			void await_suspend(const std::coroutine_handle<> handle)
 			{
 				std::lock_guard lock(_mutex);
 				if (_isFinished)
@@ -358,9 +359,9 @@ namespace ExtendedCpp
 					_handle = handle;
 			}
 
-			/// @brief 
-			/// @return 
-			void await_resume() const noexcept {}
+			/// @brief
+                        /// @return
+                        static void await_resume() noexcept {}
 
 #if GNU_COMPILER
 			~InitialAwaiter()
@@ -386,6 +387,7 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @return 
+			[[nodiscard]]
 			bool await_ready() const noexcept
 			{
 				return !_handle || _handle.promise().IsDone();
@@ -393,17 +395,17 @@ namespace ExtendedCpp
 
 			/// @brief 
 			/// @param continuation 
-			void await_suspend(std::coroutine_handle<> continuation)
+			void await_suspend(const std::coroutine_handle<> continuation) const
 			{
 				_handle.promise().SetContinuation(continuation);
 			}
 
-			/// @brief 
-			void await_resume() const noexcept {}
+			/// @brief
+                        static void await_resume() noexcept {}
 
 			/// @brief 
 			/// @param handle 
-			explicit ContinueAwaiter(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {};
+			explicit ContinueAwaiter(const std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
 		private:
 			std::coroutine_handle<Promise> _handle;
@@ -411,11 +413,11 @@ namespace ExtendedCpp
 
 		/// @brief 
 		/// @param handle 
-		explicit Task(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {};
+		explicit Task(const std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
 		/// @brief 
 		/// @return 
-		ContinueAwaiter operator co_await()
+		ContinueAwaiter operator co_await() const
 		{
 			return ContinueAwaiter(_handle);
 		}
@@ -433,9 +435,9 @@ namespace ExtendedCpp
 
 		/// @brief 
 		/// @tparam TOperation 
-		/// @tparam ...Args 
+		/// @tparam Args
 		/// @param operation 
-		/// @param ...args 
+		/// @param args
 		/// @return 
 		template<typename TOperation, typename... Args>
 		requires std::same_as<std::invoke_result_t<TOperation, Args...>, void>
