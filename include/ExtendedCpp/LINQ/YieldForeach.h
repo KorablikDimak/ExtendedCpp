@@ -32,7 +32,7 @@ namespace ExtendedCpp::LINQ
     template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
     Future<TSource> YieldForeach(TCollection&& collection) noexcept
     {
-        auto inner = std::move(collection);
+        auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
             co_yield std::move(element);
     }

@@ -5,7 +5,7 @@
 namespace ExtendedCpp::Events
 {
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     template<typename ...TParams>
     class IEventHandler
     {
@@ -33,7 +33,7 @@ namespace ExtendedCpp::Events
         }
 
         /// @brief 
-        /// @param ...params 
+        /// @param params
         virtual void Call(TParams... params) const = 0;
 
     protected:

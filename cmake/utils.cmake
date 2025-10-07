@@ -7,6 +7,15 @@ function(set_include_directories)
     endforeach()
 endfunction()
 
+function(set_interface_directories)
+    foreach(target ${ARGN})
+        target_include_directories(${target} INTERFACE
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+                $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    endforeach()
+endfunction()
+
 function(install_projects)
     install(TARGETS ${ARGN}
             EXPORT ${PROJECT_NAME}-targets

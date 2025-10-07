@@ -3,9 +3,10 @@
 
 #include <any>
 #include <stdexcept>
+#include <typeindex>
+#include <vector>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
-#include <ExtendedCpp/Reflection/TypeTraits.h>
 #include <ExtendedCpp/Reflection/Concepts.h>
 
 /// @brief 

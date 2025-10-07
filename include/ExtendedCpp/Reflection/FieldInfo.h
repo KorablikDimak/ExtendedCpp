@@ -3,7 +3,6 @@
 
 #include <any>
 #include <typeindex>
-#include <functional>
 #include <memory>
 #include <stdexcept>
 

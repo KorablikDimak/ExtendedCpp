@@ -17,7 +17,7 @@ namespace ExtendedCpp::DI
 
     /// @brief 
     /// @tparam TTarget 
-    /// @tparam ...TDependencies 
+    /// @tparam TDependencies
     template<typename TTarget, typename... TDependencies>
     requires Concepts::ConstructableFromSharedPtr<TTarget, TDependencies...>
     class Register<TTarget(TDependencies...)>

@@ -39,15 +39,6 @@ option(Asio_BUILD_TESTS "Build Asio library tests" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
 
-set(LINQ_SOURCE
-        src/LINQ/LINQ.cpp)
-
-set(Events_SOURCE
-        src/Events/Events.cpp)
-
-set(Json_SOURCE
-        src/Json/Json.cpp)
-
 set(Xml_SOURCE
         src/Xml/pugixml.cpp)
 
@@ -79,16 +70,13 @@ set(Common_SOURCE
 set(DI_SOURCE
         src/DI/ServiceProvider.cpp)
 
-set(Asio_SOURCE
-        src/Asio/Asio.cpp)
-
-add_library(LINQ ${LIBRARY_TYPE} ${LINQ_SOURCE})
+add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
-add_library(Events ${LIBRARY_TYPE} ${Events_SOURCE})
+add_library(Events INTERFACE)
 add_library(ExtendedCpp::Events ALIAS Events)
 
-add_library(Json ${LIBRARY_TYPE} ${Json_SOURCE})
+add_library(Json INTERFACE)
 add_library(ExtendedCpp::Json ALIAS Json)
 
 add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
@@ -111,10 +99,11 @@ add_library(DI ${LIBRARY_TYPE} ${DI_SOURCE})
 add_library(ExtendedCpp::DI ALIAS DI)
 target_link_libraries(DI PUBLIC Reflection)
 
-add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
+add_library(Asio INTERFACE)
 add_library(ExtendedCpp::Asio ALIAS Asio)
 
-set_include_directories(LINQ Events Json Xml InfoLog Common Reflection DI Asio)
+set_include_directories(Xml InfoLog Common Reflection DI)
+set_interface_directories(LINQ Events Json Asio)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(

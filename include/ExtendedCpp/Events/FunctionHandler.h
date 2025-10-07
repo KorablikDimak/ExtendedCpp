@@ -10,7 +10,7 @@
 namespace ExtendedCpp::Events
 {
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     template<typename ...TParams>
     class FunctionHandler final : public IEventHandler<TParams...>
     {
@@ -29,7 +29,7 @@ namespace ExtendedCpp::Events
         ~FunctionHandler() override = default;
 
         /// @brief 
-        /// @param ...params 
+        /// @param params
         void Call(TParams... params) const override
         {
             _function(std::forward<TParams>(params)...);
@@ -56,7 +56,7 @@ namespace ExtendedCpp::Events
     };
 
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     /// @param function 
     /// @return 
     template<typename ...TParams>

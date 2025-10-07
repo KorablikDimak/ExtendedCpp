@@ -4,9 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cmath>
-#include <cstdint>
 #include <optional>
-#include <functional>
 #include <future>
 #include <array>
 #include <algorithm>

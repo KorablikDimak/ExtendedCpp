@@ -10,19 +10,11 @@ endif()
 
 find_package(GTest REQUIRED)
 
-set(DI_TESTS_INCLUDES
-        IService.h
-        IService2.h
-        Service.h
-        Service2.h
-        Target.h
-        Target2.h)
-
 set(DI_TESTS_SOURCE
         main.cpp
         DI_Tests.cpp)
 
-add_executable(DI-tests ${DI_TESTS_INCLUDES} ${DI_TESTS_SOURCE})
+add_executable(DI-tests ${DI_TESTS_SOURCE})
 target_link_libraries(DI-tests PRIVATE ExtendedCpp::DI ExtendedCpp::Reflection GTest::gtest GTest::gtest_main)
 
 include(GoogleTest)

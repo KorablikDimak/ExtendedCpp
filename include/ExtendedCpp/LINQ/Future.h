@@ -96,8 +96,7 @@ namespace ExtendedCpp::LINQ
         {
             if (!_handle.done())
                 return _handle.promise().Value();
-            else
-                return {};
+            return {};
         }
 
         /// @brief 
@@ -110,7 +109,7 @@ namespace ExtendedCpp::LINQ
                 _handle.resume();
                 return value;
             }
-            else return {};
+            return {};
         }
 
     private:

@@ -12,7 +12,7 @@
 namespace ExtendedCpp::Events
 {
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     template<typename ...TParams>
     class Event final
     {
@@ -30,7 +30,7 @@ namespace ExtendedCpp::Events
         ~Event() = default;
 
         /// @brief 
-        /// @param ...params 
+        /// @param params
         void operator()(TParams... params) const
         {
             std::shared_lock lock(_listMutex);

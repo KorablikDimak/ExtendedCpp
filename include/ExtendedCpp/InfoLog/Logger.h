@@ -18,17 +18,17 @@ namespace ExtendedCpp::InfoLog
     class Logger final
     {
     private:
-        std::vector<InfoLog::ISender::Ptr> _senders;
+        std::vector<ISender::Ptr> _senders;
 
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag>
-        void Send(TMessage&& message, LogLevel logLevel, TTag&& tag) const noexcept
+        void Send(TMessage&& message, const LogLevel logLevel, TTag&& tag) const noexcept
         {
             std::vector<std::future<void>> _tasks;
             _tasks.reserve(_senders.size());
 
             for (const ISender::Ptr& sender : _senders)
                 _tasks.push_back(std::async(std::launch::async,
-                    [&](){ sender->Send(ToString(std::forward<TMessage>(message)), logLevel, ToString(std::forward<TTag>(tag))); }));
+                    [&]{ sender->Send(ToString(std::forward<TMessage>(message)), logLevel, ToString(std::forward<TTag>(tag))); }));
         }
 
     public:

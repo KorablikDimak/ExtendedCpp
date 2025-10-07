@@ -9,7 +9,7 @@
 namespace ExtendedCpp::Events
 {
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     template<typename ...TParams>
     class StaticMethodHandler final : public IEventHandler<TParams...>
     {
@@ -28,7 +28,7 @@ namespace ExtendedCpp::Events
         ~StaticMethodHandler() override = default;
 
         /// @brief 
-        /// @param ...params 
+        /// @param params
         void Call(TParams... params) const override
         {
             (*_method)(std::forward<TParams>(params)...);
@@ -54,7 +54,7 @@ namespace ExtendedCpp::Events
     };
 
     /// @brief 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     /// @param method 
     /// @return 
     template<typename ...TParams>

@@ -10,7 +10,7 @@ namespace ExtendedCpp::Events
 {
     /// @brief 
     /// @tparam TObject 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     template<typename TObject, typename ...TParams>
     class ConstMethodHandler final : public IEventHandler<TParams...>
     {
@@ -32,7 +32,7 @@ namespace ExtendedCpp::Events
         ~ConstMethodHandler() override = default;
 
         /// @brief 
-        /// @param ...params 
+        /// @param params
         void Call(TParams... params) const override
         {
             if (_object != nullptr)
@@ -63,7 +63,7 @@ namespace ExtendedCpp::Events
 
     /// @brief 
     /// @tparam TObject 
-    /// @tparam ...TParams 
+    /// @tparam TParams
     /// @param object 
     /// @param method 
     /// @return 

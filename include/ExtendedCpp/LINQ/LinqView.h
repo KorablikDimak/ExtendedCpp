@@ -16,7 +16,6 @@
 #include <optional>
 #include <type_traits>
 #include <utility>
-#include <locale>
 
 #include <ExtendedCpp/LINQ/Iterators.h>
 #include <ExtendedCpp/LINQ/Concepts.h>
@@ -36,7 +35,7 @@ namespace ExtendedCpp::LINQ
 
 	public:
 		/// @brief 
-		using value_type = TIterator::value_type;
+		using value_type = typename TIterator::value_type;
 
 		/// @brief 
 		using iterator = TIterator;

@@ -17,7 +17,6 @@
 #include <type_traits>
 #include <concepts>
 #include <utility>
-#include <locale>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
 #include <ExtendedCpp/LINQ/Sort.h>
@@ -41,16 +40,16 @@ namespace ExtendedCpp::LINQ
         using value_type = TSource;
 
         /// @brief 
-        using iterator = std::vector<TSource>::iterator;
+        using iterator = typename std::vector<TSource>::iterator;
 
         /// @brief 
-        using const_iterator = std::vector<TSource>::const_iterator;
+        using const_iterator = typename std::vector<TSource>::const_iterator;
 
         /// @brief 
-        using reverse_iterator = std::vector<TSource>::reverse_iterator;
+        using reverse_iterator = typename std::vector<TSource>::reverse_iterator;
 
         /// @brief 
-        using const_reverse_iterator = std::vector<TSource>::const_reverse_iterator;
+        using const_reverse_iterator = typename std::vector<TSource>::const_reverse_iterator;
 
         /// @brief Copy data from vector into LINQ conainer
         /// @param collection 
@@ -329,8 +328,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TKey decltype(pair.first)
         /// @tparam TValue decltype(pair.second)
         /// @return map<TKey, TValue> from vector<std::pair<TKey, TValue>>
-        template<typename TKey = PairTraits<TSource>::FirstType,
-                 typename TValue = PairTraits<TSource>::SecondType>
+        template<typename TKey = typename PairTraits<TSource>::FirstType,
+                 typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
         std::map<TKey, TValue> ToMap() const noexcept
         {
@@ -344,8 +343,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TKey decltype(pair.first)
         /// @tparam TValue decltype(pair.second)
         /// @return unordered_map<TKey, TValue> from vector<std::pair<TKey, TValue>>
-        template<typename TKey = PairTraits<TSource>::FirstType,
-                 typename TValue = PairTraits<TSource>::SecondType>
+        template<typename TKey = typename PairTraits<TSource>::FirstType,
+                 typename TValue = typename PairTraits<TSource>::SecondType>
         requires Concepts::IsPair<TSource>
         std::unordered_map<TKey, TValue> ToUnorderedMap() const noexcept
         {
@@ -415,7 +414,7 @@ namespace ExtendedCpp::LINQ
         /// @param selector Any functional object with TSource argument
         /// @return New collection LinqContainer<TResult>
         template<std::invocable<TSource> TSelector,
-                 typename TResult = std::invoke_result_t<TSelector, TSource>::value_type>
+                 typename TResult = typename std::invoke_result_t<TSelector, TSource>::value_type>
         LinqContainer<TResult> SelectMany(TSelector&& selector) const 
         noexcept(std::is_nothrow_invocable_v<TSelector, TSource>)
         {
@@ -442,7 +441,7 @@ namespace ExtendedCpp::LINQ
         /// @return 
         template<std::invocable<TSource> TCollectionSelector,
                  Concepts::Iterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
-                 typename TCollectionValueType = TCollection::value_type,
+                 typename TCollectionValueType = typename TCollection::value_type,
                  std::invocable<TSource, TCollectionValueType> TResultSelector,
                  typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
         LinqContainer<TResult> SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector) const 
@@ -492,7 +491,7 @@ namespace ExtendedCpp::LINQ
             {
                 if (predicate(element))
                     continue;
-                else newCollection.push_back(element);
+                newCollection.push_back(element);
             }
 
             return LinqContainer(std::move(newCollection));
@@ -1322,7 +1321,7 @@ namespace ExtendedCpp::LINQ
         /// @param otherCollection 
         /// @return 
         template<typename TOtherCollection,
-                 typename TOtherCollectionValueType = TOtherCollection::value_type>
+                 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
         requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) const noexcept
         {
@@ -1349,7 +1348,7 @@ namespace ExtendedCpp::LINQ
         /// @param otherCollection 
         /// @return 
         template<typename TOtherCollection,
-                 typename TOtherCollectionValueType = TOtherCollection::value_type>
+                 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
         requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
         LinqContainer<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) const noexcept
         {
