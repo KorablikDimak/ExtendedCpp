@@ -52,9 +52,8 @@ namespace ExtendedCpp
 			_columnCount = columnCount;
 			_table.reserve(_rowCount * _columnCount);
 
-			for (std::size_t i = 0; i < _rowCount; ++i)
-				for (std::size_t j = 0; j < _columnCount; ++j)
-					_table.push_back(init());
+			for (std::size_t i = 0; i < _rowCount * _columnCount; ++i)
+				_table.emplace_back(init());
 		}
 
 		/// @brief Constructs a matrix with the specified number of rows and columns, initializing elements using a callable with indices
@@ -73,7 +72,7 @@ namespace ExtendedCpp
 
 			for (std::size_t i = 0; i < _rowCount; ++i)
 				for (std::size_t j = 0; j < _columnCount; ++j)
-					_table.push_back(init(i, j));
+					_table.emplace_back(init(i, j));
 		}
 
 		/// @brief Copy constructor
@@ -968,7 +967,7 @@ namespace ExtendedCpp
 			std::vector<std::size_t> P(_rowCount + 1);
 			Matrix A(*this);
 
-			std::size_t i, j, k, imax;
+			std::size_t i, j, k;
 			T maxA, absA;
 
 			for (i = 0; i <= _rowCount; ++i)
@@ -977,7 +976,7 @@ namespace ExtendedCpp
 			for (i = 0; i < _rowCount; ++i)
 			{
 				maxA = static_cast<T>(0);
-				imax = i;
+				std::size_t imax = i;
 
 				for (k = i; k < _rowCount; ++k)
 					if ((absA = std::abs(A._table[k * A._columnCount + i])) > maxA)
@@ -1021,7 +1020,7 @@ namespace ExtendedCpp
 			for (std::size_t i = 1; i < _rowCount; ++i)
 				det *= _table[i * _columnCount + i];
 
-			return ((long long) P[_rowCount] - (long long) _rowCount) % 2 == 0 ? det : -det;
+			return (static_cast<long long>(P[_rowCount]) - static_cast<long long>(_rowCount)) % 2 == 0 ? det : -det;
 		}
 
 		Matrix LUPInvert(const std::vector<std::size_t>& P) const 
@@ -1087,7 +1086,7 @@ namespace ExtendedCpp
 		}
 
 		[[nodiscard]]
-		std::size_t NewDimension(std::size_t value) const noexcept
+		static std::size_t NewDimension(const std::size_t value) noexcept
 		{
 			std::size_t result = 1;
 			while (result < value)
@@ -1129,7 +1128,7 @@ namespace ExtendedCpp
 		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
 		requires std::is_copy_assignable_v<T>
 		{
-			auto task1 = std::async(std::launch::async, [this]()
+			auto task1 = std::async(std::launch::async, [this]
 			{
 				const std::size_t size = _rowCount / 2;
 				Matrix matrix1(size, size);
@@ -1139,7 +1138,7 @@ namespace ExtendedCpp
 				return matrix1;
 			});
 
-			auto task2 = std::async(std::launch::async, [this]()
+			auto task2 = std::async(std::launch::async, [this]
 			{
 				const std::size_t size = _rowCount / 2;
 				Matrix matrix2(size, size);
@@ -1149,7 +1148,7 @@ namespace ExtendedCpp
 				return matrix2;
 			});
 
-			auto task3 = std::async(std::launch::async, [this]()
+			auto task3 = std::async(std::launch::async, [this]
 			{
 				const std::size_t size = _rowCount / 2;
 				Matrix matrix3(size, size);
@@ -1159,7 +1158,7 @@ namespace ExtendedCpp
 				return matrix3;
 			});
 
-			auto task4 = std::async(std::launch::async, [this]()
+			auto task4 = std::async(std::launch::async, [this]
 			{
 				const std::size_t size = _rowCount / 2;
 				Matrix matrix4(size, size);
@@ -1195,7 +1194,7 @@ namespace ExtendedCpp
 		Matrix StrassenMultiply(const Matrix& matrix) const 
 		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_move_assignable_v<Matrix>)
 		{
-			std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
+			const std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
 
 			if (newDimension <= 64)
 				return MultiplyTranspose(matrix);
@@ -1219,7 +1218,7 @@ namespace ExtendedCpp
 			Matrix b22 = std::move(B[3]);
 
 			Matrix p1 = (a11 + a22) * (b11 + b22);
-			Matrix p2 = ((a21 + a22) * b11);
+			Matrix p2 = (a21 + a22) * b11;
 			Matrix p3 = a11 * (b12 - b22);
 			Matrix p4 = a22 * (b21 - b11);
 			Matrix p5 = (a11 + a12) * b22;

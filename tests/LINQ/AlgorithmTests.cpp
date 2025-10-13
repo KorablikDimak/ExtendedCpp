@@ -7,7 +7,7 @@
 TEST(AlgorithmTests, BinarySearchTest)
 {
     // Average
-    const int arr1[10] = { 1, 3, 5, 8, 9, 14, 56, 102, 304, 400 };
+    constexpr int arr1[10] = { 1, 3, 5, 8, 9, 14, 56, 102, 304, 400 };
 
     // Act
     // Assert
@@ -39,7 +39,7 @@ TEST(AlgorithmTests, BinarySearchTest)
 TEST(AlgorithmTests, CountEqualKeysTest)
 {
     // Average
-    const short arr[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
+    constexpr short arr[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
 
     // Act
     std::map<short, std::size_t> dict = ExtendedCpp::LINQ::Algorithm::CountEqualKeys(arr, 0, 9);
@@ -57,8 +57,8 @@ TEST(AlgorithmTests, CountEqualKeysTest)
 TEST(AlgorithmTests, CountCommonSubsequenceTest)
 {
     // Average
-    const short arr1[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
-    const short arr2[10] = { 7, 6, 7, 10, 2, 2, 5, 6, 41, 6 };
+    constexpr short arr1[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
+    constexpr short arr2[10] = { 7, 6, 7, 10, 2, 2, 5, 6, 41, 6 };
 
     // Act
     const std::size_t count = ExtendedCpp::LINQ::Algorithm::CountCommonSubsequence(arr1, 10, arr2, 10);
@@ -95,7 +95,7 @@ TEST(AlgorithmTests, ContainsTest)
 TEST(AlgorithmTests, IndexAtTest)
 {
     // Average
-    const short collection[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
+    constexpr short collection[10] = { 7, 6, 6, 10, 2, 2, 5, 6, 40, 6 };
     constexpr short subCollection1[4] = { 10, 2, 2, 5 };
     constexpr short subCollection2[4] = { 7, 2, 2, 40 };
 

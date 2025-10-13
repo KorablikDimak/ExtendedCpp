@@ -34,13 +34,16 @@ namespace ExtendedCpp::Events
 
         /// @brief 
         /// @param params
-        virtual void Call(TParams... params) const = 0;
+        virtual void Call(TParams&&... params) const = 0;
 
-    protected:
+    private:
         /// @brief 
         /// @param other 
         /// @return 
-        virtual bool IsEquals(const IEventHandler& other) const noexcept = 0;
+        bool IsEquals(const IEventHandler& other) const noexcept
+        {
+            return std::addressof(*this) == std::addressof(other);
+        }
     };
 }
 

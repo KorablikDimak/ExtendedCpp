@@ -125,32 +125,26 @@ namespace ExtendedCpp::LINQ::Algorithm
     std::size_t CountCommonSubsequence(TCollection&& firstSequence, const std::size_t firstSize,
                                        TOtherCollection&& secondSequence, const std::size_t secondSize) noexcept
     {
-        std::unique_ptr<std::unique_ptr<size_t[]>[]> LCSTable(new std::unique_ptr<size_t[]>[firstSize + 1]);
-
-        for (std::size_t i = 0; i <= firstSize; ++i)
-        {
-            LCSTable[i] = std::unique_ptr<std::size_t[]>(new std::size_t[secondSize + 1]);
-            for (std::size_t j = 0; j <= secondSize; ++j)
-                LCSTable[i][j] = 0;
-        }
+        const std::size_t size = (firstSize + 1) * (secondSize + 1);
+        auto LCSTable = std::make_unique<std::size_t[]>(size);
+        std::memset(LCSTable.get(), 0, size * sizeof(std::size_t));
 
         for (std::size_t i = 1; i <= firstSize; ++i)
             for (std::size_t j = 1; j <= secondSize; ++j)
             {
                 if (firstSequence[i - 1] == secondSequence[j - 1])
                 {
-                    LCSTable[i][j] = LCSTable[i - 1][j - 1] + 1;
+                    LCSTable[i * (secondSize + 1) + j] = LCSTable[(i - 1) * (secondSize + 1) + (j - 1)] + 1;
                 }
                 else
                 {
-                    if (LCSTable[i][j - 1] > LCSTable[i - 1][j])
-                        LCSTable[i][j] = LCSTable[i][j - 1];
-                    else
-                        LCSTable[i][j] = LCSTable[i - 1][j];
+                    LCSTable[i * (secondSize + 1) + j] = std::max(
+                        LCSTable[i * (secondSize + 1) + (j - 1)],
+                        LCSTable[(i - 1) * (secondSize + 1) + j]);
                 }
             }
 
-        return LCSTable[firstSize][secondSize];
+        return LCSTable[firstSize * (secondSize + 1) + secondSize];
     }
 
     /// @brief 
@@ -211,7 +205,7 @@ namespace ExtendedCpp::LINQ::Algorithm
     std::size_t IndexAt(TCollection&& collection, const std::size_t collectionSize,
                         TOtherCollection&& subCollection, const std::size_t subCollectionSize) noexcept
     {
-        std::unique_ptr<std::size_t[]> prefixSizeSubCollection(new std::size_t[subCollectionSize]);
+        auto prefixSizeSubCollection = std::make_unique<std::size_t[]>(subCollectionSize);
         prefixSizeSubCollection[0] = 0;
 
         for (std::size_t i = 1; i < subCollectionSize; ++i)

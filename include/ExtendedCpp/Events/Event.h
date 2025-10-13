@@ -31,7 +31,7 @@ namespace ExtendedCpp::Events
 
         /// @brief 
         /// @param params
-        void operator()(TParams... params) const
+        void operator()(TParams&&... params) const
         {
             std::shared_lock lock(_listMutex);
             for (const auto& handler : _handlers)
@@ -67,8 +67,23 @@ namespace ExtendedCpp::Events
         {
             std::shared_lock lock(_listMutex);
             for (const EventHandler& element : _handlers)
-                if (*handler == *element) return true;
+                if (*handler == *element)
+                    return true;
             return false;
+        }
+
+        [[nodiscard]]
+        bool empty() const noexcept
+        {
+            std::shared_lock lock(_listMutex);
+            return _handlers.empty();
+        }
+
+        [[nodiscard]]
+        std::size_t size() const noexcept
+        {
+            std::shared_lock lock(_listMutex);
+            return _handlers.size();
         }
 
     private:
