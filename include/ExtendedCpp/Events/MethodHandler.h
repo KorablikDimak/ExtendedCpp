@@ -13,7 +13,7 @@ namespace ExtendedCpp::Events
     class MethodHandler final : public IEventHandler<TParams...>
     {
     private:
-        TObject* _object;
+        mutable TObject* _object;
         void (TObject::*_method)(TParams... params);
 
     public:

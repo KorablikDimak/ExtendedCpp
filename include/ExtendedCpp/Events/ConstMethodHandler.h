@@ -13,14 +13,14 @@ namespace ExtendedCpp::Events
     class ConstMethodHandler final : public IEventHandler<TParams...>
     {
     private:
-        TObject* _object;
+        const TObject* _object;
         void (TObject::*_method)(TParams... params) const;
 
     public:
         /// @brief 
         /// @param object 
         /// @param method 
-        ConstMethodHandler(TObject* object, void(TObject::*method)(TParams...) const) noexcept
+        ConstMethodHandler(const TObject* object, void(TObject::*method)(TParams...) const) noexcept
         {
             _object = object;
             _method = method;

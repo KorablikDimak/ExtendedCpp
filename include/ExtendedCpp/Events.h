@@ -11,6 +11,10 @@
 /// @brief
 namespace ExtendedCpp::Events
 {
+	/// @brief
+	/// @tparam TFunctor
+	/// @param functor
+	/// @return
 	template<typename TFunctor>
 	auto CreateFunctorHandler(TFunctor&& functor) noexcept
 	{
