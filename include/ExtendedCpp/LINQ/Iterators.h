@@ -17,21 +17,38 @@ namespace ExtendedCpp::LINQ
 	struct OptionalIterator final
 	{
 	private:
-		TInIterator _inIterator;
+		std::decay_t<TInIterator> _inIterator;
 
 	public:
 		/// @brief
-		using value_type = typename TInIterator::value_type;
+		using value_type = typename std::decay_t<TInIterator>::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
-		explicit OptionalIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+		explicit OptionalIterator(TInIterator&& inIterator) noexcept :
+			_inIterator(std::forward<TInIterator>(inIterator)) {}
+
+		OptionalIterator(const OptionalIterator& other) noexcept = default;
+		OptionalIterator(OptionalIterator&& other) noexcept = default;
+		OptionalIterator& operator=(const OptionalIterator& other) noexcept = default;
+		OptionalIterator& operator=(OptionalIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
 		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&std::decay_t<TInIterator>::operator*)>)
 		{
 			return *_inIterator;
 		}
@@ -42,6 +59,11 @@ namespace ExtendedCpp::LINQ
 		{
 			++_inIterator;
 			return *this;
+		}
+
+		void operator++(int) noexcept
+		{
+			++_inIterator;
 		}
 
 		/// @brief
@@ -73,11 +95,23 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TSelector _selector;
+		std::decay_t<TSelector> _selector;
 
 	public:
 		/// @brief
 		using value_type = TOut;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -137,11 +171,23 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TTransform _transform;
+		std::decay_t<TTransform> _transform;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -204,11 +250,23 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TPredicate _predicate;
+		std::decay_t<TPredicate> _predicate;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -265,11 +323,23 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TPredicate _predicate;
+		std::decay_t<TPredicate> _predicate;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -327,7 +397,7 @@ namespace ExtendedCpp::LINQ
 	/// @tparam TOtherKeySelector
 	/// @tparam TResultSelector
 	template<Concepts::OptionalIter TInIterator,
-			 Concepts::ConstIterable TOtherCollection,
+			 Concepts::ForwardIterable TOtherCollection,
 			 std::invocable<typename TInIterator::value_type> TInnerKeySelector,
 			 std::invocable<typename std::decay_t<TOtherCollection>::value_type> TOtherKeySelector,
 			 std::invocable<typename TInIterator::value_type,
@@ -345,14 +415,26 @@ namespace ExtendedCpp::LINQ
 		TInIterator _inIterator;
 		TOtherIterator _otherBegin;
 		TOtherIterator _otherEnd;
-		TInnerKeySelector _innerKeySelector;
-		TOtherKeySelector _otherKeySelector;
-		TResultSelector _resultSelector;
+		std::decay_t<TInnerKeySelector> _innerKeySelector;
+		std::decay_t<TOtherKeySelector> _otherKeySelector;
+		std::decay_t<TResultSelector> _resultSelector;
 		std::size_t _otherPosition = 0;
 
 	public:
 		/// @brief
 		using value_type = TResult;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -432,7 +514,7 @@ namespace ExtendedCpp::LINQ
 	/// @tparam TLeftIterator
 	/// @tparam TOtherCollection
 	template<Concepts::OptionalIter TLeftIterator,
-			 Concepts::ConstIterable TOtherCollection,
+			 Concepts::ForwardIterable TOtherCollection,
 			 typename TLeft = typename std::decay_t<TLeftIterator>::value_type,
 			 typename TRight = typename std::decay_t<TOtherCollection>::value_type,
 			 std::forward_iterator TOtherIterator = typename TOtherCollection::const_iterator>
@@ -447,6 +529,18 @@ namespace ExtendedCpp::LINQ
 	public:
 		/// @brief
 		using value_type = std::pair<TLeft, TRight>;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param leftIterator
@@ -512,6 +606,18 @@ namespace ExtendedCpp::LINQ
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
+
+		/// @brief
 		/// @param inIterator
 		/// @param count
 		SkipIterator(TInIterator inIterator, const std::size_t count) noexcept :
@@ -574,12 +680,24 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TPredicate _predicate;
+		std::decay_t<TPredicate> _predicate;
 		mutable bool _predicateFailed = false;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -650,6 +768,18 @@ namespace ExtendedCpp::LINQ
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
+
+		/// @brief
 		/// @param inIterator
 		/// @param count
 		TakeIterator(TInIterator inIterator, std::size_t count) noexcept :
@@ -711,12 +841,24 @@ namespace ExtendedCpp::LINQ
 	{
 	private:
 		TInIterator _inIterator;
-		TPredicate _predicate;
+		std::decay_t<TPredicate> _predicate;
 		mutable bool _predicateFailed = false;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
+
+		/// @brief
+		using iterator_category = std::forward_iterator_tag;
+
+		/// @brief
+		using difference_type = std::ptrdiff_t;
+
+		/// @brief
+		using pointer = value_type*;
+
+		/// @brief
+		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator

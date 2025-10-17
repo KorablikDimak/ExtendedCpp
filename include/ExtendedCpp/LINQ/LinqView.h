@@ -24,30 +24,38 @@
 /// @brief 
 namespace ExtendedCpp::LINQ
 {
+	/// @brief
+	/// @tparam T
+	template<typename T>
+	class LinqView;
+
 	/// @brief 
 	/// @tparam TIterator 
 	template<Concepts::OptionalIter TIterator>
-	class LinqView final
+	class LinqView<TIterator> final
 	{
 	private:
 		TIterator _begin;
 		TIterator _end;
 
 	public:
-		/// @brief 
+		/// @brief
 		using value_type = typename TIterator::value_type;
 
-		/// @brief 
+		/// @brief
 		using iterator = TIterator;
 
-		/// @brief 
+		/// @brief
 		using const_iterator = TIterator;
+
+		/// @brief
+		static constexpr bool IsLinqCollection = true;
 
 		/// @brief 
 		/// @param begin 
 		/// @param end 
-		LinqView(const TIterator begin, const TIterator end) noexcept : 
-			_begin(begin), _end(end) {}
+		LinqView(TIterator&& begin, TIterator&& end) noexcept :
+			_begin(std::forward<TIterator>(begin)), _end(std::forward<TIterator>(end)) {}
 
 		/// @brief 
 		/// @return 
@@ -77,7 +85,7 @@ namespace ExtendedCpp::LINQ
 			return _end;
 		}
 
-		/// @brief 
+		/// @brief
 		/// @return 
 		[[nodiscard]]
 		std::vector<value_type> ToVector() const 
@@ -377,7 +385,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherKeySelector 
 		/// @param resultSelector 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection,
+		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<value_type> TInnerKeySelector,
 				 std::invocable<typename std::decay_t<TOtherCollection>::value_type> TOtherKeySelector,
 				 std::invocable<value_type, typename std::decay_t<TOtherCollection>::value_type> TResultSelector>
@@ -405,7 +413,7 @@ namespace ExtendedCpp::LINQ
 		/// @tparam TOtherCollection 
 		/// @param otherCollection 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection>
+		template<Concepts::ForwardIterable TOtherCollection>
 		LinqView<ZipIterator<TIterator, TOtherCollection>> Zip(const TOtherCollection& otherCollection) const noexcept
 		{
 			return LinqView<ZipIterator<TIterator, TOtherCollection>>(

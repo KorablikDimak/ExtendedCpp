@@ -3,7 +3,6 @@
 
 #include <utility>
 #include <optional>
-#include <coroutine>
 
 /// @brief 
 namespace ExtendedCpp::LINQ::Concepts
@@ -11,7 +10,7 @@ namespace ExtendedCpp::LINQ::Concepts
     template<typename TIter>
     concept OptionalIter = requires(TIter iter)
     {
-        { *(++iter) } -> std::same_as<std::optional<typename TIter::value_type>>;
+        { *(++iter) } -> std::same_as<std::optional<typename std::decay_t<TIter>::value_type>>;
         { iter == iter } -> std::convertible_to<bool>;
         { iter != iter } -> std::convertible_to<bool>;
     };
@@ -26,7 +25,7 @@ namespace ExtendedCpp::LINQ::Concepts
     template<typename T>
     concept Divisible = requires(T value)
     {
-        { value / std::declval<std::size_t>() } -> std::convertible_to<T>;
+        { value / std::declval<std::size_t>() } -> std::convertible_to<std::decay_t<T>>;
     };
 
     template<typename T>
@@ -43,7 +42,7 @@ namespace ExtendedCpp::LINQ::Concepts
     template<typename T>
     concept Summarize = requires(T value)
     {
-        { value + value } -> std::convertible_to<T>;
+        { value + value } -> std::convertible_to<std::decay_t<T>>;
     };
 
     template<typename T>
@@ -54,22 +53,10 @@ namespace ExtendedCpp::LINQ::Concepts
     };
 
     template<typename TCollection>
-    concept Iterable = requires(TCollection collection)
-    {
-        collection.begin();
-        collection.end();
-        typename TCollection::iterator;
-        typename TCollection::value_type;
-    };
+    concept InputIterable = std::input_iterator<typename std::decay_t<TCollection>::iterator>;
 
     template<typename TCollection>
-    concept ConstIterable = requires(TCollection collection)
-    {
-        collection.cbegin();
-        collection.cend();
-        typename TCollection::const_iterator;
-        typename TCollection::value_type;
-    };
+    concept ForwardIterable = std::forward_iterator<typename std::decay_t<TCollection>::iterator>;
 
     template<typename TCollection>
     concept RandomAccess = requires(TCollection collection)
@@ -89,6 +76,12 @@ namespace ExtendedCpp::LINQ::Concepts
     {
         { predicate(std::forward<TArgs>(args)...) } -> std::convertible_to<bool>;
     };
+
+    template<typename TCollection>
+    concept LinqCollection = std::decay_t<TCollection>::IsLinqCollection;
+
+    template<typename TStruct>
+    concept LinqAdaptor = std::decay_t<TStruct>::IsLinqAdaptor;
 }
 
 #endif

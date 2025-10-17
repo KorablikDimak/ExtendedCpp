@@ -176,7 +176,7 @@ TEST(LINQ_View_Tests, TakeWhileTest)
 TEST(LINQ_View_Tests, EmptyCollectionTest)
 {
     // Average
-    const std::vector<char> emptyVector;
+    constexpr std::vector<char> emptyVector;
 
     // Act
     const auto linq = ExtendedCpp::LINQ::View(emptyVector);
@@ -192,8 +192,8 @@ TEST(LINQ_View_Tests, EmptyCollectionTest)
 TEST(LINQ_View_Tests, TransformTest)
 {
     // Average
-    const std::vector<int> numbers = { 1, 2, 3, 4 };
-    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+    const std::vector numbers = { 1, 2, 3, 4 };
+    const std::vector assertVector = { 2, 4, 6, 8 };
 
     // Act
     const auto transformed = ExtendedCpp::LINQ::View(numbers)
@@ -208,12 +208,12 @@ TEST(LINQ_View_Tests, TransformTest)
 TEST(LINQ_View_Tests, MapTest)
 {
     // Average
-    const std::vector<int> numbers = { 1, 2, 3, 4 };
-    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+    const std::vector numbers = { 1, 2, 3, 4 };
+    const std::vector assertVector = { 2, 4, 6, 8 };
 
     // Act
     const auto mapped = ExtendedCpp::LINQ::View(numbers)
-        .Map([](int number){ return number * 2; })
+        .Map([](const int number){ return number * 2; })
         .ToVector();
 
     // Assert

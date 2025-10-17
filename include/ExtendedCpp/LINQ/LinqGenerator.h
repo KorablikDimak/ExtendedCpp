@@ -36,9 +36,25 @@ namespace ExtendedCpp::LINQ
 	private:
 		Future<TSource> _yieldContext;
 
+	public:
 		class Iterator final
 		{
 		public:
+			/// @brief
+			using value_type = TSource;
+
+			/// @brief
+			using iterator_category = std::input_iterator_tag;
+
+			/// @brief
+			using difference_type = std::ptrdiff_t;
+
+			/// @brief
+			using pointer = value_type*;
+
+			/// @brief
+			using reference = value_type&;
+
 			Iterator(Future<TSource>& yieldContext, const bool isEnd) noexcept :
 				_yieldContext(yieldContext), _isEnd(isEnd)
 			{
@@ -48,9 +64,23 @@ namespace ExtendedCpp::LINQ
 					_isEnd = true;
 			}
 
-			TSource& operator*() noexcept
+			Iterator(const Iterator& other) noexcept :
+				_yieldContext(other._yieldContext), _isEnd(other._isEnd)
 			{
-				return _value;
+				if (_yieldContext)
+					_value = _yieldContext.Value();
+				else
+					_isEnd = true;
+			}
+
+			Iterator& operator=(const Iterator& other)
+			{
+				_yieldContext = other._yieldContext;
+				if (_yieldContext)
+					_value = _yieldContext.Value();
+				else
+					_isEnd = true;
+				return *this;
 			}
 
 			const TSource& operator*() const noexcept
@@ -67,6 +97,14 @@ namespace ExtendedCpp::LINQ
 				return *this;
 			}
 
+			void operator++(int) noexcept
+			{
+				if (_yieldContext)
+					_value = _yieldContext.Next();
+				else
+					_isEnd = true;
+			}
+
 			bool operator!=(const Iterator& other) const noexcept
 			{
 				return _isEnd != other._isEnd;
@@ -78,7 +116,6 @@ namespace ExtendedCpp::LINQ
 			bool _isEnd;
 		};
 
-	public:
 		/// @brief 
 		using value_type = TSource;
 
@@ -91,6 +128,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		using handle_type = typename Future<TSource>::handle_type;
 
+		static constexpr bool IsLinqCollection = true;
+
 		/// @brief 
 		/// @tparam TGenerator 
 		/// @tparam Args
@@ -102,17 +141,10 @@ namespace ExtendedCpp::LINQ
 		noexcept(std::is_nothrow_invocable_v<TGenerator, Args...>) :
 			_yieldContext(generator(std::forward<Args>(args)...)) {}
 
-		/// @brief Copy data from vector into LINQ generator
-		/// @tparam TCollection 
-		/// @param collection 
-		template<Concepts::ConstIterable TCollection>
-		explicit LinqGenerator(const TCollection& collection) noexcept :
-			_yieldContext(YieldForeach(collection)) {}
-
 		/// @brief Move data from vector into LINQ generator
 		/// @tparam TCollection 
 		/// @param collection 
-		template<Concepts::Iterable TCollection>
+		template<Concepts::InputIterable TCollection>
 		explicit LinqGenerator(TCollection&& collection) noexcept :
 			_yieldContext(YieldForeach(std::forward<TCollection>(collection))) {}
 
@@ -165,7 +197,7 @@ namespace ExtendedCpp::LINQ
 		}
 
 		/// @brief Get copy of collection data. After this method generator became invalid
-		/// @tparam SIZE SIZE Size of returned array
+		/// @tparam SIZE Size of returned array
 		/// @return Copies of elements from 0 to min of array size or LINQ generator size
 		template<std::size_t SIZE>
 		requires std::is_default_constructible_v<TSource>
@@ -348,7 +380,7 @@ namespace ExtendedCpp::LINQ
 		/// @param resultSelector 
 		/// @return 
 		template<std::invocable<TSource> TCollectionSelector,
-				 Concepts::Iterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
+				 Concepts::InputIterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
 				 typename TCollectionValueType = typename TCollection::value_type,
 				 std::invocable<TSource, TCollectionValueType> TResultSelector,
 				 typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
@@ -447,7 +479,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherCollection 
 		/// @return 
 		template<typename TOtherCollection>
-		requires Concepts::ConstIterable<TOtherCollection> &&
+		requires Concepts::ForwardIterable<TOtherCollection> &&
 				 Concepts::HasSize<TOtherCollection> &&
 				 Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
@@ -477,7 +509,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherCollection 
 		/// @return 
 		template<typename TOtherCollection>
-		requires Concepts::Iterable<TOtherCollection> &&
+		requires Concepts::InputIterable<TOtherCollection> &&
 				 Concepts::HasSize<TOtherCollection> &&
 				 Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
@@ -508,7 +540,7 @@ namespace ExtendedCpp::LINQ
 		/// @tparam TOtherCollection 
 		/// @param otherCollection 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection>
+		template<Concepts::ForwardIterable TOtherCollection>
 		requires Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
 		LinqGenerator Intersect(const TOtherCollection& otherCollection) noexcept
@@ -534,7 +566,7 @@ namespace ExtendedCpp::LINQ
 		/// @tparam TOtherCollection 
 		/// @param otherCollection 
 		/// @return 
-		template<Concepts::Iterable TOtherCollection>
+		template<Concepts::InputIterable TOtherCollection>
 		requires Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
 		LinqGenerator Intersect(TOtherCollection&& otherCollection) noexcept
@@ -574,7 +606,7 @@ namespace ExtendedCpp::LINQ
 		/// @tparam TOtherCollection 
 		/// @param otherCollection 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection>
+		template<Concepts::ForwardIterable TOtherCollection>
 		requires Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
 		LinqGenerator Union(const TOtherCollection& otherCollection) noexcept
@@ -595,7 +627,7 @@ namespace ExtendedCpp::LINQ
 		/// @tparam TOtherCollection 
 		/// @param otherCollection 
 		/// @return 
-		template<Concepts::Iterable TOtherCollection>
+		template<Concepts::InputIterable TOtherCollection>
 		requires Concepts::Equatable<TSource> &&
 				 std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
 		LinqGenerator Union(TOtherCollection&& otherCollection) noexcept
@@ -854,7 +886,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherKeySelector 
 		/// @param resultSelector 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection,
+		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
 				 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
@@ -894,7 +926,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherKeySelector 
 		/// @param resultSelector 
 		/// @return 
-		template<Concepts::Iterable TOtherCollection,
+		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
 				 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
@@ -935,7 +967,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherKeySelector 
 		/// @param resultSelector 
 		/// @return 
-		template<Concepts::ConstIterable TOtherCollection,
+		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -975,7 +1007,7 @@ namespace ExtendedCpp::LINQ
 		/// @param otherKeySelector 
 		/// @param resultSelector 
 		/// @return 
-		template<Concepts::Iterable TOtherCollection,
+		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -1010,7 +1042,7 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		template<typename TOtherCollection,
 				 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-		requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
+		requires Concepts::ForwardIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		LinqGenerator<std::pair<TSource, TOtherCollectionValueType>> Zip(const TOtherCollection& otherCollection) noexcept
 		{
 			return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>(
@@ -1025,7 +1057,7 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		template<typename TOtherCollection,
 				 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-		requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
+		requires Concepts::InputIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		LinqGenerator<std::pair<TSource, TOtherCollectionValueType>> Zip(TOtherCollection&& otherCollection) noexcept
 		{
 			return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>>(
@@ -1062,14 +1094,7 @@ namespace ExtendedCpp::LINQ
 		}
 
 	private:
-		template<Concepts::ConstIterable TCollection>
-		Future<TSource> Generator(TCollection collection) noexcept
-		{
-			for (auto&& element : collection)
-				co_yield std::move(element);
-		}
-
-		template<Concepts::Iterable TCollection>
+		template<Concepts::InputIterable TCollection>
 		Future<TSource> Generator(TCollection&& collection) noexcept
 		{
 			auto inner = std::forward<TCollection>(collection);
@@ -1077,14 +1102,7 @@ namespace ExtendedCpp::LINQ
 				co_yield std::move(element);
 		}
 
-		template<Concepts::ConstIterable TCollection>
-		Future<TSource> ReverseGenerator(TCollection collection) noexcept
-		{
-			for (auto it = collection.rbegin(); it != collection.rend(); ++it)
-				co_yield std::move(*it);
-		}
-
-		template<Concepts::Iterable TCollection>
+		template<Concepts::InputIterable TCollection>
 		Future<TSource> ReverseGenerator(TCollection&& collection) noexcept
 		{
 			auto inner = std::forward<TCollection>(collection);
@@ -1128,7 +1146,7 @@ namespace ExtendedCpp::LINQ
 		}
 
 		template<std::invocable<TSource> TCollectionSelector,
-				 Concepts::Iterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
+				 Concepts::InputIterable TCollection = std::invoke_result_t<TCollectionSelector, TSource>,
 				 typename TCollectionValueType = typename TCollection::value_type,
 				 std::invocable<TSource, TCollectionValueType> TResultSelector,
 				 typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
@@ -1249,7 +1267,7 @@ namespace ExtendedCpp::LINQ
 				co_yield std::move(kv);
 		}
 
-		template<Concepts::ConstIterable TOtherCollection,
+		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
 				 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
@@ -1274,7 +1292,7 @@ namespace ExtendedCpp::LINQ
 			}
 		}
 
-		template<Concepts::Iterable TOtherCollection,
+		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
 				 std::invocable<TSource, typename TOtherCollection::value_type> TResultSelector,
@@ -1300,7 +1318,7 @@ namespace ExtendedCpp::LINQ
 			}
 		}
 
-		template<Concepts::ConstIterable TOtherCollection,
+		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -1326,7 +1344,7 @@ namespace ExtendedCpp::LINQ
 			}
 		}
 
-		template<Concepts::Iterable TOtherCollection,
+		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -1355,7 +1373,7 @@ namespace ExtendedCpp::LINQ
 
 		template<typename TOtherCollection,
 				 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-		requires Concepts::ConstIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
+		requires Concepts::ForwardIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(TOtherCollection otherCollection) noexcept
 		{
 			for (auto&& element : otherCollection)
@@ -1365,7 +1383,7 @@ namespace ExtendedCpp::LINQ
 
 		template<typename TOtherCollection,
 				 typename TOtherCollectionValueType = typename TOtherCollection::value_type>
-		requires Concepts::Iterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
+		requires Concepts::InputIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		Future<std::pair<TSource, TOtherCollectionValueType>> ZipGenerator(TOtherCollection&& otherCollection) noexcept
 		{
 			auto inner = std::forward<TOtherCollection>(otherCollection);

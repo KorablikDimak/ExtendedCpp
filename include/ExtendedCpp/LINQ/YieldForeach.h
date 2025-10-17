@@ -1,8 +1,6 @@
 #ifndef LINQ_YieldForeach_H
 #define LINQ_YieldForeach_H
 
-#include <map>
-#include <unordered_map>
 #include <utility>
 #include <iterator>
 
@@ -17,19 +15,8 @@ namespace ExtendedCpp::LINQ
     /// @tparam TCollection 
     /// @param collection 
     /// @return 
-    template<Concepts::ConstIterable TCollection, typename TSource = typename TCollection::value_type>
-    Future<TSource> YieldForeach(const TCollection& collection) noexcept
-    {
-        for (const auto& element : collection)
-            co_yield element;
-    }
-
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TCollection 
-    /// @param collection 
-    /// @return 
-    template<Concepts::Iterable TCollection, typename TSource = typename TCollection::value_type>
+    template<Concepts::InputIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
+    requires (!Concepts::IsPair<TSource>)
     Future<TSource> YieldForeach(TCollection&& collection) noexcept
     {
         auto inner = std::forward<TCollection>(collection);
@@ -37,52 +24,11 @@ namespace ExtendedCpp::LINQ
             co_yield std::move(element);
     }
 
-    /// @brief 
-    /// @tparam TKey 
-    /// @tparam TValue 
-    /// @param collection 
-    /// @return 
-    template<typename TKey, typename TValue>
-    Future<std::pair<TKey, TValue>> YieldForeach(const std::map<TKey, TValue>& collection) noexcept
+    template<Concepts::InputIterable TCollection, Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
+             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>, typename TValue = typename PairTraits<TSource>::SecondType>
+    Future<std::pair<TKey, TValue>> YieldForeach(TCollection&& collection) noexcept
     {
-        for (const auto& element : collection)
-            co_yield element;
-    }
-
-    /// @brief 
-    /// @tparam TKey 
-    /// @tparam TValue 
-    /// @param collection 
-    /// @return 
-    template<typename TKey, typename TValue>
-    Future<std::pair<TKey, TValue>> YieldForeach(std::map<TKey, TValue>&& collection) noexcept
-    {
-        auto inner = std::move(collection);
-        for (auto&& element : inner)
-            co_yield std::move(element);
-    }
-
-    /// @brief 
-    /// @tparam TKey 
-    /// @tparam TValue 
-    /// @param collection 
-    /// @return 
-    template<typename TKey, typename TValue>
-    Future<std::pair<TKey, TValue>> YieldForeach(const std::unordered_map<TKey, TValue>& collection) noexcept
-    {
-        for (const auto& element : collection)
-            co_yield element;
-    }
-
-    /// @brief 
-    /// @tparam TKey 
-    /// @tparam TValue 
-    /// @param collection 
-    /// @return 
-    template<typename TKey, typename TValue>
-    Future<std::pair<TKey, TValue>> YieldForeach(std::unordered_map<TKey, TValue>&& collection) noexcept
-    {
-        auto inner = std::move(collection);
+        auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
             co_yield std::move(element);
     }

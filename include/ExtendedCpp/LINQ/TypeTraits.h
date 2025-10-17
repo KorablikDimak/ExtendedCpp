@@ -8,11 +8,8 @@
 /// @brief 
 namespace ExtendedCpp::LINQ
 {
-    /// @brief 
-    /// @tparam TPair 
-    /// @tparam  
-    /// @tparam  
-    template<typename TPair, typename = void, typename = void>
+    /// @brief
+    template<typename, typename = void, typename = void>
     struct PairTraits
     {
         using FirstType = void;
