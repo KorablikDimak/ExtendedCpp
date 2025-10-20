@@ -2,19 +2,10 @@
 #define LINQ_Concepts_H
 
 #include <utility>
-#include <optional>
 
 /// @brief 
 namespace ExtendedCpp::LINQ::Concepts
 {
-    template<typename TIter>
-    concept OptionalIter = requires(TIter iter)
-    {
-        { *(++iter) } -> std::same_as<std::optional<typename std::decay_t<TIter>::value_type>>;
-        { iter == iter } -> std::convertible_to<bool>;
-        { iter != iter } -> std::convertible_to<bool>;
-    };
-
     template<typename TPair>
     concept IsPair = requires(TPair pair)
     {

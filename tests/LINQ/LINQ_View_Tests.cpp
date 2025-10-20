@@ -183,6 +183,8 @@ TEST(LINQ_View_Tests, EmptyCollectionTest)
     const auto emptyResultVector = linq
         .Where([](char){ return true; })
         .Select([](const char& element){ return element; })
+        .Take(10)
+        .Skip(3)
         .ToVector();
 
     // Assert
@@ -219,4 +221,25 @@ TEST(LINQ_View_Tests, MapTest)
     // Assert
     for (std::size_t i = 0; i < assertVector.size(); ++i)
         ASSERT_EQ(mapped[i], assertVector[i]);
+}
+
+TEST(LINQ_View_Tests, GroupByTest)
+{
+    // Average
+    Employer person1("Tom", "Microsoft");
+    Employer person2("Bob", "Google");
+    Employer person3("Sam", "Microsoft");
+    Employer person4("Alice", "Google");
+    Employer person5("Jon", "Google");
+
+    std::vector people { person1, person2, person3, person4, person5 };
+
+    // Act
+    std::map companies = ExtendedCpp::LINQ::View(people)
+        .GroupBy([](const Employer& employer){ return employer.CompanyName; });
+
+    // Assert
+    ASSERT_EQ(2, companies.size());
+    ASSERT_EQ(2, companies["Microsoft"].size());
+    ASSERT_EQ(3, companies["Google"].size());
 }

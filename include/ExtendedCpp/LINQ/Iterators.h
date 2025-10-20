@@ -1,11 +1,6 @@
 #ifndef LINQ_Iterators_H
 #define LINQ_Iterators_H
 
-#include <concepts>
-#include <optional>
-#include <type_traits>
-#include <utility>
-
 #include <ExtendedCpp/LINQ/Concepts.h>
 
 /// @brief
@@ -14,62 +9,78 @@ namespace ExtendedCpp::LINQ
 	/// @brief
 	/// @tparam TInIterator
 	template<std::forward_iterator TInIterator>
-	struct OptionalIterator final
+	struct IteratorWrapper final
 	{
 	private:
-		std::decay_t<TInIterator> _inIterator;
+		TInIterator _inIterator;
+		TInIterator _endIterator;
 
 	public:
 		/// @brief
-		using value_type = typename std::decay_t<TInIterator>::value_type;
-
-		/// @brief
-		using iterator_category = std::forward_iterator_tag;
+		using value_type = typename TInIterator::value_type;
 
 		/// @brief
 		using difference_type = std::ptrdiff_t;
 
 		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
-
-		/// @brief
 		/// @param inIterator
-		explicit OptionalIterator(TInIterator&& inIterator) noexcept :
-			_inIterator(std::forward<TInIterator>(inIterator)) {}
+		/// @param endIterator
+		IteratorWrapper(TInIterator inIterator, TInIterator endIterator) noexcept :
+			_inIterator(std::move(inIterator)),
+			_endIterator(std::move(endIterator)) {}
 
-		OptionalIterator(const OptionalIterator& other) noexcept = default;
-		OptionalIterator(OptionalIterator&& other) noexcept = default;
-		OptionalIterator& operator=(const OptionalIterator& other) noexcept = default;
-		OptionalIterator& operator=(OptionalIterator&& other) noexcept = default;
+		/// @brief
+		IteratorWrapper() noexcept = default;
+
+		/// @brief
+		/// @param other
+		IteratorWrapper(const IteratorWrapper& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		IteratorWrapper(IteratorWrapper&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		IteratorWrapper& operator=(const IteratorWrapper& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		IteratorWrapper& operator=(IteratorWrapper&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&std::decay_t<TInIterator>::operator*)>)
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
 			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		OptionalIterator& operator++() noexcept
+		IteratorWrapper& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
 			return *this;
 		}
 
-		void operator++(int) noexcept
+		/// @brief
+		/// @return
+		IteratorWrapper operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<IteratorWrapper>().operator++())>)
 		{
-			++_inIterator;
+			IteratorWrapper temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
 		/// @param other
 		/// @return
-		bool operator!=(const OptionalIterator& other) const noexcept
+		bool operator!=(const IteratorWrapper& other) const noexcept
 		{
 			return _inIterator != other._inIterator;
 		}
@@ -77,9 +88,15 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @param other
 		/// @return
-		bool operator==(const OptionalIterator& other) const noexcept
+		bool operator==(const IteratorWrapper& other) const noexcept
 		{
 			return _inIterator == other._inIterator;
+		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator != _endIterator;
 		}
 	};
 
@@ -88,7 +105,7 @@ namespace ExtendedCpp::LINQ
 	/// @tparam TInIterator
 	/// @tparam TSelector
 	template<typename TOut,
-			 Concepts::OptionalIter TInIterator,
+			 std::forward_iterator TInIterator,
 			 std::invocable<typename TInIterator::value_type> TSelector>
 	requires std::same_as<TOut, std::invoke_result_t<TSelector, typename TInIterator::value_type>>
 	struct SelectorIterator final
@@ -102,46 +119,67 @@ namespace ExtendedCpp::LINQ
 		using value_type = TOut;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param selector
 		SelectorIterator(TInIterator inIterator, TSelector&& selector) noexcept :
-			_inIterator(inIterator),
+			_inIterator(std::move(inIterator)),
 			_selector(std::forward<TSelector>(selector)) {}
 
 		/// @brief
 		/// @param inIterator
 		explicit SelectorIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		SelectorIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		SelectorIterator(const SelectorIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		SelectorIterator(SelectorIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		SelectorIterator& operator=(const SelectorIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		SelectorIterator& operator=(SelectorIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
+		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<TSelector, typename TInIterator::value_type> &&
 				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if ((*_inIterator).has_value())
-				return _selector((*_inIterator).value());
-			return std::nullopt;
+			return _selector(*_inIterator);
 		}
 
 		/// @brief
 		/// @return
-		SelectorIterator& operator++() noexcept
+		SelectorIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		SelectorIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SelectorIterator>().operator++())>)
+		{
+			SelectorIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -159,12 +197,18 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
 	/// @tparam TTransform
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 std::invocable<typename TInIterator::value_type&> TTransform>
 	requires std::same_as<std::invoke_result_t<TTransform, typename TInIterator::value_type&>, void>
 	struct TransformIterator final
@@ -178,50 +222,70 @@ namespace ExtendedCpp::LINQ
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param transform
 		TransformIterator(TInIterator inIterator, TTransform&& transform) noexcept :
-			_inIterator(inIterator),
+			_inIterator(std::move(inIterator)),
 			_transform(std::forward<TTransform>(transform)) {}
 
 		/// @brief
 		/// @param inIterator
 		explicit TransformIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		TransformIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		TransformIterator(const TransformIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		TransformIterator(TransformIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TransformIterator& operator=(const TransformIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TransformIterator& operator=(TransformIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<TTransform, typename TInIterator::value_type&> &&
+		value_type operator*() const
+		noexcept(std::is_nothrow_copy_assignable_v<value_type> &&
+				 std::is_nothrow_invocable_v<TTransform, typename TInIterator::value_type&> &&
 				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if ((*_inIterator).has_value())
-			{
-				auto value = (*_inIterator).value();
-				_transform(value);
-				return value;
-			}
-			return std::nullopt;
+			auto value = *_inIterator;
+			_transform(value);
+			return value;
 		}
 
 		/// @brief
 		/// @return
-		TransformIterator& operator++() noexcept
+		TransformIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		TransformIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TransformIterator>().operator++())>)
+		{
+			TransformIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -239,12 +303,18 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
 	/// @tparam TPredicate
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
 	struct WhereIterator final
 	{
@@ -257,44 +327,85 @@ namespace ExtendedCpp::LINQ
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param predicate
-		WhereIterator(TInIterator inIterator, TPredicate&& predicate) noexcept :
-			_inIterator(inIterator),
-			_predicate(std::forward<TPredicate>(predicate)) {}
+		WhereIterator(TInIterator inIterator, TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+			_inIterator(std::move(inIterator)),
+			_predicate(std::forward<TPredicate>(predicate))
+		{
+			while (_inIterator)
+			{
+				if (_predicate(*_inIterator))
+					break;
+				++_inIterator;
+			}
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit WhereIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
 
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		/// @brief
+		WhereIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		WhereIterator(const WhereIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		WhereIterator(WhereIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		WhereIterator& operator=(const WhereIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		WhereIterator& operator=(WhereIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @return
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if ((*_inIterator).has_value() && _predicate((*_inIterator).value()))
-				return (*_inIterator).value();
-			return std::nullopt;
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		WhereIterator& operator++() noexcept
+		WhereIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
 			++_inIterator;
+			while (_inIterator)
+			{
+				if (_predicate(*_inIterator))
+					break;
+				++_inIterator;
+			}
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		WhereIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<WhereIterator>().operator++())>)
+		{
+			WhereIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -312,12 +423,18 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
 	/// @tparam TPredicate
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
 	struct RemoveWhereIterator final
 	{
@@ -330,46 +447,85 @@ namespace ExtendedCpp::LINQ
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param predicate
-		RemoveWhereIterator(TInIterator inIterator, TPredicate&& predicate) noexcept :
-			_inIterator(inIterator),
-			_predicate(std::forward<TPredicate>(predicate)) {}
+		RemoveWhereIterator(TInIterator inIterator, TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>) :
+			_inIterator(std::move(inIterator)),
+			_predicate(std::forward<TPredicate>(predicate))
+		{
+			while (_inIterator)
+			{
+				if (!_predicate(*_inIterator))
+					break;
+				++_inIterator;
+			}
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit RemoveWhereIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		RemoveWhereIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		RemoveWhereIterator(const RemoveWhereIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		RemoveWhereIterator(RemoveWhereIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		RemoveWhereIterator& operator=(const RemoveWhereIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		RemoveWhereIterator& operator=(RemoveWhereIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if ((*_inIterator).has_value() && !_predicate((*_inIterator).value()))
-				return (*_inIterator).value();
-			return std::nullopt;
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		RemoveWhereIterator& operator++() noexcept
+		RemoveWhereIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
 			++_inIterator;
+			while (_inIterator)
+			{
+				if (!_predicate(*_inIterator))
+					break;
+				++_inIterator;
+			}
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		RemoveWhereIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<RemoveWhereIterator>().operator++())>)
+		{
+			WhereIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -387,6 +543,12 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
@@ -396,18 +558,18 @@ namespace ExtendedCpp::LINQ
 	/// @tparam TInnerKeySelector
 	/// @tparam TOtherKeySelector
 	/// @tparam TResultSelector
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 Concepts::ForwardIterable TOtherCollection,
 			 std::invocable<typename TInIterator::value_type> TInnerKeySelector,
-			 std::invocable<typename std::decay_t<TOtherCollection>::value_type> TOtherKeySelector,
+			 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
 			 std::invocable<typename TInIterator::value_type,
-							typename std::decay_t<TOtherCollection>::value_type> TResultSelector,
+							typename TOtherCollection::value_type> TResultSelector,
 			 typename TResult = std::invoke_result_t<TResultSelector,
 													 typename TInIterator::value_type,
-													 typename std::decay_t<TOtherCollection>::value_type>,
+													 typename TOtherCollection::value_type>,
 			 std::forward_iterator TOtherIterator = typename TOtherCollection::const_iterator>
 	requires std::same_as<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>,
-						  std::invoke_result_t<TOtherKeySelector, typename std::decay_t<TOtherCollection>::value_type>> &&
+						  std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
 			 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>>
 	struct JoinIterator final
 	{
@@ -415,26 +577,17 @@ namespace ExtendedCpp::LINQ
 		TInIterator _inIterator;
 		TOtherIterator _otherBegin;
 		TOtherIterator _otherEnd;
+		TOtherIterator _currentOther;
 		std::decay_t<TInnerKeySelector> _innerKeySelector;
 		std::decay_t<TOtherKeySelector> _otherKeySelector;
 		std::decay_t<TResultSelector> _resultSelector;
-		std::size_t _otherPosition = 0;
 
 	public:
 		/// @brief
 		using value_type = TResult;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
@@ -446,49 +599,105 @@ namespace ExtendedCpp::LINQ
 					 const TOtherCollection& otherCollection,
 					 TInnerKeySelector&& innerKeySelector,
 					 TOtherKeySelector&& otherKeySelector,
-					 TResultSelector&& resultSelector) noexcept :
-			_inIterator(inIterator),
-			_otherBegin(otherCollection.cbegin()),
-			_otherEnd(otherCollection.cend()),
+					 TResultSelector&& resultSelector)
+		noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(&TOtherIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TOtherIterator>().operator++())>) :
+			_inIterator(std::move(inIterator)),
+			_otherBegin(otherCollection.begin()),
+			_otherEnd(otherCollection.end()),
 			_innerKeySelector(std::forward<TInnerKeySelector>(innerKeySelector)),
 			_otherKeySelector(std::forward<TOtherKeySelector>(otherKeySelector)),
-			_resultSelector(std::forward<TResultSelector>(resultSelector)) {}
+			_resultSelector(std::forward<TResultSelector>(resultSelector))
+		{
+			while (_inIterator)
+			{
+				_currentOther = _otherBegin;
+				while (_currentOther != _otherEnd)
+				{
+					if (_innerKeySelector(*_inIterator) == _otherKeySelector(*_currentOther))
+						return;
+					++_currentOther;
+				}
+				++_inIterator;
+			}
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit JoinIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		JoinIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		JoinIterator(const JoinIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		JoinIterator(JoinIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		JoinIterator& operator=(const JoinIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		JoinIterator& operator=(JoinIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<TOtherKeySelector, typename std::decay_t<TOtherCollection>::value_type> &&
-				 std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type,
-											 typename std::decay_t<TOtherCollection>::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type, typename TOtherCollection::value_type> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(&TOtherIterator::operator*)>)
 		{
-			const auto& opt = *_inIterator;
-			if (!opt.has_value() || (_otherBegin + _otherPosition) == _otherEnd)
-				return std::nullopt;
-			if (_innerKeySelector(opt.value()) == _otherKeySelector(*(_otherBegin + _otherPosition)))
-				return _resultSelector(opt.value(), *(_otherBegin + _otherPosition));
-			return std::nullopt;
+			return _resultSelector(*_inIterator, *_currentOther);
 		}
 
 		/// @brief
 		/// @return
-		JoinIterator& operator++() noexcept
+		JoinIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TOtherIterator>().operator++())>)
 		{
-			if ((_otherBegin + _otherPosition) != _otherEnd)
-				++_otherPosition;
-			if ((_otherBegin + _otherPosition) == _otherEnd)
+			if (_currentOther != _otherEnd)
+				++_currentOther;
+			else
 			{
-				_otherPosition = 0;
+				_currentOther = _otherBegin;
 				++_inIterator;
-				return *this;
+			}
+
+			while (_inIterator)
+			{
+				while (_currentOther != _otherEnd)
+				{
+					if (_innerKeySelector(*_inIterator) == _otherKeySelector(*_currentOther))
+						return *this;
+					++_currentOther;
+				}
+				_currentOther = _otherBegin;
+				++_inIterator;
 			}
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		JoinIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<JoinIterator>().operator++())>)
+		{
+			JoinIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -506,6 +715,12 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
@@ -513,66 +728,92 @@ namespace ExtendedCpp::LINQ
 	/// @tparam TRight
 	/// @tparam TLeftIterator
 	/// @tparam TOtherCollection
-	template<Concepts::OptionalIter TLeftIterator,
+	template<std::forward_iterator TLeftIterator,
 			 Concepts::ForwardIterable TOtherCollection,
-			 typename TLeft = typename std::decay_t<TLeftIterator>::value_type,
-			 typename TRight = typename std::decay_t<TOtherCollection>::value_type,
-			 std::forward_iterator TOtherIterator = typename TOtherCollection::const_iterator>
+			 typename TLeft = typename TLeftIterator::value_type,
+			 typename TRight = typename TOtherCollection::value_type,
+			 std::forward_iterator TRightIterator = typename TOtherCollection::const_iterator>
 	struct ZipIterator final
 	{
 	private:
 		TLeftIterator _leftIterator;
-		TOtherIterator _otherBegin;
-		TOtherIterator _otherEnd;
-		std::size_t _otherPosition = 0;
+		TRightIterator _rightIterator;
+		TRightIterator _rightEnd;
 
 	public:
 		/// @brief
 		using value_type = std::pair<TLeft, TRight>;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param leftIterator
 		/// @param otherCollection
 		ZipIterator(TLeftIterator leftIterator, const TOtherCollection& otherCollection) noexcept :
-			_leftIterator(leftIterator),
-			_otherBegin(otherCollection.cbegin()),
-			_otherEnd(otherCollection.cend()) {}
+			_leftIterator(std::move(leftIterator)),
+			_rightIterator(otherCollection.begin()),
+			_rightEnd(otherCollection.end()) {}
 
 		/// @brief
 		/// @param leftIterator
 		explicit ZipIterator(TLeftIterator leftIterator) noexcept :
-			_leftIterator(leftIterator) {}
+			_leftIterator(std::move(leftIterator)) {}
+
+		/// @brief
+		ZipIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		ZipIterator(const ZipIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		ZipIterator(ZipIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		ZipIterator& operator=(const ZipIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		ZipIterator& operator=(ZipIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
+		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<decltype(&TLeftIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(&std::decay_t<TOtherCollection>::const_iterator::operator*)>)
+				 std::is_nothrow_invocable_v<decltype(&TRightIterator::operator*)> &&
+				 std::is_nothrow_move_constructible_v<TLeft> &&
+				 std::is_nothrow_move_constructible_v<TRight>)
 		{
-			if ((*_leftIterator).has_value() && _otherBegin + _otherPosition != _otherEnd)
-				return std::make_pair((*_leftIterator).value(), *(_otherBegin + _otherPosition));
-			return std::nullopt;
+			return std::make_pair(*_leftIterator, *_rightIterator);
 		}
 
 		/// @brief
 		/// @return
-		ZipIterator& operator++() noexcept
+		ZipIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLeftIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TRightIterator>().operator++())>)
 		{
-			++_leftIterator;
-			++_otherPosition;
+			if (_leftIterator && _rightIterator != _rightEnd)
+			{
+				++_leftIterator;
+				++_rightIterator;
+			}
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		ZipIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<ZipIterator>().operator++())>)
+		{
+			JoinIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -590,39 +831,39 @@ namespace ExtendedCpp::LINQ
 		{
 			return _leftIterator == other._leftIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _leftIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
-	template<Concepts::OptionalIter TInIterator>
+	template<std::forward_iterator TInIterator>
 	struct SkipIterator final
 	{
 	private:
 		TInIterator _inIterator;
-		mutable std::size_t _count = 0;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param count
-		SkipIterator(TInIterator inIterator, const std::size_t count) noexcept :
-			_inIterator(inIterator),
-			_count(count) {}
+		SkipIterator(TInIterator inIterator, const std::size_t count)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+			_inIterator(std::move(inIterator))
+		{
+			for (std::size_t i = 0; i < count && _inIterator; ++i)
+				++_inIterator;
+		}
 
 		/// @brief
 		/// @param inIterator
@@ -630,28 +871,51 @@ namespace ExtendedCpp::LINQ
 			_inIterator(inIterator) {}
 
 		/// @brief
+		SkipIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		SkipIterator(const SkipIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		SkipIterator(SkipIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
 		/// @return
-		std::optional<value_type> operator*() const
+		SkipIterator& operator=(const SkipIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		SkipIterator& operator=(SkipIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @return
+		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if (!(*_inIterator).has_value())
-				return std::nullopt;
-
-			if (_count)
-			{
-				--_count;
-				return std::nullopt;
-			}
-
-			return (*_inIterator).value();
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		SkipIterator& operator++() noexcept
+		SkipIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		SkipIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SkipIterator>().operator++())>)
+		{
+			SkipIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -669,72 +933,101 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
 	/// @tparam TPredicate
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
 	struct SkipWhileIterator final
 	{
 	private:
 		TInIterator _inIterator;
 		std::decay_t<TPredicate> _predicate;
-		mutable bool _predicateFailed = false;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param predicate
-		SkipWhileIterator(TInIterator inIterator, TPredicate&& predicate) noexcept :
-			_inIterator(inIterator),
-			_predicate(std::forward<TPredicate>(predicate)) {}
+		SkipWhileIterator(TInIterator inIterator, TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>) :
+			_inIterator(std::move(inIterator)),
+			_predicate(std::forward<TPredicate>(predicate))
+		{
+			while (_inIterator)
+			{
+				if (!_predicate(*_inIterator))
+					break;
+				++_inIterator;
+			}
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit SkipWhileIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		SkipWhileIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		SkipWhileIterator(const SkipWhileIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		SkipWhileIterator(SkipWhileIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		SkipWhileIterator& operator=(const SkipWhileIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		SkipWhileIterator& operator=(SkipWhileIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<TPredicate, value_type>)
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if (!(*_inIterator).has_value())
-				return std::nullopt;
-			if (_predicateFailed)
-				return (*_inIterator).value();
-
-			if (_predicate((*_inIterator).value()))
-				return std::nullopt;
-
-			_predicateFailed = true;
-			return (*_inIterator).value();
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		SkipWhileIterator& operator++() noexcept
+		SkipWhileIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		SkipWhileIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SkipWhileIterator>().operator++())>)
+		{
+			SkipWhileIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -752,67 +1045,103 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		/// @return
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
-	template<Concepts::OptionalIter TInIterator>
+	template<std::forward_iterator TInIterator>
 	struct TakeIterator final
 	{
 	private:
 		TInIterator _inIterator;
-		mutable std::size_t _count = 0;
+		std::size_t _count = 0;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param count
-		TakeIterator(TInIterator inIterator, std::size_t count) noexcept :
-			_inIterator(inIterator),
-			_count(count) {}
+		TakeIterator(TInIterator inIterator, const std::size_t count) noexcept :
+			_inIterator(std::move(inIterator)),
+			_count(count)
+		{
+			if (!count)
+				while (_inIterator)
+					++_inIterator;
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit TakeIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		TakeIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		TakeIterator(const TakeIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		TakeIterator(TakeIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TakeIterator& operator=(const TakeIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TakeIterator& operator=(TakeIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
+		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if (!(*_inIterator).has_value())
-				return std::nullopt;
-
-			if (_count)
-			{
-				--_count;
-				return (*_inIterator).value();
-			}
-			return std::nullopt;
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		TakeIterator& operator++() noexcept
+		TakeIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
+
+			if (_count)
+			{
+				--_count;
+				if (!_count)
+					while (_inIterator)
+						++_inIterator;
+			}
+
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		TakeIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TakeIterator>().operator++())>)
+		{
+			TakeIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -830,70 +1159,109 @@ namespace ExtendedCpp::LINQ
 		{
 			return _inIterator == other._inIterator;
 		}
+
+		/// @brief
+		/// @return
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
+		}
 	};
 
 	/// @brief
 	/// @tparam TInIterator
 	/// @tparam TPredicate
-	template<Concepts::OptionalIter TInIterator,
+	template<std::forward_iterator TInIterator,
 			 Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
 	struct TakeWhileIterator final
 	{
 	private:
 		TInIterator _inIterator;
 		std::decay_t<TPredicate> _predicate;
-		mutable bool _predicateFailed = false;
 
 	public:
 		/// @brief
 		using value_type = typename TInIterator::value_type;
 
 		/// @brief
-		using iterator_category = std::forward_iterator_tag;
-
-		/// @brief
 		using difference_type = std::ptrdiff_t;
-
-		/// @brief
-		using pointer = value_type*;
-
-		/// @brief
-		using reference = value_type&;
 
 		/// @brief
 		/// @param inIterator
 		/// @param predicate
-		TakeWhileIterator(TInIterator inIterator, TPredicate&& predicate) noexcept :
-			_inIterator(inIterator),
-			_predicate(std::forward<TPredicate>(predicate)) {}
+		TakeWhileIterator(TInIterator inIterator, TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+			_inIterator(std::move(inIterator)),
+			_predicate(std::forward<TPredicate>(predicate))
+		{
+			if (_inIterator)
+				if (!_predicate(*_inIterator))
+				{
+					while (_inIterator)
+						++_inIterator;
+				}
+		}
 
 		/// @brief
 		/// @param inIterator
 		explicit TakeWhileIterator(TInIterator inIterator) noexcept :
-			_inIterator(inIterator) {}
+			_inIterator(std::move(inIterator)) {}
+
+		/// @brief
+		TakeWhileIterator() noexcept = default;
+
+		/// @brief
+		/// @param other
+		TakeWhileIterator(const TakeWhileIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		TakeWhileIterator(TakeWhileIterator&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TakeWhileIterator& operator=(const TakeWhileIterator& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		TakeWhileIterator& operator=(TakeWhileIterator&& other) noexcept = default;
 
 		/// @brief
 		/// @return
-		std::optional<value_type> operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<TPredicate, value_type>)
+		value_type operator*() const
+		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
 		{
-			if (!(*_inIterator).has_value() || _predicateFailed)
-				return std::nullopt;
-
-			if (_predicate((*_inIterator).value()))
-				return (*_inIterator).value();
-
-			_predicateFailed = true;
-			return std::nullopt;
+			return *_inIterator;
 		}
 
 		/// @brief
 		/// @return
-		TakeWhileIterator& operator++() noexcept
+		TakeWhileIterator& operator++()
+		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
+				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
 		{
 			++_inIterator;
+			if (_inIterator && _predicate(*_inIterator))
+				return *this;
+
+			while (_inIterator)
+				++_inIterator;
 			return *this;
+		}
+
+		/// @brief
+		/// @return
+		TakeWhileIterator operator++(int)
+		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TakeWhileIterator>().operator++())>)
+		{
+			TakeWhileIterator temp = *this;
+			++*this;
+			return temp;
 		}
 
 		/// @brief
@@ -910,6 +1278,13 @@ namespace ExtendedCpp::LINQ
 		bool operator==(const TakeWhileIterator& other) const noexcept
 		{
 			return _inIterator == other._inIterator;
+		}
+
+		/// @brief
+		/// @return
+		explicit operator bool() const noexcept
+		{
+			return _inIterator.operator bool();
 		}
 	};
 }

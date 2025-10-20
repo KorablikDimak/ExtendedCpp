@@ -4,6 +4,8 @@
 
 #include "LINQ_Tests.h"
 
+#include <ranges>
+
 TEST(LINQ_Tests, SelectTest)
 {
     // Average
@@ -429,7 +431,7 @@ TEST(LINQ_Tests, FirstPredicateTest)
 TEST(LINQ_Tests, FirstOrDefaultTest)
 {
     // Average
-    const std::vector<int> numbers;
+    constexpr std::vector<int> numbers;
 
     // Act
     const int result = ExtendedCpp::LINQ::From(numbers)
@@ -481,7 +483,7 @@ TEST(LINQ_Tests, LastPredicateTest)
 TEST(LINQ_Tests, LastOrDefaultTest)
 {
     // Average
-    const std::vector<int> numbers;
+    constexpr std::vector<int> numbers;
 
     // Act
     const int result = ExtendedCpp::LINQ::From(numbers)
@@ -972,11 +974,11 @@ TEST(LINQ_Tests, ToContainerTest)
     for (int number : unorderedSetResult)
         ASSERT_TRUE(linq.Contains(number));
 
-    for (auto pair : mapResult)
-        ASSERT_TRUE(linq.Contains(pair.first));
+    for (const auto key : mapResult | std::views::keys)
+        ASSERT_TRUE(linq.Contains(key));
 
-    for (auto pair : unorderedMapResult)
-        ASSERT_TRUE(linq.Contains(pair.first));
+    for (const auto key : unorderedMapResult | std::views::keys)
+        ASSERT_TRUE(linq.Contains(key));
 }
 
 TEST(LINQ_Tests, ReverseTest)
@@ -1121,7 +1123,7 @@ TEST(LINQ_Tests, ForeachTest)
 TEST(LINQ_Tests, EmptyCollectionTest)
 {
     // Average
-    const std::vector<char> emptyVector;
+    constexpr std::vector<char> emptyVector;
 
     // Act
     const auto linq = ExtendedCpp::LINQ::From(emptyVector);

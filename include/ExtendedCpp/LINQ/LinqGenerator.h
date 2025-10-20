@@ -224,10 +224,8 @@ namespace ExtendedCpp::LINQ
 		/// @return Copies of elements from LINQ generator, maintaining order
 		std::forward_list<TSource> ToForwardList() noexcept
 		{
-			std::forward_list<TSource> collection;
-			while (_yieldContext)
-				collection.push_front(_yieldContext.Next());
-			return collection;
+			const std::vector<TSource> collection = ToVector();
+			return std::forward_list<TSource>(collection.cbegin(), collection.cend());
 		}
 
 		/// @brief Get copy of collection data. After this method generator became invalid

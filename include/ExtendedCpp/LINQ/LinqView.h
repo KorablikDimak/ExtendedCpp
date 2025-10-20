@@ -12,13 +12,8 @@
 #include <map>
 #include <unordered_map>
 #include <deque>
-#include <concepts>
-#include <optional>
-#include <type_traits>
-#include <utility>
 
 #include <ExtendedCpp/LINQ/Iterators.h>
-#include <ExtendedCpp/LINQ/Concepts.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 
 /// @brief 
@@ -29,28 +24,29 @@ namespace ExtendedCpp::LINQ
 	template<typename T>
 	class LinqView;
 
-	/// @brief 
+	/// @brief
 	/// @tparam TIterator 
-	template<Concepts::OptionalIter TIterator>
+	template<std::forward_iterator TIterator>
 	class LinqView<TIterator> final
 	{
-	private:
-		TIterator _begin;
-		TIterator _end;
-
 	public:
 		/// @brief
-		using value_type = typename TIterator::value_type;
+		using iterator = std::decay_t<TIterator>;
 
 		/// @brief
-		using iterator = TIterator;
+		using const_iterator = std::remove_reference_t<TIterator>;
 
 		/// @brief
-		using const_iterator = TIterator;
+		using value_type = typename iterator::value_type;
 
 		/// @brief
 		static constexpr bool IsLinqCollection = true;
 
+	private:
+		iterator _begin;
+		iterator _end;
+
+	public:
 		/// @brief 
 		/// @param begin 
 		/// @param end 
@@ -59,28 +55,28 @@ namespace ExtendedCpp::LINQ
 
 		/// @brief 
 		/// @return 
-		TIterator begin() const noexcept
+		iterator begin() const noexcept
 		{
 			return _begin;
 		}
 
 		/// @brief 
 		/// @return 
-		TIterator cbegin() const noexcept
+		const_iterator cbegin() const noexcept
 		{
 			return _begin;
 		}
 
 		/// @brief 
 		/// @return 
-		TIterator end() const noexcept
+		iterator end() const noexcept
 		{
 			return _end;
 		}
 
 		/// @brief 
 		/// @return 
-		TIterator cend() const noexcept
+		const_iterator cend() const noexcept
 		{
 			return _end;
 		}
@@ -89,15 +85,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::vector<value_type> ToVector() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::vector<value_type> collection;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					collection.push_back(opt.value());
-			}
+				collection.push_back(*it);
 			return collection;
 		}
 
@@ -106,16 +98,12 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		template<std::size_t SIZE>
 		std::array<value_type, SIZE> ToArray() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::array<value_type, SIZE> array;
 			std::size_t i = 0;
 			for (TIterator it = _begin; it != _end && i < SIZE; ++it, ++i)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					array[i] = opt.value();
-			}
+				array[i] = *it;
 			return array;
 		}
 
@@ -123,15 +111,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::list<value_type> ToList() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::list<value_type> collection;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					collection.push_back(opt.value());
-			}
+				collection.push_back(*it);
 			return collection;
 		}
 
@@ -139,31 +123,21 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::forward_list<value_type> ToForwardList() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
-			std::forward_list<value_type> collection;
-			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					collection.push_front(opt.value());
-			}
-			return collection;
+			const std::vector<value_type> collection = ToVector();
+			return std::forward_list<value_type>(collection.cbegin(), collection.cend());
 		}
 
 		/// @brief 
 		/// @return 
 		[[nodiscard]]
 		std::stack<value_type> ToStack() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::stack<value_type> stack;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					stack.push(opt.value());
-			}
+				stack.push(*it);
 			return stack;
 		}
 
@@ -171,15 +145,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::queue<value_type> ToQueue() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::queue<value_type> queue;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					queue.push(opt.value());
-			}
+				queue.push(*it);
 			return queue;
 		}
 
@@ -187,15 +157,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::deque<value_type> ToDeque() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::deque<value_type> deque;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					deque.push_back(opt.value());
-			}
+				deque.push_back(*it);
 			return deque;
 		}
 
@@ -203,45 +169,33 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::priority_queue<value_type> ToPriorityQueue() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::priority_queue<value_type> priorityQueue;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					priorityQueue.push(opt.value());
-			}
+				priorityQueue.push(*it);
 			return priorityQueue;
 		}
 
 		/// @brief 
 		/// @return 
 		std::set<value_type> ToSet() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::set<value_type> set;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					set.insert(opt.value());
-			}
+				set.insert(*it);
 			return set;
 		}
 
 		/// @brief 
 		/// @return 
 		std::unordered_set<value_type> ToUnorderedSet() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::unordered_set<value_type> unorderedSet;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-					unorderedSet.insert(opt.value());
-			}
+				unorderedSet.insert(*it);
 			return unorderedSet;
 		}
 
@@ -253,15 +207,11 @@ namespace ExtendedCpp::LINQ
 				 typename TValue = typename PairTraits<value_type>::SecondType>
 		requires Concepts::IsPair<value_type>
 		std::map<TKey, TValue> ToMap() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::map<TKey, TValue> map;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<std::pair<TKey, TValue>> opt = *it;
-				if (opt.has_value())
-					map.insert(opt.value());
-			}
+				map.insert(*it);
 			return map;
 		}
 
@@ -273,15 +223,11 @@ namespace ExtendedCpp::LINQ
 				 typename TValue = typename PairTraits<value_type>::SecondType>
 		requires Concepts::IsPair<value_type>
 		std::unordered_map<TKey, TValue> ToUnorderedMap() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&const_iterator::operator*)>)
 		{
 			std::unordered_map<TKey, TValue> unorderedMap;
 			for (TIterator it = _begin; it != _end; ++it)
-			{
-				std::optional<std::pair<TKey, TValue>> opt = *it;
-				if (opt.has_value())
-					unorderedMap.insert(opt.value());
-			}
+				unorderedMap.insert(*it);
 			return unorderedMap;
 		}
 
@@ -329,7 +275,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<value_type> TPredicate>
-		LinqView<WhereIterator<TIterator, TPredicate>> Where(TPredicate&& predicate) const noexcept
+		LinqView<WhereIterator<TIterator, TPredicate>> Where(TPredicate&& predicate) const
+		noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
 		{
 			return LinqView<WhereIterator<TIterator, TPredicate>>(
 				WhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
@@ -341,7 +288,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<value_type> TPredicate>
-		LinqView<RemoveWhereIterator<TIterator, TPredicate>> RemoveWhere(TPredicate&& predicate) const noexcept
+		LinqView<RemoveWhereIterator<TIterator, TPredicate>> RemoveWhere(TPredicate&& predicate) const
+		noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
 		{
 			return LinqView<RemoveWhereIterator<TIterator, TPredicate>>(
 				RemoveWhereIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
@@ -362,14 +310,10 @@ namespace ExtendedCpp::LINQ
 
 			for (TIterator it = _begin; it != _end; ++it)
 			{
-				std::optional<value_type> opt = *it;
-				if (opt.has_value())
-				{
-					value_type value = opt.value();
-					if (!result.contains(keySelector(value)))
-						result.insert(std::pair<TKey, std::vector<value_type>>(keySelector(value), std::vector<value_type>()));
-					result.at(keySelector(value)).push_back(value);
-				}
+				value_type value = *it;
+				if (!result.contains(keySelector(value)))
+					result.insert(std::pair<TKey, std::vector<value_type>>(keySelector(value), std::vector<value_type>()));
+				result.at(keySelector(value)).push_back(std::move(value));
 			}
 
 			return result;
@@ -396,7 +340,9 @@ namespace ExtendedCpp::LINQ
 							  TOtherKeySelector, TResultSelector>> Join(const TOtherCollection& otherCollection,
 																		TInnerKeySelector&& innerKeySelector,
 																		TOtherKeySelector&& otherKeySelector,
-																		TResultSelector&& resultSelector) const noexcept
+																		TResultSelector&& resultSelector) const
+		noexcept(std::is_nothrow_constructible_v<JoinIterator<TIterator, TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>,
+												 TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>)
 		{
 			return LinqView<JoinIterator<TIterator, TOtherCollection, TInnerKeySelector,
 										 TOtherKeySelector, TResultSelector>>(
@@ -424,7 +370,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		/// @param count 
 		/// @return 
-		LinqView<SkipIterator<TIterator>> Skip(std::size_t count) const noexcept
+		LinqView<SkipIterator<TIterator>> Skip(const std::size_t count) const
+		noexcept(std::is_nothrow_constructible_v<SkipIterator<TIterator>, TIterator, std::size_t>)
 		{
 			return LinqView<SkipIterator<TIterator>>(
 				SkipIterator<TIterator>(_begin, count),
@@ -436,7 +383,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<value_type> TPredicate>
-		LinqView<SkipWhileIterator<TIterator, TPredicate>> SkipWhile(TPredicate&& predicate) const noexcept
+		LinqView<SkipWhileIterator<TIterator, TPredicate>> SkipWhile(TPredicate&& predicate) const
+		noexcept(std::is_nothrow_constructible_v<SkipWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)
 		{
 			return LinqView<SkipWhileIterator<TIterator, TPredicate>>(
 				SkipWhileIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
@@ -446,7 +394,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		/// @param count 
 		/// @return 
-		LinqView<TakeIterator<TIterator>> Take(std::size_t count) const noexcept
+		LinqView<TakeIterator<TIterator>> Take(const std::size_t count) const
+		noexcept(std::is_nothrow_constructible_v<TakeIterator<TIterator>, TIterator, std::size_t>)
 		{
 			return LinqView<TakeIterator<TIterator>>(
 				TakeIterator<TIterator>(_begin, count),
@@ -458,7 +407,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<value_type> TPredicate>
-		LinqView<TakeWhileIterator<TIterator, TPredicate>> TakeWhile(TPredicate&& predicate) const noexcept
+		LinqView<TakeWhileIterator<TIterator, TPredicate>> TakeWhile(TPredicate&& predicate) const
+		noexcept(std::is_nothrow_constructible_v<TakeWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)
 		{
 			return LinqView<TakeWhileIterator<TIterator, TPredicate>>(
 				TakeWhileIterator<TIterator, TPredicate>(_begin, std::forward<TPredicate>(predicate)),
