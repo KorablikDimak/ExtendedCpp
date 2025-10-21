@@ -1,6 +1,7 @@
 #ifndef LINQ_LinqGenerator_H
 #define LINQ_LinqGenerator_H
 
+#include <vector>
 #include <array>
 #include <list>
 #include <forward_list>
@@ -11,11 +12,6 @@
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
-#include <stdexcept>
-#include <utility>
-#include <type_traits>
-#include <vector>
-#include <concepts>
 
 #include <ExtendedCpp/LINQ/YieldForeach.h>
 #include <ExtendedCpp/LINQ/Aggregate.h>

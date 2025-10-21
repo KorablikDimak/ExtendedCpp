@@ -1,17 +1,17 @@
 #ifndef LINQ_LinqView_H
 #define LINQ_LinqView_H
 
-#include <array>
 #include <vector>
+#include <array>
 #include <list>
 #include <forward_list>
 #include <stack>
 #include <queue>
-#include <set>
-#include <unordered_set>
-#include <map>
-#include <unordered_map>
 #include <deque>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
 
 #include <ExtendedCpp/LINQ/Iterators.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
@@ -21,12 +21,13 @@ namespace ExtendedCpp::LINQ
 {
 	/// @brief
 	/// @tparam T
-	template<typename T>
+	template<std::copyable T>
 	class LinqView;
 
 	/// @brief
 	/// @tparam TIterator 
 	template<std::forward_iterator TIterator>
+	requires std::copyable<typename std::remove_reference_t<TIterator>::value_type>
 	class LinqView<TIterator> final
 	{
 	public:
