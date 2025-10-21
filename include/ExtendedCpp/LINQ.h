@@ -768,7 +768,33 @@ namespace ExtendedCpp::LINQ
         }
     };
 
-    // TODO RemoveWhere
+    /// @brief
+    /// @tparam TPredicate
+    template<typename TPredicate>
+    struct RemoveWhere final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::decay_t<TPredicate> _predicate;
+
+        /// @brief
+        /// @param predicate
+        explicit RemoveWhere(TPredicate&& predicate) noexcept :
+            _predicate(std::forward<TPredicate>(predicate)) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().RemoveWhere(std::declval<TPredicate>())), TPredicate>)
+        {
+            return linqCollection.RemoveWhere(_predicate);
+        }
+    };
 
     /// @brief
     /// @tparam TMapFunction
@@ -799,6 +825,8 @@ namespace ExtendedCpp::LINQ
         }
     };
 
+    /// @brief
+    /// @tparam TTransformFunction
     template<typename TTransformFunction>
     struct Transform final
     {
@@ -825,13 +853,217 @@ namespace ExtendedCpp::LINQ
         }
     };
 
-    // TODO GroupBy
-    // TODO Join
-    // TODO Zip
-    // TODO Skip
-    // TODO SkipWhile
-    // TODO Take
-    // TODO TakeWhile
+    /// @brief
+    /// @tparam TKeySelector
+    template<typename TKeySelector>
+    struct GroupBy final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::decay_t<TKeySelector> _keySelector;
+
+        /// @brief
+        /// @param keySelector
+        explicit GroupBy(std::decay_t<TKeySelector>&& keySelector) noexcept :
+            _keySelector(std::forward<TKeySelector>(keySelector)) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().GroupBy(std::declval<TKeySelector>())), TKeySelector>)
+        {
+            return linqCollection.GroupBy(_keySelector);
+        }
+    };
+
+    /// @brief
+    /// @tparam TOtherCollection
+    /// @tparam TInnerKeySelector
+    /// @tparam TOtherKeySelector
+    /// @tparam TResultSelector
+    template<Concepts::ForwardIterable TOtherCollection,
+             typename TInnerKeySelector, typename TOtherKeySelector, typename TResultSelector>
+    struct Join final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const TOtherCollection& _otherCollection;
+
+        /// @brief
+        const std::decay_t<TInnerKeySelector> _innerKeySelector;
+
+        /// @brief
+        const std::decay_t<TOtherKeySelector> _otherKeySelector;
+
+        /// @brief
+        const std::decay_t<TResultSelector> _resultSelector;
+
+        /// @brief
+        /// @param otherCollection
+        /// @param innerKeySelector
+        /// @param otherKeySelector
+        /// @param resultSelector
+        Join(const TOtherCollection& otherCollection, TInnerKeySelector&& innerKeySelector,
+             TOtherKeySelector&& otherKeySelector, TResultSelector&& resultSelector) noexcept :
+            _otherCollection(otherCollection),
+            _innerKeySelector(std::forward<TInnerKeySelector>(innerKeySelector)),
+            _otherKeySelector(std::forward<TOtherKeySelector>(otherKeySelector)),
+            _resultSelector(std::forward<TResultSelector>(resultSelector)) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>()
+            .Join(std::declval<TOtherCollection>(), std::declval<TInnerKeySelector>(), std::declval<TOtherKeySelector>(), std::declval<TResultSelector>())),
+            TOtherCollection, TInnerKeySelector, TOtherKeySelector, TResultSelector>)
+        {
+            return linqCollection.Join(_otherCollection, _innerKeySelector, _otherKeySelector, _resultSelector);
+        }
+    };
+
+    /// @brief
+    /// @tparam TOtherCollection
+    template<Concepts::ForwardIterable TOtherCollection>
+    struct Zip final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const TOtherCollection& _otherCollection;
+
+        /// @brief
+        /// @param otherCollection
+        explicit Zip(const TOtherCollection& otherCollection) noexcept :
+            _otherCollection(otherCollection) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().Zip(std::declval<TOtherCollection>())), TOtherCollection>)
+        {
+            return linqCollection.Zip(_otherCollection);
+        }
+    };
+
+    /// @brief
+    struct Skip final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::size_t _count;
+
+        /// @brief
+        /// @param count
+        explicit Skip(const std::size_t count) noexcept : _count(count) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().Skip(std::declval<std::size_t>())), std::size_t>)
+        {
+            return linqCollection.Skip(_count);
+        }
+    };
+
+    /// @brief
+    /// @tparam TPredicate
+    template<typename TPredicate>
+    struct SkipWhile final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::decay_t<TPredicate> _predicate;
+
+        /// @brief
+        /// @param predicate
+        explicit SkipWhile(TPredicate&& predicate) noexcept :
+            _predicate(std::forward<TPredicate>(predicate)) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().SkipWhile(std::declval<TPredicate>())), TPredicate>)
+        {
+            return linqCollection.SkipWhile(_predicate);
+        }
+    };
+
+    /// @brief
+    struct Take final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::size_t _count;
+
+        /// @brief
+        /// @param count
+        explicit Take(const std::size_t count) noexcept : _count(count) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().Take(std::declval<std::size_t>())), std::size_t>)
+        {
+            return linqCollection.Take(_count);
+        }
+    };
+
+    /// @brief
+    /// @tparam TPredicate
+    template<typename TPredicate>
+    struct TakeWhile final
+    {
+        /// @brief
+        static constexpr bool IsLinqAdaptor = true;
+
+        /// @brief
+        const std::decay_t<TPredicate> _predicate;
+
+        /// @brief
+        /// @param predicate
+        explicit TakeWhile(TPredicate&& predicate) noexcept :
+            _predicate(std::forward<TPredicate>(predicate)) {}
+
+        /// @brief
+        /// @tparam TLinqCollection
+        /// @param linqCollection
+        /// @return
+        template<Concepts::LinqCollection TLinqCollection>
+        auto operator()(TLinqCollection&& linqCollection) const
+        noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLinqCollection>().TakeWhile(std::declval<TPredicate>())), TPredicate>)
+        {
+            return linqCollection.TakeWhile(_predicate);
+        }
+    };
 
     /// @brief
     /// @tparam TLinqCollection
