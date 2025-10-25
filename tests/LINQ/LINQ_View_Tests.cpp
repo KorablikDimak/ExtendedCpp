@@ -226,13 +226,13 @@ TEST(LINQ_View_Tests, MapTest)
 TEST(LINQ_View_Tests, GroupByTest)
 {
     // Average
-    Employer person1("Tom", "Microsoft");
-    Employer person2("Bob", "Google");
-    Employer person3("Sam", "Microsoft");
-    Employer person4("Alice", "Google");
-    Employer person5("Jon", "Google");
+    const Employer person1("Tom", "Microsoft");
+    const Employer person2("Bob", "Google");
+    const Employer person3("Sam", "Microsoft");
+    const Employer person4("Alice", "Google");
+    const Employer person5("Jon", "Google");
 
-    std::vector people { person1, person2, person3, person4, person5 };
+    const std::vector people { person1, person2, person3, person4, person5 };
 
     // Act
     std::map companies = ExtendedCpp::LINQ::View(people)

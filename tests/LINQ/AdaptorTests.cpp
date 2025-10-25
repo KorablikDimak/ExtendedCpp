@@ -2,6 +2,8 @@
 
 #include <ExtendedCpp/LINQ.h>
 
+#include "LINQ_Tests.h"
+
 TEST(AdaptorTests, SelectAdaptorTest)
 {
 	// Average
@@ -11,7 +13,7 @@ TEST(AdaptorTests, SelectAdaptorTest)
 	const auto result1 =
 		ExtendedCpp::LINQ::From(data) |
 		ExtendedCpp::LINQ::Select([](const int value){ return value * 2; }) |
-		ExtendedCpp::LINQ::To<std::vector<int>>();
+		ExtendedCpp::LINQ::To<std::vector>();
 
 	// Assert
 	for (std::size_t i = 0; i < data.size(); ++i)
@@ -21,7 +23,7 @@ TEST(AdaptorTests, SelectAdaptorTest)
 	const auto result2 =
 		ExtendedCpp::LINQ::Generator(data) |
 		ExtendedCpp::LINQ::Select([](const int value){ return value * 2; }) |
-		ExtendedCpp::LINQ::To<std::vector<int>>();
+		ExtendedCpp::LINQ::To<std::vector>();
 
 	// Assert
 	for (std::size_t i = 0; i < data.size(); ++i)
@@ -31,7 +33,7 @@ TEST(AdaptorTests, SelectAdaptorTest)
 	const auto result3 =
 		ExtendedCpp::LINQ::View(data) |
 		ExtendedCpp::LINQ::Select([](const int value){ return value * 2; }) |
-		ExtendedCpp::LINQ::To<std::vector<int>>();
+		ExtendedCpp::LINQ::To<std::vector>();
 
 	// Assert
 	for (std::size_t i = 0; i < data.size(); ++i)
@@ -46,15 +48,15 @@ TEST(AdaptorTests, ConvertToTest)
 	// Act
 	const auto result1 =
 		data |
-		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqContainer<int>>();
+		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqContainer>();
 
 	auto result2 =
 		result1 |
-		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqGenerator<int>>();
+		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqGenerator>();
 
 	const auto result3 =
 		result1 |
-		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqView<int>>();
+		ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqView>();
 
 	const auto vector1 = result1.ToVector();
 	const auto vector2 = result2.ToVector();
@@ -76,16 +78,16 @@ TEST(AdaptorTests, ConvertLinqContainerToStdContainerTest)
 	const auto linq = ExtendedCpp::LINQ::From(data);
 
 	// Act
-	const auto result1_1 = linq | ExtendedCpp::LINQ::To<std::vector<int>>();
-	const auto result1_2 = linq | ExtendedCpp::LINQ::To<std::list<int>>();
-	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list<int>>();
-	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set<int>>();
-	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set<int>>();
-	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue<int>>();
-	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque<int>>();
-	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue<int>>();
-	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack<int>>();
-	const auto result1_10 = linq | ExtendedCpp::LINQ::To<std::array<int, 16>>();
+	const auto result1_1 = linq | ExtendedCpp::LINQ::To<std::vector>();
+	const auto result1_2 = linq | ExtendedCpp::LINQ::To<std::list>();
+	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list>();
+	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set>();
+	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set>();
+	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
+	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque>();
+	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
+	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
+	const auto result1_10 = linq | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
 	ASSERT_EQ(result1_1.size(), data.size());
@@ -132,16 +134,16 @@ TEST(AdaptorTests, ConvertLinqGeneratorToStdContainerTest)
 	const std::vector data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
 	// Act
-	const auto result1_1 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::vector<int>>();
-	const auto result1_2 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::list<int>>();
-	const auto result1_3 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::forward_list<int>>();
-	const auto result1_4 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::set<int>>();
-	const auto result1_5 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::unordered_set<int>>();
-	const auto result1_6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue<int>>();
-	const auto result1_7 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::deque<int>>();
-	const auto result1_8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue<int>>();
-	const auto result1_9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack<int>>();
-	const auto result1_10 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::array<int, 16>>();
+	const auto result1_1 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::vector>();
+	const auto result1_2 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::list>();
+	const auto result1_3 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::forward_list>();
+	const auto result1_4 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::set>();
+	const auto result1_5 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::unordered_set>();
+	const auto result1_6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue>();
+	const auto result1_7 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::deque>();
+	const auto result1_8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue>();
+	const auto result1_9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack>();
+	const auto result1_10 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
 	ASSERT_EQ(result1_1.size(), data.size());
@@ -189,16 +191,16 @@ TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
 	const auto linq = ExtendedCpp::LINQ::View(data);
 
 	// Act
-	const auto result1_1 = linq | ExtendedCpp::LINQ::To<std::vector<int>>();
-	const auto result1_2 = linq | ExtendedCpp::LINQ::To<std::list<int>>();
-	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list<int>>();
-	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set<int>>();
-	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set<int>>();
-	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue<int>>();
-	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque<int>>();
-	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue<int>>();
-	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack<int>>();
-	const auto result1_10 = linq | ExtendedCpp::LINQ::To<std::array<int, 16>>();
+	const auto result1_1 = linq | ExtendedCpp::LINQ::To<std::vector>();
+	const auto result1_2 = linq | ExtendedCpp::LINQ::To<std::list>();
+	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list>();
+	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set>();
+	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set>();
+	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
+	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque>();
+	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
+	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
+	const auto result1_10 = linq | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
 	ASSERT_EQ(result1_1.size(), data.size());
@@ -237,4 +239,221 @@ TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
 
 	for (int value : result1_5)
 		ASSERT_TRUE(ExtendedCpp::LINQ::From(data).Contains(value));
+}
+
+TEST(AdaptorTests, WhereTest)
+{
+	// Average
+	const std::vector<std::string> names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
+
+	// Act
+	const auto selectedNames = names |
+		ExtendedCpp::LINQ::Where([](const std::string& name){ return name.size() == 3; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(4, selectedNames.size());
+}
+
+TEST(AdaptorTests, RemoveWhereTest)
+{
+	// Average
+	const std::vector<std::string> names { "Tom", "Alice", "Bob", "Sam", "Tim", "Tomas", "Bill" };
+
+	// Act
+	const auto selectedNames = names |
+		ExtendedCpp::LINQ::RemoveWhere([](const std::string& name){ return name.size() == 3; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(3, selectedNames.size());
+}
+
+TEST(AdaptorTests, JoinTest)
+{
+	// Average
+	const Employer person1("Tom", "Microsoft");
+	const Employer person2("Bob", "Google");
+	const Employer person3("Sam", "Microsoft");
+	const Employer person4("Alice", "Google");
+	const Employer person5("Jon", "Google");
+
+	const std::vector people { person1, person2, person3, person4, person5 };
+
+	const ItCompany company1("Microsoft", "C#");
+	const ItCompany company2("Google", "C++");
+
+	const std::vector companies { company1, company2 };
+
+	// Act
+	const auto employees = people |
+		ExtendedCpp::LINQ::Join(companies,
+			[](const Employer& employer){ return employer.CompanyName; },
+			[](const ItCompany& company){ return company.Name; },
+			[](const Employer& employer, const ItCompany& company){ return Employer(employer.Name, company.Name, company.Language); }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Asset
+	ASSERT_EQ("C#", employees[0].Language);
+	ASSERT_EQ("C++", employees[1].Language);
+	ASSERT_EQ("C#", employees[2].Language);
+	ASSERT_EQ("C++", employees[3].Language);
+	ASSERT_EQ("C++", employees[4].Language);
+}
+
+TEST(AdaptorTests, ZipTest)
+{
+	// Average
+	const std::vector numbers1 { 4, 3, 6, 1, 5 };
+	const std::vector numbers2 { 3, 2, 1, 4, 7 };
+
+	// Act
+	const auto result = numbers1 |
+		ExtendedCpp::LINQ::Zip(numbers2) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Asserta
+	ASSERT_EQ(4, result[0].first);
+	ASSERT_EQ(3, result[0].second);
+
+	ASSERT_EQ(3, result[1].first);
+	ASSERT_EQ(2, result[1].second);
+}
+
+TEST(AdaptorTests, SkipTest)
+{
+	// Average
+	const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+	// Act
+	const auto result = numbers |
+		ExtendedCpp::LINQ::Skip(3) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(3, result.size());
+	ASSERT_EQ(4, result[0]);
+	ASSERT_EQ(5, result[1]);
+	ASSERT_EQ(6, result[2]);
+}
+
+TEST(AdaptorTests, SkipWhileTest)
+{
+	// Average
+	const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+	// Act
+	const auto result = numbers |
+		ExtendedCpp::LINQ::SkipWhile([](const int n) { return n < 4; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(3, result.size());
+	ASSERT_EQ(4, result[0]);
+	ASSERT_EQ(5, result[1]);
+	ASSERT_EQ(6, result[2]);
+}
+
+TEST(AdaptorTests, TakeTest)
+{
+	// Average
+	const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+	// Act
+	const auto result = numbers |
+		ExtendedCpp::LINQ::Take(3) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(3, result.size());
+	ASSERT_EQ(1, result[0]);
+	ASSERT_EQ(2, result[1]);
+	ASSERT_EQ(3, result[2]);
+}
+
+TEST(AdaptorTests, TakeWhileTest)
+{
+	// Average
+	const std::vector numbers{ 1, 2, 3, 4, 5, 6 };
+
+	// Act
+	const auto result = numbers |
+		ExtendedCpp::LINQ::TakeWhile([](const int n) { return n < 4; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(3, result.size());
+	ASSERT_EQ(1, result[0]);
+	ASSERT_EQ(2, result[1]);
+	ASSERT_EQ(3, result[2]);
+}
+
+TEST(AdaptorTests, EmptyCollectionTest)
+{
+	// Average
+	constexpr std::vector<char> emptyVector;
+
+	// Act
+	const auto emptyResult = emptyVector |
+		ExtendedCpp::LINQ::Where([](char){ return true; }) |
+		ExtendedCpp::LINQ::Select([](const char& element){ return element; }) |
+		ExtendedCpp::LINQ::Take(10) |
+		ExtendedCpp::LINQ::Skip(3) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	ASSERT_EQ(emptyResult.size(), 0);
+}
+
+TEST(AdaptorTests, TransformTest)
+{
+	// Average
+	const std::vector numbers = { 1, 2, 3, 4 };
+	const std::vector assertVector = { 2, 4, 6, 8 };
+
+	// Act
+	const auto transformed = numbers |
+		ExtendedCpp::LINQ::Transform([](int& number){ number *= 2; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	for (std::size_t i = 0; i < assertVector.size(); ++i)
+		ASSERT_EQ(transformed[i], assertVector[i]);
+}
+
+TEST(AdaptorTests, MapTest)
+{
+	// Average
+	const std::vector numbers = { 1, 2, 3, 4 };
+	const std::vector assertVector = { 2, 4, 6, 8 };
+
+	// Act
+	const auto mapped = numbers |
+		ExtendedCpp::LINQ::Map([](const int number){ return number * 2; }) |
+		ExtendedCpp::LINQ::To<std::vector>();
+
+	// Assert
+	for (std::size_t i = 0; i < assertVector.size(); ++i)
+		ASSERT_EQ(mapped[i], assertVector[i]);
+}
+
+TEST(AdaptorTests, GroupByTest)
+{
+	// Average
+	const Employer person1("Tom", "Microsoft");
+	const Employer person2("Bob", "Google");
+	const Employer person3("Sam", "Microsoft");
+	const Employer person4("Alice", "Google");
+	const Employer person5("Jon", "Google");
+
+	const std::vector people { person1, person2, person3, person4, person5 };
+
+	// Act
+	auto companies = people |
+		ExtendedCpp::LINQ::GroupBy([](const Employer& employer){ return employer.CompanyName; });
+
+	// Assert
+	ASSERT_EQ(2, companies.size());
+	ASSERT_EQ(2, companies["Microsoft"].size());
+	ASSERT_EQ(3, companies["Google"].size());
 }
