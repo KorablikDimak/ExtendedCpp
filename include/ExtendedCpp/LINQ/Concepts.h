@@ -75,7 +75,14 @@ namespace ExtendedCpp::LINQ::Concepts
     concept LinqAdaptor = requires(TAdaptor adaptor, TLinqCollection linqCollection)
     {
         adaptor(linqCollection);
-    } && LinqCollection<TLinqCollection>;
+    } && LinqCollection<TLinqCollection> && std::decay_t<TAdaptor>::IsLinqAdaptor;
+
+    template<typename TRange>
+    concept Range = requires(TRange range)
+    {
+        range.begin();
+        range.end();
+    };
 }
 
 #endif

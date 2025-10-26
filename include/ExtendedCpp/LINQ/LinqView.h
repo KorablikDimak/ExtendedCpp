@@ -86,8 +86,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::vector<value_type> ToVector() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::vector<value_type> collection;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -100,8 +100,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		template<std::size_t SIZE>
 		std::array<value_type, SIZE> ToArray() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::array<value_type, SIZE> array;
 			std::size_t i = 0;
@@ -114,8 +114,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::list<value_type> ToList() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::list<value_type> collection;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -127,8 +127,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::forward_list<value_type> ToForwardList() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			const std::vector<value_type> collection = ToVector();
 			return std::forward_list<value_type>(collection.cbegin(), collection.cend());
@@ -138,8 +138,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::stack<value_type> ToStack() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::stack<value_type> stack;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -151,8 +151,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::queue<value_type> ToQueue() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::queue<value_type> queue;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -164,8 +164,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::deque<value_type> ToDeque() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::deque<value_type> deque;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -177,8 +177,8 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		[[nodiscard]]
 		std::priority_queue<value_type> ToPriorityQueue() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::priority_queue<value_type> priorityQueue;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -189,8 +189,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		/// @return 
 		std::set<value_type> ToSet() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::set<value_type> set;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -201,8 +201,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		/// @return 
 		std::unordered_set<value_type> ToUnorderedSet() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::unordered_set<value_type> unorderedSet;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -218,8 +218,8 @@ namespace ExtendedCpp::LINQ
 				 typename TValue = typename PairTraits<value_type>::SecondType>
 		requires Concepts::IsPair<value_type>
 		std::map<TKey, TValue> ToMap() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::map<TKey, TValue> map;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -235,8 +235,8 @@ namespace ExtendedCpp::LINQ
 				 typename TValue = typename PairTraits<value_type>::SecondType>
 		requires Concepts::IsPair<value_type>
 		std::unordered_map<TKey, TValue> ToUnorderedMap() const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&TIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())>)
+		noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>()))
 		{
 			std::unordered_map<TKey, TValue> unorderedMap;
 			for (TIterator it = _begin; it != _end; ++it)
@@ -321,8 +321,8 @@ namespace ExtendedCpp::LINQ
 				 typename TKey = std::invoke_result_t<TKeySelector, value_type>>
 		std::map<TKey, std::vector<value_type>> GroupBy(TKeySelector&& keySelector) const 
 		noexcept(std::is_nothrow_invocable_v<TKeySelector, value_type> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(&TIterator::operator*)>)
+				 noexcept(noexcept(*std::declval<TIterator>()) &&
+				 noexcept(++std::declval<TIterator>())))
 		{
 			std::map<TKey, std::vector<value_type>> result;
 

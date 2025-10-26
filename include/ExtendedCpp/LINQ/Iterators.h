@@ -53,7 +53,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -61,7 +61,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		IteratorWrapper& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 			return *this;
@@ -70,7 +70,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		IteratorWrapper operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<IteratorWrapper>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			IteratorWrapper temp = *this;
 			++*this;
@@ -158,7 +158,7 @@ namespace ExtendedCpp::LINQ
 		/// @return
 		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<TSelector, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+				 noexcept(*_inIterator))
 		{
 			return _selector(*_inIterator);
 		}
@@ -166,7 +166,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SelectorIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 			return *this;
@@ -175,7 +175,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SelectorIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SelectorIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			SelectorIterator temp = *this;
 			++*this;
@@ -260,9 +260,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_copy_assignable_v<value_type> &&
-				 std::is_nothrow_invocable_v<TTransform, typename TInIterator::value_type&> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(std::is_nothrow_invocable_v<TTransform, typename TInIterator::value_type&> &&
+				 noexcept(*_inIterator))
 		{
 			auto value = *_inIterator;
 			_transform(value);
@@ -272,7 +271,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TransformIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 			return *this;
@@ -281,7 +280,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TransformIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TransformIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			TransformIterator temp = *this;
 			++*this;
@@ -334,8 +333,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate
 		WhereIterator(TInIterator inIterator, TPredicate&& predicate)
 		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+				 noexcept(*_inIterator) &&
+				 noexcept(++_inIterator)) :
 			_inIterator(std::move(inIterator)),
 			_predicate(std::forward<TPredicate>(predicate))
 		{
@@ -376,7 +375,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -385,8 +384,8 @@ namespace ExtendedCpp::LINQ
 		/// @return
 		WhereIterator& operator++()
 		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator))
 		{
 			++_inIterator;
 			while (_inIterator)
@@ -401,7 +400,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		WhereIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<WhereIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			WhereIterator temp = *this;
 			++*this;
@@ -454,8 +453,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate
 		RemoveWhereIterator(TInIterator inIterator, TPredicate&& predicate)
 		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>) :
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator)) :
 			_inIterator(std::move(inIterator)),
 			_predicate(std::forward<TPredicate>(predicate))
 		{
@@ -496,7 +495,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -505,8 +504,8 @@ namespace ExtendedCpp::LINQ
 		/// @return
 		RemoveWhereIterator& operator++()
 		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator))
 		{
 			++_inIterator;
 			while (_inIterator)
@@ -521,7 +520,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		RemoveWhereIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<RemoveWhereIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			WhereIterator temp = *this;
 			++*this;
@@ -602,10 +601,10 @@ namespace ExtendedCpp::LINQ
 					 TResultSelector&& resultSelector)
 		noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
 				 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(&TOtherIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TOtherIterator>().operator++())>) :
+				 noexcept(*_inIterator) &&
+				 noexcept(*_currentOther) &&
+				 noexcept(++_inIterator) &&
+				 noexcept(++_currentOther)) :
 			_inIterator(std::move(inIterator)),
 			_otherBegin(otherCollection.begin()),
 			_otherEnd(otherCollection.end()),
@@ -656,8 +655,8 @@ namespace ExtendedCpp::LINQ
 		/// @return
 		value_type operator*() const
 		noexcept(std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type, typename TOtherCollection::value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(&TOtherIterator::operator*)>)
+				 noexcept(*_inIterator) &&
+				 noexcept(*_currentOther))
 		{
 			return _resultSelector(*_inIterator, *_currentOther);
 		}
@@ -665,8 +664,12 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		JoinIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TOtherIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator) &&
+				 noexcept(++_currentOther) &&
+				 std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+				 noexcept(*_inIterator) &&
+				 noexcept(*_currentOther))
 		{
 			if (_currentOther != _otherEnd)
 				++_currentOther;
@@ -693,7 +696,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		JoinIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<JoinIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			JoinIterator temp = *this;
 			++*this;
@@ -784,10 +787,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TLeftIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(&TRightIterator::operator*)> &&
-				 std::is_nothrow_move_constructible_v<TLeft> &&
-				 std::is_nothrow_move_constructible_v<TRight>)
+		noexcept(noexcept(*_leftIterator) &&
+				 noexcept(*_rightIterator))
 		{
 			return std::make_pair(*_leftIterator, *_rightIterator);
 		}
@@ -795,8 +796,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		ZipIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TLeftIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TRightIterator>().operator++())>)
+		noexcept(noexcept(++_leftIterator) &&
+				 noexcept(++_rightIterator))
 		{
 			if (_leftIterator && _rightIterator != _rightEnd)
 			{
@@ -809,7 +810,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		ZipIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<ZipIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			JoinIterator temp = *this;
 			++*this;
@@ -858,7 +859,7 @@ namespace ExtendedCpp::LINQ
 		/// @param inIterator
 		/// @param count
 		SkipIterator(TInIterator inIterator, const std::size_t count)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+		noexcept(noexcept(++_inIterator)) :
 			_inIterator(std::move(inIterator))
 		{
 			for (std::size_t i = 0; i < count && _inIterator; ++i)
@@ -894,7 +895,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -902,7 +903,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 			return *this;
@@ -911,7 +912,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SkipIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			SkipIterator temp = *this;
 			++*this;
@@ -964,8 +965,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate
 		SkipWhileIterator(TInIterator inIterator, TPredicate&& predicate)
 		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>) :
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator)) :
 			_inIterator(std::move(inIterator)),
 			_predicate(std::forward<TPredicate>(predicate))
 		{
@@ -1006,7 +1007,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -1014,7 +1015,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipWhileIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 			return *this;
@@ -1023,7 +1024,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipWhileIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<SkipWhileIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			SkipWhileIterator temp = *this;
 			++*this;
@@ -1073,7 +1074,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @param inIterator
 		/// @param count
-		TakeIterator(TInIterator inIterator, const std::size_t count) noexcept :
+		TakeIterator(TInIterator inIterator, const std::size_t count)
+		noexcept(noexcept(++_inIterator)) :
 			_inIterator(std::move(inIterator)),
 			_count(count)
 		{
@@ -1111,7 +1113,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		value_type operator*() const
-		noexcept(std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)>)
+		noexcept(noexcept(*_inIterator))
 		{
 			return *_inIterator;
 		}
@@ -1119,7 +1121,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TakeIterator& operator++()
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+		noexcept(noexcept(++_inIterator))
 		{
 			++_inIterator;
 
@@ -1137,7 +1139,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TakeIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TakeIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			TakeIterator temp = *this;
 			++*this;
@@ -1191,8 +1193,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate
 		TakeWhileIterator(TInIterator inIterator, TPredicate&& predicate)
 		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>) :
+				 noexcept(*_inIterator) &&
+				 noexcept(++_inIterator)) :
 			_inIterator(std::move(inIterator)),
 			_predicate(std::forward<TPredicate>(predicate))
 		{
@@ -1242,8 +1244,8 @@ namespace ExtendedCpp::LINQ
 		/// @return
 		TakeWhileIterator& operator++()
 		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
-				 std::is_nothrow_invocable_v<decltype(&TInIterator::operator*)> &&
-				 std::is_nothrow_invocable_v<decltype(std::declval<TInIterator>().operator++())>)
+				 noexcept(*_inIterator) &&
+				 noexcept(++_inIterator))
 		{
 			++_inIterator;
 			if (_inIterator && _predicate(*_inIterator))
@@ -1257,7 +1259,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TakeWhileIterator operator++(int)
-		noexcept(std::is_nothrow_invocable_v<decltype(std::declval<TakeWhileIterator>().operator++())>)
+		noexcept(noexcept(++*this))
 		{
 			TakeWhileIterator temp = *this;
 			++*this;
