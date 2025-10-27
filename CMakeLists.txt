@@ -55,20 +55,12 @@ set(Reflection_SOURCE
         src/Reflection/CollectionFieldInfo.cpp)
 
 set(InfoLog_SOURCE
-        src/InfoLog/Configuration.cpp
         src/InfoLog/FileSender.cpp
         src/InfoLog/ISender.cpp
         src/InfoLog/Logger.cpp
         src/InfoLog/LoggerFactory.cpp
         src/InfoLog/Parser.cpp
         src/InfoLog/ConsoleSender.cpp)
-
-set(Common_SOURCE
-        src/Cancellation/CancellationToken.cpp
-        src/Cancellation/CancellationTokenSource.cpp)
-
-set(DI_SOURCE
-        src/DI/ServiceProvider.cpp)
 
 add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
@@ -78,6 +70,16 @@ add_library(ExtendedCpp::Events ALIAS Events)
 
 add_library(Json INTERFACE)
 add_library(ExtendedCpp::Json ALIAS Json)
+
+add_library(Common INTERFACE)
+add_library(ExtendedCpp::Common ALIAS Common)
+
+add_library(DI INTERFACE)
+add_library(ExtendedCpp::DI ALIAS DI)
+target_link_libraries(DI INTERFACE Reflection)
+
+add_library(Asio INTERFACE)
+add_library(ExtendedCpp::Asio ALIAS Asio)
 
 add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
 add_library(ExtendedCpp::Xml ALIAS Xml)
@@ -92,18 +94,8 @@ add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 target_link_libraries(InfoLog PUBLIC Xml Reflection)
 
-add_library(Common ${LIBRARY_TYPE} ${Common_SOURCE})
-add_library(ExtendedCpp::Common ALIAS Common)
-
-add_library(DI ${LIBRARY_TYPE} ${DI_SOURCE})
-add_library(ExtendedCpp::DI ALIAS DI)
-target_link_libraries(DI PUBLIC Reflection)
-
-add_library(Asio INTERFACE)
-add_library(ExtendedCpp::Asio ALIAS Asio)
-
-set_include_directories(Xml InfoLog Common Reflection DI)
-set_interface_directories(LINQ Events Json Asio)
+set_interface_directories(LINQ Events Json Common DI Asio)
+set_include_directories(Xml Reflection InfoLog)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
@@ -131,7 +123,7 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake
             COPYONLY)
 
-    install_projects(LINQ Events Json Xml InfoLog Common DI Reflection Asio)
+    install_projects(LINQ Events Json Common DI Asio Xml Reflection InfoLog)
 endif()
 
 if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)

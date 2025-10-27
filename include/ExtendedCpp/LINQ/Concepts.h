@@ -31,7 +31,7 @@ namespace ExtendedCpp::LINQ::Concepts
     };
 
     template<typename T>
-    concept Summarize = requires(T value)
+    concept Addable = requires(T value)
     {
         { value + value } -> std::convertible_to<std::decay_t<T>>;
     };
@@ -83,6 +83,12 @@ namespace ExtendedCpp::LINQ::Concepts
         range.begin();
         range.end();
     };
+
+    template<typename TLeft, typename TRight = TLeft>
+    concept IsNothrowAddable = noexcept(std::declval<TLeft>() + std::declval<TRight>());
+
+    template<typename TLeft, typename TRight = TLeft>
+    concept IsNothrowDivisible = noexcept(std::declval<TLeft>() / std::declval<TRight>());
 }
 
 #endif

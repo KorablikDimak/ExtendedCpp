@@ -24,7 +24,7 @@ namespace ExtendedCpp::LINQ
 {
     /// @brief Owning thread-safe container
     /// @tparam TSource any copyable type
-    template<std::copyable TSource>
+    template<typename TSource>
     class LinqContainer final
     {
     private:
@@ -65,20 +65,11 @@ namespace ExtendedCpp::LINQ
 
         /// @brief Copy constructor
         /// @param container 
-        LinqContainer(const LinqContainer& container) noexcept
-        {
-            _collection = container._collection;
-        }
+        LinqContainer(const LinqContainer& container) noexcept = default;
 
         /// @brief Move constructor
         /// @param container 
-        LinqContainer(LinqContainer&& container) noexcept
-        {
-            _collection = std::move(container._collection);
-        }
-
-        /// @brief Default destructor
-        ~LinqContainer() = default;
+        LinqContainer(LinqContainer&& container) noexcept = default;
 
         /// @brief Copy asign
         /// @param collection Copy data from vector into LINQ conainer
@@ -101,21 +92,12 @@ namespace ExtendedCpp::LINQ
         /// @brief Copy asign
         /// @param container Copy other LINQ container
         /// @return 
-        LinqContainer& operator=(const LinqContainer& container) noexcept
-        {
-            if (this == &container) return *this;
-            _collection = container._collection;
-            return *this;
-        }
+        LinqContainer& operator=(const LinqContainer& container) noexcept = default;
 
         /// @brief Move asign
         /// @param container Move data from other LINQ container
         /// @return 
-        LinqContainer& operator=(LinqContainer&& container) noexcept
-        {
-            _collection = std::move(container._collection);
-            return *this;
-        }
+        LinqContainer& operator=(LinqContainer&& container) noexcept = default;
 
         /// @brief Get container size
         /// @return Number of elements
@@ -705,7 +687,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TResult 
         /// @tparam TAggregate 
         /// @param aggregateFunction 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<typename TResult, std::invocable<TResult, TSource> TAggregate>
         TResult Aggregate(TAggregate&& aggregateFunction) const
         {
@@ -737,9 +720,10 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Get the sum of values
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource Sum() const
-        requires Concepts::Summarize<TSource>
+        requires Concepts::Addable<TSource>
         {
             if (_collection.empty())
                 throw std::out_of_range("Collection is empty");
@@ -750,9 +734,10 @@ namespace ExtendedCpp::LINQ
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<std::invocable<TSource> TSelector,
-                 Concepts::Summarize TResult = std::invoke_result_t<TSelector, TSource>>
+                 Concepts::Addable TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Sum(TSelector&& selector) const
         {
             if (_collection.empty())
@@ -761,7 +746,8 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Find element with the minimum value
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource Min() const
         requires Concepts::Comparable<TSource>
         {
@@ -774,7 +760,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<std::invocable<TSource> TSelector,
                  Concepts::Comparable TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Min(TSelector&& selector) const
@@ -786,7 +773,8 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Find element with the maximum value
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource Max() const
         requires Concepts::Comparable<TSource>
         {
@@ -799,7 +787,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<std::invocable<TSource> TSelector,
                  Concepts::Comparable TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Max(TSelector&& selector) const
@@ -810,7 +799,8 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Find the average value of the collection
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource Average() const
         requires Concepts::Divisible<TSource>
         {
@@ -823,7 +813,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TSelector 
         /// @tparam TResult 
         /// @param selector 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<std::invocable<TSource> TSelector,
                  Concepts::Divisible TResult = std::invoke_result_t<TSelector, TSource>>
         TResult Average(TSelector&& selector) const
@@ -834,7 +825,8 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Get first element of collection
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource First() const
         {
             if (_collection.empty())
@@ -845,7 +837,8 @@ namespace ExtendedCpp::LINQ
         /// @brief Get first element of collection
         /// @tparam TPredicate 
         /// @param predicate 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<Concepts::IsPredicate<TSource> TPredicate>
         TSource First(TPredicate&& predicate) const
         {
@@ -906,7 +899,8 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief Get last element of collection
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource Last() const
         {
             if (_collection.empty())
@@ -917,7 +911,8 @@ namespace ExtendedCpp::LINQ
         /// @brief Get last element of collection
         /// @tparam TPredicate 
         /// @param predicate 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         template<Concepts::IsPredicate<TSource> TPredicate>
         TSource Last(TPredicate&& predicate) const
         {
@@ -979,7 +974,8 @@ namespace ExtendedCpp::LINQ
 
         /// @brief 
         /// @param position 
-        /// @return 
+        /// @return
+        /// @throw std::out_of_range
         TSource At(const std::size_t position) const
         {
             if (position >= _collection.size())

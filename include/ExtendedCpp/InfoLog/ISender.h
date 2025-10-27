@@ -18,9 +18,6 @@ namespace ExtendedCpp::InfoLog
         typedef std::shared_ptr<ISender> Ptr;
 
         /// @brief 
-        ISender() noexcept = default;
-
-        /// @brief 
         virtual ~ISender() = default;
 
         /// @brief 

@@ -35,7 +35,7 @@ namespace ExtendedCpp::InfoLog
         /// @brief 
         typedef std::shared_ptr<Logger> Ptr;
 
-        /// @brief 
+        /// @brief
         Logger() noexcept = default;
 
         /// @brief 
@@ -53,8 +53,23 @@ namespace ExtendedCpp::InfoLog
         /// @param configuration 
         explicit Logger(const Configuration::Ptr& configuration) noexcept;
 
-        /// @brief 
-        ~Logger() = default;
+        /// @brief
+        /// @param logger
+        Logger(const Logger& logger) noexcept = default;
+
+        /// @brief
+        /// @param logger
+        Logger(Logger&& logger) noexcept = default;
+
+        /// @brief
+        /// @param logger
+        /// @return
+        Logger& operator=(const Logger& logger) noexcept = default;
+
+        /// @brief
+        /// @param logger
+        /// @return
+        Logger& operator=(Logger&& logger) noexcept = default;
 
         /// @brief 
         /// @param config 

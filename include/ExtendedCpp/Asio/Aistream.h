@@ -5,7 +5,6 @@
 #include <bit>
 #include <stdexcept>
 #include <type_traits>
-#include <ostream>
 
 #include <ExtendedCpp/Asio/Aio.h>
 #include <ExtendedCpp/Task.h>

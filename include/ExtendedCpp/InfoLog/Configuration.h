@@ -26,11 +26,11 @@ namespace ExtendedCpp::InfoLog
 
         /// @brief 
         /// @param configuration 
-        Configuration(const Configuration& configuration) noexcept;
+        Configuration(const Configuration& configuration) noexcept = default;
 
         /// @brief 
         /// @param configuration 
-        Configuration(Configuration&& configuration) noexcept;
+        Configuration(Configuration&& configuration) noexcept = default;
 
         /// @brief 
         /// @tparam T 
@@ -66,9 +66,6 @@ namespace ExtendedCpp::InfoLog
         }
 
         /// @brief 
-        ~Configuration() = default;
-
-        /// @brief 
         /// @param configuration 
         /// @return 
         Configuration& operator=(const Configuration& configuration) noexcept = default;
@@ -76,16 +73,15 @@ namespace ExtendedCpp::InfoLog
         /// @brief 
         /// @param configuration 
         /// @return 
-        Configuration& operator=(Configuration&& configuration) noexcept
-        {
-            _configs = std::move(configuration._configs);
-            return *this;
-        }
+        Configuration& operator=(Configuration&& configuration) noexcept = default;
 
         /// @brief 
         /// @return 
         [[nodiscard]]
-        std::vector<std::map<std::string, std::string>> GetConfigs() const noexcept;
+        std::vector<std::map<std::string, std::string>> GetConfigs() const noexcept
+        {
+            return _configs;
+        }
     };
 }
 

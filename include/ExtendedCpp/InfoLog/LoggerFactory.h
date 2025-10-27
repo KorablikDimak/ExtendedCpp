@@ -25,7 +25,7 @@ namespace ExtendedCpp::InfoLog
 
         /// @brief 
         /// @param factory 
-        LoggerFactory(LoggerFactory&& factory) noexcept : _configuration(std::move(factory._configuration)) {}
+        LoggerFactory(LoggerFactory&& factory) noexcept = default;
 
         /// @brief 
         /// @param configuration 
@@ -35,8 +35,15 @@ namespace ExtendedCpp::InfoLog
         /// @param configuration 
         explicit LoggerFactory(Configuration&& configuration) noexcept;
 
-        /// @brief 
-        ~LoggerFactory() = default;
+        /// @brief
+        /// @param factory
+        /// @return
+        LoggerFactory& operator=(const LoggerFactory& factory) noexcept = default;
+
+        /// @brief
+        /// @param factory
+        /// @return
+        LoggerFactory& operator=(LoggerFactory&& factory) noexcept = default;
 
         /// @brief 
         /// @tparam T 

@@ -12,8 +12,8 @@ namespace ExtendedCpp::InfoLog
     class Parser final
     {
     public:
-        Parser() noexcept = default;
-        ~Parser() = default;
+	    /// @brief
+	    Parser() noexcept = delete;
 
         /// @brief 
         /// @param layout 

@@ -62,8 +62,5 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
         ReplaceAll(layout, "{tag}", tag);
         ReplaceAll(layout, "{message}", message);
     }
-    catch (const std::filesystem::filesystem_error&)
-    {
-        return;
-    }
+    catch (const std::filesystem::filesystem_error&) {}
 }

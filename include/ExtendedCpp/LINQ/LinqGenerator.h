@@ -69,7 +69,7 @@ namespace ExtendedCpp::LINQ
 					_isEnd = true;
 			}
 
-			Iterator& operator=(const Iterator& other)
+			Iterator& operator=(const Iterator& other) noexcept
 			{
 				_yieldContext = other._yieldContext;
 				if (_yieldContext)
@@ -197,8 +197,7 @@ namespace ExtendedCpp::LINQ
 		/// @return Copies of elements from 0 to min of array size or LINQ generator size
 		template<std::size_t SIZE>
 		requires std::is_default_constructible_v<TSource>
-		std::array<TSource, SIZE> ToArray() 
-		noexcept(std::is_nothrow_default_constructible_v<TSource>)
+		std::array<TSource, SIZE> ToArray() noexcept
 		{
 			std::array<TSource, SIZE> collection{};
 			for (std::size_t i = 0; i < SIZE && _yieldContext; ++i)
@@ -677,7 +676,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief Get the sum of values. After this method generator became invalid
 		/// @return 
 		TSource Sum()
-		requires Concepts::Summarize<TSource>
+		requires Concepts::Addable<TSource>
 		{
 			std::vector<TSource> collection;
 			while (_yieldContext)
@@ -695,7 +694,7 @@ namespace ExtendedCpp::LINQ
 		/// @param selector 
 		/// @return 
 		template<std::invocable<TSource> TSelector,
-				 Concepts::Summarize TResult = std::invoke_result_t<TSelector, TSource>>
+				 Concepts::Addable TResult = std::invoke_result_t<TSelector, TSource>>
 		TResult Sum(TSelector&& selector)
 		{
 			std::vector<TSource> collection;
@@ -879,7 +878,8 @@ namespace ExtendedCpp::LINQ
 		/// @param innerKeySelector 
 		/// @param otherKeySelector 
 		/// @param resultSelector 
-		/// @return 
+		/// @return
+		/// @throw std::invalid_argument
 		template<Concepts::ForwardIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -919,7 +919,8 @@ namespace ExtendedCpp::LINQ
 		/// @param innerKeySelector 
 		/// @param otherKeySelector 
 		/// @param resultSelector 
-		/// @return 
+		/// @return
+		/// @throw std::invalid_argument
 		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -1000,7 +1001,8 @@ namespace ExtendedCpp::LINQ
 		/// @param innerKeySelector 
 		/// @param otherKeySelector 
 		/// @param resultSelector 
-		/// @return 
+		/// @return
+		/// @throw std::invalid_argument
 		template<Concepts::InputIterable TOtherCollection,
 				 std::invocable<TSource> TInnerKeySelector,
 				 Concepts::Equatable TKey = std::invoke_result_t<TInnerKeySelector, TSource>,
@@ -1065,7 +1067,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<TSource> TPredicate>
-		bool All(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+		bool All(TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
 		{
 			while (_yieldContext)
 				if (!predicate(_yieldContext.Next()))
@@ -1079,7 +1082,8 @@ namespace ExtendedCpp::LINQ
 		/// @param predicate 
 		/// @return 
 		template<Concepts::IsPredicate<TSource> TPredicate>
-		bool Any(TPredicate&& predicate) noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
+		bool Any(TPredicate&& predicate)
+		noexcept(std::is_nothrow_invocable_v<TPredicate, TSource>)
 		{
 			while (_yieldContext)
 				if (predicate(_yieldContext.Next()))
@@ -1213,7 +1217,7 @@ namespace ExtendedCpp::LINQ
 				co_yield _yieldContext.Next();
 		}
 
-		Future<TSource> TakeGenerator(const std::size_t count)
+		Future<TSource> TakeGenerator(const std::size_t count) noexcept
 		{
 			std::size_t i = 0;
 			while (_yieldContext && i < count)

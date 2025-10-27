@@ -33,11 +33,11 @@ namespace ExtendedCpp
 		{
 			/// @brief
 			/// @return
-			static std::suspend_never initial_suspend() noexcept { return {}; }
+			std::suspend_never initial_suspend() noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
-			static std::suspend_always final_suspend() noexcept { return {}; }
+			std::suspend_always final_suspend() noexcept { return {}; }
 
 			/// @brief
 			/// @param result 
@@ -51,7 +51,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief 
-			static void unhandled_exception()
+			void unhandled_exception()
 			{ 
 				std::rethrow_exception(std::current_exception()); 
 			}
@@ -262,11 +262,11 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @return 
-			static std::suspend_never initial_suspend() noexcept { return {}; }
+			std::suspend_never initial_suspend() noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
-			static std::suspend_always final_suspend() noexcept { return {}; }
+			std::suspend_always final_suspend() noexcept { return {}; }
 
 			void return_void() noexcept 
 			{
@@ -277,7 +277,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief 
-			static void unhandled_exception()
+			void unhandled_exception()
 			{
 				std::rethrow_exception(std::current_exception());
 			}
@@ -360,8 +360,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief
-                        /// @return
-                        static void await_resume() noexcept {}
+            void await_resume() noexcept {}
 
 #if GNU_COMPILER
 			~InitialAwaiter()
@@ -401,7 +400,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief
-                        static void await_resume() noexcept {}
+			void await_resume() noexcept {}
 
 			/// @brief 
 			/// @param handle 

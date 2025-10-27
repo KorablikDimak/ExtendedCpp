@@ -15,15 +15,18 @@ namespace ExtendedCpp::Cancellation
     public:
         /// @brief 
         /// @param cancellationRequest 
-        explicit CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept;
-        
-        /// @brief 
-        ~CancellationToken() = default;
+        explicit CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept
+        {
+            _cancellationRequest = cancellationRequest;
+        }
 
         /// @brief 
         /// @return 
         [[nodiscard]]
-        bool IsCancellationRequested() const noexcept;
+        bool IsCancellationRequested() const noexcept
+        {
+            return _cancellationRequest->load();
+        }
     };
 }
 

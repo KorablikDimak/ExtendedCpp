@@ -83,10 +83,10 @@ TEST(AdaptorTests, ConvertLinqContainerToStdContainerTest)
 	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list>();
 	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set>();
 	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set>();
-	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
+	auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
 	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque>();
-	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
-	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
+	auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
+	auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
 	const auto result1_10 = linq | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
@@ -102,9 +102,9 @@ TEST(AdaptorTests, ConvertLinqContainerToStdContainerTest)
 
 	for (std::size_t i = 0; i < data.size(); ++i)
 	{
-		ASSERT_EQ(data[i],result1_1[i]);
-		ASSERT_EQ(data[i],result1_7[i]);
-		ASSERT_EQ(data[i],result1_10[i]);
+		ASSERT_EQ(data[i], result1_1[i]);
+		ASSERT_EQ(data[i], result1_7[i]);
+		ASSERT_EQ(data[i], result1_10[i]);
 	}
 
 	std::size_t i = 0;
@@ -126,6 +126,24 @@ TEST(AdaptorTests, ConvertLinqContainerToStdContainerTest)
 
 	for (int value : result1_5)
 		ASSERT_TRUE(linq.Contains(value));
+
+	for (int value : data)
+	{
+		ASSERT_EQ(value, result1_6.front());
+		result1_6.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_8.top());
+		result1_8.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_9.top());
+		result1_9.pop();
+	}
 }
 
 TEST(AdaptorTests, ConvertLinqGeneratorToStdContainerTest)
@@ -139,10 +157,10 @@ TEST(AdaptorTests, ConvertLinqGeneratorToStdContainerTest)
 	const auto result1_3 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::forward_list>();
 	const auto result1_4 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::set>();
 	const auto result1_5 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::unordered_set>();
-	const auto result1_6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue>();
+	auto result1_6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue>();
 	const auto result1_7 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::deque>();
-	const auto result1_8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue>();
-	const auto result1_9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack>();
+	auto result1_8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue>();
+	auto result1_9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack>();
 	const auto result1_10 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
@@ -182,6 +200,24 @@ TEST(AdaptorTests, ConvertLinqGeneratorToStdContainerTest)
 
 	for (int value : result1_5)
 		ASSERT_TRUE(ExtendedCpp::LINQ::From(data).Contains(value));
+
+	for (int value : data)
+	{
+		ASSERT_EQ(value, result1_6.front());
+		result1_6.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_8.top());
+		result1_8.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_9.top());
+		result1_9.pop();
+	}
 }
 
 TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
@@ -196,10 +232,10 @@ TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
 	const auto result1_3 = linq | ExtendedCpp::LINQ::To<std::forward_list>();
 	const auto result1_4 = linq | ExtendedCpp::LINQ::To<std::set>();
 	const auto result1_5 = linq | ExtendedCpp::LINQ::To<std::unordered_set>();
-	const auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
+	auto result1_6 = linq | ExtendedCpp::LINQ::To<std::queue>();
 	const auto result1_7 = linq | ExtendedCpp::LINQ::To<std::deque>();
-	const auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
-	const auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
+	auto result1_8 = linq | ExtendedCpp::LINQ::To<std::priority_queue>();
+	auto result1_9 = linq | ExtendedCpp::LINQ::To<std::stack>();
 	const auto result1_10 = linq | ExtendedCpp::LINQ::ToArray<16>();
 
 	// Assert
@@ -239,6 +275,24 @@ TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
 
 	for (int value : result1_5)
 		ASSERT_TRUE(ExtendedCpp::LINQ::From(data).Contains(value));
+
+	for (int value : data)
+	{
+		ASSERT_EQ(value, result1_6.front());
+		result1_6.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_8.top());
+		result1_8.pop();
+	}
+
+	for (int value : ExtendedCpp::LINQ::From(data).Reverse())
+	{
+		ASSERT_EQ(value, result1_9.top());
+		result1_9.pop();
+	}
 }
 
 TEST(AdaptorTests, WhereTest)
@@ -456,4 +510,31 @@ TEST(AdaptorTests, GroupByTest)
 	ASSERT_EQ(2, companies.size());
 	ASSERT_EQ(2, companies["Microsoft"].size());
 	ASSERT_EQ(3, companies["Google"].size());
+}
+
+TEST(AdaptorTests, CatchExceptionTest)
+{
+	// Average
+	const std::vector numbers = { 1, 2, 3, 4 };
+
+	// Act
+	auto view = numbers |
+		ExtendedCpp::LINQ::Select([](const int n)
+		{
+			if (n == 2)
+				throw std::invalid_argument("");
+			return n;
+		});
+
+	// Assert
+	try
+	{
+		auto result = view |
+			ExtendedCpp::LINQ::To<std::vector>();
+		ASSERT_TRUE(false);
+	}
+	catch (const std::invalid_argument&)
+	{
+		ASSERT_TRUE(true);
+	}
 }

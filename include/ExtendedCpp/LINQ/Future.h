@@ -46,8 +46,7 @@ namespace ExtendedCpp::LINQ
             /// @brief 
             /// @param value 
             /// @return 
-            std::suspend_always yield_value(TSource value)
-            noexcept(std::is_nothrow_move_assignable_v<TSource>)
+            std::suspend_always yield_value(TSource value) noexcept
             {
                 _value = std::move(value);
                 return {};

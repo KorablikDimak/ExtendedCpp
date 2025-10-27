@@ -22,16 +22,15 @@ namespace ExtendedCpp
 	class Matrix final
 	{
 	private:
-		std::vector<T> _table{}; ///< The underlying storage for matrix elements
-		std::size_t _rowCount{}; ///< The number of rows in the matrix
-		std::size_t _columnCount{}; ///< The number of columns in the matrix
+		std::vector<T> _table;
+		std::size_t _rowCount = 0;
+		std::size_t _columnCount = 0;
 
 	public:
 		/// @brief Constructs a matrix with the specified number of rows and columns
 		/// @param rowCount The number of rows
 		/// @param columnCount The number of columns
-		Matrix(const std::size_t rowCount, const std::size_t columnCount) 
-		noexcept(std::is_nothrow_default_constructible_v<T>)
+		Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
 		requires std::is_default_constructible_v<T>
 		{
 			_rowCount = rowCount;
@@ -47,6 +46,7 @@ namespace ExtendedCpp
 		template<std::invocable TInit>
 		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
 		noexcept(std::is_nothrow_invocable_v<TInit>)
+		requires std::convertible_to<std::invoke_result_t<TInit>, T>
 		{
 			_rowCount = rowCount;
 			_columnCount = columnCount;
@@ -65,6 +65,7 @@ namespace ExtendedCpp
 		requires std::invocable<TInit, std::size_t, std::size_t>
 		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
 		noexcept(std::is_nothrow_invocable_v<TInit, std::size_t, std::size_t>)
+		requires std::convertible_to<std::invoke_result_t<TInit, std::size_t, std::size_t>, T>
 		{
 			_rowCount = rowCount;
 			_columnCount = columnCount;
@@ -77,8 +78,7 @@ namespace ExtendedCpp
 
 		/// @brief Copy constructor
 		/// @param matrix The matrix to copy from
-		Matrix(const Matrix& matrix) 
-		noexcept(std::is_nothrow_copy_assignable_v<std::vector<T>>)
+		Matrix(const Matrix& matrix) noexcept
 		{
 			_rowCount = matrix._rowCount;
 			_columnCount = matrix._columnCount;
@@ -87,8 +87,7 @@ namespace ExtendedCpp
 
 		/// @brief Move constructor
 		/// @param matrix The matrix to move from
-		Matrix(Matrix&& matrix) 
-		noexcept(std::is_nothrow_move_assignable_v<std::vector<T>>)
+		Matrix(Matrix&& matrix) noexcept
 		{
 			_rowCount = matrix._rowCount;
 			_columnCount = matrix._columnCount;
@@ -97,8 +96,7 @@ namespace ExtendedCpp
 
 		/// @brief Constructs a matrix from a 2D vector
 		/// @param matrix The 2D vector to copy from
-		explicit Matrix(const std::vector<std::vector<T>>& matrix) 
-		noexcept(std::is_nothrow_default_constructible_v<T> && std::is_nothrow_copy_assignable_v<T>)
+		explicit Matrix(const std::vector<std::vector<T>>& matrix) noexcept
 		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T>
 		{
 			std::size_t maxColumnColumn = 0;
@@ -117,8 +115,7 @@ namespace ExtendedCpp
 
 		/// @brief Constructs a matrix from a 2D vector, moving elements
 		/// @param matrix The 2D vector to move from
-		explicit Matrix(std::vector<std::vector<T>>&& matrix) 
-		noexcept(std::is_nothrow_default_constructible_v<T> && std::is_nothrow_move_assignable_v<T>)
+		explicit Matrix(std::vector<std::vector<T>>&& matrix) noexcept
 		requires std::is_default_constructible_v<T> && std::is_move_assignable_v<T>
 		{
 			std::size_t maxColumnColumn = 0;
@@ -135,32 +132,20 @@ namespace ExtendedCpp
 					_table[i * _columnCount + j] = std::move(matrix[i][j]);
 		}
 
-		/// @brief Default destructor
-		~Matrix() = default;
-
 		/// @brief Copy assignment operator
 		/// @param matrix The matrix to copy from
 		/// @return Reference to the current matrix
-		Matrix& operator=(const Matrix& matrix) 
-		noexcept(std::is_nothrow_copy_assignable_v<std::vector<T>>) = default;
+		Matrix& operator=(const Matrix& matrix) noexcept = default;
 
 		/// @brief Move assignment operator
 		/// @param matrix The matrix to move from
 		/// @return Reference to the current matrix
-		Matrix& operator=(Matrix&& matrix) 
-		noexcept(std::is_nothrow_move_assignable_v<std::vector<T>>)
-		{
-			_rowCount = matrix._rowCount;
-			_columnCount = matrix._columnCount;
-			_table = std::move(matrix._table);
-			return *this;
-		}
+		Matrix& operator=(Matrix&& matrix) noexcept = default;
 
 		/// @brief Copy assignment operator from a 2D vector
 		/// @param matrix The 2D vector to copy from
 		/// @return Reference to the current matrix 
-		Matrix& operator=(const std::vector<std::vector<T>>& matrix) 
-		noexcept(std::is_nothrow_default_constructible_v<T> && std::is_nothrow_copy_assignable_v<T>)
+		Matrix& operator=(const std::vector<std::vector<T>>& matrix) noexcept
 		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T>
 		{
 			std::size_t maxColumnColumn = 0;
@@ -182,8 +167,7 @@ namespace ExtendedCpp
 		/// @brief Move assignment operator from a 2D vector
 		/// @param matrix The 2D vector to move from
 		/// @return Reference to the current matrix
-		Matrix& operator=(std::vector<std::vector<T>>&& matrix) 
-		noexcept(std::is_nothrow_default_constructible_v<T> && std::is_nothrow_move_assignable_v<T>)
+		Matrix& operator=(std::vector<std::vector<T>>&& matrix) noexcept
 		requires std::is_default_constructible_v<T> && std::is_move_assignable_v<T>
 		{
 			std::size_t maxColumnColumn = 0;
@@ -239,8 +223,7 @@ namespace ExtendedCpp
 		/// @brief Safely sums two matrices
 		/// @param matrix The matrix to add
 		/// @return An optional containing the result if the matrices have the same size, std::nullopt otherwise
-		std::optional<Matrix> SafeSum(const Matrix& matrix) const
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
+		std::optional<Matrix> SafeSum(const Matrix& matrix) const noexcept
 		requires Concepts::Summarize<T> && std::is_copy_assignable_v<T>
 		{
 			if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
@@ -275,6 +258,7 @@ namespace ExtendedCpp
 		/// @brief Addition operator
 		/// @param matrix The matrix to add
 		/// @return The result of the addition
+		/// @throws std::invalid_argument if the matrices have different sizes
 		Matrix operator+(const Matrix& matrix) const
 		{
 			return Sum(matrix);
@@ -283,8 +267,7 @@ namespace ExtendedCpp
 		/// @brief Safely subtracts two matrices
 		/// @param matrix The matrix to subtract
 		/// @return An optional containing the result if the matrices have the same size, std::nullopt otherwise
-		std::optional<Matrix> SafeSubstitute(const Matrix& matrix) const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
+		std::optional<Matrix> SafeSubstitute(const Matrix& matrix) const noexcept
 		requires Concepts::Substitute<T> && std::is_copy_assignable_v<T>
 		{
 			if (_rowCount != matrix._rowCount || _columnCount != matrix._columnCount)
@@ -319,6 +302,7 @@ namespace ExtendedCpp
 		/// @brief Subtraction operator
 		/// @param matrix The matrix to subtract
 		/// @return The result of the subtraction
+		/// @throws std::invalid_argument if the matrices have different sizes
 		Matrix operator-(const Matrix& matrix) const
 		{
 			return Substitute(matrix);
@@ -339,12 +323,10 @@ namespace ExtendedCpp
 				result.Resize(_rowCount, matrix._columnCount);
 				return result;
 			}
-			else
-			{
-				Matrix result = StrassenMultiply(matrix);
-				result.Resize(_rowCount, matrix._columnCount);
-				return result;
-			}
+
+			Matrix result = StrassenMultiply(matrix);
+			result.Resize(_rowCount, matrix._columnCount);
+			return result;
 		}
 
 		/// @brief Multiplies two matrices
@@ -363,17 +345,16 @@ namespace ExtendedCpp
 				result.Resize(_rowCount, matrix._columnCount);
 				return result;
 			}
-			else
-			{
-				Matrix result = StrassenMultiply(matrix);
-				result.Resize(_rowCount, matrix._columnCount);
-				return result;
-			}
+
+			Matrix result = StrassenMultiply(matrix);
+			result.Resize(_rowCount, matrix._columnCount);
+			return result;
 		}
 
 		/// @brief Multiplication operator
 		/// @param matrix The matrix to multiply with
 		/// @return The result of the multiplication
+		/// @throws std::invalid_argument if the matrices cannot be multiplied
 		Matrix operator*(const Matrix& matrix) const
 		{
 			return Multiply(matrix, true);
@@ -382,8 +363,7 @@ namespace ExtendedCpp
 		/// @brief Multiplies the matrix by a scalar
 		/// @param alpha The scalar to multiply with
 		/// @return The result of the multiplication
-		Matrix Multiply(T&& alpha) const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
+		Matrix Multiply(T&& alpha) const noexcept
 		requires Concepts::Multiply<T> && std::is_copy_assignable_v<T>
 		{
 			Matrix result(*this);
@@ -398,7 +378,7 @@ namespace ExtendedCpp
 		/// @param alpha The scalar to multiply with
 		/// @return The result of the multiplication
 		Matrix operator*(T&& alpha) const 
-		noexcept(std::is_nothrow_invocable_v<decltype(&Matrix::Multiply), T&&>)
+		noexcept(std::is_nothrow_invocable_v<decltype(&Multiply), T>)
 		{
 			return Multiply(std::forward<T>(alpha));
 		}
@@ -406,8 +386,7 @@ namespace ExtendedCpp
 		/// @brief Multiplies the matrix by a scalar
 		/// @param alpha The scalar to multiply with
 		/// @return The result of the multiplication
-		Matrix Multiply(T alpha) const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
+		Matrix Multiply(T alpha) const noexcept
 		requires Concepts::Multiply<T> && std::is_copy_assignable_v<T>
 		{
 			Matrix result(*this);
@@ -422,7 +401,7 @@ namespace ExtendedCpp
         /// @param alpha The scalar to multiply with
         /// @return The result of the multiplication
         Matrix operator*(T alpha) const
-        noexcept(std::is_nothrow_invocable_v<decltype(&Matrix::Multiply), T>)
+        noexcept(std::is_nothrow_invocable_v<decltype(&Multiply), T>)
         {
 			return Multiply(alpha);
         }
@@ -436,14 +415,13 @@ namespace ExtendedCpp
 			if (rowNumber >= _rowCount)
 				throw std::out_of_range(std::format("Row number {} > matrix rows which is {}.", rowNumber, _rowCount));
 
-			return std::vector<T>(_table.begin() + (rowNumber * _columnCount),
+			return std::vector<T>(_table.begin() + rowNumber * _columnCount,
 				_table.begin() + (rowNumber * _columnCount + _columnCount));
         }
 
         /// @brief Transposes the matrix
         /// @return The transposed matrix
-        Matrix Transpose() const 
-        noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
+        Matrix Transpose() const noexcept
         requires std::is_copy_assignable_v<T>
         {
 			Matrix result(_columnCount, _rowCount);
@@ -453,6 +431,11 @@ namespace ExtendedCpp
 
 			return result;
         }
+
+		Matrix operator~() const noexcept
+		{
+			return Transpose();
+		}
 
         /// @brief Erases a row from the matrix without bounds checking
         /// @param rowNumber The index of the row to erase
@@ -551,15 +534,15 @@ namespace ExtendedCpp
 
         /// @brief Calculates the inverse of the matrix using the bitwise NOT operator
         /// @return The inverse matrix
-        Matrix operator~() const
+        /// @throws std::domain_error if the matrix is not square or the inverse cannot be calculated
+        Matrix operator!() const
         {
 			return Inverse();
         }
 
         /// @brief Negates the matrix
         /// @return The negated matrix
-        Matrix operator-() const 
-        noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
+        Matrix operator-() const noexcept
         requires Concepts::Negative<T> && std::is_copy_assignable_v<T>
         {
 			Matrix copy(*this);
@@ -619,8 +602,9 @@ namespace ExtendedCpp
         /// @brief Calculates the rank of the matrix
         /// @return The rank of the matrix
         [[nodiscard]]
-        std::size_t Rank() const noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
-        requires Concepts::Divisible<T> && Concepts::Multiply<T> && Concepts::Substitute<T> && std::is_copy_assignable_v<T>
+        std::size_t Rank() const noexcept
+        requires Concepts::Divisible<T> && Concepts::Multiply<T> &&
+        		 Concepts::Substitute<T> && std::is_copy_assignable_v<T>
         {
 			if (_rowCount == 0 || _columnCount == 0)
 				return 0;
@@ -689,7 +673,7 @@ namespace ExtendedCpp
         [[nodiscard]]
         std::vector<T> GetRowUnchecked(const std::size_t rowNumber) const noexcept
         {
-			return std::vector<T>(_table.begin() + (rowNumber * _columnCount),
+			return std::vector<T>(_table.begin() + rowNumber * _columnCount,
 				_table.begin() + (rowNumber * _columnCount + _columnCount));
         }
 
@@ -703,7 +687,7 @@ namespace ExtendedCpp
 			if (rowNumber >= _rowCount)
 				throw std::out_of_range(std::format("Row number {} > matrix rows which is {}.", rowNumber, _rowCount));
 
-			return std::vector<T>(_table.begin() + (rowNumber * _columnCount),
+			return std::vector<T>(_table.begin() + rowNumber * _columnCount,
 				_table.begin() + (rowNumber * _columnCount + _columnCount));
         }
 
@@ -711,8 +695,7 @@ namespace ExtendedCpp
         /// @param newRow The new row to set
         /// @param rowNumber The index of the row to set
         /// @throws std::out_of_range if the row number is out of range
-        void SetRow(const std::vector<T>& newRow, const std::size_t rowNumber) 
-        noexcept(std::is_nothrow_copy_assignable_v<T>)
+        void SetRow(const std::vector<T>& newRow, const std::size_t rowNumber) noexcept
         requires std::is_copy_assignable_v<T>
         {
 			if (newRow.size() < _columnCount || rowNumber >= _rowCount)
@@ -726,8 +709,7 @@ namespace ExtendedCpp
         /// @param newRow The new row to set
         /// @param rowNumber The index of the row to set
         /// @throws std::out_of_range if the row number is out of range
-        void SetRow(std::vector<T>&& newRow, const std::size_t rowNumber) 
-        noexcept(std::is_nothrow_move_assignable_v<T>)
+        void SetRow(std::vector<T>&& newRow, const std::size_t rowNumber) noexcept
         requires std::is_move_assignable_v<T>
         {
 			if (newRow.size() < _columnCount || rowNumber >= _rowCount)
@@ -771,8 +753,7 @@ namespace ExtendedCpp
         /// @param newColumn The new column to set
         /// @param columnNumber The index of the column to set
         /// @throws std::out_of_range if the column number is out of range
-        void SetColumn(const std::vector<T>& newColumn, const std::size_t columnNumber) 
-        noexcept(std::is_nothrow_copy_assignable_v<T>)
+        void SetColumn(const std::vector<T>& newColumn, const std::size_t columnNumber) noexcept
         requires std::is_copy_assignable_v<T>
         {
 			if (newColumn.size() < _rowCount || columnNumber >= _columnCount)
@@ -786,8 +767,7 @@ namespace ExtendedCpp
         /// @param newColumn The new column to set
         /// @param columnNumber The index of the column to set
         /// @throws std::out_of_range if the column number is out of range
-        void SetColumn(std::vector<T>&& newColumn, const std::size_t columnNumber) 
-        noexcept(std::is_nothrow_move_assignable_v<T>)
+        void SetColumn(std::vector<T>&& newColumn, const std::size_t columnNumber) noexcept
         requires std::is_move_assignable_v<T>
         {
 			if (newColumn.size() < _rowCount || columnNumber >= _columnCount)
@@ -871,8 +851,7 @@ namespace ExtendedCpp
         /// @param i The row index of the element
         /// @param j The column index of the element
         /// @throws std::out_of_range if the row or column index is out of range
-        void SetElement(const T& newValue, const std::size_t i, const std::size_t j)
-        noexcept(std::is_nothrow_copy_assignable_v<T>)
+        void SetElement(const T& newValue, const std::size_t i, const std::size_t j) noexcept
         requires std::is_copy_assignable_v<T>
         {
 			if (i >= _rowCount || j >= _columnCount)
@@ -885,8 +864,7 @@ namespace ExtendedCpp
         /// @param i The row index of the element
         /// @param j The column index of the element
         /// @throws std::out_of_range if the row or column index is out of range
-        void SetElement(T&& newValue, const std::size_t i, const std::size_t j)
-        noexcept(std::is_nothrow_move_assignable_v<T>)
+        void SetElement(T&& newValue, const std::size_t i, const std::size_t j) noexcept
         requires std::is_move_assignable_v<T>
         {
 			if (i >= _rowCount || j >= _columnCount)
@@ -897,8 +875,7 @@ namespace ExtendedCpp
         /// @brief Resizes the matrix to the specified number of rows and columns
         /// @param rowCount The new number of rows
         /// @param columnCount The new number of columns
-        void Resize(const std::size_t rowCount, const std::size_t columnCount) 
-        noexcept(std::is_nothrow_default_constructible_v<T> && std::is_nothrow_move_assignable_v<T>)
+        void Resize(const std::size_t rowCount, const std::size_t columnCount) noexcept
         requires std::is_default_constructible_v<T> && std::is_move_assignable_v<T>
         {
 			std::vector<T> newTable(rowCount * columnCount);
@@ -915,10 +892,9 @@ namespace ExtendedCpp
         /// @param P The permutation vector
         /// @param B The right-hand side vector
         /// @return The solution vector
-        std::vector<T> LUPSolve(const std::vector<std::size_t>& P, const std::vector<T>& B) const 
-        noexcept (std::is_nothrow_default_constructible_v<T> && std::is_nothrow_copy_assignable_v<T>)
+        std::vector<T> LUPSolve(const std::vector<std::size_t>& P, const std::vector<T>& B) const noexcept
         requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T> &&
-        Concepts::Substitute<T> && Concepts::Divisible<T> && Concepts::Multiply<T>
+				 Concepts::Substitute<T> && Concepts::Divisible<T> && Concepts::Multiply<T>
         {
 			std::vector<T> X(_rowCount);
 
@@ -959,8 +935,7 @@ namespace ExtendedCpp
         }
 
 	private:
-		std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const 
-		noexcept(std::is_nothrow_default_constructible_v<T>)
+		std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept
 		requires std::is_default_constructible_v<T> && Concepts::Comparable<T> &&
 				 Concepts::Divisible<T> && Concepts::Substitute<T> && Concepts::Multiply<T>
 		{
@@ -1011,8 +986,7 @@ namespace ExtendedCpp
 			return std::make_pair(std::move(A), std::move(P));
 		}
 
-		T LUPDet(const std::vector<std::size_t>& P) const 
-		noexcept(std::is_nothrow_copy_assignable_v<T>)
+		T LUPDet(const std::vector<std::size_t>& P) const noexcept
 		requires Concepts::Multiply<T> && Concepts::Negative<T> && std::is_copy_assignable_v<T>
 		{
 			T det = _table[0];
@@ -1023,9 +997,9 @@ namespace ExtendedCpp
 			return (static_cast<long long>(P[_rowCount]) - static_cast<long long>(_rowCount)) % 2 == 0 ? det : -det;
 		}
 
-		Matrix LUPInvert(const std::vector<std::size_t>& P) const 
-		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
-		requires std::is_copy_assignable_v<T> && Concepts::Substitute<T> && Concepts::Multiply<T> && Concepts::Divisible<T>
+		Matrix LUPInvert(const std::vector<std::size_t>& P) const noexcept
+		requires std::is_copy_assignable_v<T> && Concepts::Substitute<T> &&
+				 Concepts::Multiply<T> && Concepts::Divisible<T>
 		{
 			Matrix IA(_rowCount, _columnCount);
 
@@ -1054,9 +1028,9 @@ namespace ExtendedCpp
 		}
 
 		[[deprecated]]
-		Matrix Gauss() const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_copy_assignable_v<T>)
-		requires std::is_copy_assignable_v<T> && Concepts::Divisible<T> && Concepts::Multiply<T> && Concepts::Substitute<T>
+		Matrix Gauss() const noexcept
+		requires std::is_copy_assignable_v<T> && Concepts::Divisible<T> &&
+				 Concepts::Multiply<T> && Concepts::Substitute<T>
 		{
 			Matrix copy(*this);
 
@@ -1094,8 +1068,7 @@ namespace ExtendedCpp
 			return result;
 		}
 
-		std::array<Matrix, 4> SplitMatrix() const 
-		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
+		std::array<Matrix, 4> SplitMatrix() const noexcept
 		requires std::is_copy_assignable_v<T>
 		{
 			const std::size_t size = _rowCount / 2;
@@ -1124,8 +1097,7 @@ namespace ExtendedCpp
 			return { std::move(matrix1), std::move(matrix2), std::move(matrix3), std::move(matrix4) };
 		}
 
-		std::array<Matrix, 4> SplitMatrixParallel() const 
-		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
+		std::array<Matrix, 4> SplitMatrixParallel() const noexcept
 		requires std::is_copy_assignable_v<T>
 		{
 			auto task1 = std::async(std::launch::async, [this]
@@ -1171,8 +1143,7 @@ namespace ExtendedCpp
 			return { std::move(task1.get()), std::move(task2.get()), std::move(task3.get()), std::move(task4.get()) };
 		}
 
-		static Matrix CollectMatrix(std::array<Matrix, 4> parts) 
-		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<T>)
+		static Matrix CollectMatrix(std::array<Matrix, 4> parts) noexcept
 		requires std::is_copy_assignable_v<T>
 		{
 			const std::size_t size = parts[0]._rowCount;
@@ -1191,8 +1162,7 @@ namespace ExtendedCpp
 			return matrix;
 		}
 
-		Matrix StrassenMultiply(const Matrix& matrix) const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_move_assignable_v<Matrix>)
+		Matrix StrassenMultiply(const Matrix& matrix) const noexcept
 		{
 			const std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
 
@@ -1233,8 +1203,7 @@ namespace ExtendedCpp
 			return CollectMatrix({ std::move(c11), std::move(c12), std::move(c21), std::move(c22) });
 		}
 
-		Matrix StrassenMultiplyParallel(const Matrix& matrix) const 
-		noexcept(std::is_nothrow_copy_constructible_v<Matrix> && std::is_nothrow_move_assignable_v<Matrix>)
+		Matrix StrassenMultiplyParallel(const Matrix& matrix) const noexcept
 		{
 			std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
 
@@ -1317,9 +1286,7 @@ namespace ExtendedCpp
 			return CollectMatrix({ std::move(c11), std::move(c12), std::move(c21), std::move(c22) });
 		}
 
-		Matrix MultiplyTranspose(const Matrix& matrix) const 
-		noexcept(std::is_nothrow_constructible_v<Matrix, std::size_t, std::size_t> && std::is_nothrow_copy_assignable_v<Matrix> &&
-			std::is_nothrow_default_constructible_v<T> && std::is_nothrow_copy_assignable_v<T>)
+		Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
 		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T> && 
 			Concepts::Multiply<T> && Concepts::Summarize<T>
 		{
@@ -1340,7 +1307,7 @@ namespace ExtendedCpp
 	};
 
 	template<typename T>
-	std::ostream& operator<< (std::ostream& stream, const Matrix<T>& matrix)
+	std::ostream& operator<< (std::ostream& stream, const Matrix<T>& matrix) noexcept
 	{
 		stream << matrix.ToString();
 		return stream;

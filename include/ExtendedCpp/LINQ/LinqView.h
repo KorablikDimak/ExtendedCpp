@@ -20,15 +20,9 @@
 namespace ExtendedCpp::LINQ
 {
 	/// @brief
-	/// @tparam T
-	template<std::copyable T>
-	class LinqView;
-
-	/// @brief
 	/// @tparam TIterator 
 	template<std::forward_iterator TIterator>
-	requires std::copyable<typename TIterator::value_type>
-	class LinqView<TIterator> final
+	class LinqView final
 	{
 	public:
 		/// @brief

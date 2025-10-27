@@ -1,7 +1,6 @@
 #ifndef DI_ServiceProvider_H
 #define DI_ServiceProvider_H
 
-#include <any>
 #include <functional>
 #include <map>
 #include <memory>
@@ -26,30 +25,6 @@ namespace ExtendedCpp::DI
     public:
         /// @brief 
         typedef std::shared_ptr<ServiceProvider> Ptr;
-
-        /// @brief 
-        ServiceProvider() noexcept = default;
-
-        /// @brief 
-        /// @param serviceProvider 
-        ServiceProvider(const ServiceProvider& serviceProvider) noexcept;
-
-        /// @brief 
-        /// @param serviceProvider 
-        ServiceProvider(ServiceProvider&& serviceProvider) noexcept;
-
-        /// @brief 
-        ~ServiceProvider() = default;
-
-        /// @brief 
-        /// @param serviceProvider 
-        /// @return 
-        ServiceProvider& operator=(const ServiceProvider& serviceProvider) noexcept = default;
-
-        /// @brief 
-        /// @param serviceProvider 
-        /// @return 
-        ServiceProvider& operator=(ServiceProvider&& serviceProvider) noexcept;
 
         /// @brief 
         /// @tparam TService 
@@ -264,12 +239,30 @@ namespace ExtendedCpp::DI
         /// @brief 
         /// @param typeIndex 
         /// @return 
-        std::shared_ptr<void> GetService(std::type_index typeIndex) const noexcept;
+        std::shared_ptr<void> GetService(const std::type_index typeIndex) const noexcept
+        {
+            if (!_factories.contains(typeIndex))
+                return { nullptr };
+
+            try
+            {
+                return GetServiceImplementation(typeIndex);
+            }
+            catch (...)
+            {
+                return { nullptr };
+            }
+        }
 
         /// @brief 
         /// @param typeIndex 
         /// @return 
-        std::shared_ptr<void> GetServiceRequired(std::type_index typeIndex) const;
+        std::shared_ptr<void> GetServiceRequired(const std::type_index typeIndex) const
+        {
+            if (!_factories.contains(typeIndex))
+                throw std::invalid_argument("Service " + std::string(typeIndex.name()) + " does not found!");
+            return GetServiceImplementation(typeIndex);
+        }
 
     private:
         template<typename TService>
@@ -296,7 +289,28 @@ namespace ExtendedCpp::DI
             throw std::invalid_argument("Service " + std::string(typeid(std::shared_ptr<TService>).name()) + " does not found!");
         }
 
-        std::shared_ptr<void> GetServiceImplementation(std::type_index typeIndex) const;
+        std::shared_ptr<void> GetServiceImplementation(std::type_index typeIndex) const
+        {
+            const auto& [factory, lifeTime] = _factories.at(typeIndex);
+
+            switch (lifeTime)
+            {
+            case LifeTime::Singleton:
+                if (!_instances.contains(typeIndex))
+                    _instances.insert(std::make_pair(typeIndex, factory(*this)));
+                return _instances.at(typeIndex);
+            case LifeTime::Transient:
+                return factory(*this);
+            case LifeTime::Scoped:
+                if (_instances.contains(typeIndex) && _instances.at(typeIndex).use_count() == 1)
+                    _instances.erase(_instances.find(typeIndex));
+                if (!_instances.contains(typeIndex))
+                    _instances.insert(std::make_pair(typeIndex, factory(*this)));
+                return _instances.at(typeIndex);
+            }
+
+            throw std::invalid_argument("Service " + std::string(typeIndex.name()) + " does not found!");
+        }
     };
 }
 

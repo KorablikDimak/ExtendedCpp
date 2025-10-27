@@ -16,18 +16,24 @@ namespace ExtendedCpp::Cancellation
 
     public:
         /// @brief 
-        CancellationTokenSource() noexcept;
-
-        /// @brief 
-        ~CancellationTokenSource() = default;
+        CancellationTokenSource() noexcept
+        {
+            _cancellationRequest.store(false);
+        }
 
         /// @brief 
         /// @return 
         [[nodiscard]]
-        CancellationToken Token() const noexcept;
+        CancellationToken Token() const noexcept
+        {
+            return CancellationToken(&_cancellationRequest);
+        }
 
         /// @brief 
-        void Cancel() noexcept;
+        void Cancel() noexcept
+        {
+            _cancellationRequest.store(true);
+        }
     };
 }
 

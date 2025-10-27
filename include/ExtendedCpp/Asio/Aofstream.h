@@ -357,7 +357,7 @@ namespace ExtendedCpp::Asio
 		}
 
 		/// @brief 
-		void Close()
+		void Close() noexcept
 		{
 			std::lock_guard lock(_mutex);
 #if UNIX_IO

@@ -22,7 +22,7 @@ TEST(AsioTests, AifstramTest)
 		co_return co_await innerInnerTask;
 	}();
 
-	auto task = [&]()->ExtendedCpp::Task<std::vector<char>>
+	const auto task = [&]()->ExtendedCpp::Task<std::vector<char>>
 	{
 		co_return co_await innerTask;
 	}();
@@ -39,7 +39,7 @@ TEST(AsioTests, ReadAllAsyncTest)
 	file.close();
 
 	// Act
-	auto task = []()->ExtendedCpp::Task<std::vector<char>>
+	const auto task = []()->ExtendedCpp::Task<std::vector<char>>
 	{
 		ExtendedCpp::Asio::Aifstream aifstream("ReadAllAsyncTest.txt");
 		co_return co_await aifstream.ReadAllAsync();
@@ -53,7 +53,7 @@ TEST(AsioTests, AofstramTest)
 {
 	// Average
 	// Act
-	auto task = []()->ExtendedCpp::Task<std::size_t>
+	const auto task = []()->ExtendedCpp::Task<std::size_t>
 	{
 		ExtendedCpp::Asio::Aofstream aofstream("AofstramTest.txt");
 		co_return co_await aofstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
@@ -73,7 +73,7 @@ TEST(AsioTests, AfstramTest)
 	// Act
 	std::size_t writeResult = 0;
 
-	auto task = [](std::size_t& writeResult)->ExtendedCpp::Task<std::vector<char>>
+	const auto task = [](std::size_t& writeResult)->ExtendedCpp::Task<std::vector<char>>
 	{
 		ExtendedCpp::Asio::Afstream afstream("AfstramTest.txt");
 		writeResult = co_await afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
@@ -91,7 +91,7 @@ TEST(AsioTests, StreamOpeatorTest1)
 	double data = 6.89;
 	double result = 0;
 
-	auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
+	const auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
 	{
 		ExtendedCpp::Asio::Afstream afstream("StreamOpeatorTest1.txt");
 		co_await (afstream << data);
@@ -108,7 +108,7 @@ TEST(AsioTests, StreamOpeatorTest2)
 	double data = 0.8134;
 	double result = 0;
 
-	auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
+	const auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
 	{
 		ExtendedCpp::Asio::Afstream afstreamOut("StreamOpeatorTest2.out.txt");
 		co_await (afstreamOut << data);
