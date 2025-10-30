@@ -25,7 +25,7 @@ std::type_index ExtendedCpp::Reflection::StaticFieldInfo::TypeIndex() const noex
     return _typeIndex;
 }
 
-ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticFieldInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticFieldInfo::GetMemberType() const noexcept
 {
     return MemberType::StaticField;
 }

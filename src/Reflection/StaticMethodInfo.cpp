@@ -1,6 +1,6 @@
 #include <ExtendedCpp/Reflection/StaticMethodInfo.h>
 
-ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticMethodInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticMethodInfo::GetMemberType() const noexcept
 {
     return MemberType::StaticMethod;
 }

@@ -226,24 +226,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		~BasicAifstream() override
 		{
-#if UNIX_IO
-			if (_file != nullptr)
-			{
-				std::fclose(_file);
-				_file = nullptr;
-			}
-#elif WINDOWS_IO
-			if (_fileDescriptor != -1)
-			{
-				_close(_fileDescriptor);
-				_fileDescriptor = -1;
-			}
-			else if (_file != nullptr)
-			{
-				CloseHandle(_file);
-				_file = nullptr;
-			}
-#endif
+			Close();
 		}
 
 		/// @brief 

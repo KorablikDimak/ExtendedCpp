@@ -11,7 +11,7 @@ std::string ExtendedCpp::Reflection::MemberInfo::Name() const noexcept
     return _name;
 }
 
-ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::MemberInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::MemberInfo::GetMemberType() const noexcept
 {
     return MemberType::Unknown;
 }

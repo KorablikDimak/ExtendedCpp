@@ -20,7 +20,7 @@ std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::NewFromAny(const
     return _fromAnyPtrNew(_constructorHelper, args);
 }
 
-ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::GetMemberType() const noexcept
 {
     return MemberType::Constructor;
 }

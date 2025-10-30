@@ -1,6 +1,6 @@
 #include <ExtendedCpp/Reflection/MethodInfo.h>
 
-ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::MethodInfo::MemberType() const noexcept
+ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::MethodInfo::GetMemberType() const noexcept
 {
     return MemberType::Method;
 }

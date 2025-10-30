@@ -127,7 +127,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return 
         [[nodiscard]]
-        Reflection::MemberType MemberType() const noexcept override;
+        Reflection::MemberType GetMemberType() const noexcept override;
     };
 
     /// @brief 
