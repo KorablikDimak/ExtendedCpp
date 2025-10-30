@@ -27,10 +27,18 @@ namespace ExtendedCpp::InfoLog
         virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept = 0;
 
     protected:
+        /// @brief
         std::map<std::string, std::string> Config;
 
+        ///
+        /// @param logLevel
+        /// @return
         [[nodiscard]]
         bool ValidateLogLevel(LogLevel logLevel) const noexcept;
+
+        ///
+        /// @param tag
+        /// @return
         [[nodiscard]]
         bool ValidateTag(const std::string& tag) const noexcept;
     };

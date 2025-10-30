@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include <sstream>
 #include <iostream>
 
 #include <ExtendedCpp/Xml.h>

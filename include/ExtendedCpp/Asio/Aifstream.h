@@ -7,7 +7,6 @@
 #include <format>
 #include <ios>
 #include <string>
-#include <cstring>
 #include <mutex>
 
 #include <ExtendedCpp/Asio/Aistream.h>
@@ -38,7 +37,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		/// @param fileName 
 		/// @param mode 
-		explicit BasicAifstream(const char* fileName, std::ios_base::openmode mode = std::ios_base::in)
+		explicit BasicAifstream(const char* fileName, const std::ios_base::openmode mode = std::ios_base::in)
 		{
 #if UNIX_IO
 			switch (mode)
@@ -62,15 +61,15 @@ namespace ExtendedCpp::Asio
 			switch (mode)
 			{
 				case std::ios_base::in:
-					_file = CreateFileA(fileName, GENERIC_READ, 0, NULL,
-						OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName, GENERIC_READ, 0, nullptr,
+						OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
 					_offset = 0;
 					break;
 				case std::ios_base::binary:
 				case std::ios_base::in | std::ios_base::binary:
-					_file = CreateFileA(fileName, GENERIC_READ, 0, NULL,
-						OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName, GENERIC_READ, 0, nullptr,
+						OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
 					_offset = 0;
 					break;
@@ -86,7 +85,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		/// @param fileName 
 		/// @param mode 
-		explicit BasicAifstream(const std::string_view fileName, std::ios_base::openmode mode = std::ios_base::in)
+		explicit BasicAifstream(const std::string_view fileName, const std::ios_base::openmode mode = std::ios_base::in)
 		{
 #if UNIX_IO
 			switch (mode)
@@ -104,15 +103,15 @@ namespace ExtendedCpp::Asio
 			switch (mode)
 			{
 				case std::ios_base::in:
-					_file = CreateFileA(fileName.data(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.data(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
 					_offset = 0;
 					break;
 				case std::ios_base::binary:
 				case std::ios_base::in | std::ios_base::binary:
-					_file = CreateFileA(fileName.data(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.data(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
 					_offset = 0;
 					break;
@@ -128,7 +127,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		/// @param fileName 
 		/// @param mode 
-		explicit BasicAifstream(const std::string& fileName, std::ios_base::openmode mode = std::ios_base::in)
+		explicit BasicAifstream(const std::string& fileName, const std::ios_base::openmode mode = std::ios_base::in)
 		{
 #if UNIX_IO
 			switch (mode)
@@ -146,15 +145,15 @@ namespace ExtendedCpp::Asio
 			switch (mode)
 			{
 				case std::ios_base::in:
-					_file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
 					_offset = 0;
 					break;
 				case std::ios_base::binary:
 				case std::ios_base::in | std::ios_base::binary:
-					_file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.c_str(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
 					_offset = 0;
 					break;
@@ -170,7 +169,7 @@ namespace ExtendedCpp::Asio
 		/// @brief 
 		/// @param fileName 
 		/// @param mode 
-		explicit BasicAifstream(const std::filesystem::path& fileName, std::ios_base::openmode mode = std::ios_base::in)
+		explicit BasicAifstream(const std::filesystem::path& fileName, const std::ios_base::openmode mode = std::ios_base::in)
 		{
 #if UNIX_IO
 			switch (mode)
@@ -188,15 +187,15 @@ namespace ExtendedCpp::Asio
 			switch (mode)
 			{
 				case std::ios_base::in:
-					_file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY | _O_TEXT);
 					_offset = 0;
 					break;
 				case std::ios_base::binary:
 				case std::ios_base::in | std::ios_base::binary:
-					_file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, NULL,
-						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+					_file = CreateFileA(fileName.string().c_str(), GENERIC_READ, 0, nullptr,
+						OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, nullptr);
 					_fileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(_file), _O_RDONLY);
 					_offset = 0;
 					break;
@@ -330,24 +329,23 @@ namespace ExtendedCpp::Asio
 				return buffer;
 			});
 #elif WINDOWS_IO
-			return Task<std::vector<TChar>>::Run([this](const std::size_t count)
+			return Task<std::vector<TChar>>::Run([this](const std::size_t count_)
 			{
 				std::lock_guard lock(_mutex);
-				std::vector<TChar> buffer(count);
+				std::vector<TChar> buffer(count_);
 
-				OVERLAPPED fileReadOverlapped;
-				memset(&fileReadOverlapped, 0, sizeof(OVERLAPPED));
+				OVERLAPPED fileReadOverlapped = {};
 				fileReadOverlapped.Offset = _offset;
 
-				BOOL readFileResult = ReadFileEx(_file, buffer.data(), static_cast<DWORD>(count * sizeof(TChar)), &fileReadOverlapped, NULL);
+				const BOOL readFileResult = ReadFileEx(_file, buffer.data(), static_cast<DWORD>(count_ * sizeof(TChar)), &fileReadOverlapped, nullptr);
 				if (readFileResult == FALSE)
 					throw std::runtime_error(std::string("Error at ReadFileEx()."));
 
-				DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
+				const DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
 				if (waitResult != WAIT_OBJECT_0)
 					throw std::runtime_error(std::string("Error at WaitForSingleObjectEx()."));
 
-				_offset += static_cast<off_t>(count * sizeof(TChar));
+				_offset += static_cast<off_t>(count_ * sizeof(TChar));
 				return buffer;
 			}, count);
 #endif
@@ -372,15 +370,14 @@ namespace ExtendedCpp::Asio
 
 				std::vector<TChar> buffer(truncatedSize);
 
-				OVERLAPPED fileReadOverlapped;
-				memset(&fileReadOverlapped, 0, sizeof(OVERLAPPED));
+				OVERLAPPED fileReadOverlapped = {};
 				fileReadOverlapped.Offset = _offset;
 
-				BOOL readFileResult = ReadFileEx(_file, buffer.data(), truncatedSize, &fileReadOverlapped, NULL);
+				const BOOL readFileResult = ReadFileEx(_file, buffer.data(), truncatedSize, &fileReadOverlapped, nullptr);
 				if (readFileResult == FALSE)
 					throw std::runtime_error(std::string("Error at ReadFileEx()."));
 
-				DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
+				const DWORD waitResult = WaitForSingleObjectEx(_file, INFINITE, FALSE);
 				if (waitResult != WAIT_OBJECT_0)
 					throw std::runtime_error(std::string("Error at WaitForSingleObjectEx()."));
 

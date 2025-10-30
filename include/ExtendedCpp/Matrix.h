@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <stdexcept>
-#include <cmath>
 #include <optional>
 #include <future>
 #include <array>
