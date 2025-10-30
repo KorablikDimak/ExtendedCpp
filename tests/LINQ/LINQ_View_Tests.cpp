@@ -176,7 +176,7 @@ TEST(LINQ_View_Tests, TakeWhileTest)
 TEST(LINQ_View_Tests, EmptyCollectionTest)
 {
     // Average
-    constexpr std::vector<char> emptyVector;
+    const std::vector<char> emptyVector;
 
     // Act
     const auto linq = ExtendedCpp::LINQ::View(emptyVector);

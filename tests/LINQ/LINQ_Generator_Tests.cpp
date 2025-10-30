@@ -1100,7 +1100,7 @@ TEST(LINQ_Generator_Tests, ForeachTest)
 TEST(LINQ_Generator_Tests, EmptyCollectionTest)
 {
     // Average
-    constexpr std::vector<char> emptyVector;
+    const std::vector<char> emptyVector;
 
     // Act
     auto linq = ExtendedCpp::LINQ::Generator(emptyVector);

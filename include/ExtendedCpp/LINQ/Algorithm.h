@@ -127,7 +127,7 @@ namespace ExtendedCpp::LINQ::Algorithm
     {
         const std::size_t size = (firstSize + 1) * (secondSize + 1);
         auto LCSTable = std::make_unique<std::size_t[]>(size);
-        std::memset(LCSTable.get(), 0, size * sizeof(std::size_t));
+        memset(LCSTable.get(), 0, size * sizeof(std::size_t));
 
         for (std::size_t i = 1; i <= firstSize; ++i)
             for (std::size_t j = 1; j <= secondSize; ++j)

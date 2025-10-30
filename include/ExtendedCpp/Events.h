@@ -16,6 +16,16 @@ namespace ExtendedCpp::Events
 	/// @param functor
 	/// @return
 	template<typename TFunctor>
+	auto CreateFunctorHandler(const TFunctor& functor) noexcept
+	{
+		return FunctorTraits<TFunctor>::CreateFunctorHandler(functor);
+	}
+
+	/// @brief
+	/// @tparam TFunctor
+	/// @param functor
+	/// @return
+	template<typename TFunctor>
 	auto CreateFunctorHandler(TFunctor&& functor) noexcept
 	{
 		return FunctorTraits<std::decay_t<TFunctor>>::CreateFunctorHandler(std::forward<TFunctor>(functor));

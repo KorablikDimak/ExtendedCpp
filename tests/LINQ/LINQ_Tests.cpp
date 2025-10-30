@@ -431,7 +431,7 @@ TEST(LINQ_Tests, FirstPredicateTest)
 TEST(LINQ_Tests, FirstOrDefaultTest)
 {
     // Average
-    constexpr std::vector<int> numbers;
+    const std::vector<int> numbers;
 
     // Act
     const int result = ExtendedCpp::LINQ::From(numbers)
@@ -483,7 +483,7 @@ TEST(LINQ_Tests, LastPredicateTest)
 TEST(LINQ_Tests, LastOrDefaultTest)
 {
     // Average
-    constexpr std::vector<int> numbers;
+    const std::vector<int> numbers;
 
     // Act
     const int result = ExtendedCpp::LINQ::From(numbers)
@@ -1123,7 +1123,7 @@ TEST(LINQ_Tests, ForeachTest)
 TEST(LINQ_Tests, EmptyCollectionTest)
 {
     // Average
-    constexpr std::vector<char> emptyVector;
+    const std::vector<char> emptyVector;
 
     // Act
     const auto linq = ExtendedCpp::LINQ::From(emptyVector);
@@ -1160,7 +1160,7 @@ TEST(LINQ_Tests, MapTest)
 
     // Act
     const auto mapped = ExtendedCpp::LINQ::From(numbers)
-        .Map([](int number){ return number * 2; })
+        .Map([](const int number){ return number * 2; })
         .ToVector();
 
     // Assert

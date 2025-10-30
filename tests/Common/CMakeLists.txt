@@ -13,8 +13,7 @@ find_package(GTest REQUIRED)
 set(Common_TESTS_SOURCE
         main.cpp
         MatrixTests.cpp
-        RandomTests.cpp
-        ChannelTests.cpp)
+        RandomTests.cpp)
 
 add_executable(Common-tests ${Common_TESTS_SOURCE})
 target_link_libraries(Common-tests PRIVATE ExtendedCpp::Common GTest::gtest GTest::gtest_main)

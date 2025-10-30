@@ -445,7 +445,7 @@ TEST(AdaptorTests, TakeWhileTest)
 TEST(AdaptorTests, EmptyCollectionTest)
 {
 	// Average
-	constexpr std::vector<char> emptyVector;
+	const std::vector<char> emptyVector;
 
 	// Act
 	const auto emptyResult = emptyVector |

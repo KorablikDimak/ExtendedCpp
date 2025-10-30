@@ -13,22 +13,18 @@ namespace ExtendedCpp::Events
     class FunctorHandler final : public IEventHandler<TParams...>
     {
     private:
-        TFunctor _functor;
+        mutable std::decay_t<TFunctor> _functor;
 
     public:
-        /// @brief 
+        /// @brief
         /// @param functor
-        explicit FunctorHandler(const TFunctor& functor) noexcept
-        {
-            _functor = functor;
-        }
+        explicit FunctorHandler(const TFunctor& functor) noexcept :
+            _functor(functor) {}
 
         /// @brief
         /// @param functor
-        explicit FunctorHandler(TFunctor&& functor) noexcept
-        {
-            _functor = std::move(functor);
-        }
+        explicit FunctorHandler(TFunctor&& functor) noexcept :
+            _functor(std::forward<TFunctor>(functor)) {}
 
         /// @brief 
         ~FunctorHandler() override = default;

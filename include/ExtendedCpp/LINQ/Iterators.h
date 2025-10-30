@@ -70,7 +70,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		IteratorWrapper operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			IteratorWrapper temp = *this;
 			++*this;
@@ -175,7 +175,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SelectorIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			SelectorIterator temp = *this;
 			++*this;
@@ -280,7 +280,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TransformIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			TransformIterator temp = *this;
 			++*this;
@@ -400,7 +400,9 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		WhereIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator))
 		{
 			WhereIterator temp = *this;
 			++*this;
@@ -520,7 +522,9 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		RemoveWhereIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+				 noexcept(++_inIterator) &&
+				 noexcept(*_inIterator))
 		{
 			WhereIterator temp = *this;
 			++*this;
@@ -696,7 +700,12 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		JoinIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator) &&
+				 noexcept(++_currentOther) &&
+				 std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
+				 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+				 noexcept(*_inIterator) &&
+				 noexcept(*_currentOther))
 		{
 			JoinIterator temp = *this;
 			++*this;
@@ -810,7 +819,8 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		ZipIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_leftIterator) &&
+				 noexcept(++_rightIterator))
 		{
 			JoinIterator temp = *this;
 			++*this;
@@ -912,7 +922,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			SkipIterator temp = *this;
 			++*this;
@@ -1024,7 +1034,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		SkipWhileIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			SkipWhileIterator temp = *this;
 			++*this;
@@ -1139,7 +1149,7 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TakeIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(noexcept(++_inIterator))
 		{
 			TakeIterator temp = *this;
 			++*this;
@@ -1259,7 +1269,9 @@ namespace ExtendedCpp::LINQ
 		/// @brief
 		/// @return
 		TakeWhileIterator operator++(int)
-		noexcept(noexcept(++*this))
+		noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+				 noexcept(*_inIterator) &&
+				 noexcept(++_inIterator))
 		{
 			TakeWhileIterator temp = *this;
 			++*this;
