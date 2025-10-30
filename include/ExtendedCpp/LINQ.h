@@ -13,10 +13,11 @@ namespace ExtendedCpp::LINQ
     /// @tparam TCollection 
     /// @param collection 
     /// @return 
-    template<Concepts::ForwardIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
+    template<Concepts::InputIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
     LinqContainer<TSource> From(TCollection&& collection) noexcept
     {
-        return LinqContainer(std::vector<TSource>(collection.begin(), collection.end()));
+        return LinqContainer<TSource>
+            (std::vector<TSource>(collection.begin(), collection.end()));
     }
 
     /// @brief 
@@ -25,10 +26,11 @@ namespace ExtendedCpp::LINQ
     /// @param begin 
     /// @param end 
     /// @return 
-    template<std::forward_iterator TIterator, typename TSource = typename std::iterator_traits<TIterator>::value_type>
+    template<std::input_iterator TIterator, typename TSource = typename std::iterator_traits<TIterator>::value_type>
     LinqContainer<TSource> From(TIterator&& begin, TIterator&& end) noexcept
     {
-        return LinqContainer(std::vector<TSource>(std::forward<TIterator>(begin), std::forward<TIterator>(end)));
+        return LinqContainer<TSource>(std::vector<TSource>
+            (std::forward<TIterator>(begin), std::forward<TIterator>(end)));
     }
 
     /// @brief
@@ -38,7 +40,7 @@ namespace ExtendedCpp::LINQ
     template<typename TSource>
     LinqContainer<TSource> From(std::vector<TSource>&& collection) noexcept
     {
-        return LinqContainer(std::move(collection));
+        return LinqContainer<TSource>(std::move(collection));
     }
 
     /// @brief 
@@ -57,7 +59,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -74,7 +76,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -93,7 +95,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -110,7 +112,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -129,7 +131,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -146,7 +148,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqContainer(std::move(vectorCollection));
+        return LinqContainer<TSource>(std::move(vectorCollection));
     }
 
     /// @brief
@@ -157,7 +159,8 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     LinqContainer<std::pair<TKey, TValue>> From(const std::map<TKey, TValue>& collection) noexcept
     {
-        return LinqContainer(std::vector<std::pair<TKey, TValue>>(collection.cbegin(), collection.cend()));
+        return LinqContainer<std::pair<TKey, TValue>>
+            (std::vector<std::pair<TKey, TValue>>(collection.cbegin(), collection.cend()));
     }
 
     /// @brief
@@ -168,7 +171,8 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     LinqContainer<std::pair<TKey, TValue>> From(std::map<TKey, TValue>&& collection) noexcept
     {
-        return LinqContainer(std::vector<std::pair<TKey, TValue>>(collection.begin(), collection.end()));
+        return LinqContainer<std::pair<TKey, TValue>>
+            (std::vector<std::pair<TKey, TValue>>(collection.begin(), collection.end()));
     }
 
     /// @brief
@@ -179,7 +183,8 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     LinqContainer<std::pair<TKey, TValue>> From(const std::unordered_map<TKey, TValue>& collection) noexcept
     {
-        return LinqContainer(std::vector<std::pair<TKey, TValue>>(collection.cbegin(), collection.cend()));
+        return LinqContainer<std::pair<TKey, TValue>>
+            (std::vector<std::pair<TKey, TValue>>(collection.cbegin(), collection.cend()));
     }
 
     /// @brief
@@ -190,7 +195,8 @@ namespace ExtendedCpp::LINQ
     template<typename TKey, typename TValue>
     LinqContainer<std::pair<TKey, TValue>> From(std::unordered_map<TKey, TValue>&& collection) noexcept
     {
-        return LinqContainer(std::vector<std::pair<TKey, TValue>>(collection.begin(), collection.end()));
+        return LinqContainer<std::pair<TKey, TValue>>
+            (std::vector<std::pair<TKey, TValue>>(collection.begin(), collection.end()));
     }
 
     /// @brief 
@@ -200,16 +206,22 @@ namespace ExtendedCpp::LINQ
     /// @return 
     template<Concepts::InputIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
     requires (!Concepts::IsPair<TSource>)
-    LinqGenerator<TSource> Generator(TCollection&& collection) noexcept
+    LinqGenerator<TSource, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+    Generator(TCollection&& collection) noexcept
     {
-        return LinqGenerator<TSource>(std::forward<TCollection>(collection));
+        return LinqGenerator<TSource, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+            (std::forward<TCollection>(collection));
     }
 
-    template<Concepts::InputIterable TCollection, Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
-             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>, typename TValue = typename PairTraits<TSource>::SecondType>
-    LinqGenerator<std::pair<TKey, TValue>> Generator(TCollection&& collection) noexcept
+    template<Concepts::InputIterable TCollection,
+             Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
+             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>,
+             typename TValue = typename PairTraits<TSource>::SecondType>
+    LinqGenerator<std::pair<TKey, TValue>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+    Generator(TCollection&& collection) noexcept
     {
-        return LinqGenerator<std::pair<TKey, TValue>>(std::forward<TCollection>(collection));
+        return LinqGenerator<std::pair<TKey, TValue>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+            (std::forward<TCollection>(collection));
     }
 
     /// @brief 
@@ -218,10 +230,14 @@ namespace ExtendedCpp::LINQ
     /// @param begin 
     /// @param end 
     /// @return 
-    template<std::input_iterator TIterator, typename TSource = typename std::iterator_traits<TIterator>::value_type>
-    LinqGenerator<TSource> Generator(TIterator&& begin, TIterator&& end) noexcept
+    template<std::input_iterator TIterator,
+             typename TSource = typename std::iterator_traits<TIterator>::value_type,
+             bool NothrowIterable = ++std::declval<TIterator>()>
+    LinqGenerator<TSource, std::integral_constant<bool, NothrowIterable>>
+    Generator(TIterator&& begin, TIterator&& end) noexcept
     {
-        return LinqGenerator<TSource>(std::forward<TIterator>(begin), std::forward<TIterator>(end));
+        return LinqGenerator<TSource, std::integral_constant<bool, NothrowIterable>>
+            (std::forward<TIterator>(begin), std::forward<TIterator>(end));
     }
 
     /// @brief 
@@ -229,7 +245,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::stack<TSource>& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(const std::stack<TSource>& collection) noexcept
     {
         std::stack<TSource> copy = collection;
 
@@ -240,7 +257,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -248,7 +265,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::stack<TSource>&& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(std::stack<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -257,7 +275,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -265,7 +283,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::queue<TSource>& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(const std::queue<TSource>& collection) noexcept
     {
         std::queue<TSource> copy = collection;
 
@@ -276,7 +295,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -284,7 +303,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::queue<TSource>&& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(std::queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -293,7 +313,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -301,7 +321,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(const std::priority_queue<TSource>& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(const std::priority_queue<TSource>& collection) noexcept
     {
         std::priority_queue<TSource> copy = collection;
 
@@ -312,7 +333,7 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief 
@@ -320,7 +341,8 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return 
     template<typename TSource>
-    LinqGenerator<TSource> Generator(std::priority_queue<TSource>&& collection) noexcept
+    LinqGenerator<TSource, std::true_type>
+    Generator(std::priority_queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -329,7 +351,7 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource>(std::move(vectorCollection));
+        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
 
     /// @brief
@@ -337,7 +359,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TCollection
     /// @param collection
     /// @return
-    template<Concepts::ForwardIterable TCollection, typename TIterator = typename std::decay_t<TCollection>::const_iterator>
+    template<Concepts::ForwardIterable TCollection, std::forward_iterator TIterator = typename std::decay_t<TCollection>::const_iterator>
     LinqView<IteratorWrapper<TIterator>> View(const TCollection& collection) noexcept
     {
         return LinqView<IteratorWrapper<TIterator>>(
@@ -350,7 +372,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TCollection 
     /// @param collection 
     /// @return 
-    template<Concepts::ForwardIterable TCollection, typename TIterator = typename std::decay_t<TCollection>::iterator>
+    template<Concepts::ForwardIterable TCollection, std::forward_iterator TIterator = typename std::decay_t<TCollection>::iterator>
     LinqView<IteratorWrapper<TIterator>> View(TCollection& collection) noexcept
     {
         return LinqView<IteratorWrapper<TIterator>>(
@@ -371,40 +393,13 @@ namespace ExtendedCpp::LINQ
             IteratorWrapper<TIterator>(end, end));
     }
 
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TIterator 
-    /// @param collection 
-    /// @return 
-    template<typename TSource, typename TIterator = typename std::vector<TSource>::iterator>
-    LinqView<IteratorWrapper<TIterator>> View(std::stack<TSource> collection) = delete;
-
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TIterator 
-    /// @param collection 
-    /// @return 
-    template<typename TSource, typename TIterator = typename std::vector<TSource>::iterator>
-    LinqView<IteratorWrapper<TIterator>> View(std::queue<TSource> collection) = delete;
-
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TIterator 
-    /// @param collection 
-    /// @return 
-    template<typename TSource, typename TIterator = typename std::vector<TSource>::iterator>
-    LinqView<IteratorWrapper<TIterator>> View(std::priority_queue<TSource> collection) = delete;
-
-    template<template<typename...> typename, std::size_t N = 0>
+    template<template<typename...> typename>
     struct To;
 
     /// @brief
     template<>
     struct To<LinqContainer> final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
@@ -421,9 +416,6 @@ namespace ExtendedCpp::LINQ
     struct To<LinqGenerator> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
@@ -438,9 +430,6 @@ namespace ExtendedCpp::LINQ
     template<>
     struct To<LinqView> final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
@@ -457,14 +446,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::vector> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::vector<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToVector()))
         {
             return linqCollection.ToVector();
@@ -476,14 +463,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::list> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::list<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToList()))
         {
             return linqCollection.ToList();
@@ -495,14 +480,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::forward_list> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::forward_list<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToForwardList()))
         {
             return linqCollection.ToForwardList();
@@ -514,14 +497,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::stack> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::stack<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToStack()))
         {
             return linqCollection.ToStack();
@@ -533,14 +514,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::queue> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::queue<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToQueue()))
         {
             return linqCollection.ToQueue();
@@ -552,14 +531,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::deque> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::deque<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToDeque()))
         {
             return linqCollection.ToDeque();
@@ -571,14 +548,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::priority_queue> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::priority_queue<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToPriorityQueue()))
         {
             return linqCollection.ToPriorityQueue();
@@ -590,14 +565,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::set> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::set<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToSet()))
         {
             return linqCollection.ToSet();
@@ -609,14 +582,12 @@ namespace ExtendedCpp::LINQ
     struct To<std::unordered_set> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::unordered_set<typename std::decay_t<TLinqCollection>::value_type>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToUnorderedSet()))
         {
             return linqCollection.ToUnorderedSet();
@@ -628,14 +599,13 @@ namespace ExtendedCpp::LINQ
     struct To<std::map> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
-        template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        template<Concepts::LinqCollection TLinqCollection,
+                 Concepts::IsPair TSource = typename std::decay_t<TLinqCollection>::value_type>
+        std::map<typename PairTraits<TSource>::FirstType, typename PairTraits<TSource>::FirstType>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToMap()))
         {
             return linqCollection.ToMap();
@@ -647,14 +617,13 @@ namespace ExtendedCpp::LINQ
     struct To<std::unordered_map> final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
-        template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        template<Concepts::LinqCollection TLinqCollection,
+                 Concepts::IsPair TSource = typename std::decay_t<TLinqCollection>::value_type>
+        std::unordered_map<typename PairTraits<TSource>::FirstType, typename PairTraits<TSource>::FirstType>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.ToUnorderedMap()))
         {
             return linqCollection.ToUnorderedMap();
@@ -667,14 +636,12 @@ namespace ExtendedCpp::LINQ
     struct ToArray final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         /// @tparam TLinqCollection
         /// @param linqCollection
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
-        auto operator()(TLinqCollection&& linqCollection) const
+        std::array<typename std::decay_t<TLinqCollection>::value_type, N>
+        operator()(TLinqCollection&& linqCollection) const
         noexcept(noexcept(linqCollection.template ToArray<N>()))
         {
             return linqCollection.template ToArray<N>();
@@ -686,9 +653,6 @@ namespace ExtendedCpp::LINQ
     template<typename TSelector>
     struct Select final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::decay_t<TSelector> _selector;
 
@@ -703,7 +667,7 @@ namespace ExtendedCpp::LINQ
         /// @return
         template<Concepts::LinqCollection TLinqCollection>
         auto operator()(TLinqCollection&& linqCollection) const
-        noexcept(noexcept(noexcept(linqCollection.Select(_selector))))
+        noexcept(noexcept(linqCollection.Select(_selector)))
         {
             return linqCollection.Select(_selector);
         }
@@ -714,9 +678,6 @@ namespace ExtendedCpp::LINQ
     template<typename TPredicate>
     struct Where final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::decay_t<TPredicate> _predicate;
 
@@ -743,9 +704,6 @@ namespace ExtendedCpp::LINQ
     struct RemoveWhere final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         const std::decay_t<TPredicate> _predicate;
 
         /// @brief
@@ -770,9 +728,6 @@ namespace ExtendedCpp::LINQ
     template<typename TMapFunction>
     struct Map final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::decay_t<TMapFunction> _mapFunction;
 
@@ -799,9 +754,6 @@ namespace ExtendedCpp::LINQ
     struct Transform final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         const std::decay_t<TTransformFunction> _transformFunction;
 
         /// @brief
@@ -826,9 +778,6 @@ namespace ExtendedCpp::LINQ
     template<typename TKeySelector>
     struct GroupBy final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::decay_t<TKeySelector> _keySelector;
 
@@ -858,9 +807,6 @@ namespace ExtendedCpp::LINQ
              typename TInnerKeySelector, typename TOtherKeySelector, typename TResultSelector>
     struct Join final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const TOtherCollection& _otherCollection;
 
@@ -903,9 +849,6 @@ namespace ExtendedCpp::LINQ
     struct Zip final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         const TOtherCollection& _otherCollection;
 
         /// @brief
@@ -928,9 +871,6 @@ namespace ExtendedCpp::LINQ
     /// @brief
     struct Skip final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::size_t _count;
 
@@ -956,9 +896,6 @@ namespace ExtendedCpp::LINQ
     struct SkipWhile final
     {
         /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
-        /// @brief
         const std::decay_t<TPredicate> _predicate;
 
         /// @brief
@@ -981,9 +918,6 @@ namespace ExtendedCpp::LINQ
     /// @brief
     struct Take final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::size_t _count;
 
@@ -1008,9 +942,6 @@ namespace ExtendedCpp::LINQ
     template<typename TPredicate>
     struct TakeWhile final
     {
-        /// @brief
-        static constexpr bool IsLinqAdaptor = true;
-
         /// @brief
         const std::decay_t<TPredicate> _predicate;
 
@@ -1037,44 +968,11 @@ namespace ExtendedCpp::LINQ
     /// @param linqCollection
     /// @param adaptor
     /// @return
-    template<Concepts::LinqCollection TLinqCollection, typename TAdaptor>
-    requires Concepts::LinqAdaptor<TAdaptor, TLinqCollection>
+    template<typename TLinqCollection, typename TAdaptor>
     auto operator|(TLinqCollection&& linqCollection, TAdaptor&& adaptor)
     noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
     {
         return adaptor(std::forward<TLinqCollection>(linqCollection));
-    }
-
-    /// @brief
-    /// @tparam TCollection
-    /// @tparam TAdaptor
-    /// @tparam TLinqCollection
-    /// @param collection
-    /// @param adaptor
-    /// @return
-    template<Concepts::ForwardIterable TCollection, typename TAdaptor,
-             Concepts::LinqCollection TLinqCollection = LinqView<IteratorWrapper<typename TCollection::iterator>>>
-    requires (!Concepts::LinqCollection<TCollection> && Concepts::LinqAdaptor<TAdaptor, TLinqCollection>)
-    auto operator|(const TCollection& collection, TAdaptor&& adaptor)
-    noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
-    {
-        return adaptor(View(collection));
-    }
-
-    /// @brief
-    /// @tparam TCollection
-    /// @tparam TAdaptor
-    /// @tparam TLinqCollection
-    /// @param collection
-    /// @param adaptor
-    /// @return
-    template<Concepts::ForwardIterable TCollection, typename TAdaptor,
-             Concepts::LinqCollection TLinqCollection = LinqContainer<typename TCollection::value_type>>
-    requires (!Concepts::LinqCollection<TCollection> && Concepts::LinqAdaptor<TAdaptor, TLinqCollection>)
-    auto operator|(TCollection&& collection, TAdaptor&& adaptor)
-    noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
-    {
-        return adaptor(From(std::forward<TCollection>(collection)));
     }
 
     /// @brief
@@ -1085,10 +983,27 @@ namespace ExtendedCpp::LINQ
     /// @param range
     /// @param adaptor
     /// @return
-    template<Concepts::Range TRange, typename TAdaptor, typename TRangeIterator = decltype(std::declval<TRange>().begin()),
-                                     Concepts::LinqCollection TLinqCollection = decltype(View(std::declval<TRangeIterator>(), std::declval<TRangeIterator>()))>
-    requires (!Concepts::ForwardIterable<TRange> && !Concepts::LinqCollection<TRange>)
+    template<Concepts::Range TRange, typename TAdaptor, std::forward_iterator TRangeIterator = decltype(std::declval<TRange>().cbegin()),
+             Concepts::LinqCollection TLinqCollection = decltype(View(std::declval<TRangeIterator>(), std::declval<TRangeIterator>()))>
+    requires (!Concepts::LinqCollection<TRange> && Concepts::LinqAdaptor<TAdaptor, TLinqCollection>)
     auto operator|(const TRange& range, TAdaptor&& adaptor)
+    noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
+    {
+        return adaptor(View(range.cbegin(), range.cend()));
+    }
+
+    /// @brief
+    /// @tparam TRange
+    /// @tparam TAdaptor
+    /// @tparam TRangeIterator
+    /// @tparam TLinqCollection
+    /// @param range
+    /// @param adaptor
+    /// @return
+    template<Concepts::Range TRange, typename TAdaptor, std::forward_iterator TRangeIterator = decltype(std::declval<TRange>().begin()),
+             Concepts::LinqCollection TLinqCollection = decltype(View(std::declval<TRangeIterator>(), std::declval<TRangeIterator>()))>
+    requires (!Concepts::LinqCollection<TRange> && Concepts::LinqAdaptor<TAdaptor, TLinqCollection>)
+    auto operator|(TRange& range, TAdaptor&& adaptor)
     noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
     {
         return adaptor(View(range.begin(), range.end()));
@@ -1102,9 +1017,9 @@ namespace ExtendedCpp::LINQ
     /// @param range
     /// @param adaptor
     /// @return
-    template<Concepts::Range TRange, typename TAdaptor, typename TRangeIterator = decltype(std::declval<TRange>().begin()),
-                                     Concepts::LinqCollection TLinqCollection = decltype(View(std::declval<TRangeIterator>(), std::declval<TRangeIterator>()))>
-    requires (!Concepts::ForwardIterable<TRange> && !Concepts::LinqCollection<TRange>)
+    template<Concepts::Range TRange, typename TAdaptor, std::input_iterator TRangeIterator = decltype(std::declval<TRange>().begin()),
+             Concepts::LinqCollection TLinqCollection = decltype(From(std::declval<TRangeIterator>(), std::declval<TRangeIterator>()))>
+    requires (!Concepts::LinqCollection<TRange> && Concepts::LinqAdaptor<TAdaptor, TLinqCollection>)
     auto operator|(TRange&& range, TAdaptor&& adaptor)
     noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
     {

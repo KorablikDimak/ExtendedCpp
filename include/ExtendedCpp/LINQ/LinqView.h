@@ -48,6 +48,24 @@ namespace ExtendedCpp::LINQ
 		LinqView(TIterator begin, TIterator end) noexcept :
 			_begin(std::move(begin)), _end(std::move(end)) {}
 
+		/// @brief
+		/// @param other
+		LinqView(const LinqView& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		LinqView(LinqView&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		LinqView& operator=(const LinqView& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
+		LinqView& operator=(LinqView&& other) noexcept = default;
+
 		/// @brief 
 		/// @return 
 		TIterator begin() const noexcept

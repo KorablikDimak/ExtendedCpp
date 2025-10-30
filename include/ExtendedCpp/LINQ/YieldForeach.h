@@ -10,48 +10,34 @@
 /// @brief 
 namespace ExtendedCpp::LINQ
 {
-    /// @brief
-    /// @tparam TSource
-    /// @tparam TCollection
-    /// @param collection
-    /// @return
-    template<Concepts::InputIterable TCollection, typename TSource = typename TCollection::value_type>
-    requires (!Concepts::IsPair<TSource>)
-    Future<TSource> YieldForeach(const TCollection& collection) noexcept
-    {
-        for (auto& element : collection)
-            co_yield element;
-    }
-
     /// @brief 
     /// @tparam TSource 
     /// @tparam TCollection 
     /// @param collection 
     /// @return 
-    template<Concepts::InputIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
+    template<Concepts::InputIterable TCollection,
+             typename TSource = typename std::decay_t<TCollection>::value_type,
+             bool NothrowIterable = Concepts::IsNothrowIterable<TCollection>>
     requires (!Concepts::IsPair<TSource>)
-    Future<TSource> YieldForeach(TCollection&& collection) noexcept
+    Future<TSource, std::integral_constant<bool, NothrowIterable>>
+    YieldForeach(TCollection&& collection) noexcept(NothrowIterable)
     {
         auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
-            co_yield std::move(element);
-    }
-
-    template<Concepts::InputIterable TCollection, Concepts::IsPair TSource = typename TCollection::value_type,
-             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>, typename TValue = typename PairTraits<TSource>::SecondType>
-    Future<std::pair<TKey, TValue>> YieldForeach(const TCollection& collection) noexcept
-    {
-        for (auto& element : collection)
             co_yield element;
     }
 
-    template<Concepts::InputIterable TCollection, Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
-             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>, typename TValue = typename PairTraits<TSource>::SecondType>
-    Future<std::pair<TKey, TValue>> YieldForeach(TCollection&& collection) noexcept
+    template<Concepts::InputIterable TCollection,
+             Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
+             typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>,
+             typename TValue = typename PairTraits<TSource>::SecondType,
+             bool NothrowIterable = Concepts::IsNothrowIterable<TCollection>>
+    Future<std::pair<TKey, TValue>, std::integral_constant<bool, NothrowIterable>>
+    YieldForeach(TCollection&& collection) noexcept(NothrowIterable)
     {
         auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
-            co_yield std::move(element);
+            co_yield element;
     }
 
     /// @brief 
@@ -61,8 +47,10 @@ namespace ExtendedCpp::LINQ
     /// @param end 
     /// @return 
     template<std::input_iterator TIterator,
-             typename TSource = typename TIterator::value_type>
-    Future<TSource> YieldForeach(const TIterator begin, const TIterator end) noexcept
+             typename TSource = typename TIterator::value_type,
+	         bool NothrowIterable = noexcept(++std::declval<TIterator>())>
+    Future<TSource, std::integral_constant<bool, NothrowIterable>>
+    YieldForeach(const TIterator begin, const TIterator end) noexcept(NothrowIterable)
     {
         for (auto it = begin; it != end; ++it)
             co_yield *it;

@@ -512,24 +512,77 @@ TEST(AdaptorTests, GroupByTest)
 	ASSERT_EQ(3, companies["Google"].size());
 }
 
-TEST(AdaptorTests, CatchExceptionTest)
+TEST(AdaptorTests, CatchExceptionContainerTest)
 {
 	// Average
 	const std::vector numbers = { 1, 2, 3, 4 };
 
 	// Act
-	auto view = numbers |
+	// Assert
+	try
+	{
+		const auto _ =
+			ExtendedCpp::LINQ::From(numbers) |
+			ExtendedCpp::LINQ::Select([](const int n)
+			{
+				if (n == 2)
+					throw std::invalid_argument("CatchExceptionContainerTest");
+				return n;
+			}) |
+			ExtendedCpp::LINQ::To<std::vector>();
+
+		ASSERT_TRUE(false);
+	}
+	catch (const std::invalid_argument&)
+	{
+		ASSERT_TRUE(true);
+	}
+}
+
+TEST(AdaptorTests, CatchExceptionGeneratorTest)
+{
+	// Average
+	const std::vector numbers = { 1, 2, 3, 4 };
+
+	// Act
+	// Assert
+	try
+	{
+		auto _ =
+			ExtendedCpp::LINQ::Generator(numbers) |
+			ExtendedCpp::LINQ::Select([](const int n)
+			{
+				if (n == 2)
+					throw std::invalid_argument("CatchExceptionGeneratorTest");
+				return n;
+			}) |
+			ExtendedCpp::LINQ::To<std::vector>();
+		ASSERT_TRUE(false);
+	}
+	catch (const std::invalid_argument&)
+	{
+		ASSERT_TRUE(true);
+	}
+}
+
+TEST(AdaptorTests, CatchExceptionViewTest)
+{
+	// Average
+	const std::vector numbers = { 1, 2, 3, 4 };
+
+	// Act
+	const auto view = ExtendedCpp::LINQ::View(numbers) |
 		ExtendedCpp::LINQ::Select([](const int n)
 		{
 			if (n == 2)
-				throw std::invalid_argument("");
+				throw std::invalid_argument("CatchExceptionViewTest");
 			return n;
 		});
 
 	// Assert
 	try
 	{
-		auto result = view |
+		const auto _ = view |
 			ExtendedCpp::LINQ::To<std::vector>();
 		ASSERT_TRUE(false);
 	}

@@ -7,11 +7,13 @@
 /// @brief 
 namespace ExtendedCpp::LINQ
 {
-    /// @brief 
-    /// @tparam TSource 
-    template<typename TSource>
+    /// @brief
+    /// @tparam TSource
+    /// @tparam NothrowCoroutine
+    template<typename TSource, typename NothrowCoroutine = std::false_type>
     struct Future final
     {
+        /// @brief
         struct promise_type;
 
         /// @brief 
@@ -73,17 +75,53 @@ namespace ExtendedCpp::LINQ
         /// @brief 
         /// @param handle 
         explicit Future(handle_type handle) noexcept :
-            _handle(handle) {}
+            _handle(handle),
+            _refCount(new std::size_t(1)) {}
+
+        /// @brief
+        /// @param other
+        Future(const Future& other) noexcept
+        {
+            _handle = other._handle;
+            _refCount = other._refCount;
+            ++*_refCount;
+        }
+
+        /// @brief
+        /// @param other
+        Future(Future&& other) noexcept
+        {
+            _handle = other._handle;
+            _refCount = other._refCount;
+            other._handle = nullptr;
+            other._refCount = nullptr;
+        }
+
+        /// @brief
+        /// @param other
+        /// @return
+        Future& operator=(const Future& other) noexcept = delete;
+
+        /// @brief
+        /// @param other
+        /// @return
+        Future& operator=(Future&& other) noexcept = delete;
 
         /// @brief 
         ~Future()
         {
-            if (_handle)
+            if (!_refCount || !_handle)
+                return;
+
+		    --*_refCount;
+            if (*_refCount == 0)
+            {
+                delete _refCount;
                 _handle.destroy();
-            _handle = nullptr;
+            }
         }
 
-        /// @brief 
+        /// @brief
         explicit operator bool() const noexcept
         {
             return !_handle.done();
@@ -95,12 +133,17 @@ namespace ExtendedCpp::LINQ
         {
             if (!_handle.done())
                 return _handle.promise().Value();
-            return {};
+
+            if constexpr (std::is_default_constructible_v<TSource>)
+                return {};
+            else
+                std::terminate();
         }
 
         /// @brief 
         /// @return 
-        TSource Next() noexcept
+        TSource Next()
+        noexcept(std::same_as<NothrowCoroutine, std::true_type>)
         {
             if (!_handle.done())
             {
@@ -108,11 +151,16 @@ namespace ExtendedCpp::LINQ
                 _handle.resume();
                 return value;
             }
-            return {};
+
+            if constexpr (std::is_default_constructible_v<TSource>)
+                return {};
+            else
+                std::terminate();
         }
 
     private:
         handle_type _handle;
+        std::size_t* _refCount;
     };
 }
 

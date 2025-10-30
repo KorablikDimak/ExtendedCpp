@@ -72,10 +72,9 @@ namespace ExtendedCpp::LINQ::Concepts
     concept LinqCollection = std::decay_t<TCollection>::IsLinqCollection;
 
     template<typename TAdaptor, typename TLinqCollection>
-    concept LinqAdaptor = requires(TAdaptor adaptor, TLinqCollection linqCollection)
-    {
-        adaptor(linqCollection);
-    } && LinqCollection<TLinqCollection> && std::decay_t<TAdaptor>::IsLinqAdaptor;
+    concept LinqAdaptor =
+        std::is_invocable_v<TAdaptor, TLinqCollection> &&
+        LinqCollection<TLinqCollection>;
 
     template<typename TRange>
     concept Range = requires(TRange range)
@@ -89,6 +88,11 @@ namespace ExtendedCpp::LINQ::Concepts
 
     template<typename TLeft, typename TRight = TLeft>
     concept IsNothrowDivisible = noexcept(std::declval<TLeft>() / std::declval<TRight>());
+
+    template<typename TCollection>
+    concept IsNothrowIterable =
+        noexcept(++std::declval<std::decay_t<TCollection>>().begin()) ||
+        std::is_pointer_v<typename std::decay_t<TCollection>::iterator>;
 }
 
 #endif

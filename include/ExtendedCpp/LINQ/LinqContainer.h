@@ -519,9 +519,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
-        template<typename TOtherCollection>
-        requires Concepts::ForwardIterable<TOtherCollection> &&
-                 Concepts::HasSize<TOtherCollection> &&
+        template<Concepts::ForwardIterable TOtherCollection>
+        requires Concepts::HasSize<TOtherCollection> &&
                  Concepts::Equatable<TSource> &&
                  std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Except(const TOtherCollection& otherCollection) const noexcept
@@ -550,9 +549,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TOtherCollection 
         /// @param otherCollection 
         /// @return 
-        template<typename TOtherCollection>
-        requires Concepts::InputIterable<TOtherCollection> &&
-                 Concepts::HasSize<TOtherCollection> &&
+        template<Concepts::InputIterable TOtherCollection>
+        requires Concepts::HasSize<TOtherCollection> &&
                  Concepts::Equatable<TSource> &&
                  std::same_as<typename std::decay_t<TOtherCollection>::value_type, TSource>
         LinqContainer Except(TOtherCollection&& otherCollection) const noexcept
