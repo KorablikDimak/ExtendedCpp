@@ -2,6 +2,7 @@
 #define Common_Matrix_H
 
 #include <vector>
+#include <cmath>
 #include <stdexcept>
 #include <optional>
 #include <future>
