@@ -5,8 +5,6 @@
 #include <exception>
 #include <optional>
 #include <atomic>
-#include <concepts>
-#include <type_traits>
 #include <mutex>
 #include <chrono>
 #include <future>
@@ -197,9 +195,22 @@ namespace ExtendedCpp
 		/// @param handle 
 		explicit Task(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
+		/// @brief
+		/// @param other
 		Task(const Task& other) noexcept = default;
+
+		/// @brief
+		/// @param other
 		Task(Task&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
 		Task& operator=(const Task& other) = default;
+
+		/// @brief
+		/// @param other
+		/// @return
 		Task& operator=(Task&& other) noexcept = default;
 
 		/// @brief 
@@ -405,9 +416,22 @@ namespace ExtendedCpp
 		/// @param handle 
 		explicit Task(const std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
+		/// @brief
+		/// @param other
 		Task(const Task& other) noexcept = default;
+
+		/// @brief
+		/// @param other
 		Task(Task&& other) noexcept = default;
+
+		/// @brief
+		/// @param other
+		/// @return
 		Task& operator=(const Task& other) = default;
+
+		/// @brief
+		/// @param other
+		/// @return
 		Task& operator=(Task&& other) noexcept = default;
 
 		/// @brief 
