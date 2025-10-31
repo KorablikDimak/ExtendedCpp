@@ -157,6 +157,10 @@ namespace ExtendedCpp
 		/// @brief 
 		struct ContinueAwaiter
 		{
+			/// @brief
+			/// @param handle
+			explicit ContinueAwaiter(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
+
 			/// @brief 
 			/// @return 
 			[[nodiscard]]
@@ -178,10 +182,6 @@ namespace ExtendedCpp
 			{ 
 				return _handle.promise().Result(); 
 			}
-
-			/// @brief 
-			/// @param handle 
-			explicit ContinueAwaiter(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
 
 		private:
 			std::coroutine_handle<Promise> _handle;
