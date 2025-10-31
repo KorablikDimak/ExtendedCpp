@@ -11,13 +11,13 @@ TEST(AsioTests, AifstramTest)
 	file.close();
 
 	// Act
-	auto innerInnerTask = []()->ExtendedCpp::Task<std::vector<char>>
+	const auto innerInnerTask = []()->ExtendedCpp::Task<std::vector<char>>
 	{
 		ExtendedCpp::Asio::Aifstream aifstream("AifstramTest.txt");
 		co_return co_await aifstream.ReadAsync(14);
 	}();
 
-	auto innerTask = [&]()->ExtendedCpp::Task<std::vector<char>>
+	const auto innerTask = [&]()->ExtendedCpp::Task<std::vector<char>>
 	{
 		co_return co_await innerInnerTask;
 	}();
@@ -55,16 +55,13 @@ TEST(AsioTests, AofstramTest)
 	// Act
 	const auto task = []()->ExtendedCpp::Task<std::size_t>
 	{
-		ExtendedCpp::Asio::Aofstream aofstream("AofstramTest.txt");
+		ExtendedCpp::Asio::Aofstream aofstream("AofstreamTest.txt");
 		co_return co_await aofstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
 	}();
 
 	// Assert
 	ASSERT_EQ(task.Result(), 14);
-	std::ifstream file("AofstramTest.txt");
-	std::string line;
-	std::getline(file, line);
-	ASSERT_EQ(line.size(), 14);
+	ASSERT_EQ(std::filesystem::file_size("AofstreamTest.txt"), 14);
 }
 
 TEST(AsioTests, AfstramTest)
@@ -73,10 +70,10 @@ TEST(AsioTests, AfstramTest)
 	// Act
 	std::size_t writeResult = 0;
 
-	const auto task = [](std::size_t& writeResult)->ExtendedCpp::Task<std::vector<char>>
+	const auto task = [](std::size_t& writeResult_)->ExtendedCpp::Task<std::vector<char>>
 	{
-		ExtendedCpp::Asio::Afstream afstream("AfstramTest.txt");
-		writeResult = co_await afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
+		ExtendedCpp::Asio::Afstream afstream("AfstreamTest.txt");
+		writeResult_ = co_await afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
 		afstream.ResetOffest();
 		co_return co_await afstream.ReadAsync(14);
 	}(writeResult);
@@ -88,15 +85,15 @@ TEST(AsioTests, AfstramTest)
 
 TEST(AsioTests, StreamOpeatorTest1)
 {
-	double data = 6.89;
+	constexpr double data = 6.89;
 	double result = 0;
 
-	const auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
+	const auto task = [](const double& data_, double& result_)->ExtendedCpp::Task<void>
 	{
-		ExtendedCpp::Asio::Afstream afstream("StreamOpeatorTest1.txt");
-		co_await (afstream << data);
+		ExtendedCpp::Asio::Afstream afstream("StreamOperatorTest1.txt");
+		co_await (afstream << data_);
 		afstream.ResetOffest();
-		co_await (afstream >> result);
+		co_await (afstream >> result_);
 	}(data, result);
 
 	task.Wait();
@@ -105,20 +102,20 @@ TEST(AsioTests, StreamOpeatorTest1)
 
 TEST(AsioTests, StreamOpeatorTest2)
 {
-	double data = 0.8134;
+	constexpr double data = 0.8134;
 	double result = 0;
 
-	const auto task = [](double& data, double& result)->ExtendedCpp::Task<void>
+	const auto task = [](const double& data_, double& result_)->ExtendedCpp::Task<void>
 	{
-		ExtendedCpp::Asio::Afstream afstreamOut("StreamOpeatorTest2.out.txt");
-		co_await (afstreamOut << data);
+		ExtendedCpp::Asio::Afstream afstreamOut("StreamOperatorTest2.out.txt");
+		co_await (afstreamOut << data_);
 		afstreamOut.ResetOffest();
 
-		ExtendedCpp::Asio::Afstream afstreamIn("StreamOpeatorTest2.in.txt");
+		ExtendedCpp::Asio::Afstream afstreamIn("StreamOperatorTest2.in.txt");
 		co_await (afstreamIn << afstreamOut);
 		afstreamIn.ResetOffest();
 
-		co_await (afstreamIn >> result);
+		co_await (afstreamIn >> result_);
 	}(data, result);
 
 	task.Wait();

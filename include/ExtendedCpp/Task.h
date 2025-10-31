@@ -9,16 +9,7 @@
 #include <type_traits>
 #include <mutex>
 #include <chrono>
-
-#if __GNUG__ && !__llvm__ || __MINGW32__
-	#define GNU_COMPILER 1
-#endif
-
-#if GNU_COMPILER
-	#include <thread>
-#else
-	#include <future>
-#endif
+#include <future>
 
 /// @brief 
 namespace ExtendedCpp
@@ -33,10 +24,12 @@ namespace ExtendedCpp
 		{
 			/// @brief
 			/// @return
+			[[nodiscard]]
 			std::suspend_never initial_suspend() const noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
+			[[nodiscard]]
 			std::suspend_always final_suspend() const noexcept { return {}; }
 
 			/// @brief
@@ -111,27 +104,29 @@ namespace ExtendedCpp
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args)
 			noexcept(std::is_nothrow_invocable_v<TOperation, Args...>)
 			{
-#if GNU_COMPILER
-				_asyncTask = std::thread(
-				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
-#else
 				_asyncTask = std::async(std::launch::async,
 				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
-#endif
 				{
 					TResult temp = operation(args...);
 
 					std::lock_guard lock(_mutex);
 					_result = std::move(temp);
 					if (_handle)
-						_handle.resume();
+						auto _ = std::async(std::launch::async, [this] { _handle.resume(); });
 				});
+			}
+
+			/// @brief
+			~InitialAwaiter()
+			{
+				_asyncTask.wait();
 			}
 
 			/// @brief 
 			/// @return 
-			bool await_ready() const noexcept 
-			{ 
+			[[nodiscard]]
+			bool await_ready() const noexcept
+			{
 				std::lock_guard lock(_mutex);
 				return _result.has_value();
 			}
@@ -154,21 +149,8 @@ namespace ExtendedCpp
 				return std::move(_result.value());
 			}
 
-#if GNU_COMPILER
-			/// @brief 
-			~InitialAwaiter()
-			{
-				_asyncTask.detach();
-			}
-#endif
-
 		private:
-#if GNU_COMPILER
-			std::thread _asyncTask;
-#else
 			std::future<void> _asyncTask;
-#endif
-
 			mutable std::mutex _mutex;
 			std::coroutine_handle<> _handle;
 			std::optional<TResult> _result = std::nullopt;
@@ -214,6 +196,11 @@ namespace ExtendedCpp
 		/// @brief 
 		/// @param handle 
 		explicit Task(std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
+
+		Task(const Task& other) noexcept = default;
+		Task(Task&& other) noexcept = default;
+		Task& operator=(const Task& other) = default;
+		Task& operator=(Task&& other) noexcept = default;
 
 		/// @brief 
 		/// @return 
@@ -272,10 +259,12 @@ namespace ExtendedCpp
 		{
 			/// @brief 
 			/// @return 
+			[[nodiscard]]
 			std::suspend_never initial_suspend() const noexcept { return {}; }
 
 			/// @brief 
 			/// @return 
+			[[nodiscard]]
 			std::suspend_always final_suspend() const noexcept { return {}; }
 
 			void return_void() noexcept 
@@ -332,25 +321,26 @@ namespace ExtendedCpp
 			explicit InitialAwaiter(TOperation&& operation, Args&&... args)
 			noexcept(std::is_nothrow_invocable_v<TOperation, Args...>)
 			{
-#if GNU_COMPILER
-				_asyncTask = std::thread(
-				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
-#else
 				_asyncTask = std::async(std::launch::async,
 				[this, operation = std::forward<TOperation>(operation), ...args = std::forward<Args>(args)]
-#endif
 				{
 					operation(args...);
 
 					std::lock_guard lock(_mutex);
 					_isFinished = true;
 					if (_handle)
-						return _handle.resume();
+						auto _ = std::async(std::launch::async, [this] { _handle.resume(); });
 				});
 			}
 
+			/// @brief
+			~InitialAwaiter()
+			{
+				_asyncTask.wait();
+			}
+
 			/// @brief 
-			/// @return 
+			/// @return
 			bool await_ready() const noexcept
 			{
 				std::lock_guard lock(_mutex);
@@ -371,20 +361,8 @@ namespace ExtendedCpp
 			/// @brief
             void await_resume() const noexcept {}
 
-#if GNU_COMPILER
-			~InitialAwaiter()
-			{
-				_asyncTask.detach();
-			}
-#endif
-
 		private:
-#if GNU_COMPILER
-		std::thread _asyncTask;
-#else
-		std::future<void> _asyncTask;
-#endif
-
+			std::future<void> _asyncTask;
 			mutable std::mutex _mutex;
 			std::coroutine_handle<> _handle;
 			bool _isFinished = false;
@@ -426,6 +404,11 @@ namespace ExtendedCpp
 		/// @brief 
 		/// @param handle 
 		explicit Task(const std::coroutine_handle<Promise> handle) noexcept : _handle(handle) {}
+
+		Task(const Task& other) noexcept = default;
+		Task(Task&& other) noexcept = default;
+		Task& operator=(const Task& other) = default;
+		Task& operator=(Task&& other) noexcept = default;
 
 		/// @brief 
 		/// @return 

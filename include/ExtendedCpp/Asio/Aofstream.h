@@ -22,7 +22,6 @@
 	#include <minwinbase.h>
 	#include <handleapi.h>
 	#include <io.h>
-	#include <fcntl.h>
 	#include <sys/types.h>
 #endif
 
