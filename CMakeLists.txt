@@ -62,6 +62,11 @@ set(InfoLog_SOURCE
         src/InfoLog/Parser.cpp
         src/InfoLog/ConsoleSender.cpp)
 
+set(Asio_SOURCE
+        src/Asio/IoAwaiter.cpp
+        src/Asio/FileIoAwaiter.cpp
+        src/Asio/Afstream.cpp)
+
 add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
@@ -78,7 +83,7 @@ add_library(DI INTERFACE)
 add_library(ExtendedCpp::DI ALIAS DI)
 target_link_libraries(DI INTERFACE Reflection)
 
-add_library(Asio INTERFACE)
+add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
 add_library(ExtendedCpp::Asio ALIAS Asio)
 
 add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
@@ -94,8 +99,8 @@ add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 target_link_libraries(InfoLog PUBLIC Xml Reflection)
 
-set_interface_directories(LINQ Events Json Common DI Asio)
-set_include_directories(Xml Reflection InfoLog)
+set_interface_directories(LINQ Events Json Common DI)
+set_include_directories(Asio Xml Reflection InfoLog)
 
 if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
@@ -192,6 +197,12 @@ endif()
 if(Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Asio)
+
+    add_custom_command(
+            TARGET Asio POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX}
+            ${CMAKE_CURRENT_BINARY_DIR}/tests/Asio/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
 if(LINQ_BUILD_BENCHMARKS)

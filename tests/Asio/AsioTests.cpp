@@ -13,8 +13,8 @@ TEST(AsioTests, AifstramTest)
 	// Act
 	const auto innerInnerTask = []()->ExtendedCpp::Task<std::vector<char>>
 	{
-		ExtendedCpp::Asio::Aifstream aifstream("AifstramTest.txt");
-		co_return co_await aifstream.ReadAsync(14);
+		ExtendedCpp::Asio::Afstream afstream("AifstramTest.txt");
+		co_return co_await afstream.ReadAsync(14);
 	}();
 
 	const auto innerTask = [&]()->ExtendedCpp::Task<std::vector<char>>
@@ -41,8 +41,8 @@ TEST(AsioTests, ReadAllAsyncTest)
 	// Act
 	const auto task = []()->ExtendedCpp::Task<std::vector<char>>
 	{
-		ExtendedCpp::Asio::Aifstream aifstream("ReadAllAsyncTest.txt");
-		co_return co_await aifstream.ReadAllAsync();
+		ExtendedCpp::Asio::Afstream aifstream("ReadAllAsyncTest.txt");
+		co_return co_await afstream.ReadAllAsync();
 	}();
 
 	// Assert
@@ -55,8 +55,8 @@ TEST(AsioTests, AofstramTest)
 	// Act
 	const auto task = []()->ExtendedCpp::Task<std::size_t>
 	{
-		ExtendedCpp::Asio::Aofstream aofstream("AofstreamTest.txt");
-		co_return co_await aofstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
+		ExtendedCpp::Asio::Afstream aofstream("AofstreamTest.txt");
+		co_return co_await afstream.WriteAsync({'C', 'o', 'r', 'r', 'e', 'c', 't', ' ', 't', 'e', 's', 't', '.', '\0'});
 	}();
 
 	// Assert
