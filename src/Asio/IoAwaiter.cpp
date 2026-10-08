@@ -1,9 +1,5 @@
 #include <ExtendedCpp/Asio/IoAwaiter.h>
 
-ExtendedCpp::Asio::IoAwaiter::IoAwaiter(const std::span<std::byte> buffer, const OperationType operationType) noexcept :
-    _buffer(buffer),
-    _operationType(operationType) {}
-
 bool ExtendedCpp::Asio::IoAwaiter::await_ready() noexcept
 {
     return false;

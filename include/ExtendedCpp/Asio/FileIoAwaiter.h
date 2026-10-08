@@ -1,8 +1,9 @@
 #ifndef Asio_FileIoAwaiter_H
 #define Asio_FileIoAwaiter_H
 
-#include <cstdint>
 #include <span>
+#include <variant>
+#include <memory>
 
 #if __APPLE__
     #define UNIX_IO 1
@@ -19,37 +20,50 @@
 #endif
 
 #include <ExtendedCpp/Asio/IoAwaiter.h>
+#include <ExtendedCpp/Asio/NativeHandle.h>
 
 namespace ExtendedCpp::Asio
 {
-#if UNIX_IO
-    using NativeHandle = int;
-#elif WINDOWS_IO
-    using NativeHandle = HANDLE;
-#endif
-
     class FileIoAwaiter final : public IoAwaiter
     {
     public:
-        FileIoAwaiter(NativeHandle nativeHandle, std::uint64_t offset, std::span<std::byte> buffer, OperationType operationType) noexcept;
+        FileIoAwaiter(const NativeHandle& nativeHandle, std::uint64_t offset, std::span<std::byte> buffer) noexcept;
+        FileIoAwaiter(const NativeHandle& nativeHandle, std::uint64_t offset, std::span<const std::byte> buffer) noexcept;
+
+        FileIoAwaiter(const FileIoAwaiter& other) noexcept = delete;
+        FileIoAwaiter(FileIoAwaiter&& other) noexcept = delete;
+
+        FileIoAwaiter& operator=(const FileIoAwaiter& other) noexcept = delete;
+        FileIoAwaiter& operator=(FileIoAwaiter&& other) noexcept = delete;
+
+        ~FileIoAwaiter() noexcept override = default;
 
     protected:
         void Start() noexcept override;
 
     private:
+        enum class OperationType
+        {
+            Read,
+            Write
+        };
+
         void Complete() noexcept;
 
-        NativeHandle _nativeHandle;
-
 #if UNIX_IO
+        using OffsetType = off_t;
         static void CompletionCallback(sigval value) noexcept;
-        off_t _offset;
-        aiocb _control{};
+        std::unique_ptr<aiocb> _control = std::make_unique<aiocb>();
 #elif WINDOWS_IO
+        using OffsetType = std::uint64_t;
         static DWORD WINAPI CompletionThread(void* parameter) noexcept;
-        std::uint64_t _offset;
         OVERLAPPED _overlapped{};
 #endif
+
+        const NativeHandle& _nativeHandle;
+        const std::variant<std::span<std::byte>, std::span<const std::byte>> _buffer;
+        const OffsetType _offset;
+        const OperationType _operationType{};
     };
 }
 

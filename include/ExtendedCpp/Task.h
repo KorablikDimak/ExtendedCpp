@@ -5,6 +5,7 @@
 #include <mutex>
 #include <exception>
 #include <future>
+#include <utility>
 
 /// @brief
 namespace ExtendedCpp

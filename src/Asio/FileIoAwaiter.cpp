@@ -1,39 +1,55 @@
-#include <system_error>
-
 #include <ExtendedCpp/Asio/FileIoAwaiter.h>
 
 ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
-    const NativeHandle nativeHandle,
+    const NativeHandle& nativeHandle,
     const std::uint64_t offset,
-    const std::span<std::byte> buffer,
-    const OperationType operationType) noexcept :
-        IoAwaiter(buffer, operationType),
+    const std::span<std::byte> buffer) noexcept :
         _nativeHandle(nativeHandle),
-        _offset(offset) {}
+        _buffer(buffer),
+        _offset(offset),
+        _operationType(OperationType::Read) {}
+
+ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
+    const NativeHandle& nativeHandle,
+    const std::uint64_t offset,
+    const std::span<const std::byte> buffer) noexcept :
+        _nativeHandle(nativeHandle),
+        _buffer(buffer),
+        _offset(offset),
+        _operationType(OperationType::Write) {}
 
 void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
 {
 #if UNIX_IO
-    _control = {};
+    _control->aio_fildes = *_nativeHandle;
+    _control->aio_offset = _offset;
 
-    _control.aio_fildes = _nativeHandle;
-    _control.aio_offset = _offset;
-    _control.aio_buf = _buffer.data();
-    _control.aio_nbytes = _buffer.size();
+    if (_operationType == OperationType::Read)
+    {
+        const auto buffer = std::get<std::span<std::byte>>(_buffer);
+        _control->aio_buf = buffer.data();
+        _control->aio_nbytes = buffer.size();
+    }
+    else
+    {
+        const auto buffer = std::get<std::span<const std::byte>>(_buffer);
+        _control->aio_buf = const_cast<std::byte*>(buffer.data());
+        _control->aio_nbytes = buffer.size();
+    }
 
-    _control.aio_sigevent.sigev_notify = SIGEV_THREAD;
-    _control.aio_sigevent.sigev_notify_function = &FileIoAwaiter::CompletionCallback;
-    _control.aio_sigevent.sigev_value.sival_ptr = this;
+    _control->aio_sigevent.sigev_notify = SIGEV_THREAD;
+    _control->aio_sigevent.sigev_notify_function = &FileIoAwaiter::CompletionCallback;
+    _control->aio_sigevent.sigev_value.sival_ptr = this;
 
     int result{};
 
     switch (_operationType)
     {
         case OperationType::Read:
-            result = aio_read(&_control);
+            result = aio_read(_control.get());
             break;
         case OperationType::Write:
-            result = aio_write(&_control);
+            result = aio_write(_control.get());
             break;
     }
 
@@ -51,11 +67,17 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
     switch (_operationType)
     {
         case OperationType::Read:
-            result = ReadFile(_nativeHandle, _buffer.data(), _buffer.size(), nullptr, &_overlapped);
+            result = ReadFile(*_nativeHandle,
+                std::get<std::span<std::byte>>(_buffer).data(),
+                std::get<std::span<std::byte>>(_buffer).size(),
+                nullptr, &_overlapped);
             break;
 
         case OperationType::Write:
-            result = WriteFile(_nativeHandle, _buffer.data(), _buffer.size(), nullptr, &_overlapped);
+            result = WriteFile(*_nativeHandle,
+                std::get<std::span<const std::byte>>(_buffer).data(),
+                std::get<std::span<const std::byte>>(_buffer).size(),
+                nullptr, &_overlapped);
             break;
     }
 
@@ -90,7 +112,7 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
 void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
 {
 #if UNIX_IO
-    const int error = aio_error(&_control);
+    const int error = aio_error(_control.get());
 
     if (error != 0)
     {
@@ -99,7 +121,7 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
         return;
     }
 
-    const std::streamsize result = aio_return(&_control);
+    const std::streamsize result = aio_return(_control.get());
 
     if (result < 0)
     {
@@ -113,7 +135,7 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
 #elif WINDOWS_IO
     DWORD transferred{};
 
-    const BOOL result = GetOverlappedResult(_nativeHandle, &_overlapped, &transferred, TRUE);
+    const BOOL result = GetOverlappedResult(*_nativeHandle, &_overlapped, &transferred, TRUE);
 
     if (!result)
     {

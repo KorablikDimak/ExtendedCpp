@@ -65,7 +65,8 @@ set(InfoLog_SOURCE
 set(Asio_SOURCE
         src/Asio/IoAwaiter.cpp
         src/Asio/FileIoAwaiter.cpp
-        src/Asio/Afstream.cpp)
+        src/Asio/Afstream.cpp
+        src/Asio/NativeHandle.cpp)
 
 add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
