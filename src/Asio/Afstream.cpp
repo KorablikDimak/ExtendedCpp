@@ -64,7 +64,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const 
     co_return read;
 }
 
-ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer, std::size_t count)
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer, const std::size_t count)
 {
     FileIoAwaiter ioOperation
     {
@@ -96,4 +96,75 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
         _position += written;
 
     co_return written;
+}
+
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::span<const std::byte> buffer, const std::size_t count)
+{
+    FileIoAwaiter ioOperation
+    {
+        _nativeHandle,
+        _position,
+        buffer.first(std::min(count, buffer.size()))
+    };
+
+    const std::streamsize written = co_await ioOperation;
+
+    if (written > 0)
+        _position += written;
+
+    co_return written;
+}
+
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer)
+{
+    FileIoAwaiter ioOperation
+    {
+        _nativeHandle,
+        _position,
+        std::as_bytes(std::span(buffer))
+    };
+
+    const std::streamsize written = co_await ioOperation;
+
+    if (written > 0)
+        _position += written;
+
+    co_return written;
+}
+
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer, const std::size_t count)
+{
+    FileIoAwaiter ioOperation
+    {
+        _nativeHandle,
+        _position,
+        std::as_bytes(std::span(buffer)).first(std::min(count, buffer.size()))
+    };
+
+    const std::streamsize written = co_await ioOperation;
+
+    if (written > 0)
+        _position += written;
+
+    co_return written;
+}
+
+ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAllAsync()
+{
+    // TODO ReadAllAsync()
+}
+
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAllAsync(const std::span<std::byte> buffer)
+{
+    // TODO ReadAllAsync(buffer)
+}
+
+ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
+{
+    // TODO ReadLineAsync()
+}
+
+ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadTextAsync()
+{
+    // TODO ReadTextAsync()
 }
