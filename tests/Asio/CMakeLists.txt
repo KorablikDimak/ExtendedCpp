@@ -12,7 +12,7 @@ find_package(GTest REQUIRED)
 
 set(Asio_TESTS_SOURCE
         main.cpp
-        AsioTests.cpp)
+        AfstreamTests.cpp)
 
 add_executable(Asio-tests ${Asio_TESTS_SOURCE})
 target_link_libraries(Asio-tests PRIVATE ExtendedCpp::Asio GTest::gtest GTest::gtest_main)

@@ -1,4 +1,5 @@
 #include <format>
+#include <algorithm>
 
 #include <ExtendedCpp/Asio/Afstream.h>
 
@@ -12,7 +13,8 @@ ExtendedCpp::Asio::Afstream::Afstream(const std::string& filename, const openmod
 
 ExtendedCpp::Asio::Afstream::Afstream(Afstream&& other) noexcept :
     std::fstream(std::move(other)),
-    _position(other._position),
+    _readPosition(other._readPosition),
+    _writePosition(other._writePosition),
     _nativeHandle(std::move(other._nativeHandle)) {}
 
 ExtendedCpp::Asio::Afstream& ExtendedCpp::Asio::Afstream::operator=(Afstream&& other) noexcept
@@ -21,7 +23,9 @@ ExtendedCpp::Asio::Afstream& ExtendedCpp::Asio::Afstream::operator=(Afstream&& o
         return *this;
 
     std::fstream::operator=(std::move(other));
-    _position = other._position;
+
+    _readPosition = other._readPosition;
+    _writePosition = other._writePosition;
     _nativeHandle = std::move(other._nativeHandle);
     return *this;
 }
@@ -30,10 +34,12 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAsync
 {
     std::vector<std::byte> buffer(count);
 
+    const std::uint64_t position = GetReadPosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         std::span(buffer)
     };
 
@@ -43,128 +49,237 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAsync
         co_return {};
 
     buffer.resize(read);
-    _position += read;
+    SetReadPosition(position + read);
     co_return buffer;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer)
 {
+    const std::uint64_t position = GetReadPosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         buffer
     };
 
     const std::streamsize read = co_await ioOperation;
 
     if (read > 0)
-        _position += read;
+        SetReadPosition(position + read);
 
     co_return read;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer, const std::size_t count)
 {
+    const std::uint64_t position = GetReadPosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         buffer.first(std::min(count, buffer.size()))
     };
 
     const std::streamsize read = co_await ioOperation;
 
     if (read > 0)
-        _position += read;
+        SetReadPosition(position + read);
 
     co_return read;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::span<const std::byte> buffer)
 {
+    const std::uint64_t position = GetWritePosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         buffer
     };
 
     const std::streamsize written = co_await ioOperation;
 
     if (written > 0)
-        _position += written;
+        SetWritePosition(position + written);
 
     co_return written;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::span<const std::byte> buffer, const std::size_t count)
 {
+    const std::uint64_t position = GetWritePosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         buffer.first(std::min(count, buffer.size()))
     };
 
     const std::streamsize written = co_await ioOperation;
 
     if (written > 0)
-        _position += written;
+        SetWritePosition(position + written);
 
     co_return written;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer)
 {
+    const std::uint64_t position = GetWritePosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         std::as_bytes(std::span(buffer))
     };
 
     const std::streamsize written = co_await ioOperation;
 
     if (written > 0)
-        _position += written;
+        SetWritePosition(position + written);
 
     co_return written;
 }
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer, const std::size_t count)
 {
+    const std::uint64_t position = GetWritePosition();
+
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
-        _position,
+        position,
         std::as_bytes(std::span(buffer)).first(std::min(count, buffer.size()))
     };
 
     const std::streamsize written = co_await ioOperation;
 
     if (written > 0)
-        _position += written;
+        SetWritePosition(position + written);
 
     co_return written;
 }
 
 ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAllAsync()
 {
-    // TODO ReadAllAsync()
-}
+    std::vector<std::byte> result;
 
-ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAllAsync(const std::span<std::byte> buffer)
-{
-    // TODO ReadAllAsync(buffer)
+    constexpr std::size_t CHUNK_SIZE = 4096;
+    std::array<std::byte, CHUNK_SIZE> chunk{};
+
+    std::uint64_t currentPosition = GetReadPosition();
+
+    while (true)
+    {
+        FileIoAwaiter ioOperation
+        {
+            _nativeHandle,
+            currentPosition,
+            std::span<std::byte>(chunk)
+        };
+
+        const std::streamsize read = co_await ioOperation;
+
+        if (read > 0 && static_cast<std::size_t>(read) < chunk.size())
+            currentPosition += read;
+        else
+            break;
+
+        result.insert(result.end(), chunk.begin(), chunk.begin() + read);
+    }
+
+    SetReadPosition(currentPosition);
+
+    co_return result;
 }
 
 ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
 {
-    // TODO ReadLineAsync()
+    std::string result;
+
+    constexpr std::size_t CHUNK_SIZE = 256;
+    std::array<std::byte, CHUNK_SIZE> chunk{};
+
+    std::uint64_t currentPosition = GetReadPosition();
+
+    while (true)
+    {
+        FileIoAwaiter ioOperation
+        {
+            _nativeHandle,
+            currentPosition,
+            std::span<std::byte>(chunk)
+        };
+
+        const std::streamsize read = co_await ioOperation;
+
+        if (read > 0 && static_cast<std::size_t>(read) < chunk.size())
+            currentPosition += read;
+        else
+            break;
+
+        const auto endOfLine = std::find(chunk.begin(), chunk.begin() + read, std::byte{'\n'});
+        const std::size_t lineLength = std::distance(chunk.begin(), endOfLine);
+
+        result.append(std::bit_cast<char*>(chunk.data()), lineLength);
+
+        if (lineLength < static_cast<std::size_t>(read))
+        {
+            currentPosition -= read - lineLength - 1;
+            break;
+        }
+    }
+
+    SetReadPosition(currentPosition);
+
+    co_return result;
 }
 
 ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadTextAsync()
 {
-    // TODO ReadTextAsync()
+    const std::vector<std::byte> bytes = co_await ReadAllAsync();
+
+    if (bytes.empty())
+        co_return {};
+
+    co_return std::string(std::bit_cast<const char*>(bytes.data()), bytes.size());
+}
+
+std::uint64_t ExtendedCpp::Asio::Afstream::GetReadPosition()
+{
+    const std::int64_t syncReadPosition = tellg();
+    if (syncReadPosition == -1)
+        throw failure("tellg() failed");
+
+    _readPosition = syncReadPosition;
+    return syncReadPosition;
+}
+
+void ExtendedCpp::Asio::Afstream::SetReadPosition(const std::uint64_t position)
+{
+    _readPosition = position;
+    seekg(position);
+}
+
+std::uint64_t ExtendedCpp::Asio::Afstream::GetWritePosition()
+{
+    const std::int64_t syncWritePosition = tellp();
+    if (syncWritePosition == -1)
+        throw failure("tellp() failed");
+
+    _readPosition = syncWritePosition;
+    return syncWritePosition;
+}
+
+void ExtendedCpp::Asio::Afstream::SetWritePosition(const std::uint64_t position)
+{
+    _writePosition = position;
+    seekp(position);
 }

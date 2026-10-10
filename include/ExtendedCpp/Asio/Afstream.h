@@ -32,13 +32,19 @@ namespace ExtendedCpp::Asio
         Task<std::streamsize> WriteAsync(std::string_view buffer, std::size_t count);
 
         Task<std::vector<std::byte>> ReadAllAsync();
-        Task<std::streamsize> ReadAllAsync(std::span<std::byte> buffer);
-
         Task<std::string> ReadLineAsync();
         Task<std::string> ReadTextAsync();
 
     private:
-        std::uint64_t _position = 0;
+        std::uint64_t GetReadPosition();
+        void SetReadPosition(std::uint64_t position);
+
+        std::uint64_t GetWritePosition();
+        void SetWritePosition(std::uint64_t position);
+
+        std::uint64_t _readPosition = 0;
+        std::uint64_t _writePosition = 0;
+
         NativeHandle _nativeHandle;
     };
 }
