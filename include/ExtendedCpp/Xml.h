@@ -3,10 +3,10 @@
 
 #include <ExtendedCpp/Xml/pugixml.hpp>
 
-/// @brief 
-namespace Xml
+/// @brief
+namespace ExtendedCpp::Xml
 {
-    using namespace pugi;
+    using namespace pugi; // NOLINT(*-build-using-namespace)
 }
 
 #endif

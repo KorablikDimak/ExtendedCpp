@@ -2,9 +2,9 @@
 #define Common_Random_H
 
 #include <algorithm>
+#include <chrono>
 #include <random>
 #include <string>
-#include <chrono>
 
 /// @brief Namespace for random number and string generation utilities
 namespace ExtendedCpp::Random
@@ -49,7 +49,7 @@ namespace ExtendedCpp::Random
 
         auto randChar = []() -> char
         {
-            constexpr char charset[] =
+            constexpr char charset[] = // NOLINT(*-avoid-c-arrays)
                     "0123456789"
                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                     "abcdefghijklmnopqrstuvwxyz";

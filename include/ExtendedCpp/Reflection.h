@@ -6,22 +6,22 @@
 #include <ExtendedCpp/Reflection/Assembly.h>
 #include <ExtendedCpp/Reflection/Concepts.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
     /// @brief 
     /// @param typeName 
-    /// @return 
+    /// @return
     std::vector<TypeInfo> GetType(const std::string& typeName) noexcept;
 
     /// @brief 
     /// @param typeIndex 
-    /// @return 
+    /// @return
     std::optional<TypeInfo> GetType(std::type_index typeIndex) noexcept;
 
     /// @brief 
     /// @tparam T 
-    /// @return 
+    /// @return
     template<Concepts::HasMetaInfo T>
     TypeInfo GetType() noexcept
     {

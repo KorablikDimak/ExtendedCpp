@@ -2,9 +2,9 @@
 #define Common_Task_H
 
 #include <coroutine>
-#include <mutex>
 #include <exception>
 #include <future>
+#include <mutex>
 #include <utility>
 
 // ReSharper disable CppMemberFunctionMayBeStatic
@@ -27,12 +27,6 @@ namespace ExtendedCpp
 		/// @brief
 		struct FinalAwaiter final
 		{
-			/// @brief
-			FinalAwaiter() noexcept = default;
-
-			/// @brief
-			~FinalAwaiter() noexcept = default;
-
 			/// @brief
 			/// @return
 			[[nodiscard]]
@@ -75,9 +69,6 @@ namespace ExtendedCpp
 			/// @brief
 			/// @param handle
 			explicit ContinueAwaiter(const Handle handle) noexcept : _handle(handle) {}
-
-			/// @brief
-			~ContinueAwaiter() noexcept = default;
 
 			/// @brief
 			/// @return
@@ -146,9 +137,6 @@ namespace ExtendedCpp
 				: _future(std::make_shared<std::future<T>>(std::move(future))) {}
 
 			/// @brief
-			~FutureAwaiter() noexcept = default;
-
-			/// @brief
 			/// @return
 			[[nodiscard]]
 			bool await_ready() const noexcept { return false; }
@@ -180,12 +168,6 @@ namespace ExtendedCpp
 		struct Promise final
 		{
 			/// @brief
-			Promise() noexcept = default;
-
-			/// @brief
-			~Promise() noexcept = default;
-
-			/// @brief
 			/// @return
 			Task get_return_object() noexcept { return Task{ Handle::from_promise(*this) }; }
 
@@ -201,7 +183,7 @@ namespace ExtendedCpp
 			/// @param result
 			void return_value(const TResult& result) noexcept
 			{
-				std::lock_guard lock(_mutex);
+				std::scoped_lock lock(_mutex);
 				_result = result;
 			}
 
@@ -209,14 +191,14 @@ namespace ExtendedCpp
 			/// @param result
 			void return_value(TResult&& result) noexcept
 			{
-				std::lock_guard lock(_mutex);
+				std::scoped_lock lock(_mutex);
 				_result = std::move(result);
 			}
 
 			/// @brief
 			void unhandled_exception() noexcept
 			{
-				std::lock_guard lock(_mutex);
+				std::scoped_lock lock(_mutex);
 				_exception = std::current_exception();
 			}
 
@@ -409,7 +391,7 @@ namespace ExtendedCpp
 					return true;
 
 				const auto& promise = _handle.promise();
-				std::lock_guard lock(promise._mutex);
+				const std::scoped_lock lock(promise._mutex);
 				return promise._done;
 			}
 
@@ -421,7 +403,7 @@ namespace ExtendedCpp
 			{
 				auto& promise = _handle.promise();
 
-				std::lock_guard lock(promise._mutex);
+				const std::scoped_lock lock(promise._mutex);
 
 				if (promise._done)
 					return continuation;
@@ -436,7 +418,7 @@ namespace ExtendedCpp
 			{
 				const auto& promise = _handle.promise();
 
-				std::lock_guard lock(promise._mutex);
+				const std::scoped_lock lock(promise._mutex);
 
 				if (promise._exception)
 					std::rethrow_exception(promise._exception);
@@ -489,12 +471,6 @@ namespace ExtendedCpp
 		struct Promise final
 		{
 			/// @brief
-			Promise() noexcept = default;
-
-			/// @brief
-			~Promise() noexcept = default;
-
-			/// @brief
 			/// @return
 			Task get_return_object() noexcept { return Task{ Handle::from_promise(*this) }; }
 
@@ -512,7 +488,7 @@ namespace ExtendedCpp
 			/// @brief
 			void unhandled_exception() noexcept
 			{
-				std::lock_guard lock(_mutex);
+				const std::scoped_lock lock(_mutex);
 				_exception = std::current_exception();
 			}
 
@@ -574,7 +550,7 @@ namespace ExtendedCpp
 				return false;
 
 			const auto& promise = _handle.promise();
-			std::lock_guard lock(promise._mutex);
+			const std::scoped_lock lock(promise._mutex);
 			return promise._done;
 		}
 

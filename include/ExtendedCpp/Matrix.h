@@ -1,15 +1,14 @@
 #ifndef Common_Matrix_H
 #define Common_Matrix_H
 
-#include <vector>
-#include <cmath>
-#include <stdexcept>
-#include <optional>
-#include <future>
-#include <array>
 #include <algorithm>
-#include <string>
+#include <array>
 #include <format>
+#include <future>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <ExtendedCpp/Concepts.h>
 
@@ -31,10 +30,10 @@ namespace ExtendedCpp
 		/// @param rowCount The number of rows
 		/// @param columnCount The number of columns
 		Matrix(const std::size_t rowCount, const std::size_t columnCount) noexcept
-		requires std::is_default_constructible_v<T>
+		requires std::is_default_constructible_v<T> :
+			_rowCount(rowCount),
+			_columnCount(columnCount)
 		{
-			_rowCount = rowCount;
-			_columnCount = columnCount;
 			_table.resize(_rowCount * _columnCount);
 		}
 
@@ -42,14 +41,14 @@ namespace ExtendedCpp
 		/// @tparam TInit The type of the callable used for initialization
 		/// @param rowCount The number of rows
 		/// @param columnCount The number of columns
-		/// @param init The callable used to initialize elements 
+		/// @param init The callable used to initialize elements
 		template<std::invocable TInit>
-		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
+		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit init)
 		noexcept(std::is_nothrow_invocable_v<TInit>)
-		requires std::convertible_to<std::invoke_result_t<TInit>, T>
+		requires std::convertible_to<std::invoke_result_t<TInit>, T> :
+			_rowCount(rowCount),
+			_columnCount(columnCount)
 		{
-			_rowCount = rowCount;
-			_columnCount = columnCount;
 			_table.reserve(_rowCount * _columnCount);
 
 			for (std::size_t i = 0; i < _rowCount * _columnCount; ++i)
@@ -63,12 +62,12 @@ namespace ExtendedCpp
 		/// @param init The callable used to initialize elements, taking row and column indices as parameters
 		template<typename TInit>
 		requires std::invocable<TInit, std::size_t, std::size_t>
-		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit&& init)
+		Matrix(const std::size_t rowCount, const std::size_t columnCount, TInit init)
 		noexcept(std::is_nothrow_invocable_v<TInit, std::size_t, std::size_t>)
-		requires std::convertible_to<std::invoke_result_t<TInit, std::size_t, std::size_t>, T>
+		requires std::convertible_to<std::invoke_result_t<TInit, std::size_t, std::size_t>, T> :
+			_rowCount(rowCount),
+			_columnCount(columnCount)
 		{
-			_rowCount = rowCount;
-			_columnCount = columnCount;
 			_table.reserve(_rowCount * _columnCount);
 
 			for (std::size_t i = 0; i < _rowCount; ++i)
@@ -78,21 +77,13 @@ namespace ExtendedCpp
 
 		/// @brief Copy constructor
 		/// @param matrix The matrix to copy from
-		Matrix(const Matrix& matrix) noexcept
-		{
-			_rowCount = matrix._rowCount;
-			_columnCount = matrix._columnCount;
-			_table = matrix._table;
-		}
+		Matrix(const Matrix& matrix) noexcept = default;
 
 		/// @brief Move constructor
 		/// @param matrix The matrix to move from
-		Matrix(Matrix&& matrix) noexcept
-		{
-			_rowCount = matrix._rowCount;
-			_columnCount = matrix._columnCount;
-			_table = std::move(matrix._table);
-		}
+		Matrix(Matrix&& matrix) noexcept = default;
+
+		~Matrix() noexcept = default;
 
 		/// @brief Constructs a matrix from a 2D vector
 		/// @param matrix The 2D vector to copy from
@@ -144,7 +135,7 @@ namespace ExtendedCpp
 
 		/// @brief Copy assignment operator from a 2D vector
 		/// @param matrix The 2D vector to copy from
-		/// @return Reference to the current matrix 
+		/// @return Reference to the current matrix
 		Matrix& operator=(const std::vector<std::vector<T>>& matrix) noexcept
 		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T>
 		{
@@ -197,7 +188,7 @@ namespace ExtendedCpp
 
 			for (std::size_t i = 0; i < _rowCount; ++i)
 				for (std::size_t j = 0; j < _columnCount; ++j)
-					if (_table[i * _columnCount + j] != matrix._table[i * _columnCount + j]) 
+					if (_table[i * _columnCount + j] != matrix._table[i * _columnCount + j])
 						return false;
 
 			return true;
@@ -214,7 +205,7 @@ namespace ExtendedCpp
 
 			for (std::size_t i = 0; i < _rowCount; ++i)
 				for (std::size_t j = 0; j < _columnCount; ++j)
-					if (_table[i * _columnCount + j] == matrix._table[i * _columnCount + j]) 
+					if (_table[i * _columnCount + j] == matrix._table[i * _columnCount + j])
 						return false;
 
 			return true;
@@ -338,7 +329,7 @@ namespace ExtendedCpp
 		{
 			if (_columnCount != matrix._rowCount)
 				throw std::invalid_argument("Column count of left matrix and row count of right matrix must be equal.");
-			
+
 			if (asParallel)
 			{
 				Matrix result = StrassenMultiplyParallel(matrix);
@@ -377,7 +368,7 @@ namespace ExtendedCpp
 		/// @brief Multiplication operator with a scalar
 		/// @param alpha The scalar to multiply with
 		/// @return The result of the multiplication
-		Matrix operator*(T&& alpha) const 
+		Matrix operator*(T&& alpha) const
 		noexcept(std::is_nothrow_invocable_v<decltype(&Multiply), T>)
 		{
 			return Multiply(std::forward<T>(alpha));
@@ -452,7 +443,7 @@ namespace ExtendedCpp
         {
 			if (rowNumber >= _rowCount)
 				throw std::out_of_range(std::format("Row number {} > matrix rows which is {}.", rowNumber, _rowCount));
-			if (_rowCount == 0) 
+			if (_rowCount == 0)
 				return;
 
 			_table.erase(_table.begin() + rowNumber * _columnCount, _table.begin() + rowNumber * _columnCount + _rowCount);
@@ -475,7 +466,7 @@ namespace ExtendedCpp
         {
 			if (columnNumber >= _columnCount)
 				throw std::out_of_range(std::format("Column number {} > matrix columns which is {}.", columnNumber, _columnCount));
-			if (_columnCount == 0) 
+			if (_columnCount == 0)
 				return;
 
 			for (std::size_t i = 0, j = _rowCount - 1; i < _rowCount; ++i, --j)
@@ -602,7 +593,7 @@ namespace ExtendedCpp
         /// @brief Calculates the rank of the matrix
         /// @return The rank of the matrix
         [[nodiscard]]
-        std::size_t Rank() const noexcept
+        std::size_t Rank() const noexcept // NOLINT(*-exception-escape)
         requires Concepts::Divisible<T> && Concepts::Multiply<T> &&
         		 Concepts::Substitute<T> && std::is_copy_assignable_v<T>
         {
@@ -641,7 +632,7 @@ namespace ExtendedCpp
 					if (reduce)
 					{
 						--rank;
-						for (int i = 0; i < _rowCount; ++i)
+						for (std::size_t i = 0; i < _rowCount; ++i)
 							copy._table[i * _columnCount + rowIndex] = copy._table[i * _columnCount + rank];
 					}
 					--rowIndex;
@@ -906,7 +897,7 @@ namespace ExtendedCpp
 					X[i] -= _table[i * _columnCount + k] * X[k];
 			}
 
-			for (long long i = _rowCount - 1; i >= 0; --i)
+			for (std::int64_t i = _rowCount - 1; i >= 0; --i)
 			{
 				for (std::size_t k = i + 1; k < _rowCount; ++k)
 					X[i] -= _table[i * _columnCount + k] * X[k];
@@ -928,22 +919,25 @@ namespace ExtendedCpp
 			{
 				for (std::size_t j = 0; j < _columnCount; ++j)
 					matrixString += std::to_string(_table[i * _columnCount + j]) + "\t";
-				matrixString += "\n";
+				matrixString += '\n';
 			}
 
 			return matrixString;
         }
 
 	private:
-		std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept
+		std::optional<std::pair<Matrix, std::vector<std::size_t>>> LUPDecompose() const noexcept // NOLINT(*-exception-escape)
 		requires std::is_default_constructible_v<T> && Concepts::Comparable<T> &&
 				 Concepts::Divisible<T> && Concepts::Substitute<T> && Concepts::Multiply<T>
 		{
 			std::vector<std::size_t> P(_rowCount + 1);
 			Matrix A(*this);
 
-			std::size_t i, j, k;
-			T maxA, absA;
+			std::size_t i{};
+			std::size_t j{};
+			std::size_t k{};
+			T maxA;
+			T absA;
 
 			for (i = 0; i <= _rowCount; ++i)
 				P[i] = i;
@@ -954,7 +948,7 @@ namespace ExtendedCpp
 				std::size_t imax = i;
 
 				for (k = i; k < _rowCount; ++k)
-					if ((absA = std::abs(A._table[k * A._columnCount + i])) > maxA)
+					if ((absA = std::abs(A._table[k * A._columnCount + i])) > maxA) // NOLINT(*-assignment-in-if-condition)
 					{
 						maxA = absA;
 						imax = k;
@@ -994,7 +988,7 @@ namespace ExtendedCpp
 			for (std::size_t i = 1; i < _rowCount; ++i)
 				det *= _table[i * _columnCount + i];
 
-			return (static_cast<long long>(P[_rowCount]) - static_cast<long long>(_rowCount)) % 2 == 0 ? det : -det;
+			return (static_cast<std::int64_t>(P[_rowCount]) - static_cast<std::int64_t>(_rowCount)) % 2 == 0 ? det : -det;
 		}
 
 		Matrix LUPInvert(const std::vector<std::size_t>& P) const noexcept
@@ -1014,7 +1008,7 @@ namespace ExtendedCpp
 								_table[i * _columnCount + k] * IA._table[k * IA._columnCount + j];
 				}
 
-				for (long long i = _rowCount - 1; i >= 0; --i)
+				for (std::int64_t i = _rowCount - 1; i >= 0; --i)
 				{
 					for (std::size_t k = i + 1; k < _rowCount; ++k)
 						IA._table[i * IA._columnCount + j] -=
@@ -1045,8 +1039,8 @@ namespace ExtendedCpp
 					copy._table[row * _columnCount + i] = 0;
 				}
 
-			for (long long i = _rowCount - 1; i > 0; --i)
-				for (long long row = i - 1; row > -1; --row)
+			for (std::int64_t i = _rowCount - 1; i > 0; --i)
+				for (std::int64_t row = i - 1; row > -1; --row)
 				{
 					if (std::abs(copy._table[i * _columnCount + i]) < std::numeric_limits<std::double_t>::min())
 						continue;
@@ -1166,7 +1160,7 @@ namespace ExtendedCpp
 		{
 			const std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
 
-			if (newDimension <= 64)
+			if (newDimension <= 64) // NOLINT(*-magic-numbers)
 				return MultiplyTranspose(matrix);
 
 			Matrix left(*this);
@@ -1207,7 +1201,7 @@ namespace ExtendedCpp
 		{
 			std::size_t newDimension = NewDimension(std::max({_rowCount, _columnCount, matrix._columnCount}));
 
-			if (newDimension <= 64)
+			if (newDimension <= 64) // NOLINT(*-magic-numbers)
 				return MultiplyTranspose(matrix);
 
 			std::future<std::array<Matrix, 4>> taskLeft = std::async(std::launch::async, [this, newDimension]
@@ -1287,7 +1281,7 @@ namespace ExtendedCpp
 		}
 
 		Matrix MultiplyTranspose(const Matrix& matrix) const noexcept
-		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T> && 
+		requires std::is_default_constructible_v<T> && std::is_copy_assignable_v<T> &&
 			Concepts::Multiply<T> && Concepts::Summarize<T>
 		{
 			Matrix result(_rowCount, matrix._columnCount);
@@ -1313,18 +1307,18 @@ namespace ExtendedCpp
 		return stream;
 	}
 
-	typedef Matrix<std::double_t> MatrixF64;
-	typedef Matrix<std::float_t> MatrixF32;
+	using MatrixF64 = Matrix<std::double_t>;
+	using MatrixF32 = Matrix<std::float_t>;
 
-	typedef Matrix<std::int64_t> MatrixI64;
-	typedef Matrix<std::int32_t> MatrixI32;
-	typedef Matrix<std::int16_t> MatrixI16;
-	typedef Matrix<std::int8_t> MatrixI8;
+	using MatrixI64 = Matrix<std::int64_t>;
+	using MatrixI32 = Matrix<std::int32_t>;
+	using MatrixI16 = Matrix<std::int16_t>;
+	using MatrixI8 = Matrix<std::int8_t>;
 
-	typedef Matrix<std::uint64_t> MatrixU64;
-	typedef Matrix<std::uint32_t> MatrixU32;
-	typedef Matrix<std::uint16_t> MatrixU16;
-	typedef Matrix<std::uint8_t> MatrixU8;
+	using MatrixU64 = Matrix<std::uint64_t>;
+	using MatrixU32 = Matrix<std::uint32_t>;
+	using MatrixU16 = Matrix<std::uint16_t>;
+	using MatrixU8 = Matrix<std::uint8_t>;
 }
 
 #define ZERO_MATRIX_F64(rowCount, columnCount) \
