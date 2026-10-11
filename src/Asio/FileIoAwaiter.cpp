@@ -2,7 +2,7 @@
 
 ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
     const NativeHandle& nativeHandle,
-    const std::uint64_t offset,
+    const OffsetType offset,
     const std::span<std::byte> buffer) noexcept :
         _nativeHandle(nativeHandle),
         _buffer(buffer),
@@ -11,7 +11,7 @@ ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
 
 ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
     const NativeHandle& nativeHandle,
-    const std::uint64_t offset,
+    const OffsetType offset,
     const std::span<const std::byte> buffer) noexcept :
         _nativeHandle(nativeHandle),
         _buffer(buffer),
@@ -69,14 +69,14 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
         case OperationType::Read:
             result = ReadFile(*_nativeHandle,
                 std::get<std::span<std::byte>>(_buffer).data(),
-                std::get<std::span<std::byte>>(_buffer).size(),
+                 static_cast<DWORD>(std::get<std::span<std::byte>>(_buffer).size()),
                 nullptr, &_overlapped);
             break;
 
         case OperationType::Write:
             result = WriteFile(*_nativeHandle,
                 std::get<std::span<const std::byte>>(_buffer).data(),
-                std::get<std::span<const std::byte>>(_buffer).size(),
+                static_cast<DWORD>(std::get<std::span<const std::byte>>(_buffer).size()),
                 nullptr, &_overlapped);
             break;
     }
@@ -140,6 +140,14 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
     if (!result)
     {
         const DWORD error = GetLastError();
+
+        if (_operationType == OperationType::Read && error == ERROR_HANDLE_EOF)
+        {
+            _result = 0;
+            Resume();
+            return;
+        }
+        
         _exception = std::make_exception_ptr(std::system_error(error, std::system_category()));
         Resume();
         return;

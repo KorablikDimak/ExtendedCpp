@@ -7,7 +7,7 @@
     #include <fcntl.h>
 #endif
 
-ExtendedCpp::Asio::NativeHandle::NativeHandle(const std::string& filename, std::ios_base::openmode mode) noexcept
+ExtendedCpp::Asio::NativeHandle::NativeHandle(const std::string& filename, const std::ios_base::openmode mode) noexcept
 {
 #ifdef UNIX_IO
     int flags{};

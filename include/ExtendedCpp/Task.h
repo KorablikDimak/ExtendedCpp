@@ -1,11 +1,13 @@
-#ifndef Common_Task_H
-#define Common_Task_H
+#ifndef COMMON_TASK_H
+#define COMMON_TASK_H
 
 #include <coroutine>
 #include <mutex>
 #include <exception>
 #include <future>
 #include <utility>
+
+// ReSharper disable CppMemberFunctionMayBeStatic
 
 /// @brief
 namespace ExtendedCpp
@@ -33,7 +35,8 @@ namespace ExtendedCpp
 
 			/// @brief
 			/// @return
-			static bool await_ready() noexcept { return false; }
+			[[nodiscard]]
+			bool await_ready() const noexcept { return false; }
 
 			/// @brief
 			/// @tparam TPromise
@@ -47,7 +50,7 @@ namespace ExtendedCpp
 				std::coroutine_handle<> continuation;
 
 				{
-					std::lock_guard lock(promise._mutex);
+					std::lock_guard _(promise._mutex);
 
 					promise._done = true;
 					continuation = promise._continuation;
@@ -63,7 +66,7 @@ namespace ExtendedCpp
 			}
 
 			/// @brief
-			static void await_resume() noexcept {}
+			void await_resume() const noexcept {}
 		};
 
 		/// @brief
@@ -85,7 +88,7 @@ namespace ExtendedCpp
 					return true;
 
 				const auto& promise = _handle.promise();
-				std::lock_guard lock(promise._mutex);
+				std::lock_guard _(promise._mutex);
 				return promise._done;
 			}
 
@@ -96,7 +99,7 @@ namespace ExtendedCpp
 			{
 				auto& promise = _handle.promise();
 
-				std::lock_guard lock(promise._mutex);
+				std::lock_guard _(promise._mutex);
 
 				if (promise._done)
 					return continuation;
@@ -112,7 +115,7 @@ namespace ExtendedCpp
 			{
 				const auto& promise = _handle.promise();
 
-				std::lock_guard lock(promise._mutex);
+				std::lock_guard _(promise._mutex);
 
 				if (promise._exception)
 					std::rethrow_exception(promise._exception);
@@ -147,7 +150,8 @@ namespace ExtendedCpp
 
 			/// @brief
 			/// @return
-			static bool await_ready() noexcept { return false; }
+			[[nodiscard]]
+			bool await_ready() const noexcept { return false; }
 
 			/// @brief
 			/// @param handle
@@ -187,11 +191,11 @@ namespace ExtendedCpp
 
 			/// @brief
 			/// @return
-			static std::suspend_never initial_suspend() noexcept { return {}; }
+			std::suspend_never initial_suspend() const noexcept { return {}; }
 
 			/// @brief
 			/// @return
-			static FinalAwaiter final_suspend() noexcept { return {}; }
+			FinalAwaiter final_suspend() const noexcept { return {}; }
 
 			/// @brief
 			/// @param result
@@ -275,7 +279,7 @@ namespace ExtendedCpp
 				return false;
 
 			const auto& promise = _handle.promise();
-			std::lock_guard lock(promise._mutex);
+			std::lock_guard _(promise._mutex);
 			return promise._done;
 		}
 
@@ -298,7 +302,7 @@ namespace ExtendedCpp
 
 			const auto& promise = _handle.promise();
 
-			std::lock_guard lock(promise._mutex);
+			std::lock_guard _(promise._mutex);
 
 			if (promise._exception)
 				std::rethrow_exception(promise._exception);
@@ -370,7 +374,7 @@ namespace ExtendedCpp
 				std::coroutine_handle<> continuation;
 
 				{
-					std::lock_guard lock(promise._mutex);
+					std::lock_guard _(promise._mutex);
 
 					promise._done = true;
 					continuation = promise._continuation;
@@ -503,7 +507,7 @@ namespace ExtendedCpp
 			static FinalAwaiter final_suspend() noexcept { return {}; }
 
 			/// @brief
-			static void return_void() noexcept {}
+			void return_void() const noexcept {}
 
 			/// @brief
 			void unhandled_exception() noexcept

@@ -1,35 +1,37 @@
 #include <filesystem>
+#include <array>
+
 #include <gtest/gtest.h>
 
 #include <ExtendedCpp/Asio.h>
 
 namespace AfstramTestsUtility
 {
-	static void CreateFile(const char* filename, const std::string_view content)
-	{
-		std::ofstream file(filename, std::ios::binary | std::ios::trunc);
-		if (!file)
-			throw std::runtime_error("Cannot create test file");
+    static void CreateFile(const char* filename, const std::string_view content)
+    {
+        std::ofstream file(filename, std::ios::binary | std::ios::trunc);
+        if (!file)
+            throw std::runtime_error("Cannot create test file");
 
-		file.write(content.data(), content.size());
+        file.write(content.data(), static_cast<std::streamsize>(content.size()));
 
-		if (!file)
-			throw std::runtime_error("Cannot write test file");
-	}
+        if (!file)
+            throw std::runtime_error("Cannot write test file");
+    }
 
-	static std::string ReadFile(const char* filename)
-	{
-		std::ifstream file(filename, std::ios::binary);
-		return { std::istreambuf_iterator(file), std::istreambuf_iterator<char>() };
-	}
+    static std::string ReadFile(const char* filename)
+    {
+        std::ifstream file(filename, std::ios::binary);
+        return { std::istreambuf_iterator(file), std::istreambuf_iterator<char>() };
+    }
 
     static std::string ToString(const std::span<const std::byte> bytes)
-	{
-		if (bytes.empty())
-			return {};
+    {
+        if (bytes.empty())
+            return {};
 
-		return { std::bit_cast<const char*>(bytes.data()), bytes.size() };
-	}
+        return { std::bit_cast<const char*>(bytes.data()), bytes.size() };
+    }
 }
 
 // ============================================================
@@ -38,56 +40,56 @@ namespace AfstramTestsUtility
 
 TEST(AfstramTests, ReadAsyncCountTest1)
 {
-	// Average
-	AfstramTestsUtility::CreateFile("ReadAsyncCount1.txt", "Correct test.");
+    // Average
+    AfstramTestsUtility::CreateFile("ReadAsyncCount1.txt", "Correct test.");
 
-	// Act
-	const auto task = []()->ExtendedCpp::Task<std::vector<std::byte>>
-	{
-		ExtendedCpp::Asio::Afstream file("ReadAsyncCount1.txt", std::ios::in);
-		co_return co_await file.ReadAsync(7);
-	}();
+    // Act
+    const auto task = []()-> ExtendedCpp::Task<std::vector<std::byte>>
+    {
+        ExtendedCpp::Asio::Afstream file("ReadAsyncCount1.txt");
+        co_return co_await file.ReadAsync(7);
+    }();
 
-	const auto result = task.Result();
+    const auto result = task.Result();
 
-	// Assert
-	EXPECT_EQ(AfstramTestsUtility::ToString(result), "Correct");
-	EXPECT_EQ(result.size(), 7);
+    // Assert
+    EXPECT_EQ(AfstramTestsUtility::ToString(result), "Correct");
+    EXPECT_EQ(result.size(), 7);
 }
 
 TEST(AfstreamTests, ReadAsyncCountTest2)
 {
-	// Average
-	AfstramTestsUtility::CreateFile("ReadAsyncCount2.txt", "Hello");
+    // Average
+    AfstramTestsUtility::CreateFile("ReadAsyncCount2.txt", "Hello");
 
-	// Act
-	const auto task = []()->ExtendedCpp::Task<std::vector<std::byte>>
-	{
-		ExtendedCpp::Asio::Afstream file("ReadAsyncCount2.txt", std::ios::in);
-		co_return co_await file.ReadAsync(10);
-	}();
+    // Act
+    const auto task = []()-> ExtendedCpp::Task<std::vector<std::byte>>
+    {
+        ExtendedCpp::Asio::Afstream file("ReadAsyncCount2.txt");
+        co_return co_await file.ReadAsync(10);
+    }();
 
-	const auto result = task.Result();
+    const auto result = task.Result();
 
-	// Assert
-	EXPECT_EQ(AfstramTestsUtility::ToString(result), "Hello");
-	EXPECT_EQ(result.size(), 5);
+    // Assert
+    EXPECT_EQ(AfstramTestsUtility::ToString(result), "Hello");
+    EXPECT_EQ(result.size(), 5);
 }
 
 TEST(AfstramTests, ReadAsyncCountTest3)
 {
-	// Average
-	AfstramTestsUtility::CreateFile("ReadAsyncCount3.txt", "Hello");
+    // Average
+    AfstramTestsUtility::CreateFile("ReadAsyncCount3.txt", "Hello");
 
-	// Act
-	const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
-	{
-		ExtendedCpp::Asio::Afstream file("ReadAsyncCount3.txt", std::ios::out);
-		co_return co_await file.ReadAsync(5);
-	}();
+    // Act
+    const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
+    {
+        ExtendedCpp::Asio::Afstream file("ReadAsyncCount3.txt", std::ios::out);
+        co_return co_await file.ReadAsync(5);
+    }();
 
-	// Assert
-	EXPECT_ANY_THROW(task.Result());
+    // Assert
+    EXPECT_ANY_THROW(task.Result());
 }
 
 // ============================================================
@@ -102,13 +104,10 @@ TEST(AfstramTests, ReadAsyncSpanTest1)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSpan1.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSpan1.txt");
         std::array<std::byte, 5> buffer{};
-
         const auto read = co_await file.ReadAsync(std::span<std::byte>(buffer));
-
         EXPECT_EQ(AfstramTestsUtility::ToString(std::vector(buffer.begin(), buffer.end())), "Hello");
-
         co_return read;
     }();
 
@@ -124,9 +123,8 @@ TEST(AfstramTests, ReadAsyncSpanTest2)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSpan2.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSpan2.txt");
         std::array<std::byte, 10> buffer{};
-
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer));
     }();
 
@@ -144,7 +142,6 @@ TEST(AfstramTests, ReadAsyncSpanTest3)
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpan3.txt", std::ios::out);
         std::array<std::byte, 5> buffer{};
-
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer));
     }();
 
@@ -164,9 +161,8 @@ TEST(AfstramTests, ReadAsyncSpanCountTest1)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount1.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount1.txt");
         std::array<std::byte, 10> buffer{};
-
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5);
     }();
 
@@ -182,9 +178,8 @@ TEST(AfstramTests, ReadAsyncSpanCountTest2)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount2.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount2.txt");
         std::array<std::byte, 5> buffer{};
-
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 100);
     }();
 
@@ -202,7 +197,6 @@ TEST(AfstramTests, ReadAsyncSpanCountTest3)
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount3.txt", std::ios::out);
         std::array<std::byte, 5> buffer{};
-
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5);
     }();
 
@@ -223,7 +217,6 @@ TEST(AfstramTests, WriteAsyncSpanTest1)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpan1.txt", std::ios::out | std::ios::trunc);
-
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
         co_return co_await file.WriteAsync(buffer);
     }();
@@ -244,7 +237,6 @@ TEST(AfstramTests, WriteAsyncSpanTest2)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpan2.txt", std::ios::out | std::ios::trunc);
-
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
         co_return co_await file.WriteAsync(buffer);
     }();
@@ -265,7 +257,6 @@ TEST(AfstramTests, WriteAsyncSpanTest3)
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpan3.txt", std::ios::in);
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
-
         co_return co_await file.WriteAsync(buffer);
     }();
 
@@ -286,7 +277,6 @@ TEST(AfstramTests, WriteAsyncSpanCountTest1)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpanCount1.txt", std::ios::out | std::ios::trunc);
-
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
         co_return co_await file.WriteAsync(buffer, 5);
     }();
@@ -305,7 +295,6 @@ TEST(AfstramTests, WriteAsyncSpanCountTest2)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpanCount2.txt", std::ios::out | std::ios::trunc);
-
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
         co_return co_await file.WriteAsync(buffer, 100);
     }();
@@ -326,7 +315,6 @@ TEST(AfstramTests, WriteAsyncSpanCountTest3)
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpanCount3.txt", std::ios::in);
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
-
         co_return co_await file.WriteAsync(buffer, text.size());
     }();
 
@@ -358,7 +346,7 @@ TEST(AfstramTests, WriteAsyncStringTest1)
 TEST(AfstramTests, WriteAsyncStringTest2)
 {
     // Average
-    constexpr std::string_view text = "";
+    constexpr std::string_view text;
 
     // Act
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
@@ -454,7 +442,7 @@ TEST(AfstramTests, ReadAllAsyncTest1)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAllAsync1.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadAllAsync1.txt");
         co_return co_await file.ReadAllAsync();
     }();
 
@@ -472,9 +460,8 @@ TEST(AfstramTests, ReadAllAsyncTest2)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAllAsync2.txt", std::ios::in);
-
-        const auto prefix = co_await file.ReadAsync(6);
+        ExtendedCpp::Asio::Afstream file("ReadAllAsync2.txt");
+        co_await file.ReadAsync(6);
         co_return co_await file.ReadAllAsync();
     }();
 
@@ -512,7 +499,7 @@ TEST(AfstramTests, ReadLineAsyncTest1)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::string>
     {
-        ExtendedCpp::Asio::Afstream file("ReadLineAsync1.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadLineAsync1.txt");
         co_return co_await file.ReadLineAsync();
     }();
 
@@ -528,7 +515,7 @@ TEST(AfstramTests, ReadLineAsyncTest2)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::string>
     {
-        ExtendedCpp::Asio::Afstream file("ReadLineAsync2.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadLineAsync2.txt");
         co_return co_await file.ReadLineAsync();
     }();
 
@@ -559,24 +546,15 @@ TEST(AfstramTests, ReadLineAsyncTest4)
     ExtendedCpp::Asio::Afstream file("ReadLineAsync3.txt");
 
     // Act
-    const auto task1 = [&]() -> ExtendedCpp::Task<std::string>
-    {
-        co_return co_await file.ReadLineAsync();
-    }();
+    const auto task1 = [&]() -> ExtendedCpp::Task<std::string> { co_return co_await file.ReadLineAsync(); }();
 
     task1.Wait();
 
-    const auto task2 = [&]() -> ExtendedCpp::Task<std::string>
-    {
-        co_return co_await file.ReadLineAsync();
-    }();
+    const auto task2 = [&]() -> ExtendedCpp::Task<std::string> { co_return co_await file.ReadLineAsync(); }();
 
     task2.Wait();
 
-    const auto task3 = [&]() -> ExtendedCpp::Task<std::string>
-    {
-        co_return co_await file.ReadLineAsync();
-    }();
+    const auto task3 = [&]() -> ExtendedCpp::Task<std::string> { co_return co_await file.ReadLineAsync(); }();
 
     task3.Wait();
 
@@ -598,7 +576,7 @@ TEST(AfstramTests, ReadTextAsyncTest1)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::string>
     {
-        ExtendedCpp::Asio::Afstream file("ReadTextAsync1.txt", std::ios::in);
+        ExtendedCpp::Asio::Afstream file("ReadTextAsync1.txt");
         co_return co_await file.ReadTextAsync();
     }();
 
@@ -614,9 +592,8 @@ TEST(AfstramTests, ReadTextAsyncTest2)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::string>
     {
-        ExtendedCpp::Asio::Afstream file("ReadTextAsync2.txt", std::ios::in);
-
-        const auto prefix = co_await file.ReadAsync(6);
+        ExtendedCpp::Asio::Afstream file("ReadTextAsync2.txt");
+        co_await file.ReadAsync(6);
         co_return co_await file.ReadTextAsync();
     }();
 
@@ -652,7 +629,7 @@ TEST(AfstramTests, ReadAsyncSynchronizesReadPosition)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSynchronizesReadPosition.txt", std::ios::in | std::ios::out | std::ios::binary);
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSynchronizesReadPosition.txt");
         co_return co_await file.ReadAsync(5);
     }();
 
@@ -670,11 +647,9 @@ TEST(AfstramTests, ReadAsyncUpdatesTellg)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamoff>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncUpdatesTellg.txt", std::ios::in | std::ios::out | std::ios::binary);
-
+        ExtendedCpp::Asio::Afstream file("ReadAsyncUpdatesTellg.txt");
         co_await file.ReadAsync(5);
-
-        co_return static_cast<std::streamoff>(file.tellg());
+        co_return file.tellg();
     }();
 
     const auto result = task.Result();
@@ -691,11 +666,9 @@ TEST(AfstramTests, WriteAsyncUpdatesTellp)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamoff>
     {
-        ExtendedCpp::Asio::Afstream file("WriteAsyncUpdatesTellp.txt", std::ios::in | std::ios::out | std::ios::binary);
-
+        ExtendedCpp::Asio::Afstream file("WriteAsyncUpdatesTellp.txt");
         co_await file.WriteAsync("ABCDE");
-
-        co_return static_cast<std::streamoff>(file.tellp());
+        co_return file.tellp();
     }();
 
     const auto result = task.Result();
@@ -712,10 +685,8 @@ TEST(AfstramTests, ReadAsyncSynchronizesPositionAfterSeekg)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
-        ExtendedCpp::Asio::Afstream file("ReadAsyncSynchronizesPositionAfterSeekg.txt", std::ios::in | std::ios::out | std::ios::binary);
-
+        ExtendedCpp::Asio::Afstream file("ReadAsyncSynchronizesPositionAfterSeekg.txt");
         file.seekg(4, std::ios::beg);
-
         co_return co_await file.ReadAsync(3);
     }();
 
@@ -733,13 +704,10 @@ TEST(AfstramTests, WriteAsyncSynchronizesPositionAfterSeekp)
     // Act
     const auto task = []() -> ExtendedCpp::Task<std::streamoff>
     {
-        ExtendedCpp::Asio::Afstream file("WriteAsyncSynchronizesPositionAfterSeekp.txt", std::ios::in | std::ios::out | std::ios::binary);
-
+        ExtendedCpp::Asio::Afstream file("WriteAsyncSynchronizesPositionAfterSeekp.txt");
         file.seekp(4, std::ios::beg);
-
         co_await file.WriteAsync("ABC");
-
-        co_return static_cast<std::streamoff>(file.tellp());
+        co_return file.tellp();
     }();
 
     const auto result = task.Result();

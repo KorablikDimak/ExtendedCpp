@@ -1,5 +1,5 @@
-#ifndef Asio_FileIoAwaiter_H
-#define Asio_FileIoAwaiter_H
+#ifndef ASIO_FILE_IO_AWAITER_H
+#define ASIO_FILE_IO_AWAITER_H
 
 #include <span>
 #include <variant>
@@ -24,11 +24,17 @@
 
 namespace ExtendedCpp::Asio
 {
+#if UNIX_IO
+    using OffsetType = off_t;
+#elif WINDOWS_IO
+    using OffsetType = std::int64_t;
+#endif
+
     class FileIoAwaiter final : public IoAwaiter
     {
     public:
-        FileIoAwaiter(const NativeHandle& nativeHandle, std::uint64_t offset, std::span<std::byte> buffer) noexcept;
-        FileIoAwaiter(const NativeHandle& nativeHandle, std::uint64_t offset, std::span<const std::byte> buffer) noexcept;
+        FileIoAwaiter(const NativeHandle& nativeHandle, OffsetType offset, std::span<std::byte> buffer) noexcept;
+        FileIoAwaiter(const NativeHandle& nativeHandle, OffsetType offset, std::span<const std::byte> buffer) noexcept;
 
         FileIoAwaiter(const FileIoAwaiter& other) noexcept = delete;
         FileIoAwaiter(FileIoAwaiter&& other) noexcept = delete;
@@ -51,11 +57,9 @@ namespace ExtendedCpp::Asio
         void Complete() noexcept;
 
 #if UNIX_IO
-        using OffsetType = off_t;
         static void CompletionCallback(sigval value) noexcept;
         std::unique_ptr<aiocb> _control = std::make_unique<aiocb>();
 #elif WINDOWS_IO
-        using OffsetType = std::uint64_t;
         static DWORD WINAPI CompletionThread(void* parameter) noexcept;
         OVERLAPPED _overlapped{};
 #endif

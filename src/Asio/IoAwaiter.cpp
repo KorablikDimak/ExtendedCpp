@@ -1,6 +1,7 @@
 #include <ExtendedCpp/Asio/IoAwaiter.h>
 
-bool ExtendedCpp::Asio::IoAwaiter::await_ready() noexcept
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool ExtendedCpp::Asio::IoAwaiter::await_ready() const noexcept // NOLINT(*-convert-member-functions-to-static)
 {
     return false;
 }

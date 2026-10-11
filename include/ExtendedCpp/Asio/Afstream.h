@@ -1,5 +1,5 @@
-#ifndef Asio_Afstream_H
-#define Asio_Afstream_H
+#ifndef ASIO_AFSTREAM_H
+#define ASIO_AFSTREAM_H
 
 #include <fstream>
 #include <vector>
@@ -36,14 +36,14 @@ namespace ExtendedCpp::Asio
         Task<std::string> ReadTextAsync();
 
     private:
-        std::uint64_t GetReadPosition();
-        void SetReadPosition(std::uint64_t position);
+        OffsetType GetReadPosition();
+        void SetReadPosition(OffsetType position);
 
-        std::uint64_t GetWritePosition();
-        void SetWritePosition(std::uint64_t position);
+        OffsetType GetWritePosition();
+        void SetWritePosition(OffsetType position);
 
-        std::uint64_t _readPosition = 0;
-        std::uint64_t _writePosition = 0;
+        OffsetType _readPosition = 0;
+        OffsetType _writePosition = 0;
 
         NativeHandle _nativeHandle;
     };

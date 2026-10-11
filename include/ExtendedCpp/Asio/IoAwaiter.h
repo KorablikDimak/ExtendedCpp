@@ -1,5 +1,5 @@
-#ifndef Asio_IoAwaiter_H
-#define Asio_IoAwaiter_H
+#ifndef ASIO_IO_AWAITER_H
+#define ASIO_IO_AWAITER_H
 
 #include <coroutine>
 #include <ios>
@@ -11,8 +11,12 @@ namespace ExtendedCpp::Asio
     public:
         virtual ~IoAwaiter() noexcept = default;
 
-        static bool await_ready() noexcept;
+        [[nodiscard]]
+        bool await_ready() const noexcept;
+
         void await_suspend(std::coroutine_handle<> continuation) noexcept;
+
+        [[nodiscard]]
         std::streamsize await_resume() const;
 
     protected:

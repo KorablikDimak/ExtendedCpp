@@ -1,5 +1,5 @@
-#ifndef Asio_NativeHandle_H
-#define Asio_NativeHandle_H
+#ifndef ASIO_NATIVE_HANDLE_H
+#define ASIO_NATIVE_HANDLE_H
 
 #include <string>
 #include <ios>

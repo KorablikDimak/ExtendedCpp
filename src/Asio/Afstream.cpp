@@ -1,5 +1,6 @@
 #include <format>
 #include <algorithm>
+#include <array>
 
 #include <ExtendedCpp/Asio/Afstream.h>
 
@@ -34,7 +35,7 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAsync
 {
     std::vector<std::byte> buffer(count);
 
-    const std::uint64_t position = GetReadPosition();
+    const OffsetType position = GetReadPosition();
 
     FileIoAwaiter ioOperation
     {
@@ -55,7 +56,7 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAsync
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer)
 {
-    const std::uint64_t position = GetReadPosition();
+    const OffsetType position = GetReadPosition();
 
     FileIoAwaiter ioOperation
     {
@@ -72,15 +73,17 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const 
     co_return read;
 }
 
-ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const std::span<std::byte> buffer, const std::size_t count)
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(
+    const std::span<std::byte> buffer,
+    const std::size_t count)
 {
-    const std::uint64_t position = GetReadPosition();
+    const OffsetType position = GetReadPosition();
 
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
         position,
-        buffer.first(std::min(count, buffer.size()))
+        buffer.first((std::min)(count, buffer.size()))
     };
 
     const std::streamsize read = co_await ioOperation;
@@ -93,7 +96,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const 
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::span<const std::byte> buffer)
 {
-    const std::uint64_t position = GetWritePosition();
+    const OffsetType position = GetWritePosition();
 
     FileIoAwaiter ioOperation
     {
@@ -110,15 +113,17 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
     co_return written;
 }
 
-ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::span<const std::byte> buffer, const std::size_t count)
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(
+    const std::span<const std::byte> buffer,
+    const std::size_t count)
 {
-    const std::uint64_t position = GetWritePosition();
+    const OffsetType position = GetWritePosition();
 
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
         position,
-        buffer.first(std::min(count, buffer.size()))
+        buffer.first((std::min)(count, buffer.size()))
     };
 
     const std::streamsize written = co_await ioOperation;
@@ -131,7 +136,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
 
 ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer)
 {
-    const std::uint64_t position = GetWritePosition();
+    const OffsetType position = GetWritePosition();
 
     FileIoAwaiter ioOperation
     {
@@ -148,15 +153,17 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
     co_return written;
 }
 
-ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const std::string_view buffer, const std::size_t count)
+ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(
+    const std::string_view buffer,
+    const std::size_t count)
 {
-    const std::uint64_t position = GetWritePosition();
+    const OffsetType position = GetWritePosition();
 
     FileIoAwaiter ioOperation
     {
         _nativeHandle,
         position,
-        std::as_bytes(std::span(buffer)).first(std::min(count, buffer.size()))
+        std::as_bytes(std::span(buffer)).first((std::min)(count, buffer.size()))
     };
 
     const std::streamsize written = co_await ioOperation;
@@ -171,10 +178,10 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAllAs
 {
     std::vector<std::byte> result;
 
-    constexpr std::size_t CHUNK_SIZE = 4096;
-    std::array<std::byte, CHUNK_SIZE> chunk{};
+    constexpr std::size_t chunkSize = 4096;
+    std::array<std::byte, chunkSize> chunk{};
 
-    std::uint64_t currentPosition = GetReadPosition();
+    OffsetType currentPosition = GetReadPosition();
 
     while (true)
     {
@@ -204,10 +211,10 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
 {
     std::string result;
 
-    constexpr std::size_t CHUNK_SIZE = 256;
-    std::array<std::byte, CHUNK_SIZE> chunk{};
+    constexpr std::size_t chunkSize = 256;
+    std::array<std::byte, chunkSize> chunk{};
 
-    std::uint64_t currentPosition = GetReadPosition();
+    OffsetType currentPosition = GetReadPosition();
 
     while (true)
     {
@@ -232,7 +239,7 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
 
         if (lineLength < static_cast<std::size_t>(read))
         {
-            currentPosition -= read - lineLength - 1;
+            currentPosition -= read - static_cast<OffsetType>(lineLength) - 1;
             break;
         }
     }
@@ -252,7 +259,7 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadTextAsync()
     co_return std::string(std::bit_cast<const char*>(bytes.data()), bytes.size());
 }
 
-std::uint64_t ExtendedCpp::Asio::Afstream::GetReadPosition()
+ExtendedCpp::Asio::OffsetType ExtendedCpp::Asio::Afstream::GetReadPosition()
 {
     const std::int64_t syncReadPosition = tellg();
     if (syncReadPosition == -1)
@@ -262,13 +269,13 @@ std::uint64_t ExtendedCpp::Asio::Afstream::GetReadPosition()
     return syncReadPosition;
 }
 
-void ExtendedCpp::Asio::Afstream::SetReadPosition(const std::uint64_t position)
+void ExtendedCpp::Asio::Afstream::SetReadPosition(const OffsetType position)
 {
     _readPosition = position;
     seekg(position);
 }
 
-std::uint64_t ExtendedCpp::Asio::Afstream::GetWritePosition()
+ExtendedCpp::Asio::OffsetType ExtendedCpp::Asio::Afstream::GetWritePosition()
 {
     const std::int64_t syncWritePosition = tellp();
     if (syncWritePosition == -1)
@@ -278,7 +285,7 @@ std::uint64_t ExtendedCpp::Asio::Afstream::GetWritePosition()
     return syncWritePosition;
 }
 
-void ExtendedCpp::Asio::Afstream::SetWritePosition(const std::uint64_t position)
+void ExtendedCpp::Asio::Afstream::SetWritePosition(const OffsetType position)
 {
     _writePosition = position;
     seekp(position);
