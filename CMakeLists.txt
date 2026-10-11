@@ -193,6 +193,14 @@ endif()
 if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/DI)
+
+    if(BUILD_SHARED_LIBS AND WIN32)
+        add_custom_command(
+                TARGET Reflection POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:Reflection>"
+                "$<TARGET_FILE_DIR:DI-tests>")
+    endif()
 endif()
 
 if(Asio_BUILD_TESTS OR BUILD_ALL_TESTS)

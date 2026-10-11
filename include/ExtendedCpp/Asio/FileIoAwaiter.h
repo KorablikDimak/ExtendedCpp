@@ -1,5 +1,5 @@
-#ifndef ASIO_FILE_IO_AWAITER_H
-#define ASIO_FILE_IO_AWAITER_H
+#ifndef Asio_FileIoAwaiter_H
+#define Asio_FileIoAwaiter_H
 
 #include <span>
 #include <variant>

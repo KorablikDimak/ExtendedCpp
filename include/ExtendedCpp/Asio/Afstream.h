@@ -1,5 +1,5 @@
-#ifndef ASIO_AFSTREAM_H
-#define ASIO_AFSTREAM_H
+#ifndef Asio_Afstream_H
+#define Asio_Afstream_H
 
 #include <fstream>
 #include <vector>

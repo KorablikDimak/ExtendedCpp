@@ -1,5 +1,5 @@
-#ifndef ASIO_IO_AWAITER_H
-#define ASIO_IO_AWAITER_H
+#ifndef Asio_IoAwaiter_H
+#define Asio_IoAwaiter_H
 
 #include <coroutine>
 #include <ios>
