@@ -4760,7 +4760,7 @@ PUGI__NS_BEGIN
 	{
 	#if defined(PUGI__MSVC_CRT_VERSION) && PUGI__MSVC_CRT_VERSION >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
-		typedef __int64 length_type;
+		typedef std::int64_t length_type;
 
 		_fseeki64(file, 0, SEEK_END);
 		length_type length = _ftelli64(file);

@@ -9,9 +9,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-if(WIN32)
+if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+endif ()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -20,11 +20,11 @@ include(cmake/utils.cmake)
 option(ExtendedCpp_INSTALL "Generate target for installing ExtendedCpp" ON)
 option(BUILD_SHARED_LIBS "Build libs as shared" ON)
 
-if(BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
     set(LIBRARY_TYPE SHARED)
-else()
+else ()
     set(LIBRARY_TYPE STATIC)
-endif()
+endif ()
 
 option(BUILD_ALL_TESTS "Build all tests for ExtendedCpp" OFF)
 option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
@@ -92,9 +92,9 @@ add_library(ExtendedCpp::Xml ALIAS Xml)
 
 add_library(Reflection ${LIBRARY_TYPE} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(Reflection PUBLIC /Zc:preprocessor)
-endif()
+endif ()
 
 add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
@@ -103,7 +103,7 @@ target_link_libraries(InfoLog PUBLIC Xml Reflection)
 set_interface_directories(LINQ Events Json Common DI)
 set_include_directories(Asio Xml Reflection InfoLog)
 
-if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
+if (ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
             ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config-version.cmake
             VERSION ${PROJECT_VERSION}
@@ -130,41 +130,41 @@ if(ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             COPYONLY)
 
     install_projects(LINQ Events Json Common DI Asio Xml Reflection InfoLog)
-endif()
+endif ()
 
-if(LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/LINQ)
-endif()
+endif ()
 
-if(Events_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Events_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Events)
-endif()
+endif ()
 
-if(Json_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Json_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Json)
-endif()
+endif ()
 
-if(Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Reflection)
 
-    if(BUILD_SHARED_LIBS AND WIN32)
+    if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Reflection POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
                 ${CMAKE_CURRENT_BINARY_DIR}/tests/Reflection/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/InfoLog)
 
-    if(BUILD_SHARED_LIBS AND WIN32)
+    if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET InfoLog POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
@@ -182,44 +182,44 @@ if(InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
                 ${CMAKE_CURRENT_BINARY_DIR}/tests/InfoLog/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(Common_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Common_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Common)
-endif()
+endif ()
 
-if(DI_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/DI)
 
-    if(BUILD_SHARED_LIBS AND WIN32)
+    if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Reflection POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "$<TARGET_FILE:Reflection>"
                 "$<TARGET_FILE_DIR:DI-tests>")
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
     add_subdirectory(tests/Asio)
 
-    if(BUILD_SHARED_LIBS AND WIN32)
+    if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Asio POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX}
                 ${CMAKE_CURRENT_BINARY_DIR}/tests/Asio/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif()
-endif()
+    endif ()
+endif ()
 
-if(LINQ_BUILD_BENCHMARKS)
+if (LINQ_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks/LINQ)
-endif()
+endif ()
 
-if(Common_BUILD_BENCHMARKS)
+if (Common_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks/Common)
-endif()
+endif ()

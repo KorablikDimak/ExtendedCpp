@@ -15,3 +15,7 @@ set(Common_BENCHMARKS_SOURCE
 
 add_executable(Common-benchmarks ${Common_BENCHMARKS_SOURCE})
 target_link_libraries(Common-benchmarks PRIVATE ExtendedCpp::Common benchmark::benchmark)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(Common-benchmarks PRIVATE -Wno-c2y-extensions)
+endif()

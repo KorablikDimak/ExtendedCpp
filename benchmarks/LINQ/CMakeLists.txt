@@ -17,3 +17,7 @@ set(LINQ_BENCHMARKS_SOURCE
 
 add_executable(LINQ-benchmarks ${LINQ_BENCHMARKS_SOURCE})
 target_link_libraries(LINQ-benchmarks PRIVATE ExtendedCpp::LINQ ExtendedCpp::Common benchmark::benchmark)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(LINQ-benchmarks PRIVATE -Wno-c2y-extensions)
+endif()
