@@ -1,3 +1,7 @@
+#if defined(UNIX_IO) && defined(__APPLE__)
+    #include <thread>
+#endif
+
 #include <ExtendedCpp/Asio/FileIoAwaiter.h>
 
 ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
@@ -20,7 +24,105 @@ ExtendedCpp::Asio::FileIoAwaiter::FileIoAwaiter(
 
 void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
 {
-#if UNIX_IO
+    if (IsEmptyBuffer())
+    {
+        _result = 0;
+        Resume();
+        return;
+    }
+
+#if defined(DARWIN_IO)
+    dispatch_io_t channel = dispatch_io_create(DISPATCH_IO_RANDOM, *_nativeHandle, _queue, {});
+
+    if (channel == nullptr)
+    {
+        _exception = std::make_exception_ptr(std::system_error(errno, std::generic_category()));
+        Resume();
+        return;
+    }
+
+    if (_operationType == OperationType::Read)
+    {
+        const auto& span = std::get<std::span<std::byte>>(_buffer);
+
+        dispatch_io_read(channel, _offset, span.size(), _queue,
+            ^(const bool isDone, const dispatch_data_t data, const int error)
+            {
+                if (data)
+                {
+                    const void* bytes{};
+                    std::size_t length{};
+
+                    const dispatch_data_t mapped = dispatch_data_create_map(data, &bytes, &length);
+
+                    if (mapped == nullptr)
+                        _exception = std::make_exception_ptr(std::bad_alloc());
+                    else if (length != 0)
+                    {
+                        const auto copied = static_cast<std::size_t>(_result);
+                        const auto available = span.size() - copied;
+                        const auto count = std::min(length, available);
+
+                        std::memcpy(span.data() + copied, bytes, count);
+                        _result += static_cast<std::streamsize>(count);
+                    }
+
+                    if (mapped != nullptr)
+                        dispatch_release(mapped);
+                }
+
+                if (error != 0)
+                    _exception = std::make_exception_ptr(std::system_error(error, std::generic_category()));
+
+                if (!isDone)
+                    return;
+
+                dispatch_io_close(channel, 0);
+                dispatch_release(channel);
+
+                Resume();
+            });
+    }
+    else
+    {
+        const auto span = std::get<std::span<const std::byte>>(_buffer);
+
+        dispatch_data_t payload = dispatch_data_create(span.data(), span.size(), _queue, nullptr);
+
+        if (payload == nullptr)
+        {
+            dispatch_io_close(channel, 0);
+            dispatch_release(channel);
+            _exception = std::make_exception_ptr(std::bad_alloc());
+            Resume();
+            return;
+        }
+
+        dispatch_io_write(channel, _offset, payload, _queue,
+            ^(const bool done, const dispatch_data_t remaining, const int error)
+            {
+                if (!done)
+                    return;
+
+                const std::size_t remainingSize =
+                    remaining == nullptr ? 0 : dispatch_data_get_size(remaining);
+
+                const auto written = span.size() - remainingSize;
+
+                _result = static_cast<std::streamsize>(written);
+
+                if (error != 0)
+                    _exception = std::make_exception_ptr(std::system_error(error, std::generic_category()));
+
+                dispatch_io_close(channel, 0);
+                dispatch_release(channel);
+
+                this->Resume();
+            });
+
+        dispatch_release(payload);
+    }
+#elif defined(UNIX_IO)
     _control->aio_fildes = *_nativeHandle;
     _control->aio_offset = _offset;
 
@@ -37,9 +139,11 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
         _control->aio_nbytes = buffer.size();
     }
 
+#if !defined(__APPLE__)
     _control->aio_sigevent.sigev_notify = SIGEV_THREAD;
     _control->aio_sigevent.sigev_notify_function = &FileIoAwaiter::CompletionCallback;
-    _control->aio_sigevent.sigev_value.sival_ptr = this;
+    _control->aio_sigevent.sigev_value.sival_ptr = this; // NOLINT(*-pro-type-union-access)
+#endif
 
     int result{};
 
@@ -57,8 +161,26 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
     {
         _exception = std::make_exception_ptr(std::system_error(errno, std::generic_category()));
         Resume();
+        return;
     }
-#elif WINDOWS_IO
+
+#if defined(__APPLE__)
+    std::thread([this]() noexcept
+    {
+        while (true)
+        {
+            const int error = aio_error(_control.get());
+
+            if (error == EINPROGRESS)
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            else
+                break;
+        }
+        CompletionCallback(sigval{ .sival_ptr = this });
+    }).detach();
+#endif
+
+#elif defined(WINDOWS_IO)
     _overlapped = {};
     _overlapped.Offset = _offset & 0xFFFFFFFF;
     _overlapped.OffsetHigh = _offset >> 32;
@@ -69,7 +191,7 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
         case OperationType::Read:
             result = ReadFile(*_nativeHandle,
                 std::get<std::span<std::byte>>(_buffer).data(),
-                 static_cast<DWORD>(std::get<std::span<std::byte>>(_buffer).size()),
+                static_cast<DWORD>(std::get<std::span<std::byte>>(_buffer).size()),
                 nullptr, &_overlapped);
             break;
 
@@ -109,9 +231,16 @@ void ExtendedCpp::Asio::FileIoAwaiter::Start() noexcept
 #endif
 }
 
+bool ExtendedCpp::Asio::FileIoAwaiter::IsEmptyBuffer() const noexcept
+{
+    return
+        (_operationType == OperationType::Read && std::get<std::span<std::byte>>(_buffer).empty()) ||
+        (_operationType == OperationType::Write && std::get<std::span<const std::byte>>(_buffer).empty());
+}
+
+#if defined(UNIX_IO)
 void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
 {
-#if UNIX_IO
     const int error = aio_error(_control.get());
 
     if (error != 0)
@@ -132,7 +261,16 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
 
     _result = result;
     Resume();
-#elif WINDOWS_IO
+}
+
+void ExtendedCpp::Asio::FileIoAwaiter::CompletionCallback(const sigval value) noexcept
+{
+    auto* awaiter = static_cast<FileIoAwaiter*>(value.sival_ptr); // NOLINT(*-pro-type-union-access)
+    awaiter->Complete();
+}
+#elif defined(WINDOWS_IO)
+void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
+{
     DWORD transferred{};
 
     const BOOL result = GetOverlappedResult(*_nativeHandle, &_overlapped, &transferred, TRUE);
@@ -147,7 +285,7 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
             Resume();
             return;
         }
-        
+
         _exception = std::make_exception_ptr(std::system_error(error, std::system_category()));
         Resume();
         return;
@@ -155,16 +293,8 @@ void ExtendedCpp::Asio::FileIoAwaiter::Complete() noexcept
 
     _result = transferred;
     Resume();
-#endif
 }
 
-#if UNIX_IO
-void ExtendedCpp::Asio::FileIoAwaiter::CompletionCallback(const sigval value) noexcept
-{
-    auto* awaiter = static_cast<FileIoAwaiter*>(value.sival_ptr);
-    awaiter->Complete();
-}
-#elif WINDOWS_IO
 DWORD ExtendedCpp::Asio::FileIoAwaiter::CompletionThread(void* parameter) noexcept
 {
     auto* awaiter = static_cast<FileIoAwaiter*>(parameter);

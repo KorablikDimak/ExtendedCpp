@@ -1,16 +1,8 @@
-#ifndef Asio_NativeHandle_H
-#define Asio_NativeHandle_H
+#ifndef ASIO_NATIVE_HANDLE_H
+#define ASIO_NATIVE_HANDLE_H
 
-#include <string>
 #include <ios>
-
-#if __APPLE__
-    #define UNIX_IO 1
-#elif __linux__
-    #define UNIX_IO 1
-#elif _WIN32
-    #define WINDOWS_IO 1
-#endif
+#include <string>
 
 #ifdef WINDOWS_IO
     #include <windows.h>
@@ -34,10 +26,12 @@ namespace ExtendedCpp::Asio
         explicit operator bool() const noexcept;
 
     private:
-#ifdef UNIX_IO
+        void CloseHandle() noexcept;
+
+#if defined(UNIX_IO) || defined(DARWIN_IO)
         using HandleType = int;
         static constexpr HandleType INVALID_HANDLE = -1;
-#elif WINDOWS_IO
+#elif defined(WINDOWS_IO)
         using HandleType = HANDLE;
         inline static const auto INVALID_HANDLE = INVALID_HANDLE_VALUE;
 #endif

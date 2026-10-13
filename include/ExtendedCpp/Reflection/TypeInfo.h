@@ -33,9 +33,6 @@ namespace ExtendedCpp::Reflection
         /// @param typeIndex 
         /// @param members 
         TypeInfo(std::string&& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
-        
-        /// @brief 
-        ~TypeInfo() = default;
 
         /// @brief 
         /// @return 

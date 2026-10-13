@@ -1,12 +1,12 @@
-#ifndef Asio_IoAwaiter_H
-#define Asio_IoAwaiter_H
+#ifndef ASIO_IO_AWAITER_H
+#define ASIO_IO_AWAITER_H
 
 #include <coroutine>
 #include <ios>
 
 namespace ExtendedCpp::Asio
 {
-    class IoAwaiter
+    class IoAwaiter // NOLINT(*-special-member-functions)
     {
     public:
         virtual ~IoAwaiter() noexcept = default;
@@ -27,7 +27,7 @@ namespace ExtendedCpp::Asio
         std::exception_ptr _exception;
 
     private:
-        std::coroutine_handle<> _continuation{};
+        std::coroutine_handle<> _continuation;
     };
 }
 

@@ -1,5 +1,5 @@
-#ifndef Common_Random_H
-#define Common_Random_H
+#ifndef COMMON_RANDOM_H
+#define COMMON_RANDOM_H
 
 #include <algorithm>
 #include <chrono>

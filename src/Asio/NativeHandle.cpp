@@ -2,14 +2,14 @@
 
 #include <ExtendedCpp/Asio/NativeHandle.h>
 
-#ifdef UNIX_IO
-    #include <unistd.h>
+#if defined(UNIX_IO) || defined(DARWIN_IO)
     #include <fcntl.h>
+    #include <unistd.h>
 #endif
 
 ExtendedCpp::Asio::NativeHandle::NativeHandle(const std::string& filename, const std::ios_base::openmode mode) noexcept
 {
-#ifdef UNIX_IO
+#if defined(UNIX_IO) || defined(DARWIN_IO)
     int flags{};
 
     if (mode & std::ios_base::in && mode & std::ios_base::out)
@@ -28,8 +28,8 @@ ExtendedCpp::Asio::NativeHandle::NativeHandle(const std::string& filename, const
     if (mode & std::ios_base::app)
         flags |= O_APPEND;
 
-    _handle = open(filename.c_str(), flags, 0666);
-#elif WINDOWS_IO
+    _handle = open(filename.c_str(), flags, 0666); // NOLINT(*-vararg, *-magic-numbers)
+#elif defined(WINDOWS_IO)
     DWORD access{};
 
     if (mode & std::ios_base::in)
@@ -66,11 +66,23 @@ ExtendedCpp::Asio::NativeHandle& ExtendedCpp::Asio::NativeHandle::operator=(Nati
     if (this == &other)
         return *this;
 
+    CloseHandle();
+
     _handle = std::exchange(other._handle, INVALID_HANDLE);
     return *this;
 }
 
 ExtendedCpp::Asio::NativeHandle::~NativeHandle() noexcept
+{
+    CloseHandle();
+}
+
+ExtendedCpp::Asio::NativeHandle::operator bool() const noexcept
+{
+    return _handle != INVALID_HANDLE;
+}
+
+void ExtendedCpp::Asio::NativeHandle::CloseHandle() noexcept
 {
     if (_handle == INVALID_HANDLE)
         return;
@@ -82,11 +94,6 @@ ExtendedCpp::Asio::NativeHandle::~NativeHandle() noexcept
 #endif
 
     _handle = INVALID_HANDLE;
-}
-
-ExtendedCpp::Asio::NativeHandle::operator bool() const noexcept
-{
-    return _handle != INVALID_HANDLE;
 }
 
 ExtendedCpp::Asio::NativeHandle::HandleType ExtendedCpp::Asio::NativeHandle::operator*() const noexcept

@@ -1,5 +1,5 @@
-#include <filesystem>
 #include <array>
+#include <filesystem>
 
 #include <gtest/gtest.h>
 
@@ -30,7 +30,7 @@ namespace AfstramTestsUtility
         if (bytes.empty())
             return {};
 
-        return { std::bit_cast<const char*>(bytes.data()), bytes.size() };
+        return { reinterpret_cast<const char*>(bytes.data()), bytes.size() }; // NOLINT(*-pro-type-reinterpret-cast)
     }
 }
 
@@ -38,7 +38,7 @@ namespace AfstramTestsUtility
 // ReadAsync(std::size_t count)
 // ============================================================
 
-TEST(AfstramTests, ReadAsyncCountTest1)
+TEST(AfstreamTests, ReadAsyncCountTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncCount1.txt", "Correct test.");
@@ -47,7 +47,7 @@ TEST(AfstramTests, ReadAsyncCountTest1)
     const auto task = []()-> ExtendedCpp::Task<std::vector<std::byte>>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncCount1.txt");
-        co_return co_await file.ReadAsync(7);
+        co_return co_await file.ReadAsync(7); // NOLINT(*-magic-numbers)
     }();
 
     const auto result = task.Result();
@@ -66,7 +66,7 @@ TEST(AfstreamTests, ReadAsyncCountTest2)
     const auto task = []()-> ExtendedCpp::Task<std::vector<std::byte>>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncCount2.txt");
-        co_return co_await file.ReadAsync(10);
+        co_return co_await file.ReadAsync(10); // NOLINT(*-magic-numbers)
     }();
 
     const auto result = task.Result();
@@ -76,7 +76,7 @@ TEST(AfstreamTests, ReadAsyncCountTest2)
     EXPECT_EQ(result.size(), 5);
 }
 
-TEST(AfstramTests, ReadAsyncCountTest3)
+TEST(AfstreamTests, ReadAsyncCountTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncCount3.txt", "Hello");
@@ -85,7 +85,7 @@ TEST(AfstramTests, ReadAsyncCountTest3)
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncCount3.txt", std::ios::out);
-        co_return co_await file.ReadAsync(5);
+        co_return co_await file.ReadAsync(5); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -96,7 +96,7 @@ TEST(AfstramTests, ReadAsyncCountTest3)
 // ReadAsync(std::span<std::byte> buffer)
 // ============================================================
 
-TEST(AfstramTests, ReadAsyncSpanTest1)
+TEST(AfstreamTests, ReadAsyncSpanTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpan1.txt", "Hello");
@@ -105,7 +105,7 @@ TEST(AfstramTests, ReadAsyncSpanTest1)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpan1.txt");
-        std::array<std::byte, 5> buffer{};
+        std::array<std::byte, 5> buffer{}; // NOLINT(*-magic-numbers)
         const auto read = co_await file.ReadAsync(std::span<std::byte>(buffer));
         EXPECT_EQ(AfstramTestsUtility::ToString(std::vector(buffer.begin(), buffer.end())), "Hello");
         co_return read;
@@ -115,7 +115,7 @@ TEST(AfstramTests, ReadAsyncSpanTest1)
     EXPECT_EQ(task.Result(), 5);
 }
 
-TEST(AfstramTests, ReadAsyncSpanTest2)
+TEST(AfstreamTests, ReadAsyncSpanTest2)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpan2.txt", "Hi");
@@ -124,7 +124,7 @@ TEST(AfstramTests, ReadAsyncSpanTest2)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpan2.txt");
-        std::array<std::byte, 10> buffer{};
+        std::array<std::byte, 10> buffer{}; // NOLINT(*-magic-numbers)
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer));
     }();
 
@@ -132,7 +132,7 @@ TEST(AfstramTests, ReadAsyncSpanTest2)
     EXPECT_EQ(task.Result(), 2);
 }
 
-TEST(AfstramTests, ReadAsyncSpanTest3)
+TEST(AfstreamTests, ReadAsyncSpanTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpan3.txt", "Hello");
@@ -141,7 +141,7 @@ TEST(AfstramTests, ReadAsyncSpanTest3)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpan3.txt", std::ios::out);
-        std::array<std::byte, 5> buffer{};
+        std::array<std::byte, 5> buffer{}; // NOLINT(*-magic-numbers)
         co_return co_await file.ReadAsync(std::span<std::byte>(buffer));
     }();
 
@@ -153,7 +153,7 @@ TEST(AfstramTests, ReadAsyncSpanTest3)
 // ReadAsync(std::span<std::byte> buffer, std::size_t count)
 // ============================================================
 
-TEST(AfstramTests, ReadAsyncSpanCountTest1)
+TEST(AfstreamTests, ReadAsyncSpanCountTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpanCount1.txt", "Hello world");
@@ -162,15 +162,15 @@ TEST(AfstramTests, ReadAsyncSpanCountTest1)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount1.txt");
-        std::array<std::byte, 10> buffer{};
-        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5);
+        std::array<std::byte, 10> buffer{}; // NOLINT(*-magic-numbers)
+        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
     EXPECT_EQ(task.Result(), 5);
 }
 
-TEST(AfstramTests, ReadAsyncSpanCountTest2)
+TEST(AfstreamTests, ReadAsyncSpanCountTest2)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpanCount2.txt", "Hello");
@@ -179,15 +179,15 @@ TEST(AfstramTests, ReadAsyncSpanCountTest2)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount2.txt");
-        std::array<std::byte, 5> buffer{};
-        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 100);
+        std::array<std::byte, 5> buffer{}; // NOLINT(*-magic-numbers)
+        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 100); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
     EXPECT_EQ(task.Result(), 5);
 }
 
-TEST(AfstramTests, ReadAsyncSpanCountTest3)
+TEST(AfstreamTests, ReadAsyncSpanCountTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSpanCount3.txt", "Hello");
@@ -196,8 +196,8 @@ TEST(AfstramTests, ReadAsyncSpanCountTest3)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSpanCount3.txt", std::ios::out);
-        std::array<std::byte, 5> buffer{};
-        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5);
+        std::array<std::byte, 5> buffer{}; // NOLINT(*-magic-numbers)
+        co_return co_await file.ReadAsync(std::span<std::byte>(buffer), 5); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -208,7 +208,7 @@ TEST(AfstramTests, ReadAsyncSpanCountTest3)
 // WriteAsync(std::span<const std::byte> buffer)
 // ============================================================
 
-TEST(AfstramTests, WriteAsyncSpanTest1)
+TEST(AfstreamTests, WriteAsyncSpanTest1)
 {
     // Average
     const std::string text = "Correct test.";
@@ -228,7 +228,7 @@ TEST(AfstramTests, WriteAsyncSpanTest1)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncSpan1.txt"), text);
 }
 
-TEST(AfstramTests, WriteAsyncSpanTest2)
+TEST(AfstreamTests, WriteAsyncSpanTest2)
 {
     // Average
     const std::string text = "Hello";
@@ -246,7 +246,7 @@ TEST(AfstramTests, WriteAsyncSpanTest2)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncSpan2.txt"), "Hello");
 }
 
-TEST(AfstramTests, WriteAsyncSpanTest3)
+TEST(AfstreamTests, WriteAsyncSpanTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncSpan3.txt", "Original");
@@ -268,7 +268,7 @@ TEST(AfstramTests, WriteAsyncSpanTest3)
 // WriteAsync(std::span<const std::byte> buffer, std::size_t count)
 // ============================================================
 
-TEST(AfstramTests, WriteAsyncSpanCountTest1)
+TEST(AfstreamTests, WriteAsyncSpanCountTest1)
 {
     // Average
     const std::string text = "Hello world";
@@ -278,7 +278,7 @@ TEST(AfstramTests, WriteAsyncSpanCountTest1)
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpanCount1.txt", std::ios::out | std::ios::trunc);
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
-        co_return co_await file.WriteAsync(buffer, 5);
+        co_return co_await file.WriteAsync(buffer, 5); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -286,7 +286,7 @@ TEST(AfstramTests, WriteAsyncSpanCountTest1)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncSpanCount1.txt"), "Hello");
 }
 
-TEST(AfstramTests, WriteAsyncSpanCountTest2)
+TEST(AfstreamTests, WriteAsyncSpanCountTest2)
 {
     // Average
     const std::string text = "Hello";
@@ -296,7 +296,7 @@ TEST(AfstramTests, WriteAsyncSpanCountTest2)
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncSpanCount2.txt", std::ios::out | std::ios::trunc);
         const auto buffer = std::as_bytes(std::span(text.data(), text.size()));
-        co_return co_await file.WriteAsync(buffer, 100);
+        co_return co_await file.WriteAsync(buffer, 100); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -304,7 +304,7 @@ TEST(AfstramTests, WriteAsyncSpanCountTest2)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncSpanCount2.txt"), "Hello");
 }
 
-TEST(AfstramTests, WriteAsyncSpanCountTest3)
+TEST(AfstreamTests, WriteAsyncSpanCountTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncSpanCount3.txt", "Original");
@@ -326,7 +326,7 @@ TEST(AfstramTests, WriteAsyncSpanCountTest3)
 // WriteAsync(std::string_view buffer)
 // ============================================================
 
-TEST(AfstramTests, WriteAsyncStringTest1)
+TEST(AfstreamTests, WriteAsyncStringTest1)
 {
     // Average
     constexpr std::string_view text = "Correct test.";
@@ -343,7 +343,7 @@ TEST(AfstramTests, WriteAsyncStringTest1)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncString1.txt"), text);
 }
 
-TEST(AfstramTests, WriteAsyncStringTest2)
+TEST(AfstreamTests, WriteAsyncStringTest2)
 {
     // Average
     constexpr std::string_view text;
@@ -360,7 +360,7 @@ TEST(AfstramTests, WriteAsyncStringTest2)
     EXPECT_TRUE(AfstramTestsUtility::ReadFile("WriteAsyncString2.txt").empty());
 }
 
-TEST(AfstramTests, WriteAsyncStringTest3)
+TEST(AfstreamTests, WriteAsyncStringTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncString3.txt", "Original");
@@ -380,7 +380,7 @@ TEST(AfstramTests, WriteAsyncStringTest3)
 // WriteAsync(std::string_view buffer, std::size_t count)
 // ============================================================
 
-TEST(AfstramTests, WriteAsyncStringCountTest1)
+TEST(AfstreamTests, WriteAsyncStringCountTest1)
 {
     // Average
     constexpr std::string_view text = "Hello world";
@@ -389,7 +389,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest1)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncStringCount1.txt", std::ios::out | std::ios::trunc);
-        co_return co_await file.WriteAsync(text, 5);
+        co_return co_await file.WriteAsync(text, 5); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -397,7 +397,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest1)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncStringCount1.txt"), "Hello");
 }
 
-TEST(AfstramTests, WriteAsyncStringCountTest2)
+TEST(AfstreamTests, WriteAsyncStringCountTest2)
 {
     // Average
     constexpr std::string_view text = "Hello";
@@ -406,7 +406,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest2)
     const auto task = [&]() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncStringCount2.txt", std::ios::out | std::ios::trunc);
-        co_return co_await file.WriteAsync(text, 100);
+        co_return co_await file.WriteAsync(text, 100); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -414,7 +414,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest2)
     EXPECT_EQ(AfstramTestsUtility::ReadFile("WriteAsyncStringCount2.txt"), "Hello");
 }
 
-TEST(AfstramTests, WriteAsyncStringCountTest3)
+TEST(AfstreamTests, WriteAsyncStringCountTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncStringCount3.txt", "Original");
@@ -423,7 +423,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest3)
     const auto task = []() -> ExtendedCpp::Task<std::streamsize>
     {
         ExtendedCpp::Asio::Afstream file("WriteAsyncStringCount3.txt", std::ios::in);
-        co_return co_await file.WriteAsync(std::string_view("Changed"), 7);
+        co_return co_await file.WriteAsync(std::string_view("Changed"), 7); // NOLINT(*-magic-numbers)
     }();
 
     // Assert
@@ -434,7 +434,7 @@ TEST(AfstramTests, WriteAsyncStringCountTest3)
 // ReadAllAsync()
 // ============================================================
 
-TEST(AfstramTests, ReadAllAsyncTest1)
+TEST(AfstreamTests, ReadAllAsyncTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAllAsync1.txt", "First line\nSecond line\n");
@@ -452,7 +452,7 @@ TEST(AfstramTests, ReadAllAsyncTest1)
     EXPECT_EQ(AfstramTestsUtility::ToString(result), "First line\nSecond line\n");
 }
 
-TEST(AfstramTests, ReadAllAsyncTest2)
+TEST(AfstreamTests, ReadAllAsyncTest2)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAllAsync2.txt", "Hello world");
@@ -461,7 +461,7 @@ TEST(AfstramTests, ReadAllAsyncTest2)
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
         ExtendedCpp::Asio::Afstream file("ReadAllAsync2.txt");
-        co_await file.ReadAsync(6);
+        co_await file.ReadAsync(6); // NOLINT(*-magic-numbers)
         co_return co_await file.ReadAllAsync();
     }();
 
@@ -471,7 +471,7 @@ TEST(AfstramTests, ReadAllAsyncTest2)
     EXPECT_EQ(AfstramTestsUtility::ToString(result), "world");
 }
 
-TEST(AfstramTests, ReadAllAsyncTest3)
+TEST(AfstreamTests, ReadAllAsyncTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAllAsync3.txt", "Hello");
@@ -491,7 +491,7 @@ TEST(AfstramTests, ReadAllAsyncTest3)
 // ReadLineAsync()
 // ============================================================
 
-TEST(AfstramTests, ReadLineAsyncTest1)
+TEST(AfstreamTests, ReadLineAsyncTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadLineAsync1.txt", "First line\nSecond line\n");
@@ -507,7 +507,7 @@ TEST(AfstramTests, ReadLineAsyncTest1)
     EXPECT_EQ(task.Result(), "First line");
 }
 
-TEST(AfstramTests, ReadLineAsyncTest2)
+TEST(AfstreamTests, ReadLineAsyncTest2)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadLineAsync2.txt", "Last line");
@@ -523,7 +523,7 @@ TEST(AfstramTests, ReadLineAsyncTest2)
     EXPECT_EQ(task.Result(), "Last line");
 }
 
-TEST(AfstramTests, ReadLineAsyncTest3)
+TEST(AfstreamTests, ReadLineAsyncTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadLineAsync3.txt", "Hello\n");
@@ -539,7 +539,7 @@ TEST(AfstramTests, ReadLineAsyncTest3)
     EXPECT_ANY_THROW(task.Result());
 }
 
-TEST(AfstramTests, ReadLineAsyncTest4)
+TEST(AfstreamTests, ReadLineAsyncTest4)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadLineAsync3.txt", "First line\nSecond line\nLast line");
@@ -568,7 +568,7 @@ TEST(AfstramTests, ReadLineAsyncTest4)
 // ReadTextAsync()
 // ============================================================
 
-TEST(AfstramTests, ReadTextAsyncTest1)
+TEST(AfstreamTests, ReadTextAsyncTest1)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadTextAsync1.txt", "First line\nSecond line\n");
@@ -584,7 +584,7 @@ TEST(AfstramTests, ReadTextAsyncTest1)
     EXPECT_EQ(task.Result(), "First line\nSecond line\n");
 }
 
-TEST(AfstramTests, ReadTextAsyncTest2)
+TEST(AfstreamTests, ReadTextAsyncTest2)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadTextAsync2.txt", "Hello world");
@@ -593,7 +593,7 @@ TEST(AfstramTests, ReadTextAsyncTest2)
     const auto task = []() -> ExtendedCpp::Task<std::string>
     {
         ExtendedCpp::Asio::Afstream file("ReadTextAsync2.txt");
-        co_await file.ReadAsync(6);
+        co_await file.ReadAsync(6); // NOLINT(*-magic-numbers)
         co_return co_await file.ReadTextAsync();
     }();
 
@@ -601,7 +601,7 @@ TEST(AfstramTests, ReadTextAsyncTest2)
     EXPECT_EQ(task.Result(), "world");
 }
 
-TEST(AfstramTests, ReadTextAsyncTest3)
+TEST(AfstreamTests, ReadTextAsyncTest3)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadTextAsync3.txt", "Hello");
@@ -621,7 +621,7 @@ TEST(AfstramTests, ReadTextAsyncTest3)
 // SynchronizesTests
 // ============================================================
 
-TEST(AfstramTests, ReadAsyncSynchronizesReadPosition)
+TEST(AfstreamTests, ReadAsyncSynchronizesReadPosition)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSynchronizesReadPosition.txt", "0123456789");
@@ -630,7 +630,7 @@ TEST(AfstramTests, ReadAsyncSynchronizesReadPosition)
     const auto task = []() -> ExtendedCpp::Task<std::vector<std::byte>>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncSynchronizesReadPosition.txt");
-        co_return co_await file.ReadAsync(5);
+        co_return co_await file.ReadAsync(5); // NOLINT(*-magic-numbers)
     }();
 
     const auto result = task.Result();
@@ -639,7 +639,7 @@ TEST(AfstramTests, ReadAsyncSynchronizesReadPosition)
     EXPECT_EQ(AfstramTestsUtility::ToString(result), "01234");
 }
 
-TEST(AfstramTests, ReadAsyncUpdatesTellg)
+TEST(AfstreamTests, ReadAsyncUpdatesTellg)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncUpdatesTellg.txt", "0123456789");
@@ -648,7 +648,7 @@ TEST(AfstramTests, ReadAsyncUpdatesTellg)
     const auto task = []() -> ExtendedCpp::Task<std::streamoff>
     {
         ExtendedCpp::Asio::Afstream file("ReadAsyncUpdatesTellg.txt");
-        co_await file.ReadAsync(5);
+        co_await file.ReadAsync(5); // NOLINT(*-magic-numbers)
         co_return file.tellg();
     }();
 
@@ -658,7 +658,7 @@ TEST(AfstramTests, ReadAsyncUpdatesTellg)
     EXPECT_EQ(result, 5);
 }
 
-TEST(AfstramTests, WriteAsyncUpdatesTellp)
+TEST(AfstreamTests, WriteAsyncUpdatesTellp)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncUpdatesTellp.txt", "0123456789");
@@ -677,7 +677,7 @@ TEST(AfstramTests, WriteAsyncUpdatesTellp)
     EXPECT_EQ(result, 5);
 }
 
-TEST(AfstramTests, ReadAsyncSynchronizesPositionAfterSeekg)
+TEST(AfstreamTests, ReadAsyncSynchronizesPositionAfterSeekg)
 {
     // Average
     AfstramTestsUtility::CreateFile("ReadAsyncSynchronizesPositionAfterSeekg.txt", "0123456789");
@@ -696,7 +696,7 @@ TEST(AfstramTests, ReadAsyncSynchronizesPositionAfterSeekg)
     EXPECT_EQ(AfstramTestsUtility::ToString(result), "456");
 }
 
-TEST(AfstramTests, WriteAsyncSynchronizesPositionAfterSeekp)
+TEST(AfstreamTests, WriteAsyncSynchronizesPositionAfterSeekp)
 {
     // Average
     AfstramTestsUtility::CreateFile("WriteAsyncSynchronizesPositionAfterSeekp.txt", "0123456789");

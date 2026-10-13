@@ -86,6 +86,14 @@ target_link_libraries(DI INTERFACE Reflection)
 
 add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
 add_library(ExtendedCpp::Asio ALIAS Asio)
+if (APPLE AND ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    target_compile_options(Asio PRIVATE -fblocks)
+    target_compile_definitions(Asio PUBLIC DARWIN_IO)
+elseif (UNIX OR APPLE AND NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    target_compile_definitions(Asio PUBLIC UNIX_IO)
+elseif (WIN32)
+    target_compile_definitions(Asio PUBLIC WINDOWS_IO)
+endif ()
 
 add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
 add_library(ExtendedCpp::Xml ALIAS Xml)
@@ -197,9 +205,9 @@ if (DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Reflection POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "$<TARGET_FILE:Reflection>"
-                "$<TARGET_FILE_DIR:DI-tests>")
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif ()
 endif ()
 

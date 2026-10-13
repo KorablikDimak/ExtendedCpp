@@ -1,9 +1,9 @@
-#ifndef Common_Concepts_H
-#define Common_Concepts_H
+#ifndef COMMON_CONCEPTS_H
+#define COMMON_CONCEPTS_H
 
-#include <utility>
+#include <concepts>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Concepts
 {
     template<typename T>

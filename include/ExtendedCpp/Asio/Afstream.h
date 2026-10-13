@@ -1,15 +1,15 @@
-#ifndef Asio_Afstream_H
-#define Asio_Afstream_H
+#ifndef ASIO_AFSTREAM_H
+#define ASIO_AFSTREAM_H
 
 #include <fstream>
 #include <vector>
 
-#include <ExtendedCpp/Task.h>
 #include <ExtendedCpp/Asio/FileIoAwaiter.h>
+#include <ExtendedCpp/Task.h>
 
 namespace ExtendedCpp::Asio
 {
-    class Afstream final : public std::fstream
+    class Afstream final : public std::fstream // NOLINT(*-multiple-inheritance)
     {
     public:
         explicit Afstream(const std::string& filename, openmode mode = in | out);

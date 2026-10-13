@@ -1,5 +1,5 @@
-#ifndef Xml_Xml_H
-#define Xml_Xml_H
+#ifndef XML_XML_H
+#define XML_XML_H
 
 #include <ExtendedCpp/Xml/pugixml.hpp>
 

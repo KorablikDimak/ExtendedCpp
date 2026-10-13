@@ -1,12 +1,12 @@
-#ifndef Json_Json_H
-#define Json_Json_H
+#ifndef JSON_JSON_H
+#define JSON_JSON_H
 
 #include <ExtendedCpp/Json/JsonMacros.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp
 {
-    typedef nlohmann::json Json;
+    using Json = nlohmann::json;
 }
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef Reflection_Reflection_H
-#define Reflection_Reflection_H
+#ifndef REFLECTION_REFLECTION_H
+#define REFLECTION_REFLECTION_H
 
 #include <optional>
 

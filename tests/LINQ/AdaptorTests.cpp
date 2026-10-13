@@ -544,18 +544,19 @@ TEST(AdaptorTests, CatchExceptionGeneratorTest)
 	// Average
 	const std::vector numbers = { 1, 2, 3, 4 };
 
+	auto generator = ExtendedCpp::LINQ::Generator(numbers) |
+		ExtendedCpp::LINQ::Select([](const int n)
+		{
+			if (n == 3)
+				throw std::invalid_argument("CatchExceptionGeneratorTest");
+			return n;
+		});
+
 	// Act
 	// Assert
 	try
 	{
-		auto _ =
-			ExtendedCpp::LINQ::Generator(numbers) |
-			ExtendedCpp::LINQ::Select([](const int n)
-			{
-				if (n == 2)
-					throw std::invalid_argument("CatchExceptionGeneratorTest");
-				return n;
-			}) |
+		auto _ = generator |
 			ExtendedCpp::LINQ::To<std::vector>();
 		ASSERT_TRUE(false);
 	}

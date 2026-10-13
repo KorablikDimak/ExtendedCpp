@@ -1,21 +1,15 @@
-#ifndef Asio_FileIoAwaiter_H
-#define Asio_FileIoAwaiter_H
+#ifndef ASIO_FILE_IO_AWAITER_H
+#define ASIO_FILE_IO_AWAITER_H
 
 #include <span>
 #include <variant>
-#include <memory>
 
-#if __APPLE__
-    #define UNIX_IO 1
-#elif __linux__
-    #define UNIX_IO 1
-#elif _WIN32
-    #define WINDOWS_IO 1
-#endif
-
-#if UNIX_IO
+#if defined(DARWIN_IO)
+    #include <dispatch/dispatch.h>
+#elif defined(UNIX_IO)
+    #include <memory>
     #include <aio.h>
-#elif WINDOWS_IO
+#elif defined(WINDOWS_IO)
     #include <windows.h>
 #endif
 
@@ -24,9 +18,9 @@
 
 namespace ExtendedCpp::Asio
 {
-#if UNIX_IO
+#if defined(UNIX_IO) || defined(DARWIN_IO)
     using OffsetType = off_t;
-#elif WINDOWS_IO
+#elif defined(WINDOWS_IO)
     using OffsetType = std::int64_t;
 #endif
 
@@ -54,12 +48,17 @@ namespace ExtendedCpp::Asio
             Write
         };
 
-        void Complete() noexcept;
+        [[nodiscard]]
+        bool IsEmptyBuffer() const noexcept;
 
-#if UNIX_IO
+#if defined(DARWIN_IO)
+        dispatch_queue_t _queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0);
+#elif defined(UNIX_IO)
+        void Complete() noexcept;
         static void CompletionCallback(sigval value) noexcept;
         std::unique_ptr<aiocb> _control = std::make_unique<aiocb>();
-#elif WINDOWS_IO
+#elif defined(WINDOWS_IO)
+        void Complete() noexcept;
         static DWORD WINAPI CompletionThread(void* parameter) noexcept;
         OVERLAPPED _overlapped{};
 #endif
