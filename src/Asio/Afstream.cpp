@@ -1,8 +1,11 @@
 #include <format>
 #include <algorithm>
 #include <array>
+#include <utility>
 
 #include <ExtendedCpp/Asio/Afstream.h>
+#include <ExtendedCpp/Asio/ReadFileAwaiter.h>
+#include <ExtendedCpp/Asio/WriteFileAwaiter.h>
 
 ExtendedCpp::Asio::Afstream::Afstream(const std::string& filename, const openmode mode) :
     std::fstream(filename, mode),
@@ -37,7 +40,7 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAsync
 
     const OffsetType position = GetReadPosition();
 
-    FileIoAwaiter ioOperation
+    ReadFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -58,7 +61,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(const 
 {
     const OffsetType position = GetReadPosition();
 
-    FileIoAwaiter ioOperation
+    ReadFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -79,7 +82,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::ReadAsync(
 {
     const OffsetType position = GetReadPosition();
 
-    FileIoAwaiter ioOperation
+    ReadFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -98,7 +101,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
 {
     const OffsetType position = GetWritePosition();
 
-    FileIoAwaiter ioOperation
+    WriteFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -119,7 +122,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(
 {
     const OffsetType position = GetWritePosition();
 
-    FileIoAwaiter ioOperation
+    WriteFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -138,7 +141,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(const
 {
     const OffsetType position = GetWritePosition();
 
-    FileIoAwaiter ioOperation
+    WriteFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -159,7 +162,7 @@ ExtendedCpp::Task<std::streamsize> ExtendedCpp::Asio::Afstream::WriteAsync(
 {
     const OffsetType position = GetWritePosition();
 
-    FileIoAwaiter ioOperation
+    WriteFileAwaiter ioOperation // NOLINT(*-const-correctness)
     {
         _nativeHandle,
         position,
@@ -185,7 +188,7 @@ ExtendedCpp::Task<std::vector<std::byte>> ExtendedCpp::Asio::Afstream::ReadAllAs
 
     while (true)
     {
-        FileIoAwaiter ioOperation
+        ReadFileAwaiter ioOperation // NOLINT(*-const-correctness)
         {
             _nativeHandle,
             currentPosition,
@@ -218,7 +221,7 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
 
     while (true)
     {
-        FileIoAwaiter ioOperation
+        ReadFileAwaiter ioOperation // NOLINT(*-const-correctness)
         {
             _nativeHandle,
             currentPosition,
@@ -232,12 +235,12 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
         else
             break;
 
-        const auto endOfLine = std::find(chunk.begin(), chunk.begin() + read, std::byte{'\n'});
-        const std::size_t lineLength = std::distance(chunk.begin(), endOfLine);
+        const std::byte* endOfLine = std::find(chunk.begin(), chunk.begin() + read, std::byte{'\n'});
+        const std::size_t lineLength = std::distance(chunk.cbegin(), endOfLine);
 
-        result.append(std::bit_cast<char*>(chunk.data()), lineLength);
+        result.append(reinterpret_cast<char*>(chunk.data()), lineLength);
 
-        if (lineLength < static_cast<std::size_t>(read))
+        if (std::cmp_less(lineLength, read))
         {
             currentPosition -= read - static_cast<OffsetType>(lineLength) - 1;
             break;
@@ -256,7 +259,7 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadTextAsync()
     if (bytes.empty())
         co_return {};
 
-    co_return std::string(std::bit_cast<const char*>(bytes.data()), bytes.size());
+    co_return std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size());
 }
 
 ExtendedCpp::Asio::OffsetType ExtendedCpp::Asio::Afstream::GetReadPosition()

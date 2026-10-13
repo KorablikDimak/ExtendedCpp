@@ -1,9 +1,6 @@
 #ifndef ASIO_FILE_IO_AWAITER_H
 #define ASIO_FILE_IO_AWAITER_H
 
-#include <span>
-#include <variant>
-
 #if defined(DARWIN_IO)
     #include <dispatch/dispatch.h>
 #elif defined(UNIX_IO)
@@ -24,11 +21,10 @@ namespace ExtendedCpp::Asio
     using OffsetType = std::int64_t;
 #endif
 
-    class FileIoAwaiter final : public IoAwaiter
+    class FileIoAwaiter : public IoAwaiter
     {
     public:
-        FileIoAwaiter(const NativeHandle& nativeHandle, OffsetType offset, std::span<std::byte> buffer) noexcept;
-        FileIoAwaiter(const NativeHandle& nativeHandle, OffsetType offset, std::span<const std::byte> buffer) noexcept;
+        FileIoAwaiter(const NativeHandle& nativeHandle, OffsetType offset) noexcept;
 
         FileIoAwaiter(const FileIoAwaiter& other) noexcept = delete;
         FileIoAwaiter(FileIoAwaiter&& other) noexcept = delete;
@@ -39,34 +35,20 @@ namespace ExtendedCpp::Asio
         ~FileIoAwaiter() noexcept override = default;
 
     protected:
-        void Start() noexcept override;
-
-    private:
-        enum class OperationType
-        {
-            Read,
-            Write
-        };
-
-        [[nodiscard]]
-        bool IsEmptyBuffer() const noexcept;
-
-#if defined(DARWIN_IO)
+    #if defined(DARWIN_IO)
         dispatch_queue_t _queue = dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0);
-#elif defined(UNIX_IO)
+    #elif defined(UNIX_IO)
         void Complete() noexcept;
         static void CompletionCallback(sigval value) noexcept;
         std::unique_ptr<aiocb> _control = std::make_unique<aiocb>();
-#elif defined(WINDOWS_IO)
+    #elif defined(WINDOWS_IO)
         void Complete() noexcept;
         static DWORD WINAPI CompletionThread(void* parameter) noexcept;
         OVERLAPPED _overlapped{};
-#endif
+    #endif
 
         const NativeHandle& _nativeHandle;
-        const std::variant<std::span<std::byte>, std::span<const std::byte>> _buffer;
         const OffsetType _offset;
-        const OperationType _operationType{};
     };
 }
 

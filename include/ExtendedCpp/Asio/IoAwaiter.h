@@ -6,7 +6,7 @@
 
 namespace ExtendedCpp::Asio
 {
-    class IoAwaiter // NOLINT(*-special-member-functions)
+    class IoAwaiter
     {
     public:
         virtual ~IoAwaiter() noexcept = default;

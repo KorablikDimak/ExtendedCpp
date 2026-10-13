@@ -3,13 +3,14 @@
 
 #include <fstream>
 #include <vector>
+#include <span>
 
-#include <ExtendedCpp/Asio/FileIoAwaiter.h>
 #include <ExtendedCpp/Task.h>
+#include <ExtendedCpp/Asio/FileIoAwaiter.h>
 
 namespace ExtendedCpp::Asio
 {
-    class Afstream final : public std::fstream // NOLINT(*-multiple-inheritance)
+    class Afstream final : public std::fstream
     {
     public:
         explicit Afstream(const std::string& filename, openmode mode = in | out);

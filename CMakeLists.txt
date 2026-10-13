@@ -66,7 +66,9 @@ set(Asio_SOURCE
         src/Asio/IoAwaiter.cpp
         src/Asio/FileIoAwaiter.cpp
         src/Asio/Afstream.cpp
-        src/Asio/NativeHandle.cpp)
+        src/Asio/NativeHandle.cpp
+        src/Asio/ReadFileAwaiter.cpp
+        src/Asio/WriteFileAwaiter.cpp)
 
 add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)

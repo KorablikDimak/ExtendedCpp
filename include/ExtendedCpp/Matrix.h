@@ -487,7 +487,7 @@ namespace ExtendedCpp
                 return std::nullopt;
 
             const auto [A, P] = decomposeResult.value();
-                return A.LUPDet(P);
+                return A.LupDet(P);
         }
 
         /// @brief Calculates the inverse of the matrix safely
