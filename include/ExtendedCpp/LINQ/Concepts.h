@@ -69,7 +69,7 @@ namespace ExtendedCpp::LINQ::Concepts
     };
 
     template<typename TCollection>
-    concept LinqCollection = std::decay_t<TCollection>::IsLinqCollection;
+    concept LinqCollection = std::decay_t<TCollection>::IS_LINQ_COLLECTION;
 
     template<typename TAdaptor, typename TLinqCollection>
     concept LinqAdaptor =

@@ -21,6 +21,7 @@
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 
 /// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
     /// @brief
@@ -32,13 +33,16 @@ namespace ExtendedCpp::LINQ
     {
     public:
         /// @brief
-        static constexpr bool IsLinqCollection = true;
+        static constexpr bool IS_LINQ_COLLECTION = true;
 
         /// @brief
         static constexpr bool NOTHROW = std::same_as<NothrowType, std::true_type>;
 
         /// @brief
         using FutureType = Future<TSource, NOTHROW>;
+
+        /// @brief
+        using value_type = TSource;
 
         /// @brief
         struct Iterator final

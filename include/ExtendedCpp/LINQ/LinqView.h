@@ -35,7 +35,7 @@ namespace ExtendedCpp::LINQ
         using value_type = typename TIterator::value_type;
 
         /// @brief
-        static constexpr bool IsLinqCollection = true;
+        static constexpr bool IS_LINQ_COLLECTION = true;
 
     private:
         TIterator _begin;

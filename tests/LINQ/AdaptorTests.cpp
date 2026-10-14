@@ -145,81 +145,81 @@ TEST(AdaptorTests, ConvertLinqContainerToStdContainerTest)
         result9.pop();
     }
 }
-/*
+
 TEST(AdaptorTests, ConvertLinqGeneratorToStdContainerTest)
 {
     // Average
     const std::vector data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
     // Act
-    const auto result1_1 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::vector>();
-    const auto result1_2 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::list>();
-    const auto result1_3 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::forward_list>();
-    const auto result1_4 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::set>();
-    const auto result1_5 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::unordered_set>();
-    auto result1_6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue>();
-    const auto result1_7 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::deque>();
-    auto result1_8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue>();
-    auto result1_9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack>();
-    const auto result1_10 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::ToArray<16>();
+    const auto result1 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::vector>();
+    const auto result2 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::list>();
+    const auto result3 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::forward_list>();
+    const auto result4 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::set>();
+    const auto result5 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::unordered_set>();
+    auto result6 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::queue>();
+    const auto result7 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::deque>();
+    auto result8 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::priority_queue>();
+    auto result9 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::To<std::stack>();
+    const auto result10 = ExtendedCpp::LINQ::Generator(data) | ExtendedCpp::LINQ::ToArray<16>();
 
     // Assert
-    ASSERT_EQ(result1_1.size(), data.size());
-    ASSERT_EQ(result1_2.size(), data.size());
-    ASSERT_EQ(result1_4.size(), data.size());
-    ASSERT_EQ(result1_5.size(), data.size());
-    ASSERT_EQ(result1_6.size(), data.size());
-    ASSERT_EQ(result1_7.size(), data.size());
-    ASSERT_EQ(result1_8.size(), data.size());
-    ASSERT_EQ(result1_9.size(), data.size());
-    ASSERT_EQ(result1_10.size(), data.size());
+    ASSERT_EQ(result1.size(), data.size());
+    ASSERT_EQ(result2.size(), data.size());
+    ASSERT_EQ(result4.size(), data.size());
+    ASSERT_EQ(result5.size(), data.size());
+    ASSERT_EQ(result6.size(), data.size());
+    ASSERT_EQ(result7.size(), data.size());
+    ASSERT_EQ(result8.size(), data.size());
+    ASSERT_EQ(result9.size(), data.size());
+    ASSERT_EQ(result10.size(), data.size());
 
     for (std::size_t i = 0; i < data.size(); ++i)
     {
-        ASSERT_EQ(data[i],result1_1[i]);
-        ASSERT_EQ(data[i],result1_7[i]);
-        ASSERT_EQ(data[i],result1_10[i]);
+        ASSERT_EQ(data[i],result1[i]);
+        ASSERT_EQ(data[i],result7[i]);
+        ASSERT_EQ(data[i],result10[i]);
     }
 
     std::size_t i = 0;
-    for (const int value : result1_2)
+    for (const int value : result2)
     {
         ASSERT_EQ(data[i], value);
         ++i;
     }
 
     i = 0;
-    for (const int value : result1_3)
+    for (const int value : result3)
     {
         ASSERT_EQ(data[i], value);
         ++i;
     }
 
-    for (const int value : result1_4)
+    for (const int value : result4)
         ASSERT_TRUE(ExtendedCpp::LINQ::From(data).Contains(value));
 
-    for (const int value : result1_5)
+    for (const int value : result5)
         ASSERT_TRUE(ExtendedCpp::LINQ::From(data).Contains(value));
 
     for (const int value : data)
     {
-        ASSERT_EQ(value, result1_6.front());
-        result1_6.pop();
+        ASSERT_EQ(value, result6.front());
+        result6.pop();
     }
 
     for (const int value : ExtendedCpp::LINQ::From(data).Reverse())
     {
-        ASSERT_EQ(value, result1_8.top());
-        result1_8.pop();
+        ASSERT_EQ(value, result8.top());
+        result8.pop();
     }
 
     for (const int value : ExtendedCpp::LINQ::From(data).Reverse())
     {
-        ASSERT_EQ(value, result1_9.top());
-        result1_9.pop();
+        ASSERT_EQ(value, result9.top());
+        result9.pop();
     }
 }
-*/
+
 TEST(AdaptorTests, ConvertLinqViewToStdContainerTest)
 {
     // Average

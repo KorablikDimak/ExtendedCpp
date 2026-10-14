@@ -47,7 +47,7 @@ namespace ExtendedCpp::LINQ
         using const_reverse_iterator = typename std::vector<TSource>::const_reverse_iterator;
 
         /// @brief
-        static constexpr bool IsLinqCollection = true;
+        static constexpr bool IS_LINQ_COLLECTION = true;
 
         /// @brief Copy data from vector into LINQ conainer
         /// @param collection 
