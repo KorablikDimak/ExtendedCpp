@@ -4,14 +4,15 @@
 #include <ExtendedCpp/LINQ/LinqContainer.h>
 #include <ExtendedCpp/LINQ/LinqGenerator.h>
 #include <ExtendedCpp/LINQ/LinqView.h>
+#include <ExtendedCpp/LINQ/YieldForeach.h>
 
 /// @brief
 // ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TCollection 
+    /// @brief
+    /// @tparam TCollection
+    /// @tparam TSource
     /// @param collection 
     /// @return
     template<Concepts::InputIterable TCollection, typename TSource = typename TCollection::value_type>
@@ -21,9 +22,9 @@ namespace ExtendedCpp::LINQ
             (std::vector<TSource>(collection.begin(), collection.end()));
     }
 
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TIterator 
+    /// @brief
+    /// @tparam TIterator
+    /// @tparam TSource
     /// @param begin 
     /// @param end 
     /// @return
@@ -200,47 +201,106 @@ namespace ExtendedCpp::LINQ
             (std::vector<std::pair<TKey, TValue>>(collection.begin(), collection.end()));
     }
 
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TCollection 
+    /// @brief
+    /// @tparam TCollection
+    template<Concepts::InputIterable TCollection>
+    requires std::copy_constructible<TCollection>
+    class CollectionFactory final
+    {
+    public:
+        /// @brief
+        using TSource = typename std::decay_t<TCollection>::value_type;
+
+        /// @brief
+        /// @param collection
+        explicit CollectionFactory(TCollection collection) noexcept :
+            _collection(std::move(collection)) {}
+
+        /// @brief
+        /// @return
+        auto operator()() const
+        {
+            return YieldForeach(_collection);
+        }
+
+    private:
+        TCollection _collection;
+    };
+
+    /// @brief
+    /// @tparam TIterator
+    template<std::input_iterator TIterator>
+    class IteratorFactory final
+    {
+    public:
+        /// @brief
+        using TSource = typename std::iterator_traits<TIterator>::value_type;
+
+        /// @brief
+        /// @param begin
+        /// @param end
+        explicit IteratorFactory(TIterator begin, TIterator end) noexcept :
+            _begin(std::move(begin)),
+            _end(std::move(end)) {}
+
+        /// @brief
+        /// @return
+        auto operator()() const
+        {
+            return YieldForeach(_begin, _end);
+        }
+
+    private:
+        TIterator _begin;
+        TIterator _end;
+    };
+
+    /// @brief
+    /// @tparam TCollection
+    /// @tparam TSource
     /// @param collection 
     /// @return
     template<Concepts::InputIterable TCollection, typename TSource = typename std::decay_t<TCollection>::value_type>
     requires (!Concepts::IsPair<TSource>)
-    LinqGenerator<TSource, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
-    Generator(TCollection&& collection) noexcept
+    auto Generator(TCollection&& collection) noexcept
     {
-        return LinqGenerator<TSource, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
-            (std::forward<TCollection>(collection));
+        return LinqGenerator<TSource, CollectionFactory<std::decay_t<TCollection>>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+            (CollectionFactory<std::decay_t<TCollection>>(std::forward<TCollection>(collection)));
     }
 
+    /// @brief
+    /// @tparam TCollection
+    /// @tparam TSource
+    /// @tparam TKey
+    /// @tparam TValue
+    /// @param collection
+    /// @return
     template<Concepts::InputIterable TCollection,
              Concepts::IsPair TSource = typename std::decay_t<TCollection>::value_type,
              typename TKey = std::remove_const_t<typename PairTraits<TSource>::FirstType>,
              typename TValue = typename PairTraits<TSource>::SecondType>
-    LinqGenerator<std::pair<TKey, TValue>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
-    Generator(TCollection&& collection) noexcept
+    auto Generator(TCollection&& collection) noexcept
     {
-        return LinqGenerator<std::pair<TKey, TValue>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
-            (std::forward<TCollection>(collection));
+        return LinqGenerator<std::pair<TKey, TValue>, CollectionFactory<std::decay_t<TCollection>>, std::integral_constant<bool, Concepts::IsNothrowIterable<TCollection>>>
+            (CollectionFactory<std::decay_t<TCollection>>(std::forward<TCollection>(collection)));
     }
 
-    /// @brief 
-    /// @tparam TSource 
-    /// @tparam TIterator 
+    /// @brief
+    /// @tparam TIterator
+    /// @tparam TSource
+    /// @tparam NothrowIterable
     /// @param begin 
     /// @param end 
     /// @return
     template<std::input_iterator TIterator,
              typename TSource = typename std::iterator_traits<TIterator>::value_type,
              bool NothrowIterable = ++std::declval<TIterator>()>
-    LinqGenerator<TSource, std::integral_constant<bool, NothrowIterable>>
-    Generator(TIterator&& begin, TIterator&& end) noexcept
+    auto Generator(TIterator&& begin, TIterator&& end) noexcept
     {
-        return LinqGenerator<TSource, std::integral_constant<bool, NothrowIterable>>
-            (std::forward<TIterator>(begin), std::forward<TIterator>(end));
+        return LinqGenerator<TSource, IteratorFactory<std::decay_t<TIterator>>, std::integral_constant<bool, NothrowIterable>>
+            (IteratorFactory<std::decay_t<TIterator>>(std::forward<TIterator>(begin), std::forward<TIterator>(end)));
     }
-
+/*
     /// @brief 
     /// @tparam TSource 
     /// @param collection 
@@ -354,10 +414,10 @@ namespace ExtendedCpp::LINQ
 
         return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
     }
-
+*/
     /// @brief
-    /// @tparam TIterator
     /// @tparam TCollection
+    /// @tparam TIterator
     /// @param collection
     /// @return
     template<Concepts::ForwardIterable TCollection, std::forward_iterator TIterator = typename std::decay_t<TCollection>::const_iterator>
@@ -368,9 +428,9 @@ namespace ExtendedCpp::LINQ
             IteratorWrapper<TIterator>(collection.cend(), collection.cend()));
     }
 
-    /// @brief 
-    /// @tparam TIterator 
-    /// @tparam TCollection 
+    /// @brief
+    /// @tparam TCollection
+    /// @tparam TIterator
     /// @param collection 
     /// @return
     template<Concepts::ForwardIterable TCollection, std::forward_iterator TIterator = typename std::decay_t<TCollection>::iterator>
@@ -394,6 +454,7 @@ namespace ExtendedCpp::LINQ
             IteratorWrapper<TIterator>(end, end));
     }
 
+    /// @brief
     template<template<typename...> typename>
     struct To;
 

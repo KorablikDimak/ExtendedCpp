@@ -242,16 +242,14 @@ if (Serialization_Json_BUILD_TESTS OR BUILD_ALL_TESTS)
         add_custom_command(
                 TARGET Serialization_Json POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
-    endif ()
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Serialization_Json${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Serialization_Json${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-    if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Serialization_Json POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Json${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Json${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif ()
 endif ()
 

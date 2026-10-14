@@ -90,7 +90,7 @@ void ExtendedCpp::Asio::NativeHandle::CloseHandle() noexcept
 #ifdef UNIX_IO
     close(_handle);
 #elif WINDOWS_IO
-    CloseHandle(_handle);
+    ::CloseHandle(_handle);
 #endif
 
     _handle = INVALID_HANDLE;

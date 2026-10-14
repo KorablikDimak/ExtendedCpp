@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <format>
 #include <future>
 #include <optional>
@@ -503,7 +504,7 @@ namespace ExtendedCpp
                 return std::nullopt;
 
             const auto [A, P] = decomposeResult.value();
-            return A.LUPInvert(P);
+            return A.LupInvert(P);
         }
 
         /// @brief Calculates the inverse of the matrix
@@ -520,7 +521,7 @@ namespace ExtendedCpp
                 throw std::domain_error("Inverse matrix cannot be calculated.");
 
             const auto [A, P] = decomposeResult.value();
-            return A.LUPInvert(P);
+            return A.LupInvert(P);
         }
 
         /// @brief Calculates the inverse of the matrix using the bitwise NOT operator

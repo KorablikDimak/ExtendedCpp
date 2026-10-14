@@ -1,67 +1,52 @@
-#ifndef LINQ_Future_H
-#define LINQ_Future_H
+// ReSharper disable CppMemberFunctionMayBeStatic
+#ifndef LINQ_FUTURE_H
+#define LINQ_FUTURE_H
 
 #include <coroutine>
 #include <exception>
-#include <iostream>
+#include <optional>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::LINQ
 {
     /// @brief
     /// @tparam TSource
     /// @tparam NothrowCoroutine
-    template<typename TSource, typename NothrowCoroutine = std::false_type>
+    template<std::copyable TSource, bool NothrowCoroutine>
     class Future final
     {
     private:
-        /// @brief 
         struct Promise final
         {
-            /// @brief 
-            /// @return 
             [[nodiscard]]
-            std::suspend_never initial_suspend() const noexcept { return {}; }
+            std::suspend_always initial_suspend() const noexcept { return {}; }
 
-            /// @brief 
-            /// @return 
             [[nodiscard]]
             std::suspend_always final_suspend() const noexcept { return {}; }
-            
-            /// @brief 
-            void return_void() const noexcept {}
 
-            /// @brief 
-            void unhandled_exception() const
+            void unhandled_exception() noexcept
             {
-                std::rethrow_exception(std::current_exception());
+                Exception = std::current_exception();
             }
 
-            /// @brief 
-            /// @param value 
-            /// @return 
-            std::suspend_always yield_value(TSource value) noexcept
+            void return_void() const noexcept {}
+
+            template<typename TValue>
+            requires std::constructible_from<TSource, TValue&&>
+            std::suspend_always yield_value(TValue&& value)
+            noexcept(std::is_nothrow_constructible_v<TSource, TValue&&>)
             {
-                _value = std::move(value);
+                Value.emplace(std::forward<TValue>(value));
                 return {};
             }
 
-            /// @brief 
-            /// @return 
             Future get_return_object() noexcept
             {
                 return Future(std::coroutine_handle<Promise>::from_promise(*this));
             }
 
-            /// @brief 
-            /// @return 
-            TSource Value() const noexcept
-            {
-                return _value;
-            }
-
-        private:
-            TSource _value;
+            std::optional<TSource> Value;
+            std::exception_ptr Exception;
         };
 
     public:
@@ -69,68 +54,40 @@ namespace ExtendedCpp::LINQ
         using promise_type = Promise;
 
         /// @brief 
-        /// @param handle 
+        /// @param handle
         explicit Future(std::coroutine_handle<Promise> handle) noexcept :
-            _refCount(new std::size_t(1)),
             _handle(handle) {}
 
         /// @brief
         /// @param other
-        Future(const Future& other) noexcept :
-            _refCount(other._refCount),
-            _handle(other._handle)
-        {
-            ++*_refCount;
-        }
+        Future(const Future& other) noexcept = delete;
 
-        /// @brief
+        ///
         /// @param other
         Future(Future&& other) noexcept :
-            _refCount(other._refCount),
-            _handle(other._handle)
-        {
-            ++*_refCount;
-            other.Release();
-        }
+            _handle(std::exchange(other._handle, {})) {}
 
         /// @brief
         /// @param other
         /// @return
-        Future& operator=(const Future& other) noexcept
-        {
-            if (this == &other)
-                return *this;
-
-            Release();
-
-            _refCount = other._refCount;
-            _handle = other._handle;
-            ++*_refCount;
-
-            return *this;
-        }
+        Future& operator=(const Future& other) noexcept = delete;
 
         /// @brief
         /// @param other
         /// @return
         Future& operator=(Future&& other) noexcept
         {
-            if (this == &other)
-                return *this;
-
-            Release();
-
-            _refCount = other._refCount;
-            _handle = other._handle;
-            ++*_refCount;
-
-            other.Release();
+            if (this != &other)
+            {
+                Release();
+                _handle = std::exchange(other._handle, {});
+            }
 
             return *this;
         }
 
-        /// @brief 
-        ~Future()
+        /// @brief
+        ~Future() noexcept
         {
             Release();
         }
@@ -138,57 +95,52 @@ namespace ExtendedCpp::LINQ
         /// @brief
         explicit operator bool() const noexcept
         {
-            return !_handle.done();
+            return _handle && !_handle.done();
         }
 
         /// @brief 
-        /// @return 
-        TSource Value() const noexcept
+        /// @return
+        const TSource& Value() const noexcept
         {
-            if (!_handle.done())
-                return _handle.promise().Value();
-
-            if constexpr (std::is_default_constructible_v<TSource>)
-                return {};
-            else
-                std::terminate();
+            return _handle.promise().Value.value();
         }
 
         /// @brief 
-        /// @return 
-        TSource Next()
-        noexcept(std::same_as<NothrowCoroutine, std::true_type>)
+        /// @return
+        bool Next() noexcept(NothrowCoroutine)
         {
-            if (!_handle.done())
+            if (!_handle || _handle.done())
             {
-                TSource value = _handle.promise().Value();
-                _handle.resume();
-                return value;
+                if constexpr(NothrowCoroutine)
+                    RethrowIfNeeded();
+                return false;
             }
 
-            if constexpr (std::is_default_constructible_v<TSource>)
-                return {};
-            else
-                std::terminate();
+            _handle.promise().Value.reset();
+            _handle.resume();
+
+            if constexpr(!NothrowCoroutine)
+                RethrowIfNeeded();
+
+            return _handle.promise().Value.has_value();
         }
 
     private:
+        void RethrowIfNeeded() const
+        {
+            if (_handle && _handle.promise().Exception)
+                std::rethrow_exception(_handle.promise().Exception);
+        }
+
         void Release() noexcept
         {
-            if (_refCount)
+            if (_handle)
             {
-                if (*_refCount == 1)
-                {
-                    delete _refCount;
-                    _refCount = nullptr;
-                    _handle.destroy();
-                }
-                else
-                    --*_refCount;
+                _handle.destroy();
+                _handle = {};
             }
         }
 
-        std::size_t* _refCount;
         std::coroutine_handle<Promise> _handle;
     };
 }

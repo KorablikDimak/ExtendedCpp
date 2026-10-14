@@ -7,6 +7,7 @@
     #include <memory>
     #include <aio.h>
 #elif defined(WINDOWS_IO)
+    #include <cstdint>
     #include <windows.h>
 #endif
 

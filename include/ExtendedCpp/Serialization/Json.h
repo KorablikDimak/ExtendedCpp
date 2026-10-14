@@ -7,16 +7,18 @@
 namespace ExtendedCpp::Serialization::Json
 {
     template<Reflection::Concepts::HasMetaInfo TTarget>
-    TTarget To(const ExtendedCpp::Json& json)
+    TTarget To(const ExtendedCpp::Json&)
     {
-
+        std::terminate();
     }
 
     template<Reflection::Concepts::HasMetaInfo TObject>
-    ExtendedCpp::Json From(const TObject& object)
+    ExtendedCpp::Json From(const TObject&)
     {
-
+        std::terminate();
     }
+
+    void foo();
 }
 
 #endif

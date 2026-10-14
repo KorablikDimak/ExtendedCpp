@@ -1,6 +1,6 @@
-#include <format>
 #include <algorithm>
 #include <array>
+#include <format>
 #include <utility>
 
 #include <ExtendedCpp/Asio/Afstream.h>
@@ -235,8 +235,8 @@ ExtendedCpp::Task<std::string> ExtendedCpp::Asio::Afstream::ReadLineAsync()
         else
             break;
 
-        const std::byte* endOfLine = std::find(chunk.begin(), chunk.begin() + read, std::byte{'\n'});
-        const std::size_t lineLength = std::distance(chunk.cbegin(), endOfLine);
+        const auto endOfLine = std::find(chunk.begin(), chunk.begin() + read, std::byte{'\n'});
+        const std::size_t lineLength = std::distance(chunk.begin(), endOfLine);
 
         result.append(reinterpret_cast<char*>(chunk.data()), lineLength);
 

@@ -16,16 +16,17 @@
 // ReSharper disable CppInconsistentNaming
 // ReSharper disable CppNonExplicitConvertingConstructor
 // ReSharper disable CppNonExplicitConversionOperator
-// NOLINTBEGIN(*-explicit-constructor, *-explicit-conversions, *-runtime-int)
+// NOLINTBEGIN(*-explicit-constructor, *-explicit-conversions, *-runtime-int, *-use-enum-class)
 
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
-#include <exception>
-#include <iterator>
-#include <iosfwd>
-#include <string>
 #include <array>
+#include <cstdint>
+#include <exception>
+#include <iosfwd>
+#include <iterator>
+#include <string>
 
 #define PUGIXML_TEXT(t) t
 #define PUGIXML_CHAR char
@@ -43,7 +44,7 @@ namespace pugi
 namespace pugi
 {
     // Tree node types
-    enum xml_node_type
+    enum xml_node_type : std::uint8_t
     {
         node_null,          // Empty (null) node handle
         node_document,      // A document tree's absolute root
@@ -121,7 +122,7 @@ namespace pugi
     constexpr unsigned int parse_full = parse_default | parse_pi | parse_comments | parse_declaration | parse_doctype;
 
     // These flags determine the encoding of input data for XML document
-    enum xml_encoding
+    enum xml_encoding : std::uint8_t
     {
         encoding_auto,      // Auto-detect input encoding using BOM or < / <? detection; use UTF8 if BOM is not found
         encoding_utf8,      // UTF8 encoding
@@ -342,9 +343,9 @@ namespace pugi
         [[nodiscard]]
         bool set_value(bool rhs) const;
         [[nodiscard]]
-        bool set_value(std::int64_t rhs) const;
+        bool set_value(long long rhs) const;
         [[nodiscard]]
-        bool set_value(std::uint64_t rhs) const;
+        bool set_value(unsigned long long rhs) const;
 
         // Set attribute value (equivalent to set_value without error checking)
         xml_attribute& operator=(const char_t* rhs);
@@ -355,8 +356,8 @@ namespace pugi
         xml_attribute& operator=(double rhs);
         xml_attribute& operator=(float rhs);
         xml_attribute& operator=(bool rhs);
-        xml_attribute& operator=(std::int64_t rhs);
-        xml_attribute& operator=(std::uint64_t rhs);
+        xml_attribute& operator=(long long rhs);
+        xml_attribute& operator=(unsigned long long rhs);
 
         // Get next/previous attribute in the attribute list of the parent node
         [[nodiscard]]
@@ -754,9 +755,9 @@ namespace pugi
         [[nodiscard]]
         bool set(bool rhs) const;
         [[nodiscard]]
-        bool set(std::int64_t rhs) const;
+        bool set(long long rhs) const;
         [[nodiscard]]
-        bool set(std::uint64_t rhs) const;
+        bool set(unsigned long long rhs) const;
 
         // Set text (equivalent to set without error checking)
         xml_text& operator=(const char_t* rhs);
@@ -767,8 +768,8 @@ namespace pugi
         xml_text& operator=(double rhs);
         xml_text& operator=(float rhs);
         xml_text& operator=(bool rhs);
-        xml_text& operator=(std::int64_t rhs);
-        xml_text& operator=(std::uint64_t rhs);
+        xml_text& operator=(long long rhs);
+        xml_text& operator=(unsigned long long rhs);
 
         // Get the data node (node_pcdata or node_cdata) for this object
         [[nodiscard]]
@@ -925,7 +926,7 @@ namespace pugi
     };
 
     // Parsing status, returned as part of xml_parse_result object
-    enum xml_parse_status
+    enum xml_parse_status : std::uint8_t
     {
         status_ok = 0,              // No error
 
@@ -1050,7 +1051,7 @@ namespace pugi
     };
 
     // XPath query return type
-    enum xpath_value_type
+    enum xpath_value_type : std::uint8_t
     {
         xpath_type_none,      // Unknown type (query failed to compile)
         xpath_type_node_set,  // Node set (xpath_node_set)
@@ -1312,7 +1313,7 @@ namespace pugi
     {
     public:
         // Collection type
-        enum type_t
+        enum type_t : std::uint8_t
         {
             type_unsorted,          // Not ordered
             type_sorted,            // Sorted by document order (ascending)
@@ -1429,4 +1430,4 @@ namespace pugi
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// NOLINTEND(*-explicit-constructor, *-explicit-conversions, *-runtime-int)
+// NOLINTEND(*-explicit-constructor, *-explicit-conversions, *-runtime-int, *-use-enum-class)

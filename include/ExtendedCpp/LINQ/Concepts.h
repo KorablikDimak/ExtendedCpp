@@ -3,7 +3,7 @@
 
 #include <utility>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::LINQ::Concepts
 {
     template<typename TPair>
@@ -91,8 +91,9 @@ namespace ExtendedCpp::LINQ::Concepts
 
     template<typename TCollection>
     concept IsNothrowIterable =
-        noexcept(++std::declval<std::decay_t<TCollection>>().begin()) ||
-        std::is_pointer_v<typename std::decay_t<TCollection>::iterator>;
+        (noexcept(++std::declval<std::decay_t<TCollection>>().begin()) &&
+            noexcept(*std::declval<std::decay_t<TCollection>>().begin())) ||
+                std::is_pointer_v<typename std::decay_t<TCollection>::iterator>;
 }
 
 #endif
