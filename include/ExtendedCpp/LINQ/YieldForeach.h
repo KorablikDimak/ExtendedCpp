@@ -25,6 +25,7 @@ namespace ExtendedCpp::LINQ
         auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
             co_yield element;
+        co_return;
     }
 
     template<Concepts::InputIterable TCollection,
@@ -38,6 +39,7 @@ namespace ExtendedCpp::LINQ
         auto inner = std::forward<TCollection>(collection);
         for (auto&& element : inner)
             co_yield element;
+        co_return;
     }
 
     /// @brief 
@@ -54,6 +56,7 @@ namespace ExtendedCpp::LINQ
     {
         for (auto it = begin; it != end; ++it)
             co_yield *it;
+        co_return;
     }
 }
 

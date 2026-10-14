@@ -27,20 +27,34 @@ else ()
 endif ()
 
 option(BUILD_ALL_TESTS "Build all tests for ExtendedCpp" OFF)
-option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
-option(Events_BUILD_TESTS "Build Events library tests" OFF)
-option(Json_BUILD_TESTS "Build Json library tests" OFF)
-option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
-option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
+option(Asio_BUILD_TESTS "Build Asio library tests" OFF)
 option(Common_BUILD_TESTS "Build Common library tests" OFF)
 option(DI_BUILD_TESTS "Build DI library tests" OFF)
-option(Asio_BUILD_TESTS "Build Asio library tests" OFF)
+option(Events_BUILD_TESTS "Build Events library tests" OFF)
+option(InfoLog_BUILD_TESTS "Build InfoLog library tests" OFF)
+option(Json_BUILD_TESTS "Build Json library tests" OFF)
+option(LINQ_BUILD_TESTS "Build LINQ library tests" OFF)
+option(Reflection_BUILD_TESTS "Build Reflection library tests" OFF)
+option(Serialization_Json_BUILD_TESTS "Build Serialization_Json library tests" OFF)
 
-option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
+option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 
-set(Xml_SOURCE
-        src/Xml/pugixml.cpp)
+set(Asio_SOURCE
+        src/Asio/IoAwaiter.cpp
+        src/Asio/FileIoAwaiter.cpp
+        src/Asio/Afstream.cpp
+        src/Asio/NativeHandle.cpp
+        src/Asio/ReadFileAwaiter.cpp
+        src/Asio/WriteFileAwaiter.cpp)
+
+set(InfoLog_SOURCE
+        src/InfoLog/FileSender.cpp
+        src/InfoLog/ISender.cpp
+        src/InfoLog/Logger.cpp
+        src/InfoLog/LoggerFactory.cpp
+        src/InfoLog/Parser.cpp
+        src/InfoLog/ConsoleSender.cpp)
 
 set(Reflection_SOURCE
         src/Reflection/MemberInfo.cpp
@@ -54,37 +68,11 @@ set(Reflection_SOURCE
         src/Reflection/StaticMethodInfo.cpp
         src/Reflection/CollectionFieldInfo.cpp)
 
-set(InfoLog_SOURCE
-        src/InfoLog/FileSender.cpp
-        src/InfoLog/ISender.cpp
-        src/InfoLog/Logger.cpp
-        src/InfoLog/LoggerFactory.cpp
-        src/InfoLog/Parser.cpp
-        src/InfoLog/ConsoleSender.cpp)
+set(Serialisation_Json_SOURCE
+        src/Serialization/Json.cpp)
 
-set(Asio_SOURCE
-        src/Asio/IoAwaiter.cpp
-        src/Asio/FileIoAwaiter.cpp
-        src/Asio/Afstream.cpp
-        src/Asio/NativeHandle.cpp
-        src/Asio/ReadFileAwaiter.cpp
-        src/Asio/WriteFileAwaiter.cpp)
-
-add_library(LINQ INTERFACE)
-add_library(ExtendedCpp::LINQ ALIAS LINQ)
-
-add_library(Events INTERFACE)
-add_library(ExtendedCpp::Events ALIAS Events)
-
-add_library(Json INTERFACE)
-add_library(ExtendedCpp::Json ALIAS Json)
-
-add_library(Common INTERFACE)
-add_library(ExtendedCpp::Common ALIAS Common)
-
-add_library(DI INTERFACE)
-add_library(ExtendedCpp::DI ALIAS DI)
-target_link_libraries(DI INTERFACE Reflection)
+set(Xml_SOURCE
+        src/Xml/pugixml.cpp)
 
 add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
 add_library(ExtendedCpp::Asio ALIAS Asio)
@@ -97,8 +85,25 @@ elseif (WIN32)
     target_compile_definitions(Asio PUBLIC WINDOWS_IO)
 endif ()
 
-add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
-add_library(ExtendedCpp::Xml ALIAS Xml)
+add_library(Common INTERFACE)
+add_library(ExtendedCpp::Common ALIAS Common)
+
+add_library(DI INTERFACE)
+add_library(ExtendedCpp::DI ALIAS DI)
+target_link_libraries(DI INTERFACE Reflection)
+
+add_library(Events INTERFACE)
+add_library(ExtendedCpp::Events ALIAS Events)
+
+add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
+add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
+target_link_libraries(InfoLog PUBLIC Xml Reflection)
+
+add_library(Json INTERFACE)
+add_library(ExtendedCpp::Json ALIAS Json)
+
+add_library(LINQ INTERFACE)
+add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
 add_library(Reflection ${LIBRARY_TYPE} ${Reflection_SOURCE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
@@ -106,12 +111,15 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(Reflection PUBLIC /Zc:preprocessor)
 endif ()
 
-add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
-add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
-target_link_libraries(InfoLog PUBLIC Xml Reflection)
+add_library(Serialization_Json ${LIBRARY_TYPE} ${Serialisation_Json_SOURCE})
+add_library(ExtendedCpp::Serialization::Json ALIAS Serialization_Json)
+target_link_libraries(Serialization_Json PUBLIC Json Reflection)
 
-set_interface_directories(LINQ Events Json Common DI)
-set_include_directories(Asio Xml Reflection InfoLog)
+add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
+add_library(ExtendedCpp::Xml ALIAS Xml)
+
+set_interface_directories(Common DI Events Json LINQ)
+set_include_directories(Asio InfoLog Reflection Serialization_Json Xml)
 
 if (ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
@@ -139,35 +147,43 @@ if (ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
             ${CMAKE_CURRENT_BINARY_DIR}/extendedcpp-config.cmake
             COPYONLY)
 
-    install_projects(LINQ Events Json Common DI Asio Xml Reflection InfoLog)
+    install_projects(Asio Common DI Events InfoLog Json LINQ Reflection Serialization_Json Xml)
 endif ()
 
-if (LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/LINQ)
+    add_subdirectory(tests/Asio)
+
+    if (BUILD_SHARED_LIBS AND WIN32)
+        add_custom_command(
+                TARGET Asio POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Asio/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif ()
 endif ()
 
-if (Events_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Common_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/Events)
+    add_subdirectory(tests/Common)
 endif ()
 
-if (Json_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (DI_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/Json)
-endif ()
-
-if (Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
-    enable_testing()
-    add_subdirectory(tests/Reflection)
+    add_subdirectory(tests/DI)
 
     if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Reflection POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/Reflection/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif ()
+endif ()
+
+if (Events_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/Events)
 endif ()
 
 if (InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
@@ -195,41 +211,54 @@ if (InfoLog_BUILD_TESTS OR BUILD_ALL_TESTS)
     endif ()
 endif ()
 
-if (Common_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Json_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/Common)
+    add_subdirectory(tests/Json)
 endif ()
 
-if (DI_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (LINQ_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/DI)
+    add_subdirectory(tests/LINQ)
+endif ()
+
+if (Reflection_BUILD_TESTS OR BUILD_ALL_TESTS)
+    enable_testing()
+    add_subdirectory(tests/Reflection)
 
     if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
                 TARGET Reflection POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/DI/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Reflection/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif ()
 endif ()
 
-if (Asio_BUILD_TESTS OR BUILD_ALL_TESTS)
+if (Serialization_Json_BUILD_TESTS OR BUILD_ALL_TESTS)
     enable_testing()
-    add_subdirectory(tests/Asio)
+    add_subdirectory(tests/Serialization/Json)
 
     if (BUILD_SHARED_LIBS AND WIN32)
         add_custom_command(
-                TARGET Asio POST_BUILD
+                TARGET Serialization_Json POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX}
-                ${CMAKE_CURRENT_BINARY_DIR}/tests/Asio/${CMAKE_SHARED_LIBRARY_PREFIX}Asio${CMAKE_SHARED_LIBRARY_SUFFIX})
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Reflection${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif ()
-endif ()
 
-if (LINQ_BUILD_BENCHMARKS)
-    add_subdirectory(benchmarks/LINQ)
+    if (BUILD_SHARED_LIBS AND WIN32)
+        add_custom_command(
+                TARGET Serialization_Json POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}Json${CMAKE_SHARED_LIBRARY_SUFFIX}
+                ${CMAKE_CURRENT_BINARY_DIR}/tests/Serialization/Json/${CMAKE_SHARED_LIBRARY_PREFIX}Json${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif ()
 endif ()
 
 if (Common_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks/Common)
+endif ()
+
+if (LINQ_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks/LINQ)
 endif ()

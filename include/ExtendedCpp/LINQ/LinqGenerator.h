@@ -31,10 +31,9 @@ namespace ExtendedCpp::LINQ
 	class LinqGenerator final
 	{
 	private:
-		Future<TSource, NothrowCoroutine> _yieldContext;
+		std::stack<Future<TSource, NothrowCoroutine>> _yieldContext;
 		static constexpr bool IsNothrowCoroutine = std::same_as<NothrowCoroutine, std::true_type>;
 
-	public:
 		/// @brief
 		struct Iterator final
 		{
@@ -122,17 +121,12 @@ namespace ExtendedCpp::LINQ
 			bool _isEnd;
 		};
 
+	public:
 		/// @brief 
 		using value_type = TSource;
 
 		/// @brief 
 		using iterator = Iterator;
-
-		/// @brief 
-		using promise_type = typename Future<TSource, NothrowCoroutine>::promise_type;
-
-		/// @brief 
-		using handle_type = typename Future<TSource, NothrowCoroutine>::handle_type;
 
 		/// @brief
 		static constexpr bool IsLinqCollection = true;
@@ -140,28 +134,38 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		/// @tparam TGenerator 
 		/// @tparam Args
-		/// @param generator 
+		/// @param generator
 		/// @param args
-		template<typename TGenerator, typename... Args>
+		template<typename TInnerGenerator,typename TGenerator, typename... Args>
 		requires std::same_as<std::invoke_result_t<TGenerator, Args...>, Future<TSource, NothrowCoroutine>>
-		explicit LinqGenerator(TGenerator&& generator, Args&&... args)
+		explicit LinqGenerator(TInnerGenerator&& innerGenerator, TGenerator&& generator, Args&&... args)
 		noexcept(std::is_nothrow_invocable_v<TGenerator, Args...>) :
-			_yieldContext(generator(std::forward<Args>(args)...)) {}
+			_yieldContext(generator(std::forward<Args>(args)...))
+		{
+			_yieldContext = innerGenerator._yieldContext;
+			_yieldContext.push(generator(std::forward<Args>(args)...));
+		}
 
 		/// @brief Move data from vector into LINQ generator
 		/// @tparam TCollection 
 		/// @param collection 
 		template<Concepts::InputIterable TCollection>
-		explicit LinqGenerator(TCollection&& collection) noexcept :
-			_yieldContext(YieldForeach(std::forward<TCollection>(collection))) {}
+		explicit LinqGenerator(TCollection&& collection)
+		noexcept(noexcept(YieldForeach(std::forward<TCollection>(collection))))
+		{
+			_yieldContext.push(YieldForeach(std::forward<TCollection>(collection)));
+		}
 
 		/// @brief 
 		/// @tparam TIterator 
 		/// @param begin 
 		/// @param end 
 		template<std::input_iterator TIterator>
-		LinqGenerator(TIterator&& begin, TIterator&& end) noexcept :
-			_yieldContext(YieldForeach(std::forward<TIterator>(begin), std::forward<TIterator>(end))) {}
+		LinqGenerator(TIterator&& begin, TIterator&& end)
+		noexcept(noexcept(YieldForeach(std::forward<TIterator>(begin), std::forward<TIterator>(end))))
+		{
+			_yieldContext.push(YieldForeach(std::forward<TIterator>(begin), std::forward<TIterator>(end)));
+		}
 
 		/// @brief
 		/// @param other
@@ -184,28 +188,28 @@ namespace ExtendedCpp::LINQ
 		/// @brief 
 		explicit operator bool() noexcept
 		{
-			return static_cast<bool>(_yieldContext);
+			return static_cast<bool>(_yieldContext.top());
 		}
 
 		/// @brief 
 		/// @return 
 		TSource Next() noexcept(IsNothrowCoroutine)
 		{
-			return _yieldContext.Next();
+			return _yieldContext.top().Next();
 		}
 
 		/// @brief 
 		/// @return 
 		Iterator begin() noexcept
 		{
-			return Iterator(_yieldContext, false);
+			return Iterator(_yieldContext.top(), false);
 		}
 
 		/// @brief 
 		/// @return 
 		Iterator end() noexcept
 		{
-			return Iterator(_yieldContext, true);
+			return Iterator(_yieldContext.top(), true);
 		}
 
 		/// @brief 
@@ -213,8 +217,8 @@ namespace ExtendedCpp::LINQ
 		std::vector<TSource> ToVector() noexcept(IsNothrowCoroutine)
 		{
 			std::vector<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -226,8 +230,8 @@ namespace ExtendedCpp::LINQ
 		std::array<TSource, SIZE> ToArray() noexcept(IsNothrowCoroutine)
 		{
 			std::array<TSource, SIZE> collection{};
-			for (std::size_t i = 0; i < SIZE && _yieldContext; ++i)
-				collection[i] = _yieldContext.Next();
+			for (std::size_t i = 0; i < SIZE && _yieldContext.top(); ++i)
+				collection[i] = _yieldContext.top().Next();
 			return collection;
 		}
 
@@ -236,8 +240,8 @@ namespace ExtendedCpp::LINQ
 		std::list<TSource> ToList() noexcept(IsNothrowCoroutine)
 		{
 			std::list<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -254,8 +258,8 @@ namespace ExtendedCpp::LINQ
 		std::stack<TSource> ToStack() noexcept(IsNothrowCoroutine)
 		{
 			std::stack<TSource> collection;
-			while (_yieldContext)
-				collection.push(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -264,8 +268,8 @@ namespace ExtendedCpp::LINQ
 		std::queue<TSource> ToQueue() noexcept(IsNothrowCoroutine)
 		{
 			std::queue<TSource> collection;
-			while (_yieldContext)
-				collection.push(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -274,8 +278,8 @@ namespace ExtendedCpp::LINQ
 		std::deque<TSource> ToDeque() noexcept(IsNothrowCoroutine)
 		{
 			std::deque<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -284,8 +288,8 @@ namespace ExtendedCpp::LINQ
 		std::priority_queue<TSource> ToPriorityQueue() noexcept(IsNothrowCoroutine)
 		{
 			std::priority_queue<TSource> collection;
-			while (_yieldContext)
-				collection.push(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -294,8 +298,8 @@ namespace ExtendedCpp::LINQ
 		std::set<TSource> ToSet() noexcept(IsNothrowCoroutine)
 		{
 			std::set<TSource> collection;
-			while (_yieldContext)
-				collection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.insert(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -304,8 +308,8 @@ namespace ExtendedCpp::LINQ
 		std::unordered_set<TSource> ToUnorderedSet() noexcept(IsNothrowCoroutine)
 		{
 			std::unordered_set<TSource> collection;
-			while (_yieldContext)
-				collection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.insert(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -319,8 +323,8 @@ namespace ExtendedCpp::LINQ
 		std::map<TKey, TValue> ToMap() noexcept(IsNothrowCoroutine)
 		{
 			std::map<TKey, TValue> collection;
-			while (_yieldContext)
-				collection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.insert(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -334,8 +338,8 @@ namespace ExtendedCpp::LINQ
 		std::unordered_map<TKey, TValue> ToUnorderedMap() noexcept(IsNothrowCoroutine)
 		{
 			std::unordered_map<TKey, TValue> collection;
-			while (_yieldContext)
-				collection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.insert(_yieldContext.top().Next());
 			return collection;
 		}
 
@@ -347,11 +351,11 @@ namespace ExtendedCpp::LINQ
         requires std::same_as<std::invoke_result_t<TMap, TSource>, TSource>
         auto Map(TMap&& mapFunction) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(SelectGenerator(mapFunction))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SelectGenerator(std::forward<TMap>(mapFunction)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TMap&& mapFunction_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TMap&& mapFunction_) noexcept
 				{ return SelectGenerator(std::forward<TMap>(mapFunction_)); },
 						std::forward<TMap>(mapFunction));
 		}
@@ -364,11 +368,11 @@ namespace ExtendedCpp::LINQ
         requires std::same_as<std::invoke_result_t<TTransform, TSource&>, void>
         auto Transform(TTransform&& transform) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(TransformGenerator(transform))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(TransformGenerator(std::forward<TTransform>(transform)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TTransform&& transform_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TTransform&& transform_) noexcept
 				{ return TransformGenerator(std::forward<TTransform>(transform_)); },
 						std::forward<TTransform>(transform));
 		}
@@ -382,11 +386,11 @@ namespace ExtendedCpp::LINQ
 				 typename TResult = std::invoke_result_t<TSelector, TSource>>
 		auto Select(TSelector&& selector) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(SelectGenerator(selector))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SelectGenerator(std::forward<TSelector>(selector)))>;
 
-			return LinqGenerator<TResult, NothrowNewCoroutine>(
-				[this](TSelector&& selector_) noexcept
+			return LinqGenerator<TResult, NothrowNewCoroutine>([this]
+				(TSelector&& selector_) noexcept
 				{ return SelectGenerator(std::forward<TSelector>(selector_)); },
 						std::forward<TSelector>(selector));
 		}
@@ -400,11 +404,11 @@ namespace ExtendedCpp::LINQ
 				 typename TResult = typename std::invoke_result_t<TSelector, TSource>::value_type>
 		auto SelectMany(TSelector&& selector) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(SelectManyGenerator(selector))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SelectManyGenerator(std::forward<TSelector>(selector)))>;
 
-			return LinqGenerator<TResult, NothrowNewCoroutine>(
-				[this](TSelector&& selector_) noexcept
+			return LinqGenerator<TResult, NothrowNewCoroutine>([this]
+				(TSelector&& selector_) noexcept
 				{ return SelectManyGenerator(std::forward<TSelector>(selector_)); },
 						std::forward<TSelector>(selector));
 		}
@@ -424,11 +428,12 @@ namespace ExtendedCpp::LINQ
 				 typename TResult = std::invoke_result_t<TResultSelector, TSource, TCollectionValueType>>
 		auto SelectMany(TCollectionSelector&& collectionSelector, TResultSelector&& resultSelector) noexcept
 		{
-			using NothrowNewCoroutine = std::integral_constant<bool,
-				IsNothrowCoroutine && noexcept(SelectManyGenerator(collectionSelector, resultSelector))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector),
+											 std::forward<TResultSelector>(resultSelector)))>;
 
-			return LinqGenerator<TResult, NothrowNewCoroutine>(
-				[this](TCollectionSelector&& collectionSelector_, TResultSelector&& resultSelector_) noexcept
+			return LinqGenerator<TResult, NothrowNewCoroutine>([this]
+				(TCollectionSelector&& collectionSelector_, TResultSelector&& resultSelector_) noexcept
 				{ return SelectManyGenerator(std::forward<TCollectionSelector>(collectionSelector_),
 											 std::forward<TResultSelector>(resultSelector_)); },
 						std::forward<TCollectionSelector>(collectionSelector),
@@ -442,11 +447,11 @@ namespace ExtendedCpp::LINQ
 		template<Concepts::IsPredicate<TSource> TPredicate>
 		auto Where(TPredicate&& predicate) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(WhereGenerator(predicate))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(WhereGenerator(std::forward<TPredicate>(predicate)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TPredicate&& predicate_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TPredicate&& predicate_) noexcept
 				{ return WhereGenerator(std::forward<TPredicate>(predicate_)); },
 						std::forward<TPredicate>(predicate));
 		}
@@ -458,11 +463,11 @@ namespace ExtendedCpp::LINQ
 		template<Concepts::IsPredicate<TSource> TPredicate>
 		auto RemoveWhere(TPredicate&& predicate) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(RemoveWhereGenerator(predicate))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(RemoveWhereGenerator(std::forward<TPredicate>(predicate)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TPredicate&& predicate_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TPredicate&& predicate_) noexcept
 				{ return RemoveWhereGenerator(std::forward<TPredicate>(predicate_)); },
 						std::forward<TPredicate>(predicate));
 		}
@@ -474,19 +479,20 @@ namespace ExtendedCpp::LINQ
 		requires Concepts::Comparable<TSource>
 		{
 			std::vector<TSource> newCollection;
-			while (_yieldContext)
-				newCollection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				newCollection.push_back(_yieldContext.top().Next());
 			if (newCollection.empty())
 				return std::move(*this);
 
 			Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1, orderType);
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::vector<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Sorts the elements of a collection with selector
@@ -500,20 +506,21 @@ namespace ExtendedCpp::LINQ
 		noexcept(std::is_nothrow_invocable_v<TSelector, TSource> && IsNothrowCoroutine)
 		{
 			std::vector<TSource> newCollection;
-			while (_yieldContext)
-				newCollection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				newCollection.push_back(_yieldContext.top().Next());
 			if (newCollection.empty())
 				return std::move(*this);
 
 			Sort::QuickSort(newCollection.data(), 0, newCollection.size() - 1,
 							std::forward<TSelector>(selector), orderType);
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::vector<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Reverse the collection
@@ -521,15 +528,16 @@ namespace ExtendedCpp::LINQ
 		auto Reverse() noexcept(IsNothrowCoroutine)
 		{
 			std::vector<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(ReverseGenerator(collection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(ReverseGenerator(std::move(collection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, collection = std::move(collection)]() noexcept
-				{ return ReverseGenerator(collection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::vector<TSource>&& collection_) noexcept
+				{ return ReverseGenerator(std::move(collection_)); },
+						std::move(collection));
 		}
 
 		/// @brief Get the difference of two sequences
@@ -545,9 +553,9 @@ namespace ExtendedCpp::LINQ
 		{
 			std::set<TSource> newCollection;
 
-			while (_yieldContext)
+			while (_yieldContext.top())
 			{
-				auto element = _yieldContext.Next();
+				auto element = _yieldContext.top().Next();
 
 				std::size_t i = 0;
 				for (const auto& otherElement : otherCollection)
@@ -558,12 +566,13 @@ namespace ExtendedCpp::LINQ
 				}
 			}
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Get the difference of two sequences
@@ -579,9 +588,9 @@ namespace ExtendedCpp::LINQ
 		{
 			std::set<TSource> newCollection;
 
-			while (_yieldContext)
+			while (_yieldContext.top())
 			{
-				auto element = _yieldContext.Next();
+				auto element = _yieldContext.top().Next();
 
 				std::size_t i = 0;
 				for (auto&& otherElement : otherCollection)
@@ -594,12 +603,13 @@ namespace ExtendedCpp::LINQ
 				}
 			}
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Get the intersection of sequences
@@ -613,9 +623,9 @@ namespace ExtendedCpp::LINQ
 		{
 			std::set<TSource> newCollection;
 
-			while (_yieldContext)
+			while (_yieldContext.top())
 			{
-				auto element = _yieldContext.Next();
+				auto element = _yieldContext.top().Next();
 				for (const auto& otherElement : otherCollection)
 					if (element == otherElement)
 					{
@@ -624,12 +634,13 @@ namespace ExtendedCpp::LINQ
 					}
 			}
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Get the intersection of sequences
@@ -644,9 +655,9 @@ namespace ExtendedCpp::LINQ
 			std::set<TSource> newCollection;
 			auto inner = std::forward<TOtherCollection>(otherCollection);
 
-			while (_yieldContext)
+			while (_yieldContext.top())
 			{
-				auto element = _yieldContext.Next();
+				auto element = _yieldContext.top().Next();
 				for (auto&& otherElement : inner)
 					if (element == otherElement)
 					{
@@ -655,12 +666,13 @@ namespace ExtendedCpp::LINQ
 					}
 			}
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Remove duplicates in a set
@@ -669,15 +681,16 @@ namespace ExtendedCpp::LINQ
 		requires Concepts::Equatable<TSource>
 		{
 			std::set<TSource> newCollection;
-			while (_yieldContext)
-				newCollection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				newCollection.insert(_yieldContext.top().Next());
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Join two sequences
@@ -691,18 +704,19 @@ namespace ExtendedCpp::LINQ
 		{
 			std::set<TSource> newCollection;
 
-			while (_yieldContext)
-				newCollection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				newCollection.insert(_yieldContext.top().Next());
 
 			for (const auto& element : otherCollection)
 				newCollection.insert(element);
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+						std::move(newCollection));
 		}
 
 		/// @brief Join two sequences
@@ -716,18 +730,19 @@ namespace ExtendedCpp::LINQ
 		{
 			std::set<TSource> newCollection;
 
-			while (_yieldContext)
-				newCollection.insert(_yieldContext.Next());
+			while (_yieldContext.top())
+				newCollection.insert(_yieldContext.top().Next());
 
 			for (auto&& element : otherCollection)
 				newCollection.insert(std::move(element));
 
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(Generator(newCollection))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(Generator(std::move(newCollection)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this, newCollection = std::move(newCollection)]() noexcept
-				{ return Generator(newCollection); });
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(std::set<TSource>&& newCollection_) noexcept
+				{ return Generator(std::move(newCollection_)); },
+					std::move(newCollection));
 		}
 
 		/// @brief Performs a general aggregation of the elements of the collection depending on the specified expression. 
@@ -741,8 +756,8 @@ namespace ExtendedCpp::LINQ
 		TResult Aggregate(TAggregate&& aggregateFunction)
 		{
 			std::vector<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 
 			if (collection.empty())
 				throw std::out_of_range("Collection is empty");
@@ -760,8 +775,8 @@ namespace ExtendedCpp::LINQ
 		noexcept(std::is_nothrow_invocable_v<TPredicate, TSource> && IsNothrowCoroutine)
 		{
 			std::size_t result = 0;
-			while (_yieldContext)
-				if (predicate(_yieldContext.Next()))
+			while (_yieldContext.top())
+				if (predicate(_yieldContext.top().Next()))
 					++result;
 
 			return result;
@@ -774,8 +789,8 @@ namespace ExtendedCpp::LINQ
 		requires Concepts::Addable<TSource>
 		{
 			std::vector<TSource> collection;
-			while (_yieldContext)
-				collection.push_back(_yieldContext.Next());
+			while (_yieldContext.top())
+				collection.push_back(_yieldContext.top().Next());
 
 			if (collection.empty())
 				throw std::out_of_range("Collection is empty");
@@ -794,7 +809,7 @@ namespace ExtendedCpp::LINQ
 		TResult Sum(TSelector&& selector)
 		{
 			std::vector<TSource> collection;
-			while (_yieldContext)
+			while (_yieldContext.top())
 				collection.push_back(_yieldContext.Next());
 
 			if (collection.empty())
@@ -917,11 +932,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		auto Skip(const std::size_t count) noexcept
 		{
-			using NothrowNewCoroutine =
-					std::integral_constant<bool, IsNothrowCoroutine && noexcept(SkipGenerator(count))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SkipGenerator(count))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](const std::size_t count_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(const std::size_t count_) noexcept
 				{ return SkipGenerator(count_); }, count);
 		}
 
@@ -932,11 +947,11 @@ namespace ExtendedCpp::LINQ
 		template<Concepts::IsPredicate<TSource> TPredicate>
 		auto SkipWhile(TPredicate&& predicate) noexcept
 		{
-			using NothrowNewCoroutine =
-					std::integral_constant<bool, IsNothrowCoroutine && noexcept(SkipWhileGenerator(predicate))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(SkipWhileGenerator(std::forward<TPredicate>(predicate)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TPredicate&& predicate_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TPredicate&& predicate_) noexcept
 				{ return SkipWhileGenerator(std::forward<TPredicate>(predicate_)); },
 						std::forward<TPredicate>(predicate));
 		}
@@ -946,11 +961,11 @@ namespace ExtendedCpp::LINQ
 		/// @return 
 		auto Take(const std::size_t count) noexcept
 		{
-			using NothrowNewCoroutine =
-					std::integral_constant<bool, IsNothrowCoroutine && noexcept(TakeGenerator(count))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(TakeGenerator(count))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](const std::size_t count_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(const std::size_t count_) noexcept
 				{ return TakeGenerator(count_); }, count);
 		}
 
@@ -961,11 +976,11 @@ namespace ExtendedCpp::LINQ
 		template<Concepts::IsPredicate<TSource> TPredicate>
 		auto TakeWhile(TPredicate&& predicate) noexcept
 		{
-			using NothrowNewCoroutine =
-					std::integral_constant<bool, IsNothrowCoroutine && noexcept(TakeWhileGenerator(predicate))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(TakeWhileGenerator(std::forward<TPredicate>(predicate)))>;
 
-			return LinqGenerator<TSource, NothrowNewCoroutine>(
-				[this](TPredicate&& predicate_) noexcept
+			return LinqGenerator<TSource, NothrowNewCoroutine>([this]
+				(TPredicate&& predicate_) noexcept
 				{ return TakeWhileGenerator(std::forward<TPredicate>(predicate_)); },
 						std::forward<TPredicate>(predicate));
 		}
@@ -979,11 +994,11 @@ namespace ExtendedCpp::LINQ
 				 typename TKey = std::invoke_result_t<TKeySelector, TSource>>
 		auto GroupBy(TKeySelector&& keySelector) noexcept
 		{
-			using NothrowNewCoroutine =
-					std::integral_constant<bool, IsNothrowCoroutine && noexcept(GroupByGenerator(keySelector))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(GroupByGenerator(std::forward<TKeySelector>(keySelector)))>;
 
-			return LinqGenerator<std::pair<TKey, std::vector<TSource>>, NothrowNewCoroutine>(
-				[this](TKeySelector&& keySelector_) noexcept
+			return LinqGenerator<std::pair<TKey, std::vector<TSource>>, NothrowNewCoroutine>([this]
+				(TKeySelector&& keySelector_) noexcept
 				{ return GroupByGenerator(std::forward<TKeySelector>(keySelector_)); },
 						std::forward<TKeySelector>(keySelector));
 		}
@@ -1017,14 +1032,19 @@ namespace ExtendedCpp::LINQ
 				throw std::invalid_argument("other collection must not be empty");
 
 			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
-				noexcept(JoinGenerator(std::declval<TOtherCollection>(), innerKeySelector, otherKeySelector, resultSelector))>;
+				noexcept(JoinGenerator(
+					std::declval<TOtherCollection>(),
+					std::forward<TInnerKeySelector>(innerKeySelector),
+					std::forward<TOtherKeySelector>(otherKeySelector),
+					std::forward<TResultSelector>(resultSelector)))>;
 
 			return LinqGenerator<TResult, NothrowNewCoroutine>([this](
 					TOtherCollection otherCollection_,
 					TInnerKeySelector&& innerKeySelector_,
 					TOtherKeySelector&& otherKeySelector_,
 					TResultSelector&& resultSelector_) noexcept
-				{ return JoinGenerator(std::move(otherCollection_),
+				{ return JoinGenerator(
+					std::move(otherCollection_),
 					std::forward<TInnerKeySelector>(innerKeySelector_),
 					std::forward<TOtherKeySelector>(otherKeySelector_),
 					std::forward<TResultSelector>(resultSelector_)); },
@@ -1063,14 +1083,19 @@ namespace ExtendedCpp::LINQ
 				throw std::invalid_argument("other collection must not be empty");
 
 			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
-				noexcept(JoinGenerator(std::declval<TOtherCollection>(), innerKeySelector, otherKeySelector, resultSelector))>;
+				noexcept(JoinGenerator(
+					std::declval<TOtherCollection>(),
+					std::forward<TInnerKeySelector>(innerKeySelector),
+					std::forward<TOtherKeySelector>(otherKeySelector),
+					std::forward<TResultSelector>(resultSelector)))>;
 
 			return LinqGenerator<TResult, NothrowNewCoroutine>([this](
 					TOtherCollection&& otherCollection_,
 					TInnerKeySelector&& innerKeySelector_,
 					TOtherKeySelector&& otherKeySelector_,
 					TResultSelector&& resultSelector_) noexcept
-				{ return JoinGenerator(std::forward<TOtherCollection>(otherCollection_),
+				{ return JoinGenerator(
+					std::forward<TOtherCollection>(otherCollection_),
 					std::forward<TInnerKeySelector>(innerKeySelector_),
 					std::forward<TOtherKeySelector>(otherKeySelector_),
 					std::forward<TResultSelector>(resultSelector_)); },
@@ -1109,14 +1134,19 @@ namespace ExtendedCpp::LINQ
 				throw std::invalid_argument("other collection must not be empty");
 
 			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
-				noexcept(GroupJoinGenerator(std::declval<TOtherCollection>(), innerKeySelector, otherKeySelector, resultSelector))>;
+				noexcept(GroupJoinGenerator(
+					std::declval<TOtherCollection>(),
+					std::forward<TInnerKeySelector>(innerKeySelector),
+					std::forward<TOtherKeySelector>(otherKeySelector),
+					std::forward<TResultSelector>(resultSelector)))>;
 
 			return LinqGenerator<TResult, NothrowNewCoroutine>([this](
 					TOtherCollection otherCollection_,
 					TInnerKeySelector&& innerKeySelector_,
 					TOtherKeySelector&& otherKeySelector_,
 					TResultSelector&& resultSelector_) noexcept
-				{ return GroupJoinGenerator(std::move(otherCollection_),
+				{ return GroupJoinGenerator(
+					std::move(otherCollection_),
 					std::forward<TInnerKeySelector>(innerKeySelector_),
 					std::forward<TOtherKeySelector>(otherKeySelector_),
 					std::forward<TResultSelector>(resultSelector_)); },
@@ -1155,14 +1185,19 @@ namespace ExtendedCpp::LINQ
 				throw std::invalid_argument("other collection must not be empty");
 
 			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
-				noexcept(GroupJoinGenerator(std::declval<TOtherCollection>(), innerKeySelector, otherKeySelector, resultSelector))>;
+				noexcept(GroupJoinGenerator(
+					std::declval<TOtherCollection>(),
+					std::forward<TInnerKeySelector>(innerKeySelector),
+					std::forward<TOtherKeySelector>(otherKeySelector),
+					std::forward<TResultSelector>(resultSelector)))>;
 
 			return LinqGenerator<TResult, NothrowNewCoroutine>([this](
 					TOtherCollection&& otherCollection_,
 					TInnerKeySelector&& innerKeySelector_,
 					TOtherKeySelector&& otherKeySelector_,
 					TResultSelector&& resultSelector_) noexcept
-				{ return GroupJoinGenerator(std::forward<TOtherCollection>(otherCollection_),
+				{ return GroupJoinGenerator(
+					std::forward<TOtherCollection>(otherCollection_),
 					std::forward<TInnerKeySelector>(innerKeySelector_),
 					std::forward<TOtherKeySelector>(otherKeySelector_),
 					std::forward<TResultSelector>(resultSelector_)); },
@@ -1182,8 +1217,8 @@ namespace ExtendedCpp::LINQ
 		requires Concepts::ForwardIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		auto Zip(const TOtherCollection& otherCollection) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(ZipGenerator(std::declval<TOtherCollection>()))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(ZipGenerator(std::declval<TOtherCollection>()))>;
 
 			return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>, NothrowNewCoroutine>([this]
 				(TOtherCollection otherCollection_) noexcept
@@ -1201,8 +1236,8 @@ namespace ExtendedCpp::LINQ
 		requires Concepts::InputIterable<TOtherCollection> && Concepts::HasSize<TOtherCollection>
 		auto Zip(TOtherCollection&& otherCollection) noexcept
 		{
-			using NothrowNewCoroutine =
-				std::integral_constant<bool, IsNothrowCoroutine && noexcept(ZipGenerator(std::declval<TOtherCollection>()))>;
+			using NothrowNewCoroutine = std::integral_constant<bool, IsNothrowCoroutine &&
+				noexcept(ZipGenerator(std::declval<TOtherCollection>()))>;
 
 			return LinqGenerator<std::pair<TSource, TOtherCollectionValueType>, NothrowNewCoroutine>([this]
 				(TOtherCollection&& otherCollection_) noexcept
@@ -1249,6 +1284,7 @@ namespace ExtendedCpp::LINQ
 			auto inner = std::forward<TCollection>(collection);
 			for (auto&& element : inner)
 				co_yield std::move(element);
+			co_return;
 		}
 
 		template<Concepts::InputIterable TCollection,
@@ -1259,6 +1295,7 @@ namespace ExtendedCpp::LINQ
 			auto inner = std::forward<TCollection>(collection);
 			for (auto it = inner.rbegin(); it != inner.rend(); ++it)
 				co_yield std::move(*it);
+			co_return;
 		}
 
 		template<std::invocable<TSource&> TTransform,
@@ -1273,6 +1310,7 @@ namespace ExtendedCpp::LINQ
 				transform(value);
 				co_yield std::move(value);
 			}
+			co_return;
 		}
 
 		template<std::invocable<TSource> TSelector,
@@ -1283,6 +1321,7 @@ namespace ExtendedCpp::LINQ
 		{
 			while (_yieldContext)
 				co_yield selector(_yieldContext.Next());
+			co_return;
 		}
 
 		template<std::invocable<TSource> TSelector,
@@ -1297,6 +1336,7 @@ namespace ExtendedCpp::LINQ
 				for (auto&& tempElement : tempCollection)
 					co_yield std::move(tempElement);
 			}
+			co_return;
 		}
 
 		template<std::invocable<TSource> TCollectionSelector,
@@ -1317,6 +1357,7 @@ namespace ExtendedCpp::LINQ
 				for (auto&& tempElement : tempCollection)
 					co_yield resultSelector(element, std::move(tempElement));
 			}
+			co_return;
 		}
 
 		template<Concepts::IsPredicate<TSource> TPredicate,
@@ -1330,6 +1371,7 @@ namespace ExtendedCpp::LINQ
 				if (predicate(element))
 					co_yield element;
 			}
+			co_return;
 		}
 
 		template<Concepts::IsPredicate<TSource> TPredicate,
@@ -1344,6 +1386,7 @@ namespace ExtendedCpp::LINQ
 					continue;
 				co_yield element;
 			}
+			co_return;
 		}
 
 		Future<TSource, std::integral_constant<bool, IsNothrowCoroutine>>
@@ -1358,6 +1401,7 @@ namespace ExtendedCpp::LINQ
 
 			while (_yieldContext)
 				co_yield _yieldContext.Next();
+			co_return;
 		}
 
 		template<Concepts::IsPredicate<TSource> TPredicate,
@@ -1377,6 +1421,7 @@ namespace ExtendedCpp::LINQ
 
 			while (_yieldContext)
 				co_yield _yieldContext.Next();
+			co_return;
 		}
 
 		Future<TSource, std::integral_constant<bool, IsNothrowCoroutine>>
@@ -1391,6 +1436,7 @@ namespace ExtendedCpp::LINQ
 
 			while (_yieldContext)
 				_yieldContext.Next();
+			co_return;
 		}
 
 		template<Concepts::IsPredicate<TSource> TPredicate,
@@ -1408,6 +1454,7 @@ namespace ExtendedCpp::LINQ
 
 			while (_yieldContext)
 				_yieldContext.Next();
+			co_return;
 		}
 
 		template<std::invocable<TSource> TKeySelector,
@@ -1428,6 +1475,7 @@ namespace ExtendedCpp::LINQ
 
 			for (auto&& kv : result)
 				co_yield std::move(kv);
+			co_return;
 		}
 
 		template<Concepts::InputIterable TOtherCollection,
@@ -1457,6 +1505,7 @@ namespace ExtendedCpp::LINQ
 					if (innerKeySelector(element) == otherKeySelector(otherElement))
 						co_yield resultSelector(std::move(element), std::move(otherElement));
 			}
+			co_return;
 		}
 
 		template<Concepts::InputIterable TOtherCollection,
@@ -1487,6 +1536,7 @@ namespace ExtendedCpp::LINQ
 					if (std::move(key) == otherKeySelector(element))
 						co_yield resultSelector(std::move(group), std::move(element));
 			}
+			co_return;
 		}
 
 		template<Concepts::ForwardIterable TOtherCollection,
@@ -1500,6 +1550,7 @@ namespace ExtendedCpp::LINQ
 			for (auto&& element : inner)
 				if (_yieldContext)
 					co_yield std::make_pair(_yieldContext.Next(), std::move(element));
+			co_return;
 		}
 	};
 }

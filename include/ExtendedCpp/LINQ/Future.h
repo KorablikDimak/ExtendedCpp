@@ -3,6 +3,7 @@
 
 #include <coroutine>
 #include <exception>
+#include <iostream>
 
 /// @brief 
 namespace ExtendedCpp::LINQ
@@ -11,36 +12,27 @@ namespace ExtendedCpp::LINQ
     /// @tparam TSource
     /// @tparam NothrowCoroutine
     template<typename TSource, typename NothrowCoroutine = std::false_type>
-    struct Future final
+    class Future final
     {
-        /// @brief
-        struct promise_type;
-
+    private:
         /// @brief 
-        using value_type = TSource;
-
-        /// @brief 
-        using promise_type = promise_type;
-
-        /// @brief 
-        using handle_type = std::coroutine_handle<promise_type>;
-
-        /// @brief 
-        struct promise_type final
+        struct Promise final
         {
             /// @brief 
             /// @return 
-            std::suspend_never initial_suspend() noexcept { return {}; }
+            [[nodiscard]]
+            std::suspend_never initial_suspend() const noexcept { return {}; }
 
             /// @brief 
             /// @return 
-            std::suspend_always final_suspend() noexcept { return {}; }
+            [[nodiscard]]
+            std::suspend_always final_suspend() const noexcept { return {}; }
             
             /// @brief 
-            void return_void() noexcept {}
+            void return_void() const noexcept {}
 
             /// @brief 
-            void unhandled_exception()
+            void unhandled_exception() const
             {
                 std::rethrow_exception(std::current_exception());
             }
@@ -58,7 +50,7 @@ namespace ExtendedCpp::LINQ
             /// @return 
             Future get_return_object() noexcept
             {
-                return Future(handle_type::from_promise(*this));
+                return Future(std::coroutine_handle<Promise>::from_promise(*this));
             }
 
             /// @brief 
@@ -72,53 +64,75 @@ namespace ExtendedCpp::LINQ
             TSource _value;
         };
 
+    public:
+        /// @brief
+        using promise_type = Promise;
+
         /// @brief 
         /// @param handle 
-        explicit Future(handle_type handle) noexcept :
-            _handle(handle),
-            _refCount(new std::size_t(1)) {}
+        explicit Future(std::coroutine_handle<Promise> handle) noexcept :
+            _refCount(new std::size_t(1)),
+            _handle(handle) {}
 
         /// @brief
         /// @param other
-        Future(const Future& other) noexcept
+        Future(const Future& other) noexcept :
+            _refCount(other._refCount),
+            _handle(other._handle)
         {
-            _handle = other._handle;
-            _refCount = other._refCount;
             ++*_refCount;
         }
 
         /// @brief
         /// @param other
-        Future(Future&& other) noexcept
+        Future(Future&& other) noexcept :
+            _refCount(other._refCount),
+            _handle(other._handle)
         {
-            _handle = other._handle;
-            _refCount = other._refCount;
-            other._handle = nullptr;
-            other._refCount = nullptr;
+            ++*_refCount;
+            other.Release();
         }
 
         /// @brief
         /// @param other
         /// @return
-        Future& operator=(const Future& other) noexcept = delete;
+        Future& operator=(const Future& other) noexcept
+        {
+            if (this == &other)
+                return *this;
+
+            Release();
+
+            _refCount = other._refCount;
+            _handle = other._handle;
+            ++*_refCount;
+
+            return *this;
+        }
 
         /// @brief
         /// @param other
         /// @return
-        Future& operator=(Future&& other) noexcept = delete;
+        Future& operator=(Future&& other) noexcept
+        {
+            if (this == &other)
+                return *this;
+
+            Release();
+
+            _refCount = other._refCount;
+            _handle = other._handle;
+            ++*_refCount;
+
+            other.Release();
+
+            return *this;
+        }
 
         /// @brief 
         ~Future()
         {
-            if (!_refCount || !_handle)
-                return;
-
-		    --*_refCount;
-            if (*_refCount == 0)
-            {
-                delete _refCount;
-                _handle.destroy();
-            }
+            Release();
         }
 
         /// @brief
@@ -159,8 +173,23 @@ namespace ExtendedCpp::LINQ
         }
 
     private:
-        handle_type _handle;
+        void Release() noexcept
+        {
+            if (_refCount)
+            {
+                if (*_refCount == 1)
+                {
+                    delete _refCount;
+                    _refCount = nullptr;
+                    _handle.destroy();
+                }
+                else
+                    --*_refCount;
+            }
+        }
+
         std::size_t* _refCount;
+        std::coroutine_handle<Promise> _handle;
     };
 }
 
