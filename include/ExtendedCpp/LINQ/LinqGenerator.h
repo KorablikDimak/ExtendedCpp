@@ -55,7 +55,13 @@ namespace ExtendedCpp::LINQ
 
             /// @brief
             /// @return
-            [[nodiscard]]
+            TSource& operator*() noexcept
+            {
+                return _future.Value();
+            }
+
+            /// @brief
+            /// @return
             const TSource& operator*() const noexcept
             {
                 return _future.Value();
@@ -106,7 +112,7 @@ namespace ExtendedCpp::LINQ
         /// @return
         Iterator begin() noexcept(NOTHROW)
         {
-            return Iterator{ std::invoke(_factory) };
+            return Iterator{ _factory() };
         }
 
         /// @brief

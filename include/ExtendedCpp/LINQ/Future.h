@@ -12,7 +12,8 @@ namespace ExtendedCpp::LINQ
     /// @brief
     /// @tparam TSource
     /// @tparam NothrowCoroutine
-    template<std::copyable TSource, bool NothrowCoroutine>
+    template<typename TSource, bool NothrowCoroutine>
+    requires std::copyable<TSource> || std::movable<TSource>
     class Future final
     {
     private:
@@ -31,12 +32,15 @@ namespace ExtendedCpp::LINQ
 
             void return_void() const noexcept {}
 
-            template<typename TValue>
-            requires std::constructible_from<TSource, TValue&&>
-            std::suspend_always yield_value(TValue&& value)
-            noexcept(std::is_nothrow_constructible_v<TSource, TValue&&>)
+            std::suspend_always yield_value(const TSource& value) noexcept
             {
-                Value.emplace(std::forward<TValue>(value));
+                Value.emplace(value);
+                return {};
+            }
+
+            std::suspend_always yield_value(TSource&& value) noexcept
+            {
+                Value.emplace(std::move(value));
                 return {};
             }
 
@@ -98,6 +102,13 @@ namespace ExtendedCpp::LINQ
             return _handle && !_handle.done();
         }
 
+        /// @brief
+        /// @return
+        TSource& Value() noexcept
+        {
+            return _handle.promise().Value.value();
+        }
+
         /// @brief 
         /// @return
         const TSource& Value() const noexcept
@@ -111,25 +122,24 @@ namespace ExtendedCpp::LINQ
         {
             if (!_handle || _handle.done())
             {
-                if constexpr(NothrowCoroutine)
-                    RethrowIfNeeded();
+                RethrowIfNeeded();
                 return false;
             }
 
             _handle.promise().Value.reset();
             _handle.resume();
 
-            if constexpr(!NothrowCoroutine)
-                RethrowIfNeeded();
+            RethrowIfNeeded();
 
             return _handle.promise().Value.has_value();
         }
 
     private:
-        void RethrowIfNeeded() const
+        void RethrowIfNeeded() const noexcept(NothrowCoroutine)
         {
-            if (_handle && _handle.promise().Exception)
-                std::rethrow_exception(_handle.promise().Exception);
+            if constexpr(!NothrowCoroutine)
+                if (_handle && _handle.promise().Exception)
+                    std::rethrow_exception(_handle.promise().Exception);
         }
 
         void Release() noexcept
