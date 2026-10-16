@@ -1,23 +1,24 @@
-#ifndef DI_Injector_H
-#define DI_Injector_H
+#ifndef DI_INJECTOR_H
+#define DI_INJECTOR_H
 
 #include <ExtendedCpp/DI/ServiceProvider.h>
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::DI
 {
     /// @brief 
-    /// @tparam TTarget 
+    /// @tparam TTarget
     template<typename TTarget>
     class Injector
     {
     public:
-        /// @brief 
+        /// @brief
         Injector() noexcept = delete;
 
         /// @brief 
         /// @param serviceProvider 
-        /// @return 
+        /// @return
         static std::optional<TTarget> Create(const ServiceProvider& serviceProvider) noexcept
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -51,7 +52,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @param serviceProvider 
-        /// @return 
+        /// @return
         static TTarget CreateRequired(const ServiceProvider& serviceProvider)
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -77,7 +78,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @param serviceProvider 
-        /// @return 
+        /// @return
         static std::shared_ptr<TTarget> Ptr(const ServiceProvider& serviceProvider) noexcept
         {
             auto typeInfo = Reflection::GetType<TTarget>();
@@ -111,7 +112,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @param serviceProvider 
-        /// @return 
+        /// @return
         static std::shared_ptr<TTarget> PtrRequired(const ServiceProvider& serviceProvider)
         {
             auto typeInfo = Reflection::GetType<TTarget>();

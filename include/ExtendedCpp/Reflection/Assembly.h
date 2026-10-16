@@ -1,15 +1,15 @@
-#ifndef Reflection_Assembly_H
-#define Reflection_Assembly_H
+#ifndef REFLECTION_ASSEMBLY_H
+#define REFLECTION_ASSEMBLY_H
 
 #include <map>
 #include <mutex>
 
 #include <ExtendedCpp/Reflection/TypeInfo.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class Assembly final
     {
     private:
@@ -17,15 +17,15 @@ namespace ExtendedCpp::Reflection
         static std::mutex& ListMutex() noexcept;
 
     public:
-        /// @brief 
+        /// @brief
         Assembly() = delete;
 
         /// @brief 
-        /// @param typeInfo 
+        /// @param typeInfo
         static void AddType(const TypeInfo& typeInfo) noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         static std::vector<TypeInfo> GetTypes() noexcept;
     };
 }

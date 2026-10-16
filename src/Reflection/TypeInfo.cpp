@@ -1,7 +1,7 @@
-#include <ExtendedCpp/Reflection/TypeInfo.h>
 #include <ExtendedCpp/Reflection/Assembly.h>
+#include <ExtendedCpp/Reflection/TypeInfo.h>
 
-ExtendedCpp::Reflection::TypeInfo::TypeInfo(const std::string& name, const std::type_index typeIndex,
+ExtendedCpp::Reflection::TypeInfo::TypeInfo(const std::string& name, const std::type_index typeIndex, // NOLINT(*-pass-by-value)
                                             const std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
     _name(name), _typeIndex(typeIndex), _members(members)
 {

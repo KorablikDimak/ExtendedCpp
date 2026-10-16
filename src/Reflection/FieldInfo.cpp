@@ -12,7 +12,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetField(std::any object) const
 
 void* ExtendedCpp::Reflection::FieldInfo::GetFieldPtr(std::any object) const
 {
-	return _fieldGetterPtr(_fieldHelper, std::move(object));
+    return _fieldGetterPtr(_fieldHelper, std::move(object));
 }
 
 std::any ExtendedCpp::Reflection::FieldInfo::ReadField(std::any object) const

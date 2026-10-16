@@ -1,9 +1,9 @@
-#ifndef Events_StaticMethodHandler_H
-#define Events_StaticMethodHandler_H
+#ifndef EVENTS_STATIC_METHOD_HANDLER_H
+#define EVENTS_STATIC_METHOD_HANDLER_H
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Events
 {
     /// @brief 
@@ -17,12 +17,10 @@ namespace ExtendedCpp::Events
     public:
         /// @brief 
         /// @param function
-        explicit FunctionHandler(void(*function)(TParams...)) noexcept
-        {
-            _function = function;
-        }
+        explicit FunctionHandler(void(*function)(TParams...)) noexcept :
+            _function(function) {}
 
-        /// @brief 
+        /// @brief
         ~FunctionHandler() override = default;
 
         /// @brief 

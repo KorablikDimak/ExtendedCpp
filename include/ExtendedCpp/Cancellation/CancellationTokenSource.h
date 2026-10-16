@@ -1,35 +1,35 @@
-#ifndef Cancellation_CancellationTokenSource_H
-#define Cancellation_CancellationTokenSource_H
+#ifndef CANCELLATION_CANCELLATION_TOKEN_SOURCE_H
+#define CANCELLATION_CANCELLATION_TOKEN_SOURCE_H
 
 #include <atomic>
 
 #include <ExtendedCpp/Cancellation/CancellationToken.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Cancellation
 {
-    /// @brief 
+    /// @brief
     class CancellationTokenSource final
     {
     private:
         std::atomic<bool> _cancellationRequest;
 
     public:
-        /// @brief 
+        /// @brief
         CancellationTokenSource() noexcept
         {
             _cancellationRequest.store(false);
         }
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         CancellationToken Token() const noexcept
         {
             return CancellationToken(&_cancellationRequest);
         }
 
-        /// @brief 
+        /// @brief
         void Cancel() noexcept
         {
             _cancellationRequest.store(true);

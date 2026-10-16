@@ -1,29 +1,29 @@
-#ifndef InfoLog_ISender_H
-#define InfoLog_ISender_H
+#ifndef INFO_LOG_I_SENDER_H
+#define INFO_LOG_I_SENDER_H
 
 #include <map>
 #include <memory>
 
-#include <ExtendedCpp/InfoLog/Parser.h>
 #include <ExtendedCpp/InfoLog/LogLevel.h>
+#include <ExtendedCpp/InfoLog/Parser.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
+    /// @brief
     class ISender
     {
     public:
-        /// @brief 
-        typedef std::shared_ptr<ISender> Ptr;
+        /// @brief
+        using Ptr = std::shared_ptr<ISender>;
 
-        /// @brief 
+        /// @brief
         virtual ~ISender() = default;
 
         /// @brief 
         /// @param message 
         /// @param logLevel 
-        /// @param tag 
+        /// @param tag
         virtual void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept = 0;
 
     protected:

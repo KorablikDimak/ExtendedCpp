@@ -1,18 +1,18 @@
-#ifndef Reflection_ConstructorInfo_H
-#define Reflection_ConstructorInfo_H
+#ifndef REFLECTION_CONSTRUCTOR_INFO_H
+#define REFLECTION_CONSTRUCTOR_INFO_H
 
 #include <any>
 #include <stdexcept>
 #include <typeindex>
 #include <vector>
 
-#include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <ExtendedCpp/Reflection/Concepts.h>
+#include <ExtendedCpp/Reflection/MemberInfo.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class ConstructorInfo final : public MemberInfo
     {
     private:
@@ -27,7 +27,7 @@ namespace ExtendedCpp::Reflection
         std::any (*_fromAnyPtr)(const std::any& helper, const std::vector<std::shared_ptr<void>>& args){};
         std::shared_ptr<void> (*_fromAnyPtrNew)(const std::any& helper, const std::vector<std::shared_ptr<void>>& args){};
 
-        std::vector<std::type_index> _parameters{};
+        std::vector<std::type_index> _parameters;
 
     public:
         /// @brief 
@@ -36,60 +36,60 @@ namespace ExtendedCpp::Reflection
         template<typename TClass, typename... TArgs>
         struct Helper final
         {
-            using TuppleArgs = std::tuple<TArgs...>;
-            static constexpr std::size_t Size = std::tuple_size_v<TuppleArgs>;
+            using TupleArgs = std::tuple<TArgs...>;
+            static constexpr std::size_t SIZE = std::tuple_size_v<TupleArgs>;
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass Create(std::any&& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                     return TClass();
                 else
-                    return std::apply([](TArgs&&... args)
-                        { return TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(std::move(args)));
+                    return std::apply([](TArgs&&... argsInner)
+                        { return TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass* New(std::any&& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                     return new TClass();
                 else
-                    return std::apply([](TArgs&&... args)
-                        { return new TClass(std::forward<TArgs>(args)...); }, std::any_cast<TuppleArgs>(std::move(args)));
+                    return std::apply([](TArgs&&... argsInner)
+                        { return new TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass CreateFromAny(const std::vector<std::any>& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                 {
                     return TClass();
                 }
                 else
                 {
-                    if (args.size() != Size)
+                    if (args.size() != SIZE)
                         throw std::range_error("Incorrect args size in constructor");
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
                     {
-                        return TClass(std::any_cast<std::tuple_element_t<Index, TuppleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<Size>());
+                        return TClass(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
                 }
             }
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass CreateFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                 {
                     return TClass();
                 }
@@ -99,43 +99,43 @@ namespace ExtendedCpp::Reflection
                 }
                 else
                 {
-                    if (args.size() != Size)
+                    if (args.size() != SIZE)
                         throw std::range_error("Incorrect args size in constructor");
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass
                     {
-                        return TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TuppleArgs>::element_type>(args[Index])...);
-                    }(std::make_index_sequence<Size>());
+                        return TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TupleArgs>::element_type>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
                 }
             }
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass* NewFromAny(const std::vector<std::any>& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                 {
                     return new TClass();
                 }
                 else
                 {
-                    if (args.size() != Size)
+                    if (args.size() != SIZE)
                         throw std::range_error("Incorrect args size in constructor");
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
                     {
-                        return new TClass(std::any_cast<std::tuple_element_t<Index, TuppleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<Size>());
+                        return new TClass(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
                 }
             }
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TClass* NewFromAnyPtr(const std::vector<std::shared_ptr<void>>& args) const
             {
-                if constexpr (!Size)
+                if constexpr (!SIZE)
                 {
                     return new TClass();
                 }
@@ -145,13 +145,13 @@ namespace ExtendedCpp::Reflection
                 }
                 else
                 {
-                    if (args.size() != Size)
+                    if (args.size() != SIZE)
                         throw std::range_error("Incorrect args size in constructor");
 
                     return [args]<std::size_t... Index>(std::index_sequence<Index...>)->TClass*
                     {
-                        return new TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TuppleArgs>::element_type>(args[Index])...);
-                    }(std::make_index_sequence<Size>());
+                        return new TClass(std::static_pointer_cast<typename std::tuple_element_t<Index, TupleArgs>::element_type>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
                 }
             }
         };
@@ -188,14 +188,14 @@ namespace ExtendedCpp::Reflection
     #pragma warning(pop)
 #endif
 
-        /// @brief 
+        /// @brief
         ~ConstructorInfo() override = default;
 
         /// @brief 
         /// @tparam TTarget 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename TTarget, typename... TArgs>
         TTarget Create(TArgs&&... args) const
         {
@@ -206,7 +206,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename... TArgs>
         std::any Create(TArgs&&... args) const
         {
@@ -217,7 +217,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TTarget 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename TTarget, typename... TArgs>
         std::shared_ptr<TTarget> New(TArgs&&... args) const
         {
@@ -228,7 +228,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename... TArgs>
         std::shared_ptr<void> New(TArgs&&... args) const
         {
@@ -238,7 +238,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TTarget 
         /// @param args 
-        /// @return 
+        /// @return
         template<typename TTarget>
         TTarget CreateFromAny(const std::vector<std::any>& args) const
         {
@@ -249,7 +249,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TTarget 
         /// @param args
-        /// @return 
+        /// @return
         template<typename TTarget>
         std::shared_ptr<TTarget> NewFromAny(const std::vector<std::any>& args) const
         {
@@ -260,7 +260,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TTarget 
         /// @param args 
-        /// @return 
+        /// @return
         template<typename TTarget>
         TTarget CreateFromAny(const std::vector<std::shared_ptr<void>>& args) const
         {
@@ -271,7 +271,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TTarget 
         /// @param args 
-        /// @return 
+        /// @return
         template<typename TTarget>
         std::shared_ptr<TTarget> NewFromAny(const std::vector<std::shared_ptr<void>>& args) const
         {
@@ -281,35 +281,35 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @param args 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::any CreateFromAny(const std::vector<std::any>& args) const;
 
         /// @brief 
         /// @param args 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::shared_ptr<void> NewFromAny(const std::vector<std::any>& args) const;
 
         /// @brief 
         /// @param args 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::any CreateFromAny(const std::vector<std::shared_ptr<void>>& args) const;
 
         /// @brief 
         /// @param args 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::shared_ptr<void> NewFromAny(const std::vector<std::shared_ptr<void>>& args) const;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
-        Reflection::MemberType GetMemberType() const noexcept override;
+        MemberType GetMemberType() const noexcept override;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::type_index> Parameters() const noexcept;
     };

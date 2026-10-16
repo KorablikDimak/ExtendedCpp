@@ -77,7 +77,7 @@ TEST(EventsTests, MethodHandlerTest)
     ASSERT_FALSE(event.Contains(handler1));
     ASSERT_FALSE(event.Contains(handler2));
     ASSERT_FALSE(event.Contains(handler3));
-    
+
     ASSERT_NO_THROW(event += handler1);
     ASSERT_NO_THROW(event += handler2);
     ASSERT_NO_THROW(event += handler3);

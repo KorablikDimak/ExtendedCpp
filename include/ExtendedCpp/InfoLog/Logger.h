@@ -1,20 +1,20 @@
-#ifndef InfoLog_Logger_H
-#define InfoLog_Logger_H
+#ifndef INFO_LOG_LOGGER_H
+#define INFO_LOG_LOGGER_H
 
-#include <vector>
+#include <future>
 #include <map>
 #include <memory>
-#include <future>
+#include <vector>
 
-#include <ExtendedCpp/InfoLog/ConsoleSender.h>
-#include <ExtendedCpp/InfoLog/LogLevel.h>
-#include <ExtendedCpp/InfoLog/Converter.h>
 #include <ExtendedCpp/InfoLog/Configuration.h>
+#include <ExtendedCpp/InfoLog/ConsoleSender.h>
+#include <ExtendedCpp/InfoLog/Converter.h>
+#include <ExtendedCpp/InfoLog/LogLevel.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
+    /// @brief
     class Logger final
     {
     private:
@@ -23,24 +23,24 @@ namespace ExtendedCpp::InfoLog
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag>
         void Send(TMessage&& message, const LogLevel logLevel, TTag&& tag) const noexcept
         {
-            std::vector<std::future<void>> _tasks;
-            _tasks.reserve(_senders.size());
+            std::vector<std::future<void>> tasks;
+            tasks.reserve(_senders.size());
 
             for (const ISender::Ptr& sender : _senders)
-                _tasks.push_back(std::async(std::launch::async,
+                tasks.push_back(std::async(std::launch::async,
                     [&]{ sender->Send(ToString(std::forward<TMessage>(message)), logLevel, ToString(std::forward<TTag>(tag))); }));
         }
 
     public:
-        /// @brief 
-        typedef std::shared_ptr<Logger> Ptr;
+        /// @brief
+        using Ptr = std::shared_ptr<Logger>;
 
         /// @brief
         Logger() noexcept = default;
 
         /// @brief 
         /// @tparam T 
-        /// @param fileName 
+        /// @param fileName
         template<Concepts::ConvertableToString T>
         explicit Logger(T&& fileName) noexcept
         {
@@ -50,7 +50,7 @@ namespace ExtendedCpp::InfoLog
         }
 
         /// @brief 
-        /// @param configuration 
+        /// @param configuration
         explicit Logger(const Configuration::Ptr& configuration) noexcept;
 
         /// @brief
@@ -72,26 +72,26 @@ namespace ExtendedCpp::InfoLog
         Logger& operator=(Logger&& logger) noexcept = default;
 
         /// @brief 
-        /// @param config 
+        /// @param config
         void AddSender(const std::map<std::string, std::string>& config) noexcept;
 
         /// @brief 
-        /// @param config 
+        /// @param config
         void AddSender(std::map<std::string, std::string>&& config) noexcept;
 
         /// @brief 
-        /// @param sender 
+        /// @param sender
         void AddSender(const ISender::Ptr& sender) noexcept;
 
         /// @brief 
-        /// @param sender 
+        /// @param sender
         void RemoveSender(const ISender::Ptr& sender) noexcept;
 
         /// @brief 
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Trace(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {
@@ -102,7 +102,7 @@ namespace ExtendedCpp::InfoLog
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Debug(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {
@@ -113,7 +113,7 @@ namespace ExtendedCpp::InfoLog
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Info(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {
@@ -124,7 +124,7 @@ namespace ExtendedCpp::InfoLog
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Warning(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {
@@ -135,7 +135,7 @@ namespace ExtendedCpp::InfoLog
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Error(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {
@@ -146,7 +146,7 @@ namespace ExtendedCpp::InfoLog
         /// @tparam TMessage 
         /// @tparam TTag 
         /// @param message 
-        /// @param tag 
+        /// @param tag
         template<Concepts::ConvertableToString TMessage, Concepts::ConvertableToString TTag = std::string>
         void Critical(TMessage&& message, TTag&& tag = TTag()) const noexcept
         {

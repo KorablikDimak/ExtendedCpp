@@ -1,23 +1,24 @@
-#ifndef LINQ_Algorithm_H
-#define LINQ_Algorithm_H
+#ifndef LINQ_ALGORITHM_H
+#define LINQ_ALGORITHM_H
 
+#include <concepts>
+#include <limits>
 #include <map>
 #include <memory>
-#include <limits>
-#include <concepts>
 #include <type_traits>
 
-#include <ExtendedCpp/LINQ/TypeTraits.h>
 #include <ExtendedCpp/LINQ/Concepts.h>
+#include <ExtendedCpp/LINQ/TypeTraits.h>
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
-    /// @brief 
+    /// @brief
     constexpr std::size_t NPOS = std::numeric_limits<std::size_t>::max();
 }
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::LINQ::Algorithm
 {
     /// @brief 
@@ -27,7 +28,7 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @return 
+    /// @return
     template<Concepts::Comparable TTarget, Concepts::RandomAccess TCollection>
     requires std::same_as<TTarget, RandomAccessValueType<TCollection>>
     std::size_t BinarySearch(TTarget&& target, TCollection&& collection,
@@ -60,7 +61,7 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @return 
+    /// @return
     template<Concepts::Comparable TTarget,
              Concepts::RandomAccess TCollection,
              typename TCollectionType = RandomAccessValueType<TCollection>,
@@ -95,9 +96,9 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Equatable T = RandomAccessValueType<TCollection>>
-    std::map<T, std::size_t> CountEqualKeys(TCollection&& collection, const std::size_t start, const std::size_t end) noexcept
+    std::map<T, std::size_t> CountEqualKeys(const TCollection& collection, const std::size_t start, const std::size_t end) noexcept
     {
         std::map<T, std::size_t> equalKeyCounts;
 
@@ -118,33 +119,33 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param firstSize 
     /// @param secondSequence 
     /// @param secondSize 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TOtherCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TOtherCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>
-    std::size_t CountCommonSubsequence(TCollection&& firstSequence, const std::size_t firstSize,
-                                       TOtherCollection&& secondSequence, const std::size_t secondSize) noexcept
+    std::size_t CountCommonSubsequence(const TCollection& firstSequence, const std::size_t firstSize,
+                                       const TOtherCollection& secondSequence, const std::size_t secondSize) noexcept
     {
         const std::size_t size = (firstSize + 1) * (secondSize + 1);
-        auto LCSTable = std::make_unique<std::size_t[]>(size);
-        memset(LCSTable.get(), 0, size * sizeof(std::size_t));
+        auto lcsTable = std::make_unique<std::size_t[]>(size); // NOLINT(*-avoid-c-arrays)
+        memset(lcsTable.get(), 0, size * sizeof(std::size_t));
 
         for (std::size_t i = 1; i <= firstSize; ++i)
             for (std::size_t j = 1; j <= secondSize; ++j)
             {
                 if (firstSequence[i - 1] == secondSequence[j - 1])
                 {
-                    LCSTable[i * (secondSize + 1) + j] = LCSTable[(i - 1) * (secondSize + 1) + (j - 1)] + 1;
+                    lcsTable[i * (secondSize + 1) + j] = lcsTable[(i - 1) * (secondSize + 1) + (j - 1)] + 1;
                 }
                 else
                 {
-                    LCSTable[i * (secondSize + 1) + j] = std::max(
-                        LCSTable[i * (secondSize + 1) + (j - 1)],
-                        LCSTable[(i - 1) * (secondSize + 1) + j]);
+                    lcsTable[i * (secondSize + 1) + j] = std::max(
+                        lcsTable[i * (secondSize + 1) + (j - 1)],
+                        lcsTable[(i - 1) * (secondSize + 1) + j]);
                 }
             }
 
-        return LCSTable[firstSize * (secondSize + 1) + secondSize];
+        return lcsTable[firstSize * (secondSize + 1) + secondSize];
     }
 
     /// @brief 
@@ -154,17 +155,17 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param collectionSize 
     /// @param subCollection 
     /// @param subCollectionSize 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TSubCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TSubCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>
-    bool Contains(TCollection&& collection, const std::size_t collectionSize,
-                  TSubCollection&& subCollection, const std::size_t subCollectionSize) noexcept
+    bool Contains(const TCollection& collection, const std::size_t collectionSize,
+                  const TSubCollection& subCollection, const std::size_t subCollectionSize) noexcept
     {
         if (subCollectionSize > collectionSize)
             return false;
 
-        std::unique_ptr<std::size_t[]> prefixSizeSubCollection(new std::size_t[subCollectionSize]);
+        auto prefixSizeSubCollection = std::make_unique<std::size_t[]>(subCollectionSize); // NOLINT(*-avoid-c-arrays)
         prefixSizeSubCollection[0] = 0;
 
         for (std::size_t i = 1; i < subCollectionSize; ++i)
@@ -198,14 +199,14 @@ namespace ExtendedCpp::LINQ::Algorithm
     /// @param collectionSize 
     /// @param subCollection 
     /// @param subCollectionSize 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection, Concepts::RandomAccess TOtherCollection>
     requires std::same_as<RandomAccessValueType<TCollection>, RandomAccessValueType<TOtherCollection>> &&
              Concepts::Equatable<RandomAccessValueType<TCollection>>
-    std::size_t IndexAt(TCollection&& collection, const std::size_t collectionSize,
-                        TOtherCollection&& subCollection, const std::size_t subCollectionSize) noexcept
+    std::size_t IndexAt(const TCollection& collection, const std::size_t collectionSize,
+                        const TOtherCollection& subCollection, const std::size_t subCollectionSize) noexcept
     {
-        auto prefixSizeSubCollection = std::make_unique<std::size_t[]>(subCollectionSize);
+        auto prefixSizeSubCollection = std::make_unique<std::size_t[]>(subCollectionSize); // NOLINT(*-avoid-c-arrays)
         prefixSizeSubCollection[0] = 0;
 
         for (std::size_t i = 1; i < subCollectionSize; ++i)

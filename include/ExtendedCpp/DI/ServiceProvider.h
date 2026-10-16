@@ -1,5 +1,5 @@
-#ifndef DI_ServiceProvider_H
-#define DI_ServiceProvider_H
+#ifndef DI_SERVICE_PROVIDER_H
+#define DI_SERVICE_PROVIDER_H
 
 #include <functional>
 #include <map>
@@ -10,10 +10,11 @@
 #include <ExtendedCpp/DI/LifeTime.h>
 #include <ExtendedCpp/Reflection.h>
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::DI
 {
-    /// @brief 
+    /// @brief
     class ServiceProvider final
     {
     private:
@@ -23,12 +24,12 @@ namespace ExtendedCpp::DI
         mutable std::map<std::type_index, std::shared_ptr<void>> _instances;
 
     public:
-        /// @brief 
-        typedef std::shared_ptr<ServiceProvider> Ptr;
+        /// @brief
+        using Ptr = std::shared_ptr<ServiceProvider>;
 
         /// @brief 
         /// @tparam TService 
-        /// @tparam TImplementation 
+        /// @tparam TImplementation
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
                  std::is_base_of_v<TService, TImplementation>
@@ -40,7 +41,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @tparam TImplementation 
+        /// @tparam TImplementation
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
                  std::is_base_of_v<TService, TImplementation>
@@ -52,7 +53,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @tparam TImplementation 
+        /// @tparam TImplementation
         template<typename TService, typename TImplementation>
         requires std::is_default_constructible_v<TImplementation> &&
                  std::is_base_of_v<TService, TImplementation>
@@ -63,7 +64,7 @@ namespace ExtendedCpp::DI
         }
 
         /// @brief 
-        /// @tparam TService 
+        /// @tparam TService
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddSingleton() noexcept
@@ -73,7 +74,7 @@ namespace ExtendedCpp::DI
         }
 
         /// @brief 
-        /// @tparam TService 
+        /// @tparam TService
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddTransient() noexcept
@@ -83,7 +84,7 @@ namespace ExtendedCpp::DI
         }
 
         /// @brief 
-        /// @tparam TService 
+        /// @tparam TService
         template<typename TService>
         requires std::is_default_constructible_v<TService>
         void AddScoped() noexcept
@@ -94,7 +95,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddSingleton(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -113,7 +114,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddSingleton(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -132,7 +133,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddTransient(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -151,7 +152,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddTransient(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -170,7 +171,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddScoped(const std::function<std::shared_ptr<void>(const ServiceProvider&)>& serviceFactory) noexcept
         {
@@ -189,7 +190,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @param serviceFactory 
+        /// @param serviceFactory
         template<typename TService>
         void AddScoped(std::function<std::shared_ptr<void>(const ServiceProvider&)>&& serviceFactory) noexcept
         {
@@ -208,7 +209,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @return 
+        /// @return
         template<typename TService>
         std::shared_ptr<TService> GetService() const noexcept
         {
@@ -227,7 +228,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @tparam TService 
-        /// @return 
+        /// @return
         template<typename TService>
         std::shared_ptr<TService> GetServiceRequired() const
         {
@@ -238,7 +239,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @param typeIndex 
-        /// @return 
+        /// @return
         std::shared_ptr<void> GetService(const std::type_index typeIndex) const noexcept
         {
             if (!_factories.contains(typeIndex))
@@ -256,7 +257,7 @@ namespace ExtendedCpp::DI
 
         /// @brief 
         /// @param typeIndex 
-        /// @return 
+        /// @return
         std::shared_ptr<void> GetServiceRequired(const std::type_index typeIndex) const
         {
             if (!_factories.contains(typeIndex))

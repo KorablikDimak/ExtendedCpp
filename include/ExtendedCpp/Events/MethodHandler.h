@@ -1,9 +1,9 @@
-#ifndef Events_MethodHandler_H
-#define Events_MethodHandler_H
+#ifndef EVENTS_METHOD_HANDLER_H
+#define EVENTS_METHOD_HANDLER_H
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Events
 {
     /// @brief 
@@ -19,14 +19,11 @@ namespace ExtendedCpp::Events
     public:
         /// @brief 
         /// @param object 
-        /// @param method 
-        MethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept
-        {
-            _object = object;
-            _method = method;
-        }
+        /// @param method
+        MethodHandler(TObject* object, void(TObject::*method)(TParams...)) noexcept :
+            _object(object), _method(method) {}
 
-        /// @brief 
+        /// @brief
         ~MethodHandler() override = default;
 
         /// @brief 

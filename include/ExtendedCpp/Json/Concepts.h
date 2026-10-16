@@ -1,10 +1,10 @@
-#ifndef Json_Concepts_H
-#define Json_Concepts_H
+#ifndef JSON_CONCEPTS_H
+#define JSON_CONCEPTS_H
 
 #include <utility>
 #include <memory>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Concepts
 {
     template<typename T>

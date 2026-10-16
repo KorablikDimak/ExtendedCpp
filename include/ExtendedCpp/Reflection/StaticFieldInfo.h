@@ -1,16 +1,16 @@
-#ifndef Reflection_StaticFieldInfo_H
-#define Reflection_StaticFieldInfo_H
+#ifndef REFLECTION_STATIC_FIELD_INFO_H
+#define REFLECTION_STATIC_FIELD_INFO_H
 
 #include <any>
-#include <typeindex>
 #include <memory>
+#include <typeindex>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class StaticFieldInfo final : public MemberInfo
     {
     private:
@@ -23,7 +23,7 @@ namespace ExtendedCpp::Reflection
 
     public:
         /// @brief 
-        /// @tparam TField 
+        /// @tparam TField
         template<typename TField>
         struct Helper final
         {
@@ -32,12 +32,12 @@ namespace ExtendedCpp::Reflection
 
         public:
             /// @brief 
-            /// @param fieldPtr 
+            /// @param fieldPtr
             explicit Helper(TField* fieldPtr) noexcept :
                 _fieldPtr(fieldPtr) {}
 
             /// @brief 
-            /// @return 
+            /// @return
             [[nodiscard]]
             TField* GetField() const noexcept
             {
@@ -45,7 +45,7 @@ namespace ExtendedCpp::Reflection
             }
 
             /// @brief 
-            /// @return 
+            /// @return
             [[nodiscard]]
             const TField* ReadField() const noexcept
             {
@@ -57,7 +57,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam THelper 
         /// @param fieldName 
         /// @param typeIndex 
-        /// @param fieldHelper 
+        /// @param fieldHelper
         template<typename THelper>
         StaticFieldInfo(std::string&& fieldName, const std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             MemberInfo(std::move(fieldName)),
@@ -74,7 +74,7 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TField 
-        /// @return 
+        /// @return
         template<typename TField>
         TField GetValue() const
         {
@@ -83,7 +83,7 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TField 
-        /// @return 
+        /// @return
         template<typename TField>
         TField* GetField() const
         {
@@ -91,18 +91,18 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::any GetField() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         void* GetFieldPtr() const noexcept;
 
         /// @brief 
         /// @tparam TField 
-        /// @return 
+        /// @return
         template<typename TField>
         const TField* ReadField() const
         {
@@ -110,31 +110,31 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::any ReadField() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         const void* ReadFieldPtr() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
-        Reflection::MemberType GetMemberType() const noexcept override;
+        MemberType GetMemberType() const noexcept override;
     };
 
     /// @brief 
     /// @tparam TField 
     /// @param name 
     /// @param fieldPtr 
-    /// @return 
+    /// @return
     template<typename TField>
     std::shared_ptr<MemberInfo> CreateStaticFieldInfo(std::string&& name, TField* fieldPtr) noexcept
     {

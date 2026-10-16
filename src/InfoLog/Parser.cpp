@@ -1,17 +1,18 @@
-#include <filesystem>
 #include <chrono>
+#include <filesystem>
+#include <memory>
 
-#include <ExtendedCpp/InfoLog/Parser.h>
 #include <ExtendedCpp/InfoLog/Converter.h>
+#include <ExtendedCpp/InfoLog/Parser.h>
 
 void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::string& message, const LogLevel logLevel, const std::string& tag) noexcept
 {
     const auto currentTime = std::chrono::system_clock::now();
     const time_t time = std::chrono::system_clock::to_time_t(currentTime);
-    const std::unique_ptr<tm> timeStructure(new tm());
+    const auto timeStructure = std::make_unique<tm>();
 
 #if defined(_WIN32)
-    localtime_s(timeStructure.get(), &time);
+    localtime_s(timeStructure.get(), &time); // NOLINT(*-err33-c)
 #elif defined(__linux__)
     localtime_r(&time, timeStructure.get());
 #elif defined(__APPLE__)
@@ -20,7 +21,7 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
 
     const auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(currentTime);
     const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - seconds);
-
+// NOLINTBEGIN(*-magic-numbers)
     ReplaceAll(layout, "{years}", std::to_string(timeStructure->tm_year + 1900));
     ReplaceAll(layout, "{months}", std::to_string(timeStructure->tm_mon + 1));
     ReplaceAll(layout, "{days}", std::to_string(timeStructure->tm_mday));
@@ -33,7 +34,7 @@ void ExtendedCpp::InfoLog::Parser::ParseLayout(std::string& layout, const std::s
     ReplaceAll(layout, "{yy}", std::to_string(timeStructure->tm_year - 100));
     ReplaceAll(layout, "{mm}", std::to_string(timeStructure->tm_mon + 1));
     ReplaceAll(layout, "{dd}", std::to_string(timeStructure->tm_mday));
-
+// NOLINTEND(*-magic-numbers)
     ReplaceAll(layout, "{hours}", std::to_string(timeStructure->tm_hour));
     ReplaceAll(layout, "{minutes}", std::to_string(timeStructure->tm_min));
     ReplaceAll(layout, "{seconds}", std::to_string(timeStructure->tm_sec));

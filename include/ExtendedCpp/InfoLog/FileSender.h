@@ -1,14 +1,14 @@
-#ifndef InfoLog_FileSender_H
-#define InfoLog_FileSender_H
+#ifndef INFO_LOG_FILE_SENDER_H
+#define INFO_LOG_FILE_SENDER_H
 
 #include <mutex>
 
 #include <ExtendedCpp/InfoLog/ISender.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
+    /// @brief
     class FileSender final : public ISender
     {
     private:
@@ -17,17 +17,16 @@ namespace ExtendedCpp::InfoLog
 
     public:
         /// @brief 
-        /// @param config 
+        /// @param config
         explicit FileSender(const std::map<std::string, std::string>& config);
 
-        /// @brief 
+        /// @brief
         ~FileSender() override = default;
 
-    protected:
         /// @brief 
         /// @param message 
         /// @param logLevel 
-        /// @param tag 
+        /// @param tag
         void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept override;
     };
 }

@@ -1,5 +1,5 @@
-#ifndef Json_JsonMacros_H
-#define Json_JsonMacros_H
+#ifndef JSON_JSON_MACROS_H
+#define JSON_JSON_MACROS_H
 
 #include <ExtendedCpp/Json/json.hpp>
 #include <ExtendedCpp/Json/Concepts.h>

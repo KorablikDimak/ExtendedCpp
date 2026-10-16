@@ -1,24 +1,24 @@
-#ifndef Reflection_StaticMethodInfo_H
-#define Reflection_StaticMethodInfo_H
+#ifndef REFLECTION_STATIC_METHOD_INFO_H
+#define REFLECTION_STATIC_METHOD_INFO_H
 
 #include <any>
+#include <memory>
 #include <utility>
 #include <vector>
-#include <memory>
 
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <ExtendedCpp/Reflection/TypeTraits.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class StaticMethodInfo final : public MemberInfo
     {
     private:
         std::any _methodHelper;
         std::any (*_method)(const std::any& helper, std::any&& args);
-        std::vector<std::type_index> _parameters{};
+        std::vector<std::type_index> _parameters;
 
     public:
         /// @brief 
@@ -32,17 +32,17 @@ namespace ExtendedCpp::Reflection
             TMethod _method;
 
         public:
-            /// @brief 
+            /// @brief
             using ReturnType = TReturnType;
 
             /// @brief 
-            /// @param method 
+            /// @param method
             explicit Helper(TMethod method) noexcept :
                 _method(std::forward<TMethod>(method)) {}
 
             /// @brief 
             /// @param args 
-            /// @return 
+            /// @return
             TReturnType Invoke(std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
@@ -59,7 +59,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam THelper 
         /// @param methodName 
         /// @param methodHelper 
-        /// @param parameters 
+        /// @param parameters
         template<typename THelper>
         StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
             MemberInfo(std::move(methodName)),
@@ -76,14 +76,14 @@ namespace ExtendedCpp::Reflection
                 }),
             _parameters(std::move(parameters)) {}
 
-        /// @brief 
+        /// @brief
         ~StaticMethodInfo() override = default;
 
         /// @brief 
         /// @tparam TResult 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename TResult, typename... TArgs>
         TResult Invoke(TArgs&&... args) const
         {
@@ -99,7 +99,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
-        /// @return 
+        /// @return
         template<typename... TArgs>
         std::any Invoke(TArgs&&... args) const
         {
@@ -107,12 +107,12 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         MemberType GetMemberType() const noexcept override;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::type_index> Parameters() const noexcept;
     };
@@ -122,7 +122,7 @@ namespace ExtendedCpp::Reflection
     /// @tparam TArgs
     /// @param name 
     /// @param methodPtr 
-    /// @return 
+    /// @return
     template<typename TReturnType, typename... TArgs>
     std::shared_ptr<MemberInfo> CreateStaticMethodInfo(std::string&& name,
                                                        TReturnType(*methodPtr)(TArgs...)) noexcept

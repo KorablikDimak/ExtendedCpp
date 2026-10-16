@@ -1,5 +1,5 @@
-#include <ExtendedCpp/InfoLog/Logger.h>
 #include <ExtendedCpp/InfoLog/FileSender.h>
+#include <ExtendedCpp/InfoLog/Logger.h>
 #include <ExtendedCpp/Reflection.h>
 
 ExtendedCpp::InfoLog::Logger::Logger(const Configuration::Ptr& configuration) noexcept
@@ -17,10 +17,10 @@ void ExtendedCpp::InfoLog::Logger::AddSender(const std::map<std::string, std::st
     else if (config.contains("logsender")) logSenderName = config.at("logsender");
     else return;
 
-    if (ToLowerCase(logSenderName) == "file") _senders.push_back(std::make_shared<FileSender>(config));
-    else if (ToLowerCase(logSenderName) == "filesender") _senders.push_back(std::make_shared<FileSender>(config));
-    else if (ToLowerCase(logSenderName) == "console") _senders.push_back(std::make_shared<ConsoleSender>(config));
-    else if (ToLowerCase(logSenderName) == "consolesender") _senders.push_back(std::make_shared<ConsoleSender>(config));
+    if (ToLowerCase(logSenderName) == "file" || ToLowerCase(logSenderName) == "filesender")
+        _senders.push_back(std::make_shared<FileSender>(config));
+    else if (ToLowerCase(logSenderName) == "console" || ToLowerCase(logSenderName) == "consolesender")
+        _senders.push_back(std::make_shared<ConsoleSender>(config));
     else
     {
         const std::vector<Reflection::TypeInfo> sendersInfo = Reflection::GetType(logSenderName);
@@ -34,7 +34,7 @@ void ExtendedCpp::InfoLog::Logger::AddSender(const std::map<std::string, std::st
             for (const auto& constructor : constructors)
                 if (constructor->Parameters().size() == 1 && constructor->Parameters()[0] == typeid(config))
                 {
-                    std::shared_ptr<void> newSender = constructor->New(config);
+                    const std::shared_ptr<void> newSender = constructor->New(config);
                     if (!newSender) continue;
                     _senders.push_back(std::static_pointer_cast<ISender>(newSender));
                     return;
@@ -51,10 +51,10 @@ void ExtendedCpp::InfoLog::Logger::AddSender(std::map<std::string, std::string>&
     else if (config.contains("logsender")) logSenderName = config.at("logsender");
     else return;
 
-    if (ToLowerCase(logSenderName) == "file") _senders.push_back(std::make_shared<FileSender>(std::move(config)));
-    else if (ToLowerCase(logSenderName) == "filesender") _senders.push_back(std::make_shared<FileSender>(std::move(config)));
-    else if (ToLowerCase(logSenderName) == "console") _senders.push_back(std::make_shared<ConsoleSender>(std::move(config)));
-    else if (ToLowerCase(logSenderName) == "consolesender") _senders.push_back(std::make_shared<ConsoleSender>(std::move(config)));
+    if (ToLowerCase(logSenderName) == "file" || ToLowerCase(logSenderName) == "filesender")
+        _senders.push_back(std::make_shared<FileSender>(std::move(config)));
+    else if (ToLowerCase(logSenderName) == "console" || ToLowerCase(logSenderName) == "consolesender")
+        _senders.push_back(std::make_shared<ConsoleSender>(std::move(config)));
     else
     {
         const std::vector<Reflection::TypeInfo> sendersInfo = Reflection::GetType(logSenderName);
@@ -68,7 +68,7 @@ void ExtendedCpp::InfoLog::Logger::AddSender(std::map<std::string, std::string>&
             for (const auto& constructor : constructors)
                 if (constructor->Parameters().size() == 1 && constructor->Parameters()[0] == typeid(config))
                 {
-                    std::shared_ptr<void> newSender = constructor->New(config);
+                    const std::shared_ptr<void> newSender = constructor->New(config);
                     if (!newSender) continue;
                     _senders.push_back(std::static_pointer_cast<ISender>(newSender));
                     return;
@@ -85,5 +85,5 @@ void ExtendedCpp::InfoLog::Logger::AddSender(const ISender::Ptr& sender) noexcep
 void ExtendedCpp::InfoLog::Logger::RemoveSender(const ISender::Ptr& sender) noexcept
 {
     for (std::size_t i = 0; i < _senders.size(); ++i)
-        if (sender.get() == _senders[i].get()) _senders.erase(_senders.begin() + i);
+        if (sender.get() == _senders[i].get()) _senders.erase(_senders.begin() + static_cast<std::int64_t>(i));
 }

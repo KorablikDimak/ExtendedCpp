@@ -1,14 +1,14 @@
-#ifndef InfoLog_ConsoleSender_H
-#define InfoLog_ConsoleSender_H
+#ifndef INFO_LOG_CONSOLE_SENDER_H
+#define INFO_LOG_CONSOLE_SENDER_H
 
 #include <mutex>
 
 #include <ExtendedCpp/InfoLog/ISender.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
+    /// @brief
     class ConsoleSender final : public ISender
     {
     private:
@@ -16,17 +16,16 @@ namespace ExtendedCpp::InfoLog
 
     public:
         /// @brief 
-        /// @param config 
+        /// @param config
         explicit ConsoleSender(const std::map<std::string, std::string>& config) noexcept;
 
-        /// @brief 
+        /// @brief
         ~ConsoleSender() override = default;
 
-    protected:
         /// @brief 
         /// @param message 
         /// @param logLevel 
-        /// @param tag 
+        /// @param tag
         void Send(const std::string& message, LogLevel logLevel, const std::string& tag) const noexcept override;
     };
 }

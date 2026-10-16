@@ -1,9 +1,9 @@
-#ifndef Events_LambdaHandler_H
-#define Events_LambdaHandler_H
+#ifndef EVENTS_LAMBDA_HANDLER_H
+#define EVENTS_LAMBDA_HANDLER_H
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Events
 {
     /// @brief 
@@ -26,7 +26,7 @@ namespace ExtendedCpp::Events
         explicit FunctorHandler(TFunctor&& functor) noexcept :
             _functor(std::forward<TFunctor>(functor)) {}
 
-        /// @brief 
+        /// @brief
         ~FunctorHandler() override = default;
 
         /// @brief 

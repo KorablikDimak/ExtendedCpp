@@ -1,5 +1,5 @@
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 
 #include <ExtendedCpp/InfoLog/FileSender.h>
@@ -24,8 +24,8 @@ void ExtendedCpp::InfoLog::FileSender::Send(const std::string& message, const Lo
 
     try
     {
-        std::filesystem::path layoutPath(filePath);
-        std::lock_guard lock(_mutex);
+        const std::filesystem::path layoutPath(filePath);
+        std::scoped_lock lock(_mutex);
         if (!exists(layoutPath.parent_path()))
             create_directories(layoutPath.parent_path());
     }
@@ -37,11 +37,11 @@ void ExtendedCpp::InfoLog::FileSender::Send(const std::string& message, const Lo
     std::string layout = Config.at("layout");
     Parser::ParseLayout(layout, message, logLevel, tag);
 
-    std::lock_guard lock(_mutex);
+    std::scoped_lock lock(_mutex);
     std::ofstream fileStream(filePath, std::ios::app);
     if (fileStream.is_open())
     {
-        fileStream << layout << std::endl;
+        fileStream << layout << '\n';
         fileStream.close();
     }
 }

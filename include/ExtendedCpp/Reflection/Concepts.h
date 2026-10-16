@@ -1,10 +1,10 @@
-#ifndef Reflection_Concepts_H
-#define Reflection_Concepts_H
+#ifndef REFLECTION_CONCEPTS_H
+#define REFLECTION_CONCEPTS_H
 
-#include <memory>
 #include <iterator>
+#include <memory>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection::Concepts
 {
     template<typename TCollection>

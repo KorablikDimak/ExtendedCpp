@@ -1,9 +1,9 @@
-#ifndef InfoLog_Concepts_H
-#define InfoLog_Concepts_H
+#ifndef INFO_LOG_CONCEPTS_H
+#define INFO_LOG_CONCEPTS_H
 
 #include <sstream>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog::Concepts
 {
     template<typename T>

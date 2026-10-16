@@ -12,10 +12,10 @@ std::vector<std::type_index> ExtendedCpp::Reflection::MethodInfo::Parameters() c
 
 bool ExtendedCpp::Reflection::MethodInfo::HasConstOverload() const noexcept
 {
-    return _methodCvQualifier != MethodCVQualifier::OnlyNoConst;
+    return _methodCvQualifier != MethodCvQualifier::OnlyNoConst;
 }
 
 bool ExtendedCpp::Reflection::MethodInfo::HasNoConstOverload() const noexcept
 {
-    return _methodCvQualifier != MethodCVQualifier::OnlyConst;
+    return _methodCvQualifier != MethodCvQualifier::OnlyConst;
 }

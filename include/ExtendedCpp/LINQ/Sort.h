@@ -1,20 +1,20 @@
-#ifndef LINQ_Sort_H
-#define LINQ_Sort_H
+#ifndef LINQ_SORT_H
+#define LINQ_SORT_H
 
+#include <cmath>
+#include <concepts>
 #include <map>
 #include <memory>
-#include <vector>
-#include <cmath>
-#include <utility>
 #include <type_traits>
-#include <concepts>
+#include <utility>
+#include <vector>
 
+#include <ExtendedCpp/LINQ/Aggregate.h>
+#include <ExtendedCpp/LINQ/Concepts.h>
 #include <ExtendedCpp/LINQ/OrderType.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
-#include <ExtendedCpp/LINQ/Concepts.h>
-#include <ExtendedCpp/LINQ/Aggregate.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::LINQ::Sort
 {
     static constexpr std::size_t RUN = 64;
@@ -25,10 +25,10 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
-    void SelectionSort(TCollection&& collection, const std::size_t start, const std::size_t end,
+    void SelectionSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
                        const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -67,12 +67,12 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    void SelectionSort(TCollection&& collection, const std::size_t start, const std::size_t end, TSelector&& selector,
+    void SelectionSort(TCollection&& collection, const std::size_t start, const std::size_t end, const TSelector& selector, // NOLINT(*-missing-std-forward)
                        const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
@@ -109,10 +109,10 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
-    void InsertionSort(TCollection&& collection, const std::size_t start, const std::size_t end,
+    void InsertionSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
                        const OrderType orderType = OrderType::ASC) noexcept
     {
         if (orderType == OrderType::ASC)
@@ -147,13 +147,13 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    void InsertionSort(TCollection&& collection, const std::size_t start, const std::size_t end,
-                       TSelector&& selector, const OrderType orderType = OrderType::ASC)
+    void InsertionSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
+                       const TSelector& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (orderType == OrderType::ASC)
@@ -185,10 +185,10 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection>
     requires Concepts::Comparable<RandomAccessValueType<TCollection>>
-    void CombSort(TCollection&& collection, const std::size_t start, const std::size_t end,
+    void CombSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
                   const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end)
@@ -227,13 +227,13 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    void CombSort(TCollection&& collection, const std::size_t start, const std::size_t end,
-                  TSelector&& selector, const OrderType orderType = OrderType::ASC)
+    void CombSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
+                  const TSelector& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (start >= end)
@@ -270,11 +270,11 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>>
     requires Concepts::Comparable<T> && Concepts::Divisible<T>
-    void BucketSort(TCollection&& collection, const std::size_t start, const std::size_t end,
+    void BucketSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
                     const OrderType orderType = OrderType::ASC) noexcept
     {
         if (start >= end)
@@ -298,7 +298,7 @@ namespace ExtendedCpp::LINQ::Sort
         }
 
         for (std::size_t i = start; i <= end; ++i)
-            for (long long j = static_cast<long long>(blockCount) - 1; j >= 0; --j)
+            for (std::int64_t j = static_cast<std::int64_t>(blockCount) - 1; j >= 0; --j)
                 if (collection[i] >= blockIndexes[j])
                 {
                     bucket[blockIndexes[j]].push_back(collection[i]);
@@ -309,7 +309,7 @@ namespace ExtendedCpp::LINQ::Sort
         {
             if (block.second.empty())
                 continue;
-            if (block.second.size() < 1000)
+            if (block.second.size() < 1024) // NOLINT(*-magic-numbers)
                 InsertionSort(block.second.data(), 0, block.second.size() - 1, orderType);
             else
                 CombSort(block.second.data(), 0, block.second.size() - 1, orderType);
@@ -331,7 +331,7 @@ namespace ExtendedCpp::LINQ::Sort
         }
         else
         {
-            for (long long i = static_cast<long long>(blockCount) - 1; i >= 0; --i)
+            for (std::int64_t i = static_cast<std::int64_t>(blockCount) - 1; i >= 0; --i)
             {
                 std::vector<T> block = std::move(bucket[blockIndexes[i]]);
                 if (block.empty())
@@ -351,14 +351,14 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>> &&
              Concepts::Divisible<std::invoke_result_t<TSelector, T>>
-    void BucketSort(TCollection&& collection, const std::size_t start, const std::size_t end,
-                    TSelector&& selector, const OrderType orderType = OrderType::ASC)
+    void BucketSort(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
+                    const TSelector& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (start >= end)
@@ -384,7 +384,7 @@ namespace ExtendedCpp::LINQ::Sort
         }
 
         for (std::size_t i = start; i <= end; ++i)
-            for (long long j = static_cast<long long>(blockCount) - 1; j >= 0; --j)
+            for (std::int64_t j = static_cast<std::int64_t>(blockCount) - 1; j >= 0; --j)
                 if (selector(collection[i]) >= blockIndexes[j])
                 {
                     bucket[blockIndexes[j]].push_back(collection[i]);
@@ -395,7 +395,7 @@ namespace ExtendedCpp::LINQ::Sort
         {
             if (block.second.empty())
                 continue;
-            if (block.second.size() < 1000)
+            if (block.second.size() < 1024) // NOLINT(*-magic-numbers)
                 InsertionSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
             else
                 CombSort(block.second.data(), 0, block.second.size() - 1, selector, orderType);
@@ -417,7 +417,7 @@ namespace ExtendedCpp::LINQ::Sort
         }
         else
         {
-            for (long long i = static_cast<long long>(blockCount) - 1; i >= 0; --i)
+            for (std::int64_t i = static_cast<std::int64_t>(blockCount) - 1; i >= 0; --i)
             {
                 std::vector<T> block = std::move(bucket[blockIndexes[i]]);
                 if (block.empty())
@@ -436,9 +436,9 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param mid 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
+    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end, // NOLINT(*-missing-std-forward)
                const OrderType orderType) noexcept
     {
         const std::size_t n1 = mid - start + 1;
@@ -454,13 +454,14 @@ namespace ExtendedCpp::LINQ::Sort
         for (std::size_t i = mid + 1; i <= end; ++i)
             array2.push_back(collection[i]);
 
-        std::size_t i = 0, j = 0;
+        std::size_t i = 0;
+        std::size_t j = 0;
 
         if (orderType == OrderType::ASC)
         {
             for (std::size_t k = start; k <= end; ++k)
             {
-                if (i != n1 && (j == n2 || array1[i] < array2[j]))
+                if (i != n1 && (j == n2 || array1[i] <= array2[j]))
                 {
                     collection[k] = array1[i];
                     ++i;
@@ -469,11 +470,6 @@ namespace ExtendedCpp::LINQ::Sort
                 {
                     collection[k] = array2[j];
                     ++j;
-                }
-                else if (i != n1 && (j == n2 || array1[i] == array2[j]))
-                {
-                    collection[k] = array1[i];
-                    ++i;
                 }
             }
         }
@@ -486,12 +482,7 @@ namespace ExtendedCpp::LINQ::Sort
                     collection[k] = array1[i];
                     ++i;
                 }
-                else if (j != n2 && (i == n1 || array1[i] < array2[j]))
-                {
-                    collection[k] = array2[j];
-                    ++j;
-                }
-                else if (j != n2 && (i == n1 || array1[i] == array2[j]))
+                else if (j != n2 && (i == n1 || array1[i] <= array2[j]))
                 {
                     collection[k] = array2[j];
                     ++j;
@@ -505,7 +496,7 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<typename TCollection>
     void MergeSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
@@ -527,13 +518,13 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param mid 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end,
-               TSelector&& selector, const OrderType orderType)
+    void Merge(TCollection&& collection, const std::size_t start, const std::size_t mid, const std::size_t end, // NOLINT(*-missing-std-forward)
+               const TSelector& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         const std::size_t n1 = mid - start + 1;
@@ -549,13 +540,14 @@ namespace ExtendedCpp::LINQ::Sort
         for (std::size_t i = mid + 1; i <= end; ++i)
             array2.push_back(collection[i]);
 
-        std::size_t i = 0, j = 0;
+        std::size_t i = 0;
+        std::size_t j = 0;
 
         if (orderType == OrderType::ASC)
         {
             for (std::size_t k = start; k <= end; ++k)
             {
-                if (i != n1 && (j == n2 || selector(array1[i]) < selector(array2[j])))
+                if (i != n1 && (j == n2 || selector(array1[i]) <= selector(array2[j])))
                 {
                     collection[k] = array1[i];
                     ++i;
@@ -564,11 +556,6 @@ namespace ExtendedCpp::LINQ::Sort
                 {
                     collection[k] = array2[j];
                     ++j;
-                }
-                else if (i != n1 && (j == n2 || selector(array1[i]) == selector(array2[j])))
-                {
-                    collection[k] = array1[i];
-                    ++i;
                 }
             }
         }
@@ -581,12 +568,7 @@ namespace ExtendedCpp::LINQ::Sort
                     collection[k] = array1[i];
                     ++i;
                 }
-                else if (j != n2 && (i == n1 || selector(array1[i]) < selector(array2[j])))
-                {
-                    collection[k] = array2[j];
-                    ++j;
-                }
-                else if (j != n2 && (i == n1 || selector(array1[i]) == selector(array2[j])))
+                else if (j != n2 && (i == n1 || selector(array1[i]) <= selector(array2[j])))
                 {
                     collection[k] = array2[j];
                     ++j;
@@ -603,12 +585,12 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     void MergeSort(TCollection&& collection, const std::size_t start, const std::size_t end,
-                   TSelector&& selector, const OrderType orderType = OrderType::ASC)
+                   const TSelector& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (start >= end)
@@ -620,13 +602,12 @@ namespace ExtendedCpp::LINQ::Sort
     }
 
     /// @brief 
-    /// @tparam TCollection 
-    /// @tparam T 
+    /// @tparam TCollection
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
-    template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
+    /// @param orderType
+    template<Concepts::RandomAccess TCollection>
     void TimSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                  const OrderType orderType = OrderType::ASC) noexcept
     {
@@ -662,13 +643,13 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
     void TimSort(TCollection&& collection, const std::size_t start, const std::size_t end,
-                 TSelector&& selector, const OrderType orderType = OrderType::ASC)
+                 const TSelector& selector, const OrderType orderType = OrderType::ASC)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         if (start >= end)
@@ -702,13 +683,13 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param orderType 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
+    std::size_t Partition(const TCollection& collection, const std::size_t start, const std::size_t end,
                           const OrderType orderType) noexcept
     {
-        auto i = static_cast<long long>(start);
-        auto j = static_cast<long long>(end);
+        auto i = static_cast<std::int64_t>(start);
+        auto j = static_cast<std::int64_t>(end);
         const T pivot = collection[(start + end) / 2];
 
         if (orderType == OrderType::ASC)
@@ -754,7 +735,7 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param collection 
     /// @param start 
     /// @param end 
-    /// @param orderType 
+    /// @param orderType
     template<typename TCollection>
     void QuickSort(TCollection&& collection, const std::size_t start, const std::size_t end,
                    const OrderType orderType = OrderType::ASC) noexcept
@@ -782,19 +763,19 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param end 
     /// @param selector 
     /// @param orderType 
-    /// @return 
+    /// @return
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>
     requires Concepts::Comparable<std::invoke_result_t<TSelector, T>>
-    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end,
-                                 TSelector&& selector, const OrderType orderType)
+    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
+                          const TSelector& selector, const OrderType orderType)
     noexcept(std::is_nothrow_invocable_v<TSelector, T>)
     {
         using TSelect = std::invoke_result_t<TSelector, T>;
 
-        auto i = static_cast<long long>(start);
-        auto j = static_cast<long long>(end);
+        auto i = static_cast<std::int64_t>(start);
+        auto j = static_cast<std::int64_t>(end);
         const TSelect pivot = selector(collection[(start + end) / 2]);
 
         if (orderType == OrderType::ASC)
@@ -843,7 +824,7 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param start 
     /// @param end 
     /// @param selector 
-    /// @param orderType 
+    /// @param orderType
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
              std::invocable<T> TSelector>

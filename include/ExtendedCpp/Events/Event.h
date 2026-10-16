@@ -1,14 +1,14 @@
-#ifndef Events_Event_H
-#define Events_Event_H
+#ifndef EVENTS_EVENT_H
+#define EVENTS_EVENT_H
 
-#include <memory>
 #include <list>
-#include <shared_mutex>
+#include <memory>
 #include <mutex>
+#include <shared_mutex>
 
 #include <ExtendedCpp/Events/IEventHandler.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Events
 {
     /// @brief 
@@ -23,10 +23,10 @@ namespace ExtendedCpp::Events
         mutable std::shared_mutex _listMutex;
 
     public:
-        /// @brief 
+        /// @brief
         Event() noexcept = default;
 
-        /// @brief 
+        /// @brief
         ~Event() = default;
 
         /// @brief 
@@ -39,7 +39,7 @@ namespace ExtendedCpp::Events
         }
 
         /// @brief 
-        /// @param handler 
+        /// @param handler
         void operator+=(const EventHandler& handler) noexcept
         {
             if (!Contains(handler))
@@ -50,7 +50,7 @@ namespace ExtendedCpp::Events
         }
 
         /// @brief 
-        /// @param handler 
+        /// @param handler
         void operator-=(const EventHandler& handler) noexcept
         {
             if (Contains(handler))
@@ -62,7 +62,7 @@ namespace ExtendedCpp::Events
 
         /// @brief 
         /// @param handler 
-        /// @return 
+        /// @return
         bool Contains(const EventHandler& handler) const noexcept
         {
             std::shared_lock lock(_listMutex);
@@ -72,6 +72,7 @@ namespace ExtendedCpp::Events
             return false;
         }
 
+        // ReSharper disable once CppInconsistentNaming
         [[nodiscard]]
         bool empty() const noexcept
         {

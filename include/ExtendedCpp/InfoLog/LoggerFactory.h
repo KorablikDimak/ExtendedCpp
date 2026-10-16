@@ -1,12 +1,12 @@
-#ifndef InfoLog_LoggerFactory_H
-#define InfoLog_LoggerFactory_H
+#ifndef INFO_LOG_LOGGER_FACTORY_H
+#define INFO_LOG_LOGGER_FACTORY_H
 
 #include <ExtendedCpp/InfoLog/Logger.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
+    /// @brief
     class LoggerFactory final
     {
     private:
@@ -15,24 +15,24 @@ namespace ExtendedCpp::InfoLog
     public:
         /// @brief 
         /// @tparam T 
-        /// @param fileName 
+        /// @param fileName
         template<Concepts::ConvertableToString T>
         explicit LoggerFactory(const T& fileName) : _configuration(fileName) {}
 
         /// @brief 
-        /// @param factory 
+        /// @param factory
         LoggerFactory(const LoggerFactory& factory) noexcept = default;
 
         /// @brief 
-        /// @param factory 
+        /// @param factory
         LoggerFactory(LoggerFactory&& factory) noexcept = default;
 
         /// @brief 
-        /// @param configuration 
+        /// @param configuration
         explicit LoggerFactory(const Configuration& configuration) noexcept;
 
         /// @brief 
-        /// @param configuration 
+        /// @param configuration
         explicit LoggerFactory(Configuration&& configuration) noexcept;
 
         /// @brief
@@ -47,7 +47,7 @@ namespace ExtendedCpp::InfoLog
 
         /// @brief 
         /// @tparam T 
-        /// @param fileName 
+        /// @param fileName
         template<Concepts::ConvertableToString T>
         void SetConfiguration(const T& fileName)
         {
@@ -56,7 +56,7 @@ namespace ExtendedCpp::InfoLog
 
         /// @brief 
         /// @tparam T 
-        /// @param fileName 
+        /// @param fileName
         template<Concepts::ConvertableToString T>
         void SetConfiguration(T&& fileName)
         {
@@ -64,15 +64,15 @@ namespace ExtendedCpp::InfoLog
         }
 
         /// @brief 
-        /// @param configuration 
+        /// @param configuration
         void SetConfiguration(const Configuration& configuration) noexcept;
 
         /// @brief 
-        /// @param configuration 
+        /// @param configuration
         void SetConfiguration(Configuration&& configuration) noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         Logger::Ptr CreateLogger() const noexcept;
     };

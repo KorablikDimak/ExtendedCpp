@@ -1,18 +1,20 @@
-#ifndef InfoLog_LogLevel_H
-#define InfoLog_LogLevel_H
+#ifndef INFO_LOG_LOG_LEVEL_H
+#define INFO_LOG_LOG_LEVEL_H
 
-/// @brief 
+#include <cstdint>
+
+/// @brief
 namespace ExtendedCpp::InfoLog
 {
-    /// @brief 
-    enum class LogLevel
+    /// @brief
+    enum class LogLevel : std::uint8_t
     {
-        Trace = 0,
-        Debug = 1,
-        Info = 2,
-        Warning = 3,
-        Error = 4,
-        Critical = 5
+        Trace,
+        Debug,
+        Info,
+        Warning,
+        Error,
+        Critical
     };
 }
 

@@ -1,11 +1,13 @@
-#ifndef Reflection_MemberType_H
-#define Reflection_MemberType_H
+#ifndef REFLECTION_MEMBER_TYPE_H
+#define REFLECTION_MEMBER_TYPE_H
 
-/// @brief 
+#include <cstdint>
+
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
-    enum class MemberType
+    /// @brief
+    enum class MemberType : std::uint8_t
     {
         Unknown,
         Field,

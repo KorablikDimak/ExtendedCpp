@@ -1,14 +1,14 @@
-#ifndef Reflection_MemberInfo_H
-#define Reflection_MemberInfo_H
+#ifndef REFLECTION_MEMBER_INFO_H
+#define REFLECTION_MEMBER_INFO_H
 
 #include <string>
 
 #include <ExtendedCpp/Reflection/MemberType.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class MemberInfo
     {
     protected:
@@ -16,19 +16,19 @@ namespace ExtendedCpp::Reflection
 
     public:
         /// @brief 
-        /// @param name 
+        /// @param name
         explicit MemberInfo(std::string&& name) noexcept;
 
-        /// @brief 
+        /// @brief
         virtual ~MemberInfo() = default;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         virtual std::string Name() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         virtual MemberType GetMemberType() const noexcept;
     };

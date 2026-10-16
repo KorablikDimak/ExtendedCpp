@@ -1,7 +1,7 @@
-#ifndef Events_EventHandler_H
-#define Events_EventHandler_H
+#ifndef EVENTS_EVENT_HANDLER_H
+#define EVENTS_EVENT_HANDLER_H
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Events
 {
     /// @brief 
@@ -10,15 +10,15 @@ namespace ExtendedCpp::Events
     class IEventHandler
     {
     public:
-        /// @brief 
+        /// @brief
         IEventHandler() noexcept = default;
 
-        /// @brief 
+        /// @brief
         virtual ~IEventHandler() = default;
 
         /// @brief 
         /// @param other 
-        /// @return 
+        /// @return
         bool operator==(const IEventHandler& other) const noexcept
         {
             return IsEquals(other);
@@ -26,7 +26,7 @@ namespace ExtendedCpp::Events
 
         /// @brief 
         /// @param other 
-        /// @return 
+        /// @return
         bool operator!=(const IEventHandler& other) const noexcept
         {
             return !IsEquals(other);
@@ -39,7 +39,7 @@ namespace ExtendedCpp::Events
     private:
         /// @brief 
         /// @param other 
-        /// @return 
+        /// @return
         bool IsEquals(const IEventHandler& other) const noexcept
         {
             return std::addressof(*this) == std::addressof(other);

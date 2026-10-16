@@ -1,19 +1,19 @@
-#ifndef Reflection_TypeInfo_H
-#define Reflection_TypeInfo_H
+#ifndef REFLECTION_TYPE_INFO_H
+#define REFLECTION_TYPE_INFO_H
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <ExtendedCpp/Reflection/CollectionFieldInfo.h>
-#include <ExtendedCpp/Reflection/MethodInfo.h>
 #include <ExtendedCpp/Reflection/ConstructorInfo.h>
-#include <ExtendedCpp/Reflection/StaticMethodInfo.h>
+#include <ExtendedCpp/Reflection/MethodInfo.h>
 #include <ExtendedCpp/Reflection/StaticFieldInfo.h>
+#include <ExtendedCpp/Reflection/StaticMethodInfo.h>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Reflection
 {
-    /// @brief 
+    /// @brief
     class TypeInfo final
     {
     private:
@@ -25,82 +25,82 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @param name 
         /// @param typeIndex 
-        /// @param members 
+        /// @param members
         TypeInfo(const std::string& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
-        
+
         /// @brief 
         /// @param name 
         /// @param typeIndex 
-        /// @param members 
+        /// @param members
         TypeInfo(std::string&& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::string Name() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::type_index TypeIndex() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<MemberInfo>> GetMembers() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<FieldInfo>> GetFields() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<StaticFieldInfo>> GetStaticFields() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<MethodInfo>> GetMethods() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<StaticMethodInfo>> GetStaticMethods() const noexcept;
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<ConstructorInfo>> GetConstructors() const noexcept;
 
         /// @brief 
         /// @param name 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<MemberInfo>> GetMembers(const std::string_view& name) const noexcept;
 
         /// @brief 
         /// @param name 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::shared_ptr<FieldInfo> GetField(const std::string_view& name) const noexcept;
 
         /// @brief 
         /// @param name 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::shared_ptr<StaticFieldInfo> GetStaticField(const std::string_view& name) const noexcept;
 
         /// @brief 
         /// @param name 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<MethodInfo>> GetMethods(const std::string_view& name) const noexcept;
 
         /// @brief 
         /// @param name 
-        /// @return 
+        /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<StaticMethodInfo>> GetStaticMethods(const std::string_view& name) const noexcept;
     };

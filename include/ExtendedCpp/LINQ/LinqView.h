@@ -1,5 +1,5 @@
-#ifndef LINQ_LinqView_H
-#define LINQ_LinqView_H
+#ifndef LINQ_LINQ_VIEW_H
+#define LINQ_LINQ_VIEW_H
 
 #include <array>
 #include <deque>
@@ -16,19 +16,22 @@
 #include <ExtendedCpp/LINQ/Iterators.h>
 #include <ExtendedCpp/LINQ/TypeTraits.h>
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
     /// @brief
- /// @tparam TIterator
+    /// @tparam TIterator
     template<std::forward_iterator TIterator>
     class LinqView final
     {
     public:
         /// @brief
+        // ReSharper disable once CppInconsistentNaming
         using iterator = TIterator;
 
         /// @brief
+        // ReSharper disable once CppInconsistentNaming
         using const_iterator = TIterator;
 
         /// @brief
@@ -44,26 +47,26 @@ namespace ExtendedCpp::LINQ
     public:
         /// @brief
         /// @param begin
-      /// @param end
+        /// @param end
         LinqView(TIterator begin, TIterator end) noexcept :
             _begin(std::move(begin)), _end(std::move(end)) {}
 
         /// @brief
-     /// @param other
+        /// @param other
         LinqView(const LinqView& other) noexcept = default;
 
         /// @brief
-     /// @param other
+        /// @param other
         LinqView(LinqView&& other) noexcept = default;
 
         /// @brief
-     /// @param other
-       /// @return
+        /// @param other
+        /// @return
         LinqView& operator=(const LinqView& other) noexcept = default;
 
         /// @brief
-     /// @param other
-       /// @return
+        /// @param other
+        /// @return
         LinqView& operator=(LinqView&& other) noexcept = default;
 
         /// @brief
@@ -81,7 +84,7 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief
-     /// @return
+        /// @return
         TIterator cbegin() const noexcept
         {
             return _begin;
@@ -95,7 +98,7 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief
-     /// @return
+        /// @return
         [[nodiscard]]
         std::vector<value_type> ToVector() const
         noexcept(noexcept(*std::declval<TIterator>()) &&
@@ -108,16 +111,16 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief
-        /// @tparam SIZE
-      /// @return
-        template<std::size_t SIZE>
-        std::array<value_type, SIZE> ToArray() const
+        /// @tparam Size
+        /// @return
+        template<std::size_t Size>
+        std::array<value_type, Size> ToArray() const
         noexcept(noexcept(*std::declval<TIterator>()) &&
                  noexcept(++std::declval<TIterator>()))
         {
-            std::array<value_type, SIZE> array;
+            std::array<value_type, Size> array;
             std::size_t i = 0;
-            for (TIterator it = _begin; it != _end && i < SIZE; ++it, ++i)
+            for (TIterator it = _begin; it != _end && i < Size; ++it, ++i)
                 array[i] = *it;
             return array;
         }
@@ -224,7 +227,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TKey
-      /// @tparam TValue
+        /// @tparam TValue
         /// @return
         template<typename TKey = typename PairTraits<value_type>::FirstType,
                  typename TValue = typename PairTraits<value_type>::SecondType>
@@ -241,7 +244,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TKey
-      /// @tparam TValue
+        /// @tparam TValue
         /// @return
         template<typename TKey = typename PairTraits<value_type>::FirstType,
                  typename TValue = typename PairTraits<value_type>::SecondType>
@@ -258,7 +261,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TMap
-      /// @param mapFunction
+        /// @param mapFunction
         /// @return
         template<std::invocable<value_type> TMap>
         requires std::same_as<std::invoke_result_t<TMap, value_type>, value_type>
@@ -273,7 +276,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @tparam TTransform
         /// @param transform
-      /// @return
+        /// @return
         template<std::invocable<value_type&> TTransform>
         requires std::same_as<std::invoke_result_t<TTransform, value_type&>, void>
         LinqView<TransformIterator<TIterator, TTransform>> Transform(TTransform&& transform) const
@@ -285,10 +288,10 @@ namespace ExtendedCpp::LINQ
         }
 
         /// @brief
-     /// @tparam TResult
-       /// @tparam TSelector
-     /// @param selector
-       /// @return
+        /// @tparam TResult
+        /// @tparam TSelector
+        /// @param selector
+        /// @return
         template<std::invocable<value_type> TSelector, typename TResult = std::invoke_result_t<TSelector, value_type>>
         LinqView<SelectorIterator<TResult, TIterator, TSelector>> Select(TSelector&& selector) const
         noexcept(std::is_nothrow_constructible_v<SelectorIterator<TResult, TIterator, TSelector>, TResult, TIterator, TSelector>)
@@ -301,7 +304,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @tparam TPredicate
         /// @param predicate
-      /// @return
+        /// @return
         template<Concepts::IsPredicate<value_type> TPredicate>
         LinqView<WhereIterator<TIterator, TPredicate>> Where(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
@@ -314,7 +317,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @tparam TPredicate
         /// @param predicate
-      /// @return
+        /// @return
         template<Concepts::IsPredicate<value_type> TPredicate>
         LinqView<RemoveWhereIterator<TIterator, TPredicate>> RemoveWhere(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
@@ -326,12 +329,12 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TKey
-      /// @tparam TKeySelector
-      /// @param keySelector
+        /// @tparam TKeySelector
+        /// @param keySelector
         /// @return
         template<std::invocable<value_type> TKeySelector,
                  typename TKey = std::invoke_result_t<TKeySelector, value_type>>
-        std::map<TKey, std::vector<value_type>> GroupBy(TKeySelector&& keySelector) const
+        std::map<TKey, std::vector<value_type>> GroupBy(const TKeySelector& keySelector) const
         noexcept(std::is_nothrow_invocable_v<TKeySelector, value_type> &&
                  noexcept(noexcept(*std::declval<TIterator>()) &&
                  noexcept(++std::declval<TIterator>())))
@@ -351,14 +354,14 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TOtherCollection
-      /// @tparam TInnerKeySelector
-     /// @tparam TOtherKeySelector
-     /// @tparam TResultSelector
-       /// @param otherCollection
+        /// @tparam TInnerKeySelector
+        /// @tparam TOtherKeySelector
+        /// @tparam TResultSelector
+        /// @param otherCollection
         /// @param innerKeySelector
-       /// @param otherKeySelector
-       /// @param resultSelector
-     /// @return
+        /// @param otherKeySelector
+        /// @param resultSelector
+        /// @return
         template<Concepts::ForwardIterable TOtherCollection,
                  std::invocable<value_type> TInnerKeySelector,
                  std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
@@ -387,7 +390,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @tparam TOtherCollection
-      /// @param otherCollection
+        /// @param otherCollection
         /// @return
         template<Concepts::ForwardIterable TOtherCollection>
         LinqView<ZipIterator<TIterator, TOtherCollection>> Zip(const TOtherCollection& otherCollection) const
@@ -400,7 +403,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @param count
-      /// @return
+        /// @return
         LinqView<SkipIterator<TIterator>> Skip(const std::size_t count) const
         noexcept(std::is_nothrow_constructible_v<SkipIterator<TIterator>, TIterator, std::size_t>)
         {
@@ -412,7 +415,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @tparam TPredicate
         /// @param predicate
-      /// @return
+        /// @return
         template<Concepts::IsPredicate<value_type> TPredicate>
         LinqView<SkipWhileIterator<TIterator, TPredicate>> SkipWhile(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<SkipWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)
@@ -424,7 +427,7 @@ namespace ExtendedCpp::LINQ
 
         /// @brief
         /// @param count
-      /// @return
+        /// @return
         LinqView<TakeIterator<TIterator>> Take(const std::size_t count) const
         noexcept(std::is_nothrow_constructible_v<TakeIterator<TIterator>, TIterator, std::size_t>)
         {
@@ -436,7 +439,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @tparam TPredicate
         /// @param predicate
-      /// @return
+        /// @return
         template<Concepts::IsPredicate<value_type> TPredicate>
         LinqView<TakeWhileIterator<TIterator, TPredicate>> TakeWhile(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<TakeWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)

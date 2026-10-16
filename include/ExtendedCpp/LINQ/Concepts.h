@@ -1,5 +1,5 @@
-#ifndef LINQ_Concepts_H
-#define LINQ_Concepts_H
+#ifndef LINQ_CONCEPTS_H
+#define LINQ_CONCEPTS_H
 
 #include <utility>
 

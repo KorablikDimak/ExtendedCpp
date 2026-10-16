@@ -1,12 +1,12 @@
-#ifndef Cancellation_CancellationToken_H
-#define Cancellation_CancellationToken_H
+#ifndef CANCELLATION_CANCELLATION_TOKEN_H
+#define CANCELLATION_CANCELLATION_TOKEN_H
 
 #include <atomic>
 
-/// @brief 
+/// @brief
 namespace ExtendedCpp::Cancellation
 {
-    /// @brief 
+    /// @brief
     class CancellationToken final
     {
     private:
@@ -14,14 +14,12 @@ namespace ExtendedCpp::Cancellation
 
     public:
         /// @brief 
-        /// @param cancellationRequest 
-        explicit CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept
-        {
-            _cancellationRequest = cancellationRequest;
-        }
+        /// @param cancellationRequest
+        explicit CancellationToken(const std::atomic<bool>* cancellationRequest) noexcept :
+            _cancellationRequest(cancellationRequest) {}
 
         /// @brief 
-        /// @return 
+        /// @return
         [[nodiscard]]
         bool IsCancellationRequested() const noexcept
         {

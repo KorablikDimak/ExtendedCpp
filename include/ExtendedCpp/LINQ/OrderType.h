@@ -1,13 +1,16 @@
-#ifndef LINQ_OrderType_H
-#define LINQ_OrderType_H
+#ifndef LINQ_ORDER_TYPE_H
+#define LINQ_ORDER_TYPE_H
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
-    /// @brief 
-    enum class OrderType
+    /// @brief
+    enum class OrderType : bool
     {
+        // ReSharper disable once CppInconsistentNaming
         ASC = true,
+        // ReSharper disable once CppInconsistentNaming
         DESC = false
     };
 }

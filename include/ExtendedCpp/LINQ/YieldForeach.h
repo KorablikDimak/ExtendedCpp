@@ -8,6 +8,7 @@
 #include <ExtendedCpp/LINQ/Future.h>
 
 /// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
     /// @brief

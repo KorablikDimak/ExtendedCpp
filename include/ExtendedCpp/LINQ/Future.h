@@ -7,6 +7,7 @@
 #include <optional>
 
 /// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
     /// @brief

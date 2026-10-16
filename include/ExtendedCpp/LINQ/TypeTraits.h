@@ -1,11 +1,12 @@
-#ifndef LINQ_TypeTraits_H
-#define LINQ_TypeTraits_H
+#ifndef LINQ_TYPE_TRAITS_H
+#define LINQ_TYPE_TRAITS_H
 
 #include <utility>
 
 #include <ExtendedCpp/LINQ/Concepts.h>
 
-/// @brief 
+/// @brief
+// ReSharper disable once CppInconsistentNaming
 namespace ExtendedCpp::LINQ
 {
     /// @brief
@@ -17,7 +18,7 @@ namespace ExtendedCpp::LINQ
     };
 
     /// @brief 
-    /// @tparam TPair 
+    /// @tparam TPair
     template<typename TPair>
     struct PairTraits<TPair, std::void_t<decltype(std::declval<TPair>().first)>,
                              std::void_t<decltype(std::declval<TPair>().second)>>
@@ -27,7 +28,7 @@ namespace ExtendedCpp::LINQ
     };
 
     /// @brief
-    /// @tparam TCollection 
+    /// @tparam TCollection
     template<Concepts::RandomAccess TCollection>
     struct RandomAccessValue
     {
@@ -35,7 +36,7 @@ namespace ExtendedCpp::LINQ
     };
 
     /// @brief 
-    /// @tparam TCollection 
+    /// @tparam TCollection
     template <Concepts::RandomAccess TCollection>
     using RandomAccessValueType = typename RandomAccessValue<TCollection>::Type;
 }
