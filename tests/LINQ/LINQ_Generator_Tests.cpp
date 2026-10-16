@@ -982,14 +982,14 @@ TEST(LINQ_Generator_Tests, FromContainerTest)
     const std::vector result2 = linq2.ToVector();
     const std::vector result3 = linq3.ToVector();
     const std::vector result4 = linq4.ToVector();
-    linq5.ToVector();
-    linq6.ToVector();
+    [[maybe_unused]] const std::vector result5 = linq5.ToVector();
+    [[maybe_unused]] const std::vector result6 = linq6.ToVector();
     const std::vector result7 = linq7.ToVector();
-    linq8.ToVector();
-    linq9.ToVector();
-    linq10.ToVector();
-    linq11.ToVector();
-    linq12.ToVector();
+    [[maybe_unused]] const std::vector result8 = linq8.ToVector();
+    [[maybe_unused]] const std::vector result9 = linq9.ToVector();
+    [[maybe_unused]] const std::vector result10 = linq10.ToVector();
+    [[maybe_unused]] const std::vector result11 = linq11.ToVector();
+    [[maybe_unused]] const std::vector result12 = linq12.ToVector();
 
     // Assert
     for (int i = 0; i < 7; ++i)
@@ -1032,7 +1032,7 @@ TEST(LINQ_Generator_Tests, ToContainerTest)
     const std::vector vectorResult = linq1.ToVector();
     const std::array arrayResult = linq2.ToArray<7>();
     const std::list listResult = linq3.ToList();
-    linq4.ToForwardList();
+    [[maybe_unused]] const std::forward_list forwardListResult = linq4.ToForwardList();
     const std::stack stackResult = linq5.ToStack();
     const std::queue queueResult = linq6.ToQueue();
     const std::deque dequeResult = linq7.ToDeque();
@@ -1081,7 +1081,7 @@ TEST(LINQ_Generator_Tests, ReverseTest)
 TEST(LINQ_Generator_Tests, EmptyCollectionTest)
 {
     // Average
-    constexpr std::vector<char> emptyVector;
+    const std::vector<char> emptyVector;
 
     // Act
     const auto linq = ExtendedCpp::LINQ::Generator(emptyVector);

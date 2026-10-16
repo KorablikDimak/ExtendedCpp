@@ -156,11 +156,16 @@ namespace ExtendedCpp::Reflection
             }
         };
 
+#if defined(_MSC_VER) && !defined(__clang__)
+    #pragma warning(push)
+    #pragma warning(disable : 4702)
+#endif
+
         /// @brief 
         /// @tparam THelper 
         /// @param constructorName 
         /// @param constructorHelper 
-        /// @param parameters 
+        /// @param parameters
         template<typename THelper>
         ConstructorInfo(std::string&& constructorName, THelper&& constructorHelper, std::vector<std::type_index>&& parameters) noexcept :
             MemberInfo(std::move(constructorName)),
@@ -178,6 +183,10 @@ namespace ExtendedCpp::Reflection
             _fromAnyPtrNew([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
                 { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromAnyPtr(args)); }),
             _parameters(std::move(parameters)) {}
+
+#if defined(_MSC_VER) && !defined(__clang__)
+    #pragma warning(pop)
+#endif
 
         /// @brief 
         ~ConstructorInfo() override = default;

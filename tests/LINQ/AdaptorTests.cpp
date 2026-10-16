@@ -18,7 +18,7 @@ TEST(AdaptorTests, SelectAdaptorTest)
     // Assert
     for (std::size_t i = 0; i < data.size(); ++i)
         ASSERT_EQ(result1[i], data[i] * 2);
-/*
+
     // Act
     const auto result2 =
         ExtendedCpp::LINQ::Generator(data) |
@@ -28,7 +28,7 @@ TEST(AdaptorTests, SelectAdaptorTest)
     // Assert
     for (std::size_t i = 0; i < data.size(); ++i)
         ASSERT_EQ(result2[i], data[i] * 2);
-*/
+
     // Act
     const auto result3 =
         ExtendedCpp::LINQ::View(data) |
@@ -49,24 +49,24 @@ TEST(AdaptorTests, ConvertToTest)
     const auto result1 =
         data |
         ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqContainer>();
-/*
-    auto result2 =
+
+    const auto result2 =
         result1 |
         ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqGenerator>();
-*/
+
     const auto result3 =
         result1 |
         ExtendedCpp::LINQ::To<ExtendedCpp::LINQ::LinqView>();
 
     const auto vector1 = result1.ToVector();
-    // const auto vector2 = result2.ToVector();
+    const auto vector2 = result2.ToVector();
     const auto vector3 = result3.ToVector();
 
     // Assert
     for (std::size_t i = 0; i < data.size(); ++i)
     {
         ASSERT_EQ(vector1[i], data[i]);
-        // ASSERT_EQ(vector2[i], data[i]);
+        ASSERT_EQ(vector2[i], data[i]);
         ASSERT_EQ(vector3[i], data[i]);
     }
 }
@@ -445,7 +445,7 @@ TEST(AdaptorTests, TakeWhileTest)
 TEST(AdaptorTests, EmptyCollectionTest)
 {
     // Average
-    constexpr std::vector<char> emptyVector;
+    const std::vector<char> emptyVector;
 
     // Act
     const auto emptyResult = emptyVector |

@@ -3875,10 +3875,10 @@ strconv_pcdata_t get_strconv_pcdata(const unsigned int optmask)
         _fseeki64(file, 0, SEEK_SET);
     #elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR))
         // there are 64-bit versions of fseek/ftell, let's use them
-        typedef off64_t length_type;
+        using length_type = off64_t;
 
         fseeko64(file, 0, SEEK_END);
-        length_type length = ftello64(file);
+        const length_type length = ftello64(file);
         fseeko64(file, 0, SEEK_SET);
     #else
         // if this is a 32-bit OS, long is enough; if this is a unix system, long is 64-bit, which is enough; otherwise we can't do anything anyway.
@@ -6260,7 +6260,7 @@ namespace pugi
         // destroy dynamic storage, leave sentinel page (it's in static memory)
         const auto* root_page = PUGI_GETPAGE(_root);
         assert(root_page && !root_page->prev);
-        assert(reinterpret_cast<char*>(root_page) >= _memory.data() && reinterpret_cast<char*>(root_page) < _memory.data() + _memory.size());
+        assert(reinterpret_cast<const char*>(root_page) >= _memory.data() && reinterpret_cast<const char*>(root_page) < _memory.data() + _memory.size());
 
         for (impl::xml_memory_page* page = root_page->next; page; )
         {
@@ -7878,6 +7878,8 @@ PUGI_NS_BEGIN
 
         T* result = new (memory) T();
 
+        if (result->name == nullptr)
+            return nullptr;
         memcpy(result->name, name, (length + 1) * sizeof(char_t));
 
         return result;

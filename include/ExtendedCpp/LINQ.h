@@ -203,60 +203,6 @@ namespace ExtendedCpp::LINQ
 
     /// @brief
     /// @tparam TCollection
-    template<Concepts::InputIterable TCollection>
-    requires std::copy_constructible<TCollection>
-    class CollectionFactory final
-    {
-    public:
-        /// @brief
-        using TSource = typename std::decay_t<TCollection>::value_type;
-
-        /// @brief
-        /// @param collection
-        explicit CollectionFactory(TCollection collection) noexcept :
-            _collection(std::move(collection)) {}
-
-        /// @brief
-        /// @return
-        auto operator()() const
-        {
-            return YieldForeach(_collection);
-        }
-
-    private:
-        TCollection _collection;
-    };
-
-    /// @brief
-    /// @tparam TIterator
-    template<std::input_iterator TIterator>
-    class IteratorFactory final
-    {
-    public:
-        /// @brief
-        using TSource = typename std::iterator_traits<TIterator>::value_type;
-
-        /// @brief
-        /// @param begin
-        /// @param end
-        explicit IteratorFactory(TIterator begin, TIterator end) noexcept :
-            _begin(std::move(begin)),
-            _end(std::move(end)) {}
-
-        /// @brief
-        /// @return
-        auto operator()() const
-        {
-            return YieldForeach(_begin, _end);
-        }
-
-    private:
-        TIterator _begin;
-        TIterator _end;
-    };
-
-    /// @brief
-    /// @tparam TCollection
     /// @tparam TSource
     /// @param collection 
     /// @return
@@ -289,8 +235,8 @@ namespace ExtendedCpp::LINQ
     /// @tparam TIterator
     /// @tparam TSource
     /// @tparam NothrowIterable
-    /// @param begin 
-    /// @param end 
+    /// @param begin
+    /// @param end
     /// @return
     template<std::input_iterator TIterator,
              typename TSource = typename std::iterator_traits<TIterator>::value_type,
@@ -300,14 +246,13 @@ namespace ExtendedCpp::LINQ
         return LinqGenerator<TSource, IteratorFactory<std::decay_t<TIterator>>, std::integral_constant<bool, NothrowIterable>>
             (IteratorFactory<std::decay_t<TIterator>>(std::forward<TIterator>(begin), std::forward<TIterator>(end)));
     }
-/*
+
     /// @brief 
     /// @tparam TSource 
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(const std::stack<TSource>& collection) noexcept
+    auto Generator(const std::stack<TSource>& collection) noexcept
     {
         std::stack<TSource> copy = collection;
 
@@ -318,7 +263,8 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
 
     /// @brief 
@@ -326,8 +272,7 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(std::stack<TSource>&& collection) noexcept
+    auto Generator(std::stack<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -336,7 +281,8 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
 
     /// @brief 
@@ -344,8 +290,7 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(const std::queue<TSource>& collection) noexcept
+    auto Generator(const std::queue<TSource>& collection) noexcept
     {
         std::queue<TSource> copy = collection;
 
@@ -356,7 +301,8 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
 
     /// @brief 
@@ -364,8 +310,7 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(std::queue<TSource>&& collection) noexcept
+    auto Generator(std::queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -374,7 +319,8 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
 
     /// @brief 
@@ -382,8 +328,7 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(const std::priority_queue<TSource>& collection) noexcept
+    auto Generator(const std::priority_queue<TSource>& collection) noexcept
     {
         std::priority_queue<TSource> copy = collection;
 
@@ -394,7 +339,8 @@ namespace ExtendedCpp::LINQ
             copy.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
 
     /// @brief 
@@ -402,8 +348,7 @@ namespace ExtendedCpp::LINQ
     /// @param collection 
     /// @return
     template<typename TSource>
-    LinqGenerator<TSource, std::true_type>
-    Generator(std::priority_queue<TSource>&& collection) noexcept
+    auto Generator(std::priority_queue<TSource>&& collection) noexcept
     {
         std::vector<TSource> vectorCollection(collection.size());
         for (std::size_t i = 0; i < collection.size(); ++i)
@@ -412,9 +357,10 @@ namespace ExtendedCpp::LINQ
             collection.pop();
         }
 
-        return LinqGenerator<TSource, std::true_type>(std::move(vectorCollection));
+        return LinqGenerator<TSource, CollectionFactory<std::vector<TSource>>, std::true_type>
+            (CollectionFactory<std::vector<TSource>>(std::move(vectorCollection)));
     }
-*/
+
     /// @brief
     /// @tparam TCollection
     /// @tparam TIterator

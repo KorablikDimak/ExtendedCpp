@@ -13,7 +13,6 @@ namespace ExtendedCpp::LINQ
     /// @tparam TSource
     /// @tparam NothrowCoroutine
     template<typename TSource, bool NothrowCoroutine>
-    requires std::copyable<TSource> || std::movable<TSource>
     class Future final
     {
     private:
