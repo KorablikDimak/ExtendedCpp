@@ -304,7 +304,7 @@ namespace ExtendedCpp::Reflection
         if constexpr(!requires { std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...); }) \
         { \
             using ReturnType = decltype(std::declval<ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
-            ReturnType(ThisClassType::*methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
+            ReturnType(ThisClassType::*const methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ReturnType __VA_OPT__(,) __VA_ARGS__> \
                 (#methodName, methodPtr); \
         } \
@@ -315,15 +315,15 @@ namespace ExtendedCpp::Reflection
         { \
             using ReturnType = decltype(std::declval<ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
             using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
-            ReturnType(ThisClassType::*methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
-            ConstReturnType(ThisClassType::*constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
+            ReturnType(ThisClassType::*const methodPtr)(__VA_ARGS__) = &ThisClassType::methodName; \
+            ConstReturnType(ThisClassType::*const constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ReturnType, ConstReturnType __VA_OPT__(,) __VA_ARGS__> \
                 (#methodName, methodPtr, constMethodPtr); \
         } \
         else \
         { \
             using ConstReturnType = decltype(std::declval<const ThisClassType>().methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
-            ConstReturnType(ThisClassType::*constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
+            ConstReturnType(ThisClassType::*const constMethodPtr)(__VA_ARGS__) const = &ThisClassType::methodName; \
             return ExtendedCpp::Reflection::CreateMethodInfo<ThisClassType, ConstReturnType __VA_OPT__(,) __VA_ARGS__> \
                 (#methodName, constMethodPtr); \
         } \

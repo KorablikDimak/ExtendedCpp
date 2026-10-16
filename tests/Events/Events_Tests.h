@@ -1,10 +1,12 @@
-#ifndef Events_Tests_H
-#define Events_Tests_H
+#ifndef EVENTS_TESTS_H
+#define EVENTS_TESTS_H
+
+// ReSharper disable CppMemberFunctionMayBeStatic
 
 class EventType final
 {
 public:
-    typedef std::shared_ptr<EventType> Ptr;
+    using Ptr = std::shared_ptr<EventType>;
 };
 
 class HandlerClass final

@@ -18,7 +18,7 @@ TEST(FileSenderTests, CreateLoggerTest)
 TEST(FileSenderTests, FileLogSendTest)
 {
     // Average
-    std::string xmlFilePath = "LogConfig.xml";
+    const std::string xmlFilePath = "LogConfig.xml";
 
     // Act
     auto factory = ExtendedCpp::InfoLog::LoggerFactory(xmlFilePath);

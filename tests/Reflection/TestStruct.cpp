@@ -1,9 +1,8 @@
 #include "TestStruct.h"
 
-TestStruct::TestStruct(const std::string& str) noexcept
-{
-    StringField = str;
-}
+#include <utility>
+
+TestStruct::TestStruct(std::string  str) noexcept : StringField(std::move(str)) {}
 
 int TestStruct::TestMethodInt() const noexcept
 {
@@ -20,17 +19,17 @@ double TestStruct::TestMethodDouble(double a, double b, double c) const noexcept
     return IntField + a + b + c;
 }
 
-std::string TestStruct::TestMethodStaticString() noexcept
+std::string_view TestStruct::TestMethodStaticString() noexcept
 {
     return "test";
 }
 
 int TestStruct::TestMethodStatic() noexcept
 {
-    return 10;
+    return 10; // NOLINT(*-magic-numbers)
 }
 
-int TestStruct::TestMethodStatic(int a) noexcept
+int TestStruct::TestMethodStatic(const int a) noexcept
 {
-    return 10 + a;
+    return 10 + a; // NOLINT(*-magic-numbers)
 }

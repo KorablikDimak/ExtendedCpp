@@ -1,13 +1,13 @@
-#ifndef Service_H
-#define Service_H
+#ifndef SERVICE_H
+#define SERVICE_H
 
 #include "IService.h"
 
 class Service final : public IService
 {
 public:
-    Service() = default;
-    ~Service() override = default;
+    Service() noexcept = default;
+    ~Service() noexcept override = default;
 };
 
 #endif

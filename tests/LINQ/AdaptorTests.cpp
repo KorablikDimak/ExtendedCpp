@@ -445,6 +445,7 @@ TEST(AdaptorTests, TakeWhileTest)
 TEST(AdaptorTests, EmptyCollectionTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<char> emptyVector;
 
     // Act

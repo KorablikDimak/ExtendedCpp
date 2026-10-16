@@ -3,7 +3,9 @@
 #include <ExtendedCpp/Matrix.h>
 #include <ExtendedCpp/Random.h>
 
-typedef ExtendedCpp::MatrixF64 Matrix;
+using Matrix = ExtendedCpp::MatrixF64;
+
+// NOLINTBEGIN(*-magic-numbers)
 
 TEST(MatrixTests, SumMatrixTest)
 {
@@ -112,18 +114,18 @@ TEST(MatrixTests, MacrosZeroTest)
 {
     // Average
     // Act
-    const ExtendedCpp::MatrixF64 matrixF64 = ZERO_MATRIX_F64(10, 10);
-    const ExtendedCpp::MatrixF32 matrixF32 = ZERO_MATRIX_F32(10, 10);
+    const auto matrixF64 = ZERO_MATRIX_F64(10, 10);
+    const auto matrixF32 = ZERO_MATRIX_F32(10, 10);
 
-    const ExtendedCpp::MatrixI64 matrixI64 = ZERO_MATRIX_I64(10, 10);
-    const ExtendedCpp::MatrixI32 matrixI32 = ZERO_MATRIX_I32(10, 10);
-    const ExtendedCpp::MatrixI16 matrixI16 = ZERO_MATRIX_I16(10, 10);
-    const ExtendedCpp::MatrixI8 matrixI8 = ZERO_MATRIX_I8(10, 10);
+    const auto matrixI64 = ZERO_MATRIX_I64(10, 10);
+    const auto matrixI32 = ZERO_MATRIX_I32(10, 10);
+    const auto matrixI16 = ZERO_MATRIX_I16(10, 10);
+    const auto matrixI8 = ZERO_MATRIX_I8(10, 10);
 
-    const ExtendedCpp::MatrixU64 matrixU64 = ZERO_MATRIX_U64(10, 10);
-    const ExtendedCpp::MatrixU32 matrixU32 = ZERO_MATRIX_U32(10, 10);
-    const ExtendedCpp::MatrixU16 matrixU16 = ZERO_MATRIX_U16(10, 10);
-    const ExtendedCpp::MatrixU8 matrixU8 = ZERO_MATRIX_U8(10, 10);
+    const auto matrixU64 = ZERO_MATRIX_U64(10, 10);
+    const auto matrixU32 = ZERO_MATRIX_U32(10, 10);
+    const auto matrixU16 = ZERO_MATRIX_U16(10, 10);
+    const auto matrixU8 = ZERO_MATRIX_U8(10, 10);
 
     // Assert
     for (std::size_t i = 0; i < 10; ++i)
@@ -131,9 +133,12 @@ TEST(MatrixTests, MacrosZeroTest)
         {
             ASSERT_EQ(matrixF64[i][j], 0);
             ASSERT_EQ(matrixF32[i][j], 0);
+
             ASSERT_EQ(matrixI64[i][j], 0);
             ASSERT_EQ(matrixI32[i][j], 0);
+            ASSERT_EQ(matrixI16[i][j], 0);
             ASSERT_EQ(matrixI8[i][j], 0);
+
             ASSERT_EQ(matrixU64[i][j], 0);
             ASSERT_EQ(matrixU32[i][j], 0);
             ASSERT_EQ(matrixU16[i][j], 0);
@@ -163,12 +168,17 @@ TEST(MatrixTests, MacrosETest)
     {
         ASSERT_EQ(matrixF64[i][i], 1);
         ASSERT_EQ(matrixF32[i][i], 1);
+
         ASSERT_EQ(matrixI64[i][i], 1);
         ASSERT_EQ(matrixI32[i][i], 1);
+        ASSERT_EQ(matrixI16[i][i], 1);
         ASSERT_EQ(matrixI8[i][i], 1);
+
         ASSERT_EQ(matrixU64[i][i], 1);
         ASSERT_EQ(matrixU32[i][i], 1);
         ASSERT_EQ(matrixU16[i][i], 1);
         ASSERT_EQ(matrixU8[i][i], 1);
     }
 }
+
+// NOLINTEND(*-magic-numbers)

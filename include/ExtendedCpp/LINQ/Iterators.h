@@ -107,8 +107,8 @@ namespace ExtendedCpp::LINQ
     /// @tparam TSelector
     template<typename TOut,
              std::forward_iterator TInIterator,
-             std::invocable<typename TInIterator::value_type> TSelector>
-    requires std::same_as<TOut, std::invoke_result_t<TSelector, typename TInIterator::value_type>>
+             std::invocable<const typename TInIterator::value_type&> TSelector>
+    requires std::same_as<TOut, std::invoke_result_t<TSelector, const typename TInIterator::value_type&>>
     struct SelectorIterator final
     {
     private:
@@ -158,7 +158,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         value_type operator*() const
-        noexcept(std::is_nothrow_invocable_v<TSelector, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TSelector, const typename TInIterator::value_type&> &&
                  noexcept(*_inIterator))
         {
             return _selector(*_inIterator);
@@ -315,7 +315,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TInIterator
     /// @tparam TPredicate
     template<std::forward_iterator TInIterator,
-             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+             Concepts::IsPredicate<const typename TInIterator::value_type&> TPredicate>
     struct WhereIterator final
     {
     private:
@@ -333,7 +333,7 @@ namespace ExtendedCpp::LINQ
         /// @param inIterator
         /// @param predicate
         WhereIterator(TInIterator inIterator, TPredicate&& predicate)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(++_inIterator)) :
             _inIterator(std::move(inIterator)),
@@ -384,7 +384,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         WhereIterator& operator++()
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator))
         {
@@ -401,7 +401,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         WhereIterator operator++(int)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator))
         {
@@ -437,7 +437,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TInIterator
     /// @tparam TPredicate
     template<std::forward_iterator TInIterator,
-             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+             Concepts::IsPredicate<const typename TInIterator::value_type&> TPredicate>
     struct RemoveWhereIterator final
     {
     private:
@@ -455,7 +455,7 @@ namespace ExtendedCpp::LINQ
         /// @param inIterator
         /// @param predicate
         RemoveWhereIterator(TInIterator inIterator, TPredicate&& predicate)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator)) :
             _inIterator(std::move(inIterator)),
@@ -506,7 +506,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         RemoveWhereIterator& operator++()
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator))
         {
@@ -523,7 +523,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         RemoveWhereIterator operator++(int)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, typename TInIterator::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const typename TInIterator::value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator))
         {
@@ -564,17 +564,17 @@ namespace ExtendedCpp::LINQ
     /// @tparam TResultSelector
     template<std::forward_iterator TInIterator,
              Concepts::ForwardIterable TOtherCollection,
-             std::invocable<typename TInIterator::value_type> TInnerKeySelector,
-             std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
-             std::invocable<typename TInIterator::value_type,
-                            typename TOtherCollection::value_type> TResultSelector,
+             std::invocable<const typename TInIterator::value_type&> TInnerKeySelector,
+             std::invocable<const typename TOtherCollection::value_type&> TOtherKeySelector,
+             std::invocable<const typename TInIterator::value_type&,
+                            const typename TOtherCollection::value_type&> TResultSelector,
              typename TResult = std::invoke_result_t<TResultSelector,
-                                                     typename TInIterator::value_type,
-                                                     typename TOtherCollection::value_type>,
+                                                     const typename TInIterator::value_type&,
+                                                     const typename TOtherCollection::value_type&>,
              std::forward_iterator TOtherIterator = typename TOtherCollection::const_iterator>
-    requires std::same_as<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>,
-                          std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
-             Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, typename TInIterator::value_type>>
+    requires std::same_as<std::invoke_result_t<TInnerKeySelector, const typename TInIterator::value_type&>,
+                          std::invoke_result_t<TOtherKeySelector, const typename TOtherCollection::value_type&>> &&
+             Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, const typename TInIterator::value_type&>>
     struct JoinIterator final
     {
     private:
@@ -604,8 +604,8 @@ namespace ExtendedCpp::LINQ
                      TInnerKeySelector&& innerKeySelector,
                      TOtherKeySelector&& otherKeySelector,
                      TResultSelector&& resultSelector)
-        noexcept(std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
-                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<const TInnerKeySelector, typename TInIterator::value_type&> &&
+                 std::is_nothrow_invocable_v<const TOtherKeySelector, typename TOtherCollection::value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(*_currentOther) &&
                  noexcept(++_inIterator) &&
@@ -659,7 +659,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         value_type operator*() const
-        noexcept(std::is_nothrow_invocable_v<TResultSelector, typename TInIterator::value_type, typename TOtherCollection::value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TResultSelector, const typename TInIterator::value_type&, const typename TOtherCollection::value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(*_currentOther))
         {
@@ -671,8 +671,8 @@ namespace ExtendedCpp::LINQ
         JoinIterator& operator++()
         noexcept(noexcept(++_inIterator) &&
                  noexcept(++_currentOther) &&
-                 std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
-                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TInnerKeySelector, const typename TInIterator::value_type&> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, const typename TOtherCollection::value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(*_currentOther))
         {
@@ -703,8 +703,8 @@ namespace ExtendedCpp::LINQ
         JoinIterator operator++(int)
         noexcept(noexcept(++_inIterator) &&
                  noexcept(++_currentOther) &&
-                 std::is_nothrow_invocable_v<TInnerKeySelector, typename TInIterator::value_type> &&
-                 std::is_nothrow_invocable_v<TOtherKeySelector, typename TOtherCollection::value_type> &&
+                 std::is_nothrow_invocable_v<TInnerKeySelector, const typename TInIterator::value_type&> &&
+                 std::is_nothrow_invocable_v<TOtherKeySelector, const typename TOtherCollection::value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(*_currentOther))
         {
@@ -957,7 +957,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TInIterator
     /// @tparam TPredicate
     template<std::forward_iterator TInIterator,
-             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+             Concepts::IsPredicate<const typename TInIterator::value_type&> TPredicate>
     struct SkipWhileIterator final
     {
     private:
@@ -975,7 +975,7 @@ namespace ExtendedCpp::LINQ
         /// @param inIterator
         /// @param predicate
         SkipWhileIterator(TInIterator inIterator, TPredicate&& predicate)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const value_type&> &&
                  noexcept(++_inIterator) &&
                  noexcept(*_inIterator)) :
             _inIterator(std::move(inIterator)),
@@ -1185,7 +1185,7 @@ namespace ExtendedCpp::LINQ
     /// @tparam TInIterator
     /// @tparam TPredicate
     template<std::forward_iterator TInIterator,
-             Concepts::IsPredicate<typename TInIterator::value_type> TPredicate>
+             Concepts::IsPredicate<const typename TInIterator::value_type&> TPredicate>
     struct TakeWhileIterator final
     {
     private:
@@ -1203,7 +1203,7 @@ namespace ExtendedCpp::LINQ
         /// @param inIterator
         /// @param predicate
         TakeWhileIterator(TInIterator inIterator, TPredicate&& predicate)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(++_inIterator)) :
             _inIterator(std::move(inIterator)),
@@ -1254,7 +1254,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         TakeWhileIterator& operator++()
-        noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(++_inIterator))
         {
@@ -1270,7 +1270,7 @@ namespace ExtendedCpp::LINQ
         /// @brief
         /// @return
         TakeWhileIterator operator++(int)
-        noexcept(std::is_nothrow_invocable_v<TPredicate, value_type> &&
+        noexcept(std::is_nothrow_invocable_v<TPredicate, const value_type&> &&
                  noexcept(*_inIterator) &&
                  noexcept(++_inIterator))
         {

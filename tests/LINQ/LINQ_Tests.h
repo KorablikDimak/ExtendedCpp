@@ -1,7 +1,8 @@
-#ifndef LINQ_Tests_H
-#define LINQ_Tests_H
+#ifndef LINQ_TESTS_H
+#define LINQ_TESTS_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 class Person
@@ -10,12 +11,7 @@ public:
     std::string Name;
     unsigned char Age{};
 
-    Person(const std::string& name, const unsigned char age)
-    {
-        Name = name;
-        Age = age;
-    }
-
+    Person(std::string name, const unsigned char age) : Name(std::move(name)), Age(age) {}
     Person() = default;
 };
 
@@ -25,11 +21,7 @@ public:
     std::string Name;
     std::vector<Person> People;
 
-    explicit Company(const std::string& name)
-    {
-        Name = name;
-    }
-
+    explicit Company(std::string name) : Name(std::move(name)) {}
     Company() = default;
 };
 
@@ -40,19 +32,10 @@ public:
     std::string CompanyName;
     std::string Language;
 
-    Employer(const std::string& name, const std::string& companyName)
-    {
-        Name = name;
-        CompanyName = companyName;
-    }
-
-    Employer(const std::string& name, const std::string& companyName, const std::string& language)
-    {
-        Name = name;
-        CompanyName = companyName;
-        Language = language;
-    }
-
+    Employer(std::string name, std::string  companyName) :
+        Name(std::move(name)), CompanyName(std::move(companyName)) {}
+    Employer(std::string name, std::string  companyName, std::string language) :
+        Name(std::move(name)), CompanyName(std::move(companyName)), Language(std::move(language)) {}
     Employer() = default;
 };
 
@@ -63,18 +46,8 @@ public:
     std::string Language;
     std::vector<Employer> People;
 
-    ItCompany(const std::string& name, const std::string& language)
-    {
-        Name = name;
-        Language = language;
-    }
-
-    ItCompany(const std::string& name, const std::vector<Employer>& people)
-    {
-        Name = name;
-        People = people;
-    }
-
+    ItCompany(std::string name, std::string language) : Name(std::move(name)), Language(std::move(language)) {}
+    ItCompany(std::string  name, const std::vector<Employer>& people) : Name(std::move(name)), People(people) {}
     ItCompany() = default;
 };
 

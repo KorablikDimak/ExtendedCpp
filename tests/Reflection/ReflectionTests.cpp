@@ -3,6 +3,8 @@
 #include "TestStruct.h"
 #include "TestTemplate.h"
 
+// NOLINTBEGIN(*-magic-numbers)
+
 TEST(ReflectionTests, MetaFieldTest)
 {
     // Average
@@ -12,11 +14,11 @@ TEST(ReflectionTests, MetaFieldTest)
     testStruct.IntField = 0;
     TestStruct::StaticDoubleField = 0;
 
-    const auto fieldPtr =
+    auto *const fieldPtr =
             std::any_cast<int*>(TestStruct::MetaInfo.GetField("IntField")->GetField(&testStruct));
     *fieldPtr = 5;
 
-    const auto staticFieldPtr =
+    auto *const staticFieldPtr =
             std::any_cast<double*>(TestStruct::MetaInfo.GetStaticField("StaticDoubleField")->GetField());
     *staticFieldPtr = 8;
 
@@ -80,10 +82,10 @@ TEST(ReflectionTests, MetaStaticMethodTest)
 TEST(ReflectionTests, MetaConstructorTest)
 {
     // Average
-    TestStruct testStruct;
+    [[maybe_unused]] const TestStruct testStruct;
 
     // Act
-    auto createdStruct = std::any_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->Create());
+    [[maybe_unused]] const auto createdStruct = std::any_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->Create());
     const auto newStruct = std::static_pointer_cast<TestStruct>(TestStruct::MetaInfo.GetConstructors()[0]->New());
 
     // Assert
@@ -97,7 +99,7 @@ TEST(ReflectionTests, GetTypeTest)
     const auto typeInfo2 = ExtendedCpp::Reflection::GetType(typeid(TestStruct));
 
     // Act
-    const auto staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
+    auto *const staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
     *staticField1 = 6;
 
     // Assert
@@ -105,7 +107,7 @@ TEST(ReflectionTests, GetTypeTest)
     ASSERT_TRUE(typeInfo2.has_value());
 
     // Act
-    const auto staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
+    auto *const staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
     *staticField2 = 9;
 
     // Assert
@@ -116,18 +118,18 @@ TEST(ReflectionTests, GetTypeTest)
 TEST(ReflectionTests, ConstructorFromAnyTest)
 {
     // Average
-    auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
-    auto constructors = typeInfo.GetConstructors();
+    const auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
+    const auto constructors = typeInfo.GetConstructors();
 
     // Act
-    auto testStruct1 = constructors[1]->CreateFromAny({std::string("test")});
-    auto testStruct2 = constructors[1]->NewFromAny({std::string("test")});
+    const auto testStruct1 = constructors[1]->CreateFromAny({std::string("test")});
+    const auto testStruct2 = constructors[1]->NewFromAny({std::string("test")});
 
     // Assert
     ASSERT_TRUE(testStruct1.has_value());
     ASSERT_TRUE(testStruct2);
-    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::any_cast<TestStruct>(testStruct1));
-    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::static_pointer_cast<TestStruct>(testStruct2));
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::any_cast<TestStruct>(testStruct1)); // NOLINT(*-avoid-goto)
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = std::static_pointer_cast<TestStruct>(testStruct2)); // NOLINT(*-avoid-goto)
 }
 
 TEST(ReflectionTests, MetaTemplateTest)
@@ -139,11 +141,11 @@ TEST(ReflectionTests, MetaTemplateTest)
 
     // Act
     // Assert
-    ASSERT_NO_THROW([[maybe_unused]] auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = // NOLINT(*-avoid-goto)
             std::any_cast<TestTemplate<int>>(typeInfo1.GetConstructors()[0]->Create()));
-    ASSERT_NO_THROW([[maybe_unused]] auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = // NOLINT(*-avoid-goto)
             std::any_cast<TestTemplate<double>>(typeInfo2.GetConstructors()[0]->Create()));
-    ASSERT_NO_THROW([[maybe_unused]] auto _ =
+    ASSERT_NO_THROW([[maybe_unused]] auto _ = // NOLINT(*-avoid-goto)
             std::any_cast<TestTemplate<std::string>>(typeInfo3.GetConstructors()[0]->Create()));
 }
 
@@ -153,7 +155,7 @@ TEST(ReflectionTests, GetCollectionInfoTest)
     const auto typeInfo = TestTemplate<int>::MetaInfo;
 
     // Act
-    const auto fieldInfo = typeInfo.GetField("data");
+    const auto fieldInfo = typeInfo.GetField("Data");
     const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
 
     // Assert
@@ -166,29 +168,29 @@ TEST(ReflectionTests, GetElementTest)
 {
     // Average
     const auto typeInfo = TestTemplate<int>::MetaInfo;
-    const auto fieldInfo = typeInfo.GetField("data");
+    const auto fieldInfo = typeInfo.GetField("Data");
     const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
 
     // Act
     TestTemplate<int> object;
-    object.data = { 1, 2, 3, 4 };
+    object.Data = { 1, 2, 3, 4 };
     const int element0 = collectionFieldInfo->GetElementValue<int>(&object, 0);
     const int element1 = collectionFieldInfo->GetElementValue<int>(&object, 1);
     const int element2 = collectionFieldInfo->GetElementValue<int>(&object, 2);
     const int element3 = collectionFieldInfo->GetElementValue<int>(&object, 3);
 
     // Assert
-    ASSERT_EQ(element0, object.data[0]);
-    ASSERT_EQ(element1, object.data[1]);
-    ASSERT_EQ(element2, object.data[2]);
-    ASSERT_EQ(element3, object.data[3]);
+    ASSERT_EQ(element0, object.Data[0]);
+    ASSERT_EQ(element1, object.Data[1]);
+    ASSERT_EQ(element2, object.Data[2]);
+    ASSERT_EQ(element3, object.Data[3]);
 }
 
 TEST(ReflectionTests, InsertionFieldTest)
 {
     // Average
     const auto typeInfo = TestTemplate<int>::MetaInfo;
-    const auto fieldInfo = typeInfo.GetField("data");
+    const auto fieldInfo = typeInfo.GetField("Data");
     const auto collectionFieldInfo = std::dynamic_pointer_cast<ExtendedCpp::Reflection::CollectionFieldInfo>(fieldInfo);
 
     // Act
@@ -199,9 +201,11 @@ TEST(ReflectionTests, InsertionFieldTest)
     collectionFieldInfo->InsertBack(&object, 9);
 
     // Assert
-    ASSERT_EQ(object.data.size(), 4);
-    ASSERT_EQ(1, object.data[0]);
-    ASSERT_EQ(3, object.data[1]);
-    ASSERT_EQ(6, object.data[2]);
-    ASSERT_EQ(9, object.data[3]);
+    ASSERT_EQ(object.Data.size(), 4);
+    ASSERT_EQ(1, object.Data[0]);
+    ASSERT_EQ(3, object.Data[1]);
+    ASSERT_EQ(6, object.Data[2]);
+    ASSERT_EQ(9, object.Data[3]);
 }
+
+// NOLINTEND(*-magic-numbers)

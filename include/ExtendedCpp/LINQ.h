@@ -4,7 +4,6 @@
 #include <ExtendedCpp/LINQ/LinqContainer.h>
 #include <ExtendedCpp/LINQ/LinqGenerator.h>
 #include <ExtendedCpp/LINQ/LinqView.h>
-#include <ExtendedCpp/LINQ/YieldForeach.h>
 
 /// @brief
 // ReSharper disable once CppInconsistentNaming
@@ -1025,7 +1024,7 @@ namespace ExtendedCpp::LINQ
     auto operator|(TRange&& range, TAdaptor&& adaptor)
     noexcept(std::is_nothrow_invocable_v<TAdaptor, TLinqCollection>)
     {
-        return std::forward<TAdaptor>(adaptor)(From(
+        return std::forward<TAdaptor>(adaptor)(Generator(
             std::forward<TRange>(range).begin(),
             std::forward<TRange>(range).end()));
     }

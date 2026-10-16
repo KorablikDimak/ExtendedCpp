@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
-#include <vector>
 #include <map>
+#include <vector>
 
 #include <ExtendedCpp/LINQ/Algorithm.h>
+
+// NOLINTBEGIN(*-magic-numbers, *-avoid-c-arrays, *-runtime-int)
 
 TEST(AlgorithmTests, BinarySearchTest)
 {
@@ -104,3 +106,5 @@ TEST(AlgorithmTests, IndexAtTest)
     ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::IndexAt(collection, 10, subCollection1, 4), 3);
     ASSERT_EQ(ExtendedCpp::LINQ::Algorithm::IndexAt(collection, 10, subCollection2, 4), ExtendedCpp::LINQ::NPOS);
 }
+
+// NOLINTEND(*-magic-numbers, *-avoid-c-arrays, *-runtime-int)

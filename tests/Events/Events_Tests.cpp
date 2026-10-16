@@ -4,7 +4,7 @@
 
 #include "Events_Tests.h"
 
-void Handler(const EventType::Ptr&) noexcept {}
+static void Handler(const EventType::Ptr&) noexcept {}
 
 TEST(EventsTests, FunctionHandlerTest)
 {
@@ -38,7 +38,7 @@ TEST(EventsTests, FunctorHandlerTest)
     // Average
     auto event = ExtendedCpp::Events::Event<const EventType::Ptr&>();
     auto functor1 = [](const EventType::Ptr&){};
-    std::function functor2 = [](const EventType::Ptr&){};
+    const std::function functor2 = [](const EventType::Ptr&){};
 
     // Act
     const auto handler1 = ExtendedCpp::Events::CreateFunctorHandler(functor1);

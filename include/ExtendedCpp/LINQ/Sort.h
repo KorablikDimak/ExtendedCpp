@@ -685,7 +685,7 @@ namespace ExtendedCpp::LINQ::Sort
     /// @param orderType 
     /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    std::size_t Partition(const TCollection& collection, const std::size_t start, const std::size_t end,
+    std::size_t Partition(TCollection&& collection, const std::size_t start, const std::size_t end, // NOLINT(*-missing-std-forward)
                           const OrderType orderType) noexcept
     {
         auto i = static_cast<std::int64_t>(start);

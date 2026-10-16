@@ -1,11 +1,11 @@
-#ifndef IService2_H
-#define IService2_H
+#ifndef I_SERVICE2_H
+#define I_SERVICE2_H
 
 class IService2
 {
 public:
-    IService2() = default;
-    virtual ~IService2() = default;
+    IService2() noexcept = default;
+    virtual ~IService2() noexcept = default;
 };
 
 #endif

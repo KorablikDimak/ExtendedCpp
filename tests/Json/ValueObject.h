@@ -1,10 +1,12 @@
-#ifndef ValueObject_H
-#define ValueObject_H
+#ifndef VALUE_OBJECT_H
+#define VALUE_OBJECT_H
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include <ExtendedCpp/Json.h>
+
+// ReSharper disable CppInconsistentNaming
 
 class ValueObject
 {

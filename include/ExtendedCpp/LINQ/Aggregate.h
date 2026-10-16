@@ -16,13 +16,14 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @param end 
     /// @param aggregateFunction 
     /// @return
-    template<std::copyable TResult, Concepts::RandomAccess TCollection,
-             std::invocable<TResult, RandomAccessValueType<TCollection>> TAggregate>
+    template<typename TResult, Concepts::RandomAccess TCollection,
+             std::invocable<const TResult&, const RandomAccessValueType<TCollection>&> TAggregate>
+    requires std::is_copy_constructible_v<TResult>
     TResult Aggregate(const TCollection& collection, const std::size_t start, const std::size_t end,
                       const TAggregate& aggregateFunction)
-    noexcept(std::is_nothrow_invocable_v<TAggregate, TResult, RandomAccessValueType<TCollection>>)
+    noexcept(std::is_nothrow_invocable_v<TAggregate, const TResult&, const RandomAccessValueType<TCollection>&>)
     {
-        TResult result = collection[start];
+        TResult result(collection[start]);
         for (std::size_t i = start + 1; i <= end; ++i)
             result = aggregateFunction(result, collection[i]);
         return result;
@@ -39,10 +40,10 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection, typename TPredicate,
              typename T = RandomAccessValueType<TCollection>>
-    requires Concepts::IsPredicate<TPredicate, T>
+    requires Concepts::IsPredicate<TPredicate, const T&>
     std::size_t Count(const TCollection& collection, const std::size_t start,
                       const std::size_t end, const TPredicate& predicate)
-    noexcept(std::is_nothrow_invocable_v<TPredicate, T>)
+    noexcept(std::is_nothrow_invocable_v<TPredicate, const T&>)
     {
         std::size_t count = 0;
         for (std::size_t i = start; i <= end; ++i)
@@ -59,11 +60,11 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @param end 
     /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Addable T = RandomAccessValueType<TCollection>>
-    requires std::is_copy_assignable_v<T>
+    requires std::is_copy_constructible_v<T>
     T Sum(const TCollection& collection, const std::size_t start, const std::size_t end)
     noexcept(Concepts::IsNothrowAddable<T>)
     {
-        T sum = collection[start];
+        T sum(collection[start]);
         for (std::size_t i = start + 1; i <= end; ++i)
             sum += collection[i];
         return sum;
@@ -81,13 +82,13 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
-             std::invocable<T> TSelector,
-             Concepts::Addable TResult = std::invoke_result_t<TSelector, T>>
-    requires std::is_copy_assignable_v<TResult>
+             std::invocable<const T&> TSelector,
+             Concepts::Addable TResult = std::invoke_result_t<TSelector, const T&>>
+    requires std::is_copy_constructible_v<TResult>
     TResult Sum(const TCollection& collection, const std::size_t start, const std::size_t end, const TSelector& selector)
-    noexcept(std::is_nothrow_invocable_v<TSelector, T> && Concepts::IsNothrowAddable<TResult>)
+    noexcept(std::is_nothrow_invocable_v<TSelector, const T&> && Concepts::IsNothrowAddable<TResult>)
     {
-        TResult sum = selector(collection[start]);
+        TResult sum(selector(collection[start]));
         for (std::size_t i = start + 1; i <= end; ++i)
             sum += selector(collection[i]);
         return sum;
@@ -102,10 +103,10 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection,
              Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    requires std::is_copy_assignable_v<T>
+    requires std::is_copy_constructible_v<T>
     T Min(const TCollection& collection, const std::size_t start, const std::size_t end) noexcept
     {
-        T min = collection[start];
+        T min(collection[start]);
         for (std::size_t i = start + 1; i <= end; ++i)
             if (collection[i] < min)
                 min = collection[i];
@@ -124,13 +125,13 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
-             std::invocable<T> TSelector,
-             Concepts::Comparable TResult = std::invoke_result_t<TSelector, T>>
-    requires std::is_copy_assignable_v<TResult>
+             std::invocable<const T&> TSelector,
+             Concepts::Comparable TResult = std::invoke_result_t<TSelector, const T&>>
+    requires std::is_copy_constructible_v<TResult>
     TResult Min(const TCollection& collection, const std::size_t start, const std::size_t end, const TSelector& selector)
-    noexcept(std::is_nothrow_invocable_v<TSelector, T>)
+    noexcept(std::is_nothrow_invocable_v<TSelector, const T&>)
     {
-        TResult min = selector(collection[start]);
+        TResult min(selector(collection[start]));
         for (std::size_t i = start + 1; i <= end; ++i)
             if (selector(collection[i]) < min)
                 min = selector(collection[i]);
@@ -145,10 +146,10 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @param end 
     /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Comparable T = RandomAccessValueType<TCollection>>
-    requires std::is_copy_assignable_v<T>
+    requires std::is_copy_constructible_v<T>
     T Max(const TCollection& collection, const std::size_t start, const std::size_t end) noexcept
     {
-        T max = collection[start];
+        T max(collection[start]);
         for (std::size_t i = start + 1; i <= end; ++i)
             if (max < collection[i])
                 max = collection[i];
@@ -167,13 +168,13 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
-             std::invocable<T> TSelector,
-             Concepts::Comparable TResult = std::invoke_result_t<TSelector, T>>
-    requires std::is_copy_assignable_v<TResult>
+             std::invocable<const T&> TSelector,
+             Concepts::Comparable TResult = std::invoke_result_t<TSelector, const T&>>
+    requires std::is_copy_constructible_v<TResult>
     TResult Max(const TCollection& collection, const std::size_t start, const std::size_t end, const TSelector& selector)
-    noexcept(std::is_nothrow_invocable_v<TSelector, T>)
+    noexcept(std::is_nothrow_invocable_v<TSelector, const T&>)
     {
-        TResult max = selector(collection[start]);
+        TResult max(selector(collection[start]));
         for (std::size_t i = start + 1; i <= end; ++i)
             if (max < selector(collection[i]))
                 max = selector(collection[i]);
@@ -188,10 +189,10 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @param end 
     /// @return
     template<Concepts::RandomAccess TCollection, Concepts::Divisible T = RandomAccessValueType<TCollection>>
-    requires std::is_copy_assignable_v<T>
+    requires std::is_copy_constructible_v<T>
     T Average(const TCollection& collection, const std::size_t start, const std::size_t end) noexcept
     {
-        T sum = collection[start];
+        T sum(collection[start]);
         for (std::size_t i = start + 1; i <= end; ++i)
             sum += collection[i];
         return static_cast<T>(sum / (end + 1 - start));
@@ -209,15 +210,15 @@ namespace ExtendedCpp::LINQ::Aggregate
     /// @return
     template<Concepts::RandomAccess TCollection,
              typename T = RandomAccessValueType<TCollection>,
-             std::invocable<T> TSelector,
-             Concepts::Divisible TResult = std::invoke_result_t<TSelector, T>>
-    requires std::is_copy_assignable_v<TResult>
+             std::invocable<const T&> TSelector,
+             Concepts::Divisible TResult = std::invoke_result_t<TSelector, const T&>>
+    requires std::is_copy_constructible_v<TResult>
     TResult Average(const TCollection& collection, const std::size_t start, const std::size_t end, const TSelector& selector)
-    noexcept(std::is_nothrow_invocable_v<TSelector, T> &&
+    noexcept(std::is_nothrow_invocable_v<TSelector, const T&> &&
              Concepts::IsNothrowAddable<TResult> &&
              Concepts::IsNothrowDivisible<TResult, std::size_t>)
     {
-        TResult sum = selector(collection[start]);
+        TResult sum(selector(collection[start]));
         for (std::size_t i = start + 1; i <= end; ++i)
             sum += selector(collection[i]);
         return static_cast<TResult>(sum / (end + 1 - start));

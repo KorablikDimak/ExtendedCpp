@@ -1,5 +1,5 @@
-#ifndef TestSender_H
-#define TestSender_H
+#ifndef TEST_SENDER_H
+#define TEST_SENDER_H
 
 #include <ExtendedCpp/InfoLog/ISender.h>
 #include <ExtendedCpp/Reflection.h>
@@ -13,7 +13,6 @@ public:
     META(TestSender,
          CONSTRUCTOR(std::map<std::string, std::string>))
 
-protected:
     void Send(const std::string& message, ExtendedCpp::InfoLog::LogLevel logLevel, const std::string& tag) const noexcept override;
 };
 

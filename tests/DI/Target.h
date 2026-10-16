@@ -1,5 +1,5 @@
-#ifndef Target_H
-#define Target_H
+#ifndef TARGET_H
+#define TARGET_H
 
 #include <memory>
 
@@ -13,10 +13,7 @@ private:
     std::shared_ptr<IService> _service;
 
 public:
-    explicit Target(const std::shared_ptr<IService>& service)
-    {
-        _service = service;
-    }
+    explicit Target(const std::shared_ptr<IService>& service) noexcept : _service(service) {}
 
     META(Target,
          CONSTRUCTOR(std::shared_ptr<IService>))

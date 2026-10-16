@@ -1,8 +1,10 @@
-#ifndef ObjectObject_H
-#define ObjectObject_H
+#ifndef OBJECT_OBJECT_H
+#define OBJECT_OBJECT_H
 
 #include "ValueObject.h"
 #include "ValuesObject.h"
+
+// ReSharper disable CppInconsistentNaming
 
 class ObjectObject
 {

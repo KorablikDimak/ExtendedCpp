@@ -20,8 +20,8 @@ TEST(RandomTests, RandomStringTest)
 TEST(RandomTests, RandomIntTest)
 {
     // Average
-    const int min = -100;
-    const int max = 100;
+    constexpr int min = -100;
+    constexpr int max = 100;
 
     // Act
     const int random1 = ExtendedCpp::Random::RandomInt(min, max);
@@ -35,8 +35,8 @@ TEST(RandomTests, RandomIntTest)
 TEST(RandomTests, RandomRealTest)
 {
     // Average
-    const double min = -0.5;
-    const double max = 1.2;
+    constexpr double min = -0.5;
+    constexpr double max = 1.2;
 
     // Act
     const double random1 = ExtendedCpp::Random::RandomReal(min, max);
@@ -50,8 +50,8 @@ TEST(RandomTests, RandomRealTest)
 TEST(RandomTests, RandomNumberTest)
 {
     // Average
-    const unsigned int min = 110;
-    const unsigned int max = 150;
+    constexpr unsigned int min = 110;
+    constexpr unsigned int max = 150;
 
     // Act
     const unsigned int random1 = ExtendedCpp::Random::Random(min, max);
@@ -65,8 +65,8 @@ TEST(RandomTests, RandomNumberTest)
 TEST(RandomTests, RandomSequenceTest)
 {
     // Average
-    const unsigned int min = 40;
-    const unsigned int max = 80;
+    constexpr unsigned int min = 40;
+    constexpr unsigned int max = 80;
 
     // Act
     const auto sequence = ExtendedCpp::Random::RandomSequence(min, max, 10);

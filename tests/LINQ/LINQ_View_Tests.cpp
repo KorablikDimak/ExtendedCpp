@@ -57,18 +57,18 @@ TEST(LINQ_View_Tests, RemoveWhereTest)
 TEST(LINQ_View_Tests, JoinTest)
 {
     // Average
-    Employer person1("Tom", "Microsoft");
-    Employer person2("Bob", "Google");
-    Employer person3("Sam", "Microsoft");
-    Employer person4("Alice", "Google");
-    Employer person5("Jon", "Google");
+    const Employer person1("Tom", "Microsoft");
+    const Employer person2("Bob", "Google");
+    const Employer person3("Sam", "Microsoft");
+    const Employer person4("Alice", "Google");
+    const Employer person5("Jon", "Google");
 
     std::vector people { person1, person2, person3, person4, person5 };
 
-    ItCompany company1("Microsoft", "C#");
-    ItCompany company2("Google", "C++");
+    const ItCompany company1("Microsoft", "C#");
+    const ItCompany company2("Google", "C++");
 
-    std::vector companies { company1, company2 };
+    const std::vector companies { company1, company2 };
 
     // Act
     const std::vector employees = ExtendedCpp::LINQ::View(people)
@@ -176,6 +176,7 @@ TEST(LINQ_View_Tests, TakeWhileTest)
 TEST(LINQ_View_Tests, EmptyCollectionTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<char> emptyVector;
 
     // Act

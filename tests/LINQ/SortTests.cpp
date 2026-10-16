@@ -4,6 +4,8 @@
 
 #include "LINQ_Tests.h"
 
+// NOLINTBEGIN(*-magic-numbers, *-avoid-c-arrays, *-runtime-int)
+
 TEST(SortTests, SelectionSortTest)
 {
     // Average
@@ -278,3 +280,5 @@ TEST(SortTests, TimSortTest)
     for (short i = 0; i < 4; ++i)
         ASSERT_TRUE(persons[i].Age == sortedAges[i]);
 }
+
+// NOLINTEND(*-magic-numbers, *-avoid-c-arrays, *-runtime-int)

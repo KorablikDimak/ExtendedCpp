@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <ExtendedCpp/DI/Register.h>
 #include <ExtendedCpp/DI/Injector.h>
+#include <ExtendedCpp/DI/Register.h>
 
 #include "Service.h"
 #include "Service2.h"
@@ -18,7 +18,7 @@ TEST(DI_Tests, DI_ServiceProviderTest1) {
     serviceProvider.AddScoped<IService, Service>();
 
     // Assert
-    ASSERT_NO_THROW(auto service = serviceProvider.GetServiceRequired<IService>());
+    ASSERT_NO_THROW(serviceProvider.GetServiceRequired<IService>());
 }
 
 TEST(DI_Tests, DI_ServiceProviderTest2)
@@ -32,10 +32,10 @@ TEST(DI_Tests, DI_ServiceProviderTest2)
     serviceProvider.AddScoped<IService>();
 
     // Assert
-    ASSERT_NO_THROW(auto service = serviceProvider.GetService<IService>();
+    ASSERT_NO_THROW(const auto service = serviceProvider.GetService<IService>();
     ASSERT_TRUE(service));
 
-    ASSERT_NO_THROW(auto service = serviceProvider.GetServiceRequired<IService>();
+    ASSERT_NO_THROW(const auto service = serviceProvider.GetServiceRequired<IService>();
     ASSERT_TRUE(service));
 }
 
@@ -50,10 +50,10 @@ TEST(DI_Tests, DI_ServiceProviderTest3)
     serviceProvider.AddScoped<IService>([](const ExtendedCpp::DI::ServiceProvider&){ return std::make_shared<Service>(); });
 
     // Assert
-    ASSERT_NO_THROW(auto service = serviceProvider.GetService<IService>();
+    ASSERT_NO_THROW(const auto service = serviceProvider.GetService<IService>();
     ASSERT_TRUE(service));
 
-    ASSERT_NO_THROW(auto service = serviceProvider.GetServiceRequired<IService>();
+    ASSERT_NO_THROW(const auto service = serviceProvider.GetServiceRequired<IService>();
     ASSERT_TRUE(service));
 }
 
@@ -68,7 +68,7 @@ TEST(DI_Tests, DI_RegisterTest)
     // Assert
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::Create(serviceProvider);
     ASSERT_TRUE(target.has_value()));
-    ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::CreateRequired(serviceProvider));
+    ASSERT_NO_THROW(ExtendedCpp::DI::Register<Target(IService)>::CreateRequired(serviceProvider));
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target(IService)>::New(serviceProvider);
     ASSERT_TRUE(target);
@@ -95,7 +95,7 @@ TEST(DI_Tests, DI_RegisterTest2)
     // Assert
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target2(IService, IService2)>::Create(serviceProvider);
     ASSERT_TRUE(target.has_value()));
-    ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target2(IService, IService2)>::CreateRequired(serviceProvider));
+    ASSERT_NO_THROW(ExtendedCpp::DI::Register<Target2(IService, IService2)>::CreateRequired(serviceProvider));
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Register<Target2(IService, IService2)>::New(serviceProvider);
     ASSERT_TRUE(target);
@@ -121,7 +121,7 @@ TEST(DI_Tests, DI_InjectorTest)
     // Assert
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target>::Create(serviceProvider);
     ASSERT_TRUE(target.has_value()));
-    ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target>::CreateRequired(serviceProvider));
+    ASSERT_NO_THROW(ExtendedCpp::DI::Injector<Target>::CreateRequired(serviceProvider));
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target>::Ptr(serviceProvider);
     ASSERT_TRUE(target));
@@ -141,7 +141,7 @@ TEST(DI_Tests, DI_InjectorTest2)
     // Assert
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target2>::Create(serviceProvider);
     ASSERT_TRUE(target.has_value()));
-    ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target2>::CreateRequired(serviceProvider));
+    ASSERT_NO_THROW(ExtendedCpp::DI::Injector<Target2>::CreateRequired(serviceProvider));
 
     ASSERT_NO_THROW(auto target = ExtendedCpp::DI::Injector<Target2>::Ptr(serviceProvider);
     ASSERT_TRUE(target));

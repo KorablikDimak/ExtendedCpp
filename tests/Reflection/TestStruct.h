@@ -1,5 +1,5 @@
-#ifndef TestStruct_H
-#define TestStruct_H
+#ifndef TEST_STRUCT_H
+#define TEST_STRUCT_H
 
 #include <string>
 
@@ -14,18 +14,18 @@ struct TestStruct
     inline static double StaticDoubleField{};
 
     TestStruct() noexcept = default;
-    explicit TestStruct(const std::string& str) noexcept;
+    explicit TestStruct(std::string str) noexcept;
 
 private:
     [[nodiscard]]
     int TestMethodInt() const noexcept;
-    inline int TestMethodInt() noexcept { return --IntField; }
+    int TestMethodInt() noexcept { return --IntField; }
     [[nodiscard]]
     double TestMethodDouble(double a, double b) const noexcept;
     [[nodiscard]]
     double TestMethodDouble(double a, double b, double c) const noexcept;
 
-    static std::string TestMethodStaticString() noexcept;
+    static std::string_view TestMethodStaticString() noexcept;
     static int TestMethodStatic() noexcept;
     static int TestMethodStatic(int a) noexcept;
 

@@ -263,8 +263,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TMap
         /// @param mapFunction
         /// @return
-        template<std::invocable<value_type> TMap>
-        requires std::same_as<std::invoke_result_t<TMap, value_type>, value_type>
+        template<std::invocable<const value_type&> TMap>
+        requires std::same_as<std::invoke_result_t<TMap, const value_type&>, value_type>
         LinqView<SelectorIterator<value_type, TIterator, TMap>> Map(TMap&& mapFunction) const
         noexcept(std::is_nothrow_constructible_v<SelectorIterator<value_type, TIterator, TMap>, value_type, TIterator, TMap>)
         {
@@ -292,7 +292,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TSelector
         /// @param selector
         /// @return
-        template<std::invocable<value_type> TSelector, typename TResult = std::invoke_result_t<TSelector, value_type>>
+        template<std::invocable<const value_type&> TSelector,
+                 typename TResult = std::invoke_result_t<TSelector, const value_type&>>
         LinqView<SelectorIterator<TResult, TIterator, TSelector>> Select(TSelector&& selector) const
         noexcept(std::is_nothrow_constructible_v<SelectorIterator<TResult, TIterator, TSelector>, TResult, TIterator, TSelector>)
         {
@@ -305,7 +306,7 @@ namespace ExtendedCpp::LINQ
         /// @tparam TPredicate
         /// @param predicate
         /// @return
-        template<Concepts::IsPredicate<value_type> TPredicate>
+        template<Concepts::IsPredicate<const value_type&> TPredicate>
         LinqView<WhereIterator<TIterator, TPredicate>> Where(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
         {
@@ -318,7 +319,7 @@ namespace ExtendedCpp::LINQ
         /// @tparam TPredicate
         /// @param predicate
         /// @return
-        template<Concepts::IsPredicate<value_type> TPredicate>
+        template<Concepts::IsPredicate<const value_type&> TPredicate>
         LinqView<RemoveWhereIterator<TIterator, TPredicate>> RemoveWhere(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<WhereIterator<TIterator, TPredicate>, TIterator, TPredicate>)
         {
@@ -332,8 +333,8 @@ namespace ExtendedCpp::LINQ
         /// @tparam TKeySelector
         /// @param keySelector
         /// @return
-        template<std::invocable<value_type> TKeySelector,
-                 typename TKey = std::invoke_result_t<TKeySelector, value_type>>
+        template<std::invocable<const value_type&> TKeySelector,
+                 typename TKey = std::invoke_result_t<TKeySelector, const value_type&>>
         std::map<TKey, std::vector<value_type>> GroupBy(const TKeySelector& keySelector) const
         noexcept(std::is_nothrow_invocable_v<TKeySelector, value_type> &&
                  noexcept(noexcept(*std::declval<TIterator>()) &&
@@ -363,12 +364,12 @@ namespace ExtendedCpp::LINQ
         /// @param resultSelector
         /// @return
         template<Concepts::ForwardIterable TOtherCollection,
-                 std::invocable<value_type> TInnerKeySelector,
-                 std::invocable<typename TOtherCollection::value_type> TOtherKeySelector,
-                 std::invocable<value_type, typename TOtherCollection::value_type> TResultSelector>
-        requires std::same_as<std::invoke_result_t<TInnerKeySelector, value_type>,
-                              std::invoke_result_t<TOtherKeySelector, typename TOtherCollection::value_type>> &&
-                 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, value_type>>
+                 std::invocable<const value_type&> TInnerKeySelector,
+                 std::invocable<const typename TOtherCollection::value_type&> TOtherKeySelector,
+                 std::invocable<const value_type&, const typename TOtherCollection::value_type&> TResultSelector>
+        requires std::same_as<std::invoke_result_t<TInnerKeySelector, const value_type&>,
+                              std::invoke_result_t<TOtherKeySelector, const typename TOtherCollection::value_type&>> &&
+                 Concepts::Equatable<std::invoke_result_t<TInnerKeySelector, const value_type&>>
         LinqView<JoinIterator<TIterator, TOtherCollection, TInnerKeySelector,
                               TOtherKeySelector, TResultSelector>> Join(const TOtherCollection& otherCollection,
                                                                         TInnerKeySelector&& innerKeySelector,
@@ -416,7 +417,7 @@ namespace ExtendedCpp::LINQ
         /// @tparam TPredicate
         /// @param predicate
         /// @return
-        template<Concepts::IsPredicate<value_type> TPredicate>
+        template<Concepts::IsPredicate<const value_type&> TPredicate>
         LinqView<SkipWhileIterator<TIterator, TPredicate>> SkipWhile(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<SkipWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)
         {
@@ -440,7 +441,7 @@ namespace ExtendedCpp::LINQ
         /// @tparam TPredicate
         /// @param predicate
         /// @return
-        template<Concepts::IsPredicate<value_type> TPredicate>
+        template<Concepts::IsPredicate<const value_type&> TPredicate>
         LinqView<TakeWhileIterator<TIterator, TPredicate>> TakeWhile(TPredicate&& predicate) const
         noexcept(std::is_nothrow_constructible_v<TakeWhileIterator<TIterator, TPredicate>, TIterator, TPredicate>)
         {

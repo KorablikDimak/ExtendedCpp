@@ -8,7 +8,7 @@
 TEST(JsonTests, VALUE_FROM_JSON_Test)
 {
     // Average
-    std::string jsonString =
+    const std::string jsonString =
         R"({"intField": 1, "boolField": true, "stringField": "stringValue"})";
     const ExtendedCpp::Json json = ExtendedCpp::Json::parse(jsonString);
 
@@ -167,6 +167,7 @@ TEST(JsonTests, OBJECT_TO_JSON_Test)
 
     // Act
     const ExtendedCpp::Json json = std::make_shared<ObjectObject>(objectObject);
+    // ReSharper disable once CppUseStructuredBinding
     const auto assertObject = json.get<ObjectObject>();
 
     // Assert

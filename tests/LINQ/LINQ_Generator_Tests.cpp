@@ -1081,6 +1081,7 @@ TEST(LINQ_Generator_Tests, ReverseTest)
 TEST(LINQ_Generator_Tests, EmptyCollectionTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<char> emptyVector;
 
     // Act

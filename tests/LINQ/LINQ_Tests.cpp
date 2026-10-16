@@ -1,10 +1,12 @@
+#include <ranges>
+
 #include <gtest/gtest.h>
 
 #include <ExtendedCpp/LINQ.h>
 
 #include "LINQ_Tests.h"
 
-#include <ranges>
+// NOLINTBEGIN(*-magic-numbers)
 
 TEST(LINQ_Tests, SelectTest)
 {
@@ -31,10 +33,10 @@ TEST(LINQ_Tests, SelectTest)
 TEST(LINQ_Tests, SelectMany1Test)
 {
     // Average
-    Person person1("Tom", 23);
-    Person person2("Bob", 27);
-    Person person3("Sam", 29);
-    Person person4("Alice", 24);
+    const Person person1("Tom", 23);
+    const Person person2("Bob", 27);
+    const Person person3("Sam", 29);
+    const Person person4("Alice", 24);
 
     Company company1("Microsoft");
     company1.People.push_back(person1);
@@ -44,7 +46,7 @@ TEST(LINQ_Tests, SelectMany1Test)
     company2.People.push_back(person3);
     company2.People.push_back(person4);
 
-    std::vector companies { company1, company2 };
+    const std::vector companies { company1, company2 };
 
     // Act
     std::vector employees = ExtendedCpp::LINQ::From(companies)
@@ -63,10 +65,10 @@ TEST(LINQ_Tests, SelectMany1Test)
 TEST(LINQ_Tests, SelectMany2Test)
 {
     // Average
-    Person person1("Tom", 23);
-    Person person2("Bob", 27);
-    Person person3("Sam", 29);
-    Person person4("Alice", 24);
+    const Person person1("Tom", 23);
+    const Person person2("Bob", 27);
+    const Person person3("Sam", 29);
+    const Person person4("Alice", 24);
 
     Company company1("Microsoft");
     company1.People.push_back(person1);
@@ -76,7 +78,7 @@ TEST(LINQ_Tests, SelectMany2Test)
     company2.People.push_back(person3);
     company2.People.push_back(person4);
 
-    std::vector companies { company1, company2 };
+    const std::vector companies { company1, company2 };
 
     // Act
     std::vector employees = ExtendedCpp::LINQ::From(companies)
@@ -149,12 +151,12 @@ TEST(LINQ_Tests, OrderByTest)
 TEST(LINQ_Tests, OrderByWithSelectorTest)
 {
     // Average
-    Person person1("Tom", 23);
-    Person person2("Bob", 27);
-    Person person3("Sam", 29);
-    Person person4("Alice", 24);
+    const Person person1("Tom", 23);
+    const Person person2("Bob", 27);
+    const Person person3("Sam", 29);
+    const Person person4("Alice", 24);
 
-    std::vector people { person1, person2, person3, person4 };
+    const std::vector people { person1, person2, person3, person4 };
 
     // Act
     std::vector sortedPeople = ExtendedCpp::LINQ::From(people)
@@ -431,6 +433,7 @@ TEST(LINQ_Tests, FirstPredicateTest)
 TEST(LINQ_Tests, FirstOrDefaultTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<int> numbers;
 
     // Act
@@ -483,6 +486,7 @@ TEST(LINQ_Tests, LastPredicateTest)
 TEST(LINQ_Tests, LastOrDefaultTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<int> numbers;
 
     // Act
@@ -611,13 +615,13 @@ TEST(LINQ_Tests, TakeWhileTest)
 TEST(LINQ_Tests, GroupByTest)
 {
     // Average
-    Employer person1("Tom", "Microsoft");
-    Employer person2("Bob", "Google");
-    Employer person3("Sam", "Microsoft");
-    Employer person4("Alice", "Google");
-    Employer person5("Jon", "Google");
+    const Employer person1("Tom", "Microsoft");
+    const Employer person2("Bob", "Google");
+    const Employer person3("Sam", "Microsoft");
+    const Employer person4("Alice", "Google");
+    const Employer person5("Jon", "Google");
 
-    std::vector people { person1, person2, person3, person4, person5 };
+    const std::vector people { person1, person2, person3, person4, person5 };
 
     // Act
     std::map companies = ExtendedCpp::LINQ::From(people)
@@ -632,18 +636,18 @@ TEST(LINQ_Tests, GroupByTest)
 TEST(LINQ_Tests, JoinTest)
 {
     // Average
-    Employer person1("Tom", "Microsoft");
-    Employer person2("Bob", "Google");
-    Employer person3("Sam", "Microsoft");
-    Employer person4("Alice", "Google");
-    Employer person5("Jon", "Google");
+    const Employer person1("Tom", "Microsoft");
+    const Employer person2("Bob", "Google");
+    const Employer person3("Sam", "Microsoft");
+    const Employer person4("Alice", "Google");
+    const Employer person5("Jon", "Google");
 
-    std::vector people { person1, person2, person3, person4, person5 };
+    const std::vector people { person1, person2, person3, person4, person5 };
 
-    ItCompany company1("Microsoft", "C#");
-    ItCompany company2("Google", "C++");
+    const ItCompany company1("Microsoft", "C#");
+    const ItCompany company2("Google", "C++");
 
-    std::vector companies { company1, company2 };
+    const std::vector companies { company1, company2 };
 
     // Act
     const std::vector employees = ExtendedCpp::LINQ::From(people)
@@ -664,18 +668,18 @@ TEST(LINQ_Tests, JoinTest)
 TEST(LINQ_Tests, GroupJoinTest)
 {
     // Average
-    Employer person1("Tom", "Microsoft");
-    Employer person2("Bob", "Google");
-    Employer person3("Sam", "Microsoft");
-    Employer person4("Alice", "Google");
-    Employer person5("Jon", "Google");
+    const Employer person1("Tom", "Microsoft");
+    const Employer person2("Bob", "Google");
+    const Employer person3("Sam", "Microsoft");
+    const Employer person4("Alice", "Google");
+    const Employer person5("Jon", "Google");
 
-    std::vector people{person1, person2, person3, person4, person5};
+    const std::vector people{person1, person2, person3, person4, person5};
 
-    ItCompany company1("Microsoft", "C#");
-    ItCompany company2("Google", "C++");
+    const ItCompany company1("Microsoft", "C#");
+    const ItCompany company2("Google", "C++");
 
-    std::vector companies{company1, company2};
+    const std::vector companies{company1, company2};
 
     // Act
     const std::vector result = ExtendedCpp::LINQ::From(people)
@@ -817,7 +821,7 @@ TEST(LINQ_Tests, FromContainerTest)
     numbersQueue.push(0);
     numbersQueue.push(3);
 
-    std::deque numbersDequeue { 8, 7, 1, 9, 50, 0, 3 };
+    const std::deque numbersDequeue { 8, 7, 1, 9, 50, 0, 3 };
 
     std::priority_queue<int> numbersPriorityQueue;
     numbersPriorityQueue.push(8);
@@ -828,8 +832,8 @@ TEST(LINQ_Tests, FromContainerTest)
     numbersPriorityQueue.push(0);
     numbersPriorityQueue.push(3);
 
-    std::set numbersSet { 8, 7, 1, 9, 50, 0, 3 };
-    std::unordered_set numbersUnorderedSet { 8, 7, 1, 9, 50, 0, 3 };
+    const std::set numbersSet { 8, 7, 1, 9, 50, 0, 3 };
+    const std::unordered_set numbersUnorderedSet { 8, 7, 1, 9, 50, 0, 3 };
 
     std::map<int, int> numbersMap;
     numbersMap.insert(std::make_pair(8, 8));
@@ -869,14 +873,14 @@ TEST(LINQ_Tests, FromContainerTest)
     std::vector result2 = linq2.ToVector();
     std::vector result3 = linq3.ToVector();
     std::vector result4 = linq4.ToVector();
-    std::vector result5 = linq5.ToVector();
-    std::vector result6 = linq6.ToVector();
+    const std::vector result5 = linq5.ToVector();
+    const std::vector result6 = linq6.ToVector();
     std::vector result7 = linq7.ToVector();
-    std::vector result8 = linq8.ToVector();
-    std::vector result9 = linq9.ToVector();
-    std::vector result10 = linq10.ToVector();
-    std::vector result11 = linq11.ToVector();
-    std::vector result12 = linq12.ToVector();
+    const std::vector result8 = linq8.ToVector();
+    const std::vector result9 = linq9.ToVector();
+    const std::vector result10 = linq10.ToVector();
+    const std::vector result11 = linq11.ToVector();
+    const std::vector result12 = linq12.ToVector();
     std::vector result13 = linq13.ToVector();
     std::vector result14 = linq14.ToVector();
 
@@ -892,26 +896,26 @@ TEST(LINQ_Tests, FromContainerTest)
         ASSERT_EQ(numbersVector[i], result14[i]);
     }
 
-    for (int number : result5)
+    for (const int number : result5)
         ASSERT_TRUE(linq1.Contains(number));
 
-    for (int number : result6)
+    for (const int number : result6)
         ASSERT_TRUE(linq1.Contains(number));
 
-    for (int number : result8)
+    for (const int number : result8)
         ASSERT_TRUE(linq1.Contains(number));
 
-    for (int number : result9)
+    for (const int number : result9)
         ASSERT_TRUE(linq1.Contains(number));
 
-    for (int number : result10)
+    for (const int number : result10)
         ASSERT_TRUE(linq1.Contains(number));
 
-    for (std::pair<int, int> pair : result11)
-        ASSERT_TRUE(linq1.Contains(pair.first));
+    for (const auto key : result11 | std::views::keys)
+        ASSERT_TRUE(linq1.Contains(key));
 
-    for (std::pair<int, int> pair : result12)
-        ASSERT_TRUE(linq1.Contains(pair.first));
+    for (const auto key : result12 | std::views::keys)
+        ASSERT_TRUE(linq1.Contains(key));
 }
 
 TEST(LINQ_Tests, ToContainerTest)
@@ -932,14 +936,14 @@ TEST(LINQ_Tests, ToContainerTest)
     // Act
     std::vector vectorResult = linq.ToVector();
     std::array arrayResult = linq.ToArray<7>();
-    std::list listResult = linq.ToList();
-    std::forward_list forwardListResult = linq.ToForwardList();
+    const std::list listResult = linq.ToList();
+    const std::forward_list forwardListResult = linq.ToForwardList();
     std::stack stackResult = linq.ToStack();
     std::queue queueResult = linq.ToQueue();
-    std::deque dequeResult = linq.ToDeque();
+    const std::deque dequeResult = linq.ToDeque();
     std::priority_queue priorityQueueResult = linq.ToPriorityQueue();
-    std::set setResult = linq.ToSet();
-    std::unordered_set unorderedSetResult = linq.ToUnorderedSet();
+    const std::set setResult = linq.ToSet();
+    const std::unordered_set unorderedSetResult = linq.ToUnorderedSet();
     std::map mapResult = linqPairs.ToMap();
     std::unordered_map unorderedMapResult = linqPairs.ToUnorderedMap();
 
@@ -959,19 +963,19 @@ TEST(LINQ_Tests, ToContainerTest)
         priorityQueueResult.pop();
     }
 
-    for (int number : listResult)
+    for (const int number : listResult)
         ASSERT_TRUE(linq.Contains(number));
 
-    for (int number : forwardListResult)
+    for (const int number : forwardListResult)
         ASSERT_TRUE(linq.Contains(number));
 
-    for (int number : dequeResult)
+    for (const int number : dequeResult)
         ASSERT_TRUE(linq.Contains(number));
 
-    for (int number : setResult)
+    for (const int number : setResult)
         ASSERT_TRUE(linq.Contains(number));
 
-    for (int number : unorderedSetResult)
+    for (const int number : unorderedSetResult)
         ASSERT_TRUE(linq.Contains(number));
 
     for (const auto key : mapResult | std::views::keys)
@@ -1116,13 +1120,14 @@ TEST(LINQ_Tests, ForeachTest)
     for (const auto& element : clinq)
         ASSERT_TRUE(element > 0);
 
-    for (auto& element : linq)
+    for (const auto& element : linq)
         ASSERT_TRUE(element > 0);
 }
 
 TEST(LINQ_Tests, EmptyCollectionTest)
 {
     // Average
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::vector<char> emptyVector;
 
     // Act
@@ -1139,8 +1144,8 @@ TEST(LINQ_Tests, EmptyCollectionTest)
 TEST(LINQ_Tests, TransformTest)
 {
     // Average
-    const std::vector<int> numbers = { 1, 2, 3, 4 };
-    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+    const std::vector numbers = { 1, 2, 3, 4 };
+    const std::vector assertVector = { 2, 4, 6, 8 };
 
     // Act
     const auto transformed = ExtendedCpp::LINQ::From(numbers)
@@ -1155,8 +1160,8 @@ TEST(LINQ_Tests, TransformTest)
 TEST(LINQ_Tests, MapTest)
 {
     // Average
-    const std::vector<int> numbers = { 1, 2, 3, 4 };
-    const std::vector<int> assertVector = { 2, 4, 6, 8 };
+    const std::vector numbers = { 1, 2, 3, 4 };
+    const std::vector assertVector = { 2, 4, 6, 8 };
 
     // Act
     const auto mapped = ExtendedCpp::LINQ::From(numbers)
@@ -1167,3 +1172,5 @@ TEST(LINQ_Tests, MapTest)
     for (std::size_t i = 0; i < assertVector.size(); ++i)
         ASSERT_EQ(mapped[i], assertVector[i]);
 }
+
+// NOLINTEND(*-magic-numbers)
