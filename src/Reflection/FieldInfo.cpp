@@ -25,6 +25,11 @@ const void* ExtendedCpp::Reflection::FieldInfo::ReadFieldPtr(std::any object) co
     return _fieldReaderPtr(_fieldHelper, std::move(object));
 }
 
+void ExtendedCpp::Reflection::FieldInfo::SetValue(std::any object, std::any value) const
+{
+    _fieldValueSetter(_fieldHelper, std::move(object), std::move(value));
+}
+
 std::type_index ExtendedCpp::Reflection::FieldInfo::TypeIndex() const noexcept
 {
     return _typeIndex;

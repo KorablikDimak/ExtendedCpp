@@ -77,6 +77,15 @@ namespace ExtendedCpp::Reflection
 
             /// @brief
             /// @param object
+            /// @param value
+            void SetValue(std::any&& object, std::any&& value) const
+            {
+                std::any_cast<TObject*>(std::move(object))->*_fieldPtr =
+                    std::move(std::any_cast<TField>(std::move(value)));
+            }
+
+            /// @brief
+            /// @param object
             /// @param position
             /// @return
             [[nodiscard]]

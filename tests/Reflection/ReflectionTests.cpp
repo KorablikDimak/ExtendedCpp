@@ -208,4 +208,35 @@ TEST(ReflectionTests, InsertionFieldTest)
     ASSERT_EQ(9, object.Data[3]);
 }
 
+TEST(ReflectionTests, SetValueTest1)
+{
+    // Average
+    const auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
+
+    // Act
+    TestStruct object{};
+    const auto fieldInfo = typeInfo.GetField("IntField");
+    ASSERT_EQ(0, object.IntField);
+    fieldInfo->SetValue(&object, 5);
+
+    // Asser
+    ASSERT_EQ(5, object.IntField);
+}
+
+TEST(ReflectionTests, SetValueTest2)
+{
+    // Average
+    const auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
+
+    // Act
+    TestStruct object{};
+    const auto fieldInfo = typeInfo.GetField("StringField");
+    const std::string value = "TestString";
+    ASSERT_TRUE(object.StringField.empty());
+    fieldInfo->SetValue(&object, value);
+
+    // Asser
+    ASSERT_TRUE(value == object.StringField);
+}
+
 // NOLINTEND(*-magic-numbers)

@@ -4,23 +4,12 @@ project(LINQ-tests LANGUAGES CXX)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 if (is_top_level)
-    enable_testing()
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
     find_package(ExtendedCpp REQUIRED)
+    enable_testing()
 endif ()
 
-find_package(GTest REQUIRED)
-
-set(LINQ_TESTS_SOURCE
-        main.cpp
-        AlgorithmTests.cpp
-        SortTests.cpp
-        LINQ_Tests.cpp
-        LINQ_Generator_Tests.cpp
-        LINQ_View_Tests.cpp
-        AdaptorTests.cpp)
-
-add_executable(LINQ-tests ${LINQ_TESTS_SOURCE})
-target_link_libraries(LINQ-tests PRIVATE ExtendedCpp::LINQ GTest::gtest GTest::gtest_main)
-
-include(GoogleTest)
-gtest_discover_tests(LINQ-tests)
+add_gtest_for(ExtendedCpp::LINQ)

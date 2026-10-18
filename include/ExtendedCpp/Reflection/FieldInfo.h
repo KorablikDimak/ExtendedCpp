@@ -22,6 +22,7 @@ namespace ExtendedCpp::Reflection
         std::any (*_fieldReader)(const std::any& helper, std::any&& object);
         void* (*_fieldGetterPtr)(const std::any& helper, std::any&& object);
         const void* (*_fieldReaderPtr)(const std::any& helper, std::any&& object);
+        void (*_fieldValueSetter)(const std::any& helper, std::any&& object, std::any&& value);
 
     public:
         /// @brief
@@ -31,7 +32,7 @@ namespace ExtendedCpp::Reflection
         struct Helper final
         {
         private:
-            TField TObject::*_fieldPtr;
+            TField TObject::*const _fieldPtr;
 
         public:
             /// @brief
@@ -65,6 +66,15 @@ namespace ExtendedCpp::Reflection
             {
                 return &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
             }
+
+            /// @brief
+            /// @param object
+            /// @param value
+            void SetValue(std::any&& object, std::any&& value) const
+            {
+                std::any_cast<TObject*>(std::move(object))->*_fieldPtr =
+                    std::move(std::any_cast<TField>(std::move(value)));
+            }
         };
 
         /// @brief
@@ -86,7 +96,9 @@ namespace ExtendedCpp::Reflection
             _fieldGetterPtr([](const std::any& helper, std::any&& object)
                 { return static_cast<void*>(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
             _fieldReaderPtr([](const std::any& helper, std::any&& object)
-                { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }) {}
+                { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
+            _fieldValueSetter([](const std::any& helper, std::any&& object, std::any&& value)
+                { std::any_cast<const THelper&>(helper).SetValue(std::move(object), std::move(value)); }) {}
 
         /// @brief
         ~FieldInfo() override = default;
@@ -249,6 +261,30 @@ namespace ExtendedCpp::Reflection
                 throw std::invalid_argument("Object is null");
             return _fieldReaderPtr(_fieldHelper, object);
         }
+
+        template<typename TObject, typename TField>
+        void SetValue(TObject* object, TField&& value) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _fieldValueSetter(_fieldHelper, object, std::forward<TField>(value));
+        }
+
+        template<typename TField>
+        void SetValue(std::any object, TField&& value) const
+        {
+            _fieldValueSetter(_fieldHelper, std::move(object), std::forward<TField>(value));
+        }
+
+        template<typename TObject>
+        void SetValue(TObject* object, std::any value) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _fieldValueSetter(_fieldHelper, object, std::move(value));
+        }
+
+        void SetValue(std::any object, std::any value) const;
 
         /// @brief
         /// @return

@@ -40,42 +40,9 @@ option(Serialization_Json_BUILD_TESTS "Build Serialization_Json library tests" O
 option(Common_BUILD_BENCHMARKS "Build Common benchmarks" OFF)
 option(LINQ_BUILD_BENCHMARKS "Build LINQ benchmarks" OFF)
 
-set(Asio_SOURCE
-        src/Asio/IoAwaiter.cpp
-        src/Asio/FileIoAwaiter.cpp
-        src/Asio/Afstream.cpp
-        src/Asio/NativeHandle.cpp
-        src/Asio/ReadFileAwaiter.cpp
-        src/Asio/WriteFileAwaiter.cpp)
-
-set(InfoLog_SOURCE
-        src/InfoLog/FileSender.cpp
-        src/InfoLog/ISender.cpp
-        src/InfoLog/Logger.cpp
-        src/InfoLog/LoggerFactory.cpp
-        src/InfoLog/Parser.cpp
-        src/InfoLog/ConsoleSender.cpp)
-
-set(Reflection_SOURCE
-        src/Reflection/MemberInfo.cpp
-        src/Reflection/FieldInfo.cpp
-        src/Reflection/TypeInfo.cpp
-        src/Reflection/StaticFieldInfo.cpp
-        src/Reflection/Assembly.cpp
-        src/Reflection/ConstructorInfo.cpp
-        src/Reflection/MethodInfo.cpp
-        src/Reflection/Reflection.cpp
-        src/Reflection/StaticMethodInfo.cpp
-        src/Reflection/CollectionFieldInfo.cpp)
-
-set(Serialisation_Json_SOURCE
-        src/Serialization/Json.cpp)
-
-set(Xml_SOURCE
-        src/Xml/pugixml.cpp)
-
-add_library(Asio ${LIBRARY_TYPE} ${Asio_SOURCE})
+add_library(Asio ${LIBRARY_TYPE})
 add_library(ExtendedCpp::Asio ALIAS Asio)
+target_link_libraries(Asio INTERFACE Common)
 if (APPLE AND ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     target_compile_options(Asio PRIVATE -fblocks)
     target_compile_definitions(Asio PUBLIC DARWIN_IO)
@@ -87,6 +54,14 @@ endif ()
 
 add_library(Common INTERFACE)
 add_library(ExtendedCpp::Common ALIAS Common)
+target_sources(Common INTERFACE FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/include" FILES
+        "include/ExtendedCpp/Cancellation/CancellationToken.h"
+        "include/ExtendedCpp/Cancellation/CancellationTokenSource.h"
+        "include/ExtendedCpp/Cancellation.h"
+        "include/ExtendedCpp/Concepts.h"
+        "include/ExtendedCpp/Matrix.h"
+        "include/ExtendedCpp/Random.h"
+        "include/ExtendedCpp/Task.h")
 
 add_library(DI INTERFACE)
 add_library(ExtendedCpp::DI ALIAS DI)
@@ -95,7 +70,7 @@ target_link_libraries(DI INTERFACE Reflection)
 add_library(Events INTERFACE)
 add_library(ExtendedCpp::Events ALIAS Events)
 
-add_library(InfoLog ${LIBRARY_TYPE} ${InfoLog_SOURCE})
+add_library(InfoLog ${LIBRARY_TYPE})
 add_library(ExtendedCpp::InfoLog ALIAS InfoLog)
 target_link_libraries(InfoLog PUBLIC Xml Reflection)
 
@@ -105,21 +80,24 @@ add_library(ExtendedCpp::Json ALIAS Json)
 add_library(LINQ INTERFACE)
 add_library(ExtendedCpp::LINQ ALIAS LINQ)
 
-add_library(Reflection ${LIBRARY_TYPE} ${Reflection_SOURCE})
+add_library(Reflection ${LIBRARY_TYPE})
 add_library(ExtendedCpp::Reflection ALIAS Reflection)
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     target_compile_options(Reflection PUBLIC /Zc:preprocessor)
 endif ()
 
-add_library(Serialization_Json ${LIBRARY_TYPE} ${Serialisation_Json_SOURCE})
+add_library(Serialization_Json ${LIBRARY_TYPE})
 add_library(ExtendedCpp::Serialization::Json ALIAS Serialization_Json)
 target_link_libraries(Serialization_Json PUBLIC Json Reflection)
 
-add_library(Xml ${LIBRARY_TYPE} ${Xml_SOURCE})
+add_library(Xml ${LIBRARY_TYPE})
 add_library(ExtendedCpp::Xml ALIAS Xml)
 
 set_interface_directories(Common DI Events Json LINQ)
 set_include_directories(Asio InfoLog Reflection Serialization_Json Xml)
+
+add_target_interface_sources(Common DI Events Json LINQ)
+add_target_sources(Asio InfoLog Reflection Serialization_Json Xml)
 
 if (ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     write_basic_package_version_file(
