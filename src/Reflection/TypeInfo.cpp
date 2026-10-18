@@ -1,16 +1,9 @@
 #include <ExtendedCpp/Reflection/Assembly.h>
 #include <ExtendedCpp/Reflection/TypeInfo.h>
 
-ExtendedCpp::Reflection::TypeInfo::TypeInfo(const std::string& name, const std::type_index typeIndex, // NOLINT(*-pass-by-value)
+ExtendedCpp::Reflection::TypeInfo::TypeInfo(const std::string_view name, const std::type_index typeIndex,
                                             const std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
     _name(name), _typeIndex(typeIndex), _members(members)
-{
-    Assembly::AddType(*this);
-}
-
-ExtendedCpp::Reflection::TypeInfo::TypeInfo(std::string&& name, const std::type_index typeIndex,
-                                            const std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept :
-    _name(std::move(name)), _typeIndex(typeIndex), _members(members)
 {
     Assembly::AddType(*this);
 }
@@ -25,16 +18,10 @@ std::type_index ExtendedCpp::Reflection::TypeInfo::TypeIndex() const noexcept
     return _typeIndex;
 }
 
-std::vector<std::shared_ptr<ExtendedCpp::Reflection::MemberInfo>>
+const std::vector<std::shared_ptr<ExtendedCpp::Reflection::MemberInfo>>&
 ExtendedCpp::Reflection::TypeInfo::GetMembers() const noexcept
 {
-    std::vector<std::shared_ptr<MemberInfo>> result;
-    result.reserve(_members.size());
-
-    for (const auto& member : _members)
-        result.push_back(member);
-
-    return result;
+    return _members;
 }
 
 std::vector<std::shared_ptr<ExtendedCpp::Reflection::FieldInfo>>
@@ -44,7 +31,7 @@ ExtendedCpp::Reflection::TypeInfo::GetFields() const noexcept
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::Field)
-            result.push_back(std::dynamic_pointer_cast<FieldInfo>(member));
+            result.emplace_back(std::static_pointer_cast<FieldInfo>(member));
 
     return result;
 }
@@ -56,7 +43,7 @@ ExtendedCpp::Reflection::TypeInfo::GetStaticFields() const noexcept
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::StaticField)
-            result.push_back(std::dynamic_pointer_cast<StaticFieldInfo>(member));
+            result.emplace_back(std::static_pointer_cast<StaticFieldInfo>(member));
 
     return result;
 }
@@ -68,7 +55,7 @@ ExtendedCpp::Reflection::TypeInfo::GetMethods() const noexcept
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::Method)
-            result.push_back(std::dynamic_pointer_cast<MethodInfo>(member));
+            result.emplace_back(std::static_pointer_cast<MethodInfo>(member));
 
     return result;
 }
@@ -80,7 +67,7 @@ ExtendedCpp::Reflection::TypeInfo::GetStaticMethods() const noexcept
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::StaticMethod)
-            result.push_back(std::dynamic_pointer_cast<StaticMethodInfo>(member));
+            result.emplace_back(std::static_pointer_cast<StaticMethodInfo>(member));
 
     return result;
 }
@@ -92,9 +79,23 @@ ExtendedCpp::Reflection::TypeInfo::GetConstructors() const noexcept
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::Constructor)
-            result.push_back(std::dynamic_pointer_cast<ConstructorInfo>(member));
+            result.emplace_back(std::static_pointer_cast<ConstructorInfo>(member));
 
     return result;
+}
+
+std::shared_ptr<ExtendedCpp::Reflection::ConstructorInfo>
+ExtendedCpp::Reflection::TypeInfo::GetDefaultConstructor() const noexcept
+{
+    for (const auto& member : _members)
+        if (member->GetMemberType() == MemberType::Constructor)
+        {
+            const auto constructor = std::static_pointer_cast<ConstructorInfo>(member);
+            if (constructor->Parameters().empty())
+                return constructor;
+        }
+
+    return { nullptr };
 }
 
 std::vector<std::shared_ptr<ExtendedCpp::Reflection::MemberInfo>>
@@ -105,7 +106,7 @@ ExtendedCpp::Reflection::TypeInfo::GetMembers(const std::string_view& name) cons
 
     for (const auto& member : _members)
         if (member->Name() == name)
-            result.push_back(member);
+            result.emplace_back(member);
 
     return result;
 }
@@ -115,9 +116,9 @@ ExtendedCpp::Reflection::TypeInfo::GetField(const std::string_view& name) const 
 {
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::Field && member->Name() == name)
-            return std::dynamic_pointer_cast<FieldInfo>(member);
+            return std::static_pointer_cast<FieldInfo>(member);
 
-    return {nullptr};
+    return { nullptr };
 }
 
 std::shared_ptr<ExtendedCpp::Reflection::StaticFieldInfo>
@@ -125,9 +126,9 @@ ExtendedCpp::Reflection::TypeInfo::GetStaticField(const std::string_view& name) 
 {
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::StaticField && member->Name() == name)
-            return std::dynamic_pointer_cast<StaticFieldInfo>(member);
+            return std::static_pointer_cast<StaticFieldInfo>(member);
 
-    return {nullptr};
+    return { nullptr };
 }
 
 std::vector<std::shared_ptr<ExtendedCpp::Reflection::MethodInfo>>
@@ -137,7 +138,7 @@ ExtendedCpp::Reflection::TypeInfo::GetMethods(const std::string_view& name) cons
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::Method && member->Name() == name)
-            result.push_back(std::dynamic_pointer_cast<MethodInfo>(member));
+            result.emplace_back(std::static_pointer_cast<MethodInfo>(member));
 
     return result;
 }
@@ -149,7 +150,7 @@ ExtendedCpp::Reflection::TypeInfo::GetStaticMethods(const std::string_view &name
 
     for (const auto& member : _members)
         if (member->GetMemberType() == MemberType::StaticMethod && member->Name() == name)
-            result.push_back(std::dynamic_pointer_cast<StaticMethodInfo>(member));
+            result.emplace_back(std::static_pointer_cast<StaticMethodInfo>(member));
 
     return result;
 }

@@ -26,13 +26,7 @@ namespace ExtendedCpp::Reflection
         /// @param name 
         /// @param typeIndex 
         /// @param members
-        TypeInfo(const std::string& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
-
-        /// @brief 
-        /// @param name 
-        /// @param typeIndex 
-        /// @param members
-        TypeInfo(std::string&& name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
+        TypeInfo(std::string_view name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
 
         /// @brief 
         /// @return
@@ -47,7 +41,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return
         [[nodiscard]]
-        std::vector<std::shared_ptr<MemberInfo>> GetMembers() const noexcept;
+        const std::vector<std::shared_ptr<MemberInfo>>& GetMembers() const noexcept;
 
         /// @brief 
         /// @return
@@ -73,6 +67,11 @@ namespace ExtendedCpp::Reflection
         /// @return
         [[nodiscard]]
         std::vector<std::shared_ptr<ConstructorInfo>> GetConstructors() const noexcept;
+
+        /// @brief
+        /// @return
+        [[nodiscard]]
+        std::shared_ptr<ConstructorInfo> GetDefaultConstructor() const noexcept;
 
         /// @brief 
         /// @param name 
