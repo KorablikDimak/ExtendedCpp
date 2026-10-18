@@ -12,7 +12,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetField(std::any object) const
 
 void* ExtendedCpp::Reflection::FieldInfo::GetFieldPtr(std::any object) const
 {
-    return _fieldGetterPtr(_fieldHelper, std::move(object));
+    return _fieldPtrGetter(_fieldHelper, std::move(object));
 }
 
 std::any ExtendedCpp::Reflection::FieldInfo::ReadField(std::any object) const
@@ -22,12 +22,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::ReadField(std::any object) const
 
 const void* ExtendedCpp::Reflection::FieldInfo::ReadFieldPtr(std::any object) const
 {
-    return _fieldReaderPtr(_fieldHelper, std::move(object));
-}
-
-void ExtendedCpp::Reflection::FieldInfo::SetValue(std::any object, std::any value) const
-{
-    _fieldValueSetter(_fieldHelper, std::move(object), std::move(value));
+    return _fieldPtrReader(_fieldHelper, std::move(object));
 }
 
 std::type_index ExtendedCpp::Reflection::FieldInfo::TypeIndex() const noexcept

@@ -12,7 +12,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElement(std::any objec
 
 void* ExtendedCpp::Reflection::CollectionFieldInfo::GetElementPtr(std::any object, const std::size_t position) const
 {
-    return _elementGetterPtr(_fieldHelper, std::move(object), position);
+    return _elementPtrGetter(_fieldHelper, std::move(object), position);
 }
 
 std::any ExtendedCpp::Reflection::CollectionFieldInfo::ReadElement(std::any object, const std::size_t position) const
@@ -22,11 +22,18 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::ReadElement(std::any obje
 
 const void* ExtendedCpp::Reflection::CollectionFieldInfo::ReadElementPtr(std::any object, const std::size_t position) const
 {
-    return _elementReaderPtr(_fieldHelper, std::move(object), position);
+    return _elementPtrReader(_fieldHelper, std::move(object), position);
 }
 
 std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(std::any object) const
 {
+    return _sizeGetter(_fieldHelper, std::move(object));
+}
+
+std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(const std::shared_ptr<void>& object) const
+{
+    if (!object)
+        throw std::invalid_argument("Object is null");
     return _sizeGetter(_fieldHelper, std::move(object));
 }
 

@@ -1,23 +1,23 @@
 #include <ExtendedCpp/Reflection/ConstructorInfo.h>
 
-std::any ExtendedCpp::Reflection::ConstructorInfo::CreateFromAny(const std::vector<std::any>& args) const
+std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::any>& args) const
 {
     return _fromAny(_constructorHelper, args);
 }
 
-std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::NewFromAny(const std::vector<std::any>& args) const
+std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::any>& args) const
 {
     return _fromAnyNew(_constructorHelper, args);
 }
 
-std::any ExtendedCpp::Reflection::ConstructorInfo::CreateFromAny(const std::vector<std::shared_ptr<void>>& args) const
+std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::shared_ptr<void>>& args) const
 {
-    return _fromAnyPtr(_constructorHelper, args);
+    return _fromPtr(_constructorHelper, args);
 }
 
-std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::NewFromAny(const std::vector<std::shared_ptr<void>>& args) const
+std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::shared_ptr<void>>& args) const
 {
-    return _fromAnyPtrNew(_constructorHelper, args);
+    return _fromPtrNew(_constructorHelper, args);
 }
 
 ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::GetMemberType() const noexcept

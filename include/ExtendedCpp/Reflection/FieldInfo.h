@@ -20,9 +20,11 @@ namespace ExtendedCpp::Reflection
         std::any (*_fieldValueGetter)(const std::any& helper, std::any&& object);
         std::any (*_fieldGetter)(const std::any& helper, std::any&& object);
         std::any (*_fieldReader)(const std::any& helper, std::any&& object);
-        void* (*_fieldGetterPtr)(const std::any& helper, std::any&& object);
-        const void* (*_fieldReaderPtr)(const std::any& helper, std::any&& object);
+        void* (*_fieldPtrGetter)(const std::any& helper, std::any&& object);
+        const void* (*_fieldPtrReader)(const std::any& helper, std::any&& object);
         void (*_fieldValueSetter)(const std::any& helper, std::any&& object, std::any&& value);
+
+        void (*_fieldValueSetterToPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& value);
 
     public:
         /// @brief
@@ -75,6 +77,16 @@ namespace ExtendedCpp::Reflection
                 std::any_cast<TObject*>(std::move(object))->*_fieldPtr =
                     std::move(std::any_cast<TField>(std::move(value)));
             }
+
+            /// @brief
+            /// @param object
+            /// @param value
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            void SetValue(std::shared_ptr<void>& object, std::any&& value) const
+            {
+                std::static_pointer_cast<TObject>(object).get()->*_fieldPtr =
+                    std::move(std::any_cast<TField>(std::move(value)));
+            }
         };
 
         /// @brief
@@ -93,12 +105,14 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
             _fieldReader([](const std::any& helper, std::any&& object)
                 { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
-            _fieldGetterPtr([](const std::any& helper, std::any&& object)
+            _fieldPtrGetter([](const std::any& helper, std::any&& object)
                 { return static_cast<void*>(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
-            _fieldReaderPtr([](const std::any& helper, std::any&& object)
+            _fieldPtrReader([](const std::any& helper, std::any&& object)
                 { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
             _fieldValueSetter([](const std::any& helper, std::any&& object, std::any&& value)
-                { std::any_cast<const THelper&>(helper).SetValue(std::move(object), std::move(value)); }) {}
+                { std::any_cast<const THelper&>(helper).SetValue(std::move(object), std::move(value)); }),
+            _fieldValueSetterToPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& value)
+                { std::any_cast<const THelper&>(helper).SetValue(object, std::move(value)); }) {}
 
         /// @brief
         ~FieldInfo() override = default;
@@ -276,15 +290,21 @@ namespace ExtendedCpp::Reflection
             _fieldValueSetter(_fieldHelper, std::move(object), std::forward<TField>(value));
         }
 
-        template<typename TObject>
-        void SetValue(TObject* object, std::any value) const
+        template<typename TObject, typename TField>
+        void SetValue(std::shared_ptr<TObject>& object, TField&& value) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            _fieldValueSetter(_fieldHelper, object, std::move(value));
+            _fieldValueSetterToPtr(_fieldHelper, object, std::forward<TField>(value));
         }
 
-        void SetValue(std::any object, std::any value) const;
+        template<typename TField>
+        void SetValue(std::shared_ptr<void>& object, TField&& value) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _fieldValueSetterToPtr(_fieldHelper, object, std::forward<TField>(value));
+        }
 
         /// @brief
         /// @return

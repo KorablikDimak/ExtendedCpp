@@ -39,7 +39,7 @@ namespace ExtendedCpp::DI
 
                 try
                 {
-                    return constructor->CreateFromAny<TTarget>(args);
+                    return constructor->Create<TTarget>(std::move(args));
                 }
                 catch (...)
                 {
@@ -70,7 +70,7 @@ namespace ExtendedCpp::DI
 
                 if (args.size() != constructor->Parameters().size())
                     continue;
-                return constructor->CreateFromAny<TTarget>(args);
+                return constructor->Create<TTarget>(std::move(args));
             }
 
             throw std::runtime_error("Can not create type " + std::string(typeid(TTarget).name()));
@@ -99,7 +99,7 @@ namespace ExtendedCpp::DI
 
                 try
                 {
-                    return constructor->NewFromAny<TTarget>(args);
+                    return constructor->New<TTarget>(std::move(args));
                 }
                 catch (...)
                 {
@@ -130,7 +130,7 @@ namespace ExtendedCpp::DI
 
                 if (args.size() != constructor->Parameters().size())
                     continue;
-                return constructor->NewFromAny<TTarget>(args);
+                return constructor->New<TTarget>(std::move(args));
             }
 
             throw std::runtime_error("Can not create type " + std::string(typeid(TTarget).name()));

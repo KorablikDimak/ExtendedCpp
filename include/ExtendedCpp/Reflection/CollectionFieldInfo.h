@@ -4,6 +4,7 @@
 #include <any>
 #include <string>
 #include <typeindex>
+#include <xutility>
 
 #include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/FieldInfo.h>
@@ -15,25 +16,26 @@ namespace ExtendedCpp::Reflection
     class CollectionFieldInfo final : public FieldInfo
     {
     private:
-        std::type_index _valueTypeIndex;
+        const std::type_index _valueTypeIndex;
 
-        std::any (*_elementValueGetter)(const std::any& helper, std::any&& object, std::size_t position);
-        std::any (*_elementGetter)(const std::any& helper, std::any&& object, std::size_t position);
-        std::any (*_elementReader)(const std::any& helper, std::any&& object, std::size_t position);
-        void* (*_elementGetterPtr)(const std::any& helper, std::any&& object, std::size_t position);
-        const void* (*_elementReaderPtr)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementValueGetter)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementGetter)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementReader)(const std::any& helper, std::any&& object, std::size_t position);
+        void* (*const _elementPtrGetter)(const std::any& helper, std::any&& object, std::size_t position);
+        const void* (*const _elementPtrReader)(const std::any& helper, std::any&& object, std::size_t position);
 
-        void (*_inserter)(const std::any& helper, std::any&& object, std::any&& element, std::size_t position);
-        void (*_frontInserter)(const std::any& helper, std::any&& object, std::any&& element);
-        void (*_backInserter)(const std::any& helper, std::any&& object, std::any&& element);
+        void (*const _inserter)(const std::any& helper, std::any&& object, std::any&& element, std::size_t position);
+        void (*const _frontInserter)(const std::any& helper, std::any&& object, std::any&& element);
+        void (*const _backInserter)(const std::any& helper, std::any&& object, std::any&& element);
 
-        std::size_t (*_sizeGetter)(const std::any& helper, std::any&& object);
+        std::size_t (*const _sizeGetter)(const std::any& helper, std::any&& object);
+        void (*const _clear)(const std::any& helper, std::any&& object);
 
     public:
         /// @brief
         /// @tparam TObject
         /// @tparam TField
-        template<typename TObject, Concepts::Insertable TField>
+        template<typename TObject, std::ranges::random_access_range TField>
         struct Helper final
         {
         private:
@@ -153,6 +155,13 @@ namespace ExtendedCpp::Reflection
             {
                 return (std::any_cast<const TObject*>(std::move(object))->*_fieldPtr).size();
             }
+
+            /// @brief
+            /// @param object
+            void Clear(std::any&& object) const
+            {
+                (std::any_cast<TObject*>(std::move(object))->*_fieldPtr).clear();
+            }
         };
 
         /// @brief
@@ -170,9 +179,9 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
             _elementReader([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<const THelper&>(helper).Read(std::move(object), position)); }),
-            _elementGetterPtr([](const std::any& helper, std::any&& object, const std::size_t position)
+            _elementPtrGetter([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return static_cast<void*>(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
-            _elementReaderPtr([](const std::any& helper, std::any&& object, const std::size_t position)
+            _elementPtrReader([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return static_cast<const void*>(std::any_cast<const THelper&>(helper).Read(std::move(object), position)); }),
             _inserter([](const std::any& helper, std::any&& object, std::any&& element, const std::size_t position)
                 { std::any_cast<const THelper&>(helper).Insert(std::move(object), std::move(element), position); }),
@@ -181,7 +190,9 @@ namespace ExtendedCpp::Reflection
             _backInserter([](const std::any& helper, std::any&& object, std::any&& element)
                 { std::any_cast<const THelper&>(helper).InsertBack(std::move(object), std::move(element)); }),
             _sizeGetter([](const std::any& helper, std::any&& object)
-                { return std::any_cast<const THelper&>(helper).Size(std::move(object)); }) {}
+                { return std::any_cast<const THelper&>(helper).Size(std::move(object)); }),
+            _clear([](const std::any& helper, std::any&& object)
+                { return std::any_cast<const THelper&>(helper).Clear(std::move(object)); }) {}
 
         /// @brief
         ~CollectionFieldInfo() override = default;
@@ -450,6 +461,19 @@ namespace ExtendedCpp::Reflection
             return _sizeGetter(_fieldHelper, object);
         }
 
+        [[nodiscard]]
+        std::size_t Size(const std::shared_ptr<void>& object) const;
+
+        void Clear(std::any object) const;
+
+        template<typename TObject>
+        void Clear(TObject* object) const
+        {
+
+        }
+
+        void Clear(std::shared_ptr<void>& object) const;
+
         /// @brief
         /// @return
         [[nodiscard]]
@@ -480,7 +504,7 @@ namespace ExtendedCpp::Reflection
 #define FIELD(name) \
 []() \
 { \
-    if constexpr (ExtendedCpp::Reflection::Concepts::Insertable<decltype(name)>) \
+    if constexpr (std::ranges::random_access_range<decltype(name)>) \
         return ExtendedCpp::Reflection::CreateCollectionFieldInfo(#name, &ThisClassType::name); \
     else \
         return ExtendedCpp::Reflection::CreateFieldInfo(#name, &ThisClassType::name); \

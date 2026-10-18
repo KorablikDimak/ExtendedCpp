@@ -122,8 +122,8 @@ TEST(ReflectionTests, ConstructorFromAnyTest)
     const auto constructors = typeInfo.GetConstructors();
 
     // Act
-    const auto testStruct1 = constructors[1]->CreateFromAny({std::string("test")});
-    const auto testStruct2 = constructors[1]->NewFromAny({std::string("test")});
+    const auto testStruct1 = constructors[1]->Create({std::string("test")});
+    const auto testStruct2 = constructors[1]->New({std::string("test")});
 
     // Assert
     ASSERT_TRUE(testStruct1.has_value());
@@ -231,12 +231,27 @@ TEST(ReflectionTests, SetValueTest2)
     // Act
     TestStruct object{};
     const auto fieldInfo = typeInfo.GetField("StringField");
+    // ReSharper disable once CppVariableCanBeMadeConstexpr
     const std::string value = "TestString";
     ASSERT_TRUE(object.StringField.empty());
     fieldInfo->SetValue(&object, value);
 
     // Asser
     ASSERT_TRUE(value == object.StringField);
+}
+
+TEST(ReflectionTests, CreateAndSetValueTest)
+{
+    const auto typeInfo = ExtendedCpp::Reflection::GetType<TestStruct>();
+
+    // Act
+    auto object = typeInfo.GetDefaultConstructor()->New();
+    ASSERT_EQ(0, std::static_pointer_cast<TestStruct>(object)->IntField);
+    const auto fieldInfo = typeInfo.GetField("IntField");
+    fieldInfo->SetValue(object, 7);
+
+    // Asser
+    ASSERT_EQ(7, std::static_pointer_cast<TestStruct>(object)->IntField);
 }
 
 // NOLINTEND(*-magic-numbers)
