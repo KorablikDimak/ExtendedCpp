@@ -20,7 +20,7 @@ namespace ExtendedCpp::Reflection
         explicit MemberInfo(std::string&& name) noexcept;
 
         /// @brief
-        virtual ~MemberInfo() = default;
+        virtual ~MemberInfo() noexcept = default;
 
         /// @brief 
         /// @return

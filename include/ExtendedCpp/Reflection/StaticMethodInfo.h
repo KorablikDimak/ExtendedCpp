@@ -77,7 +77,7 @@ namespace ExtendedCpp::Reflection
             _parameters(std::move(parameters)) {}
 
         /// @brief
-        ~StaticMethodInfo() override = default;
+        ~StaticMethodInfo() noexcept override = default;
 
         /// @brief 
         /// @tparam TResult 

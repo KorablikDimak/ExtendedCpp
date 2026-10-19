@@ -14,21 +14,24 @@ namespace ExtendedCpp::Reflection
     /// @brief
     class FieldInfo : public MemberInfo
     {
-    protected:
-        std::type_index _typeIndex;
-        std::any _fieldHelper;
+    private:
+        const std::type_index _typeIndex;
+        const std::any _fieldHelper;
 
-        std::any (*_fieldValueGetter)(const std::any& helper, std::any&& object);
-        std::any (*_fieldGetter)(const std::any& helper, std::any&& object);
-        std::any (*_fieldReader)(const std::any& helper, std::any&& object);
-        void (*_fieldValueSetter)(const std::any& helper, std::any&& object, std::any&& value);
+        std::any (*const _value)(const std::any& helper, std::any&& object);
+        std::any (*const _ref)(const std::any& helper, std::any&& object);
+        std::any (*const _constRef)(const std::any& helper, std::any&& object);
+        std::any (*const _ptr)(const std::any& helper, std::any&& object);
+        std::any (*const _constPtr)(const std::any& helper, std::any&& object);
+        void (*const _valueSetter)(const std::any& helper, std::any&& object, std::any&& value);
 
-        std::any (*_fieldValueGetterToPtr)(const std::any& helper, const std::shared_ptr<void>& object);
-        std::any (*_fieldGetterToPtr)(const std::any& helper, std::shared_ptr<void>& object);
-        std::any (*_fieldReaderToPtr)(const std::any& helper, const std::shared_ptr<void>& object);
-        void (*_fieldValueSetterToPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& value);
+        std::any (*const _valueFromPtr)(const std::any& helper, const std::shared_ptr<void>& object);
+        std::any (*const _refFromPtr)(const std::any& helper, std::shared_ptr<void>& object);
+        std::any (*const _constRefFromPtr)(const std::any& helper, const std::shared_ptr<void>& object);
+        std::any (*const _ptrFromPtr)(const std::any& helper, std::shared_ptr<void>& object);
+        std::any (*const _constPtrFromPtr)(const std::any& helper, const std::shared_ptr<void>& object);
+        void (*const _valueSetterFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& value);
 
-    public:
         template<typename TObject, typename TField>
         struct Helper final
         {
@@ -40,56 +43,146 @@ namespace ExtendedCpp::Reflection
                 _fieldPtr(fieldPtr) {}
 
             [[nodiscard]]
-            TField GetValue(std::any&& object) const
+            TField Value(std::any&& object) const
             {
-                return std::any_cast<const TObject*>(std::move(object))->*_fieldPtr;
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    return ptr->*_fieldPtr;
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                    return std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr;
+
+                throw std::invalid_argument("Invalid object type");
             }
 
             [[nodiscard]]
-            TField GetValue(const std::shared_ptr<void>& object) const noexcept
+            TField Value(const std::shared_ptr<void>& object) const noexcept
             {
                 return std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
             }
 
             [[nodiscard]]
-            TField* GetField(std::any&& object) const
+            TField& Ref(std::any&& object) const
             {
-                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    return ptr->*_fieldPtr;
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                    return std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+
+                throw std::invalid_argument("Invalid object type");
             }
 
             // ReSharper disable once CppParameterMayBeConstPtrOrRef
             [[nodiscard]]
-            TField* GetField(std::shared_ptr<void>& object) const noexcept
+            TField& Ref(std::shared_ptr<void>& object) const noexcept
+            {
+                return std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+            }
+
+            [[nodiscard]]
+            const TField& ConstRef(std::any&& object) const
+            {
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    return ptr->*_fieldPtr;
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                    return std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr;
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            [[nodiscard]]
+            const TField& ConstRef(const std::shared_ptr<void>& object) const noexcept
+            {
+                return std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+            }
+
+            [[nodiscard]]
+            TField* Ptr(std::any&& object) const
+            {
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    return &(ptr->*_fieldPtr);
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                    return &(std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr);
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            [[nodiscard]]
+            TField* Ptr(std::shared_ptr<void>& object) const noexcept
             {
                 return &(std::static_pointer_cast<TObject>(object).get()->*_fieldPtr);
             }
 
             [[nodiscard]]
-            const TField* ReadField(std::any&& object) const
+            const TField* ConstPtr(std::any&& object) const
             {
-                return &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    return &(ptr->*_fieldPtr);
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                    return &(std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr);
+
+                throw std::invalid_argument("Invalid object type");
             }
 
             [[nodiscard]]
-            const TField* ReadField(const std::shared_ptr<void>& object) const noexcept
+            const TField* ConstPtr(const std::shared_ptr<void>& object) const noexcept
             {
                 return &(std::static_pointer_cast<TObject>(object).get()->*_fieldPtr);
             }
 
             void SetValue(std::any&& object, std::any&& value) const
             {
-                std::any_cast<TObject*>(std::move(object))->*_fieldPtr =
-                    std::move(std::any_cast<TField>(std::move(value)));
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+                    ptr->*_fieldPtr = std::any_cast<TField>(std::move(value));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                    std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).*_fieldPtr = std::any_cast<TField>(std::move(value));
+
+                throw std::invalid_argument("Invalid object type");
             }
 
             // ReSharper disable once CppParameterMayBeConstPtrOrRef
             void SetValue(std::shared_ptr<void>& object, std::any&& value) const
             {
-                std::static_pointer_cast<TObject>(object).get()->*_fieldPtr =
-                    std::move(std::any_cast<TField>(std::move(value)));
+                std::static_pointer_cast<TObject>(object).get()->*_fieldPtr = std::move(std::any_cast<TField>(std::move(value)));
             }
         };
 
+    public:
         /// @brief
         /// @tparam THelper
         /// @param fieldName
@@ -101,26 +194,34 @@ namespace ExtendedCpp::Reflection
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
 
-            _fieldValueGetter([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetValue(std::move(object))); }),
-            _fieldGetter([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField(std::move(object))); }),
-            _fieldReader([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<const THelper&>(helper).ReadField(std::move(object))); }),
-            _fieldValueSetter([](const std::any& helper, std::any&& object, std::any&& value)
+            _value([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Value(std::move(object))); }),
+            _ref([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Ref(std::move(object))); }),
+            _constRef([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ConstRef(std::move(object))); }),
+            _ptr([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Ptr(std::move(object))); }),
+            _constPtr([](const std::any& helper, std::any&& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ConstPtr(std::move(object))); }),
+            _valueSetter([](const std::any& helper, std::any&& object, std::any&& value)
                 { std::any_cast<const THelper&>(helper).SetValue(std::move(object), std::move(value)); }),
 
-            _fieldValueGetterToPtr([](const std::any& helper, const std::shared_ptr<void>& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetValue(object)); }),
-            _fieldGetterToPtr([](const std::any& helper, std::shared_ptr<void>& object)
-                { return std::any(std::any_cast<const THelper&>(helper).GetField(object)); }),
-            _fieldReaderToPtr([](const std::any& helper, const std::shared_ptr<void>& object)
-                { return std::any(std::any_cast<const THelper&>(helper).ReadField(object)); }),
-            _fieldValueSetterToPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& value)
+            _valueFromPtr([](const std::any& helper, const std::shared_ptr<void>& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Value(object)); }),
+            _refFromPtr([](const std::any& helper, std::shared_ptr<void>& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Ref(object)); }),
+            _constRefFromPtr([](const std::any& helper, const std::shared_ptr<void>& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ConstRef(object)); }),
+            _ptrFromPtr([](const std::any& helper, std::shared_ptr<void>& object)
+                { return std::any(std::any_cast<const THelper&>(helper).Ptr(object)); }),
+            _constPtrFromPtr([](const std::any& helper, const std::shared_ptr<void>& object)
+                { return std::any(std::any_cast<const THelper&>(helper).ConstPtr(object)); }),
+            _valueSetterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& value)
                 { std::any_cast<const THelper&>(helper).SetValue(object, std::move(value)); }) {}
 
         /// @brief
-        ~FieldInfo() override = default;
+        ~FieldInfo() noexcept override = default;
 
         /// @brief
         /// @tparam TField
@@ -129,7 +230,7 @@ namespace ExtendedCpp::Reflection
         template<typename TField>
         TField GetValue(std::any object) const
         {
-            return std::any_cast<TField>(_fieldValueGetter(_fieldHelper, std::move(object)));
+            return std::any_cast<TField>(_value(_fieldHelper, std::move(object)));
         }
 
         /// @brief
@@ -140,31 +241,6 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @tparam TField
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TField, typename TObject>
-        TField GetValue(const TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<TField>(_fieldValueGetter(_fieldHelper, object));
-        }
-
-        /// @brief
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TObject>
-        std::any GetValue(const TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldValueGetter(_fieldHelper, object);
-        }
-
-        /// @brief
-        /// @tparam TField
         /// @param object
         /// @return
         template<typename TField>
@@ -172,7 +248,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            return std::any_cast<TField>(_fieldValueGetterToPtr(_fieldHelper, object));
+            return std::any_cast<TField>(_valueFromPtr(_fieldHelper, object));
         }
 
         /// @brief
@@ -183,226 +259,149 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @tparam TField
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TField, typename TObject>
-        TField GetValue(const std::shared_ptr<TObject>& object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<TField>(_fieldValueGetterToPtr(_fieldHelper, object));
-        }
-
-        /// @brief
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TObject>
-        std::any GetValue(const std::shared_ptr<TObject>& object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldValueGetterToPtr(_fieldHelper, object);
-        }
-
-        /// @brief
-        /// @tparam TField
         /// @param object
         /// @return
         template<typename TField>
-        TField* GetField(std::any object) const
+        TField& GetRef(std::any object) const
         {
-            return std::any_cast<TField*>(_fieldGetter(_fieldHelper, std::move(object)));
+            return std::any_cast<std::reference_wrapper<TField>>(_ref(_fieldHelper, std::move(object)));
         }
 
         /// @brief
         /// @param object
         /// @return
         [[nodiscard]]
-        std::any GetField(std::any object) const;
-
-        /// @brief
-        /// @tparam TField
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TField, typename TObject>
-        TField* GetField(TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<TField*>(_fieldGetter(_fieldHelper, object));
-        }
-
-        /// @brief
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TObject>
-        std::any GetField(TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldGetter(_fieldHelper, object);
-        }
+        std::any GetRef(std::any object) const;
 
         /// @brief
         /// @tparam TField
         /// @param object
         /// @return
         template<typename TField>
-        TField* GetField(std::shared_ptr<void>& object) const
+        TField& GetRef(std::shared_ptr<void>& object) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            return std::any_cast<TField*>(_fieldGetterToPtr(_fieldHelper, object));
+            return std::any_cast<std::reference_wrapper<TField>>(_refFromPtr(_fieldHelper, object)).get();
         }
 
         /// @brief
         /// @param object
         /// @return
         [[nodiscard]]
-        std::any GetField(std::shared_ptr<void>& object) const;
-
-        /// @brief
-        /// @tparam TField
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TField, typename TObject>
-        TField* GetField(std::shared_ptr<TObject>& object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<TField*>(_fieldGetterToPtr(_fieldHelper, object));
-        }
-
-        /// @brief
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TObject>
-        std::any GetField(std::shared_ptr<TObject>& object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldGetterToPtr(_fieldHelper, object);
-        }
+        std::any GetRef(std::shared_ptr<void>& object) const;
 
         /// @brief
         /// @tparam TField
         /// @param object
         /// @return
         template<typename TField>
-        const TField* ReadField(std::any object) const
+        const TField& GetConstRef(std::any object) const
         {
-            return std::any_cast<const TField*>(_fieldReader(_fieldHelper, std::move(object)));
+            return std::any_cast<std::reference_wrapper<const TField>>(_constRef(_fieldHelper, std::move(object))).get();
         }
 
         /// @brief
         /// @param object
         /// @return
         [[nodiscard]]
-        std::any ReadField(std::any object) const;
-
-        /// @brief
-        /// @tparam TField
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TField, typename TObject>
-        const TField* ReadField(const TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<const TField*>(_fieldReader(_fieldHelper, object));
-        }
-
-        /// @brief
-        /// @tparam TObject
-        /// @param object
-        /// @return
-        template<typename TObject>
-        std::any ReadField(const TObject* object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldReader(_fieldHelper, object);
-        }
+        std::any GetConstRef(std::any object) const;
 
         /// @brief
         /// @tparam TField
         /// @param object
         /// @return
         template<typename TField>
-        const TField* ReadField(const std::shared_ptr<void>& object) const
+        const TField& GetConstRef(const std::shared_ptr<void>& object) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            return std::any_cast<const TField*>(_fieldReaderToPtr(_fieldHelper, object));
+            return std::any_cast<std::reference_wrapper<const TField>>(_constRefFromPtr(_fieldHelper, object)).get();
         }
 
         /// @brief
         /// @param object
         /// @return
         [[nodiscard]]
-        std::any ReadField(const std::shared_ptr<void>& object) const;
+        std::any GetConstRef(const std::shared_ptr<void>& object) const;
 
         /// @brief
         /// @tparam TField
-        /// @tparam TObject
         /// @param object
         /// @return
-        template<typename TField, typename TObject>
-        const TField* ReadField(const std::shared_ptr<TObject>& object) const
+        template<typename TField>
+        TField* GetPtr(std::any object) const
         {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return std::any_cast<const TField*>(_fieldReaderToPtr(_fieldHelper, object));
+            return std::any_cast<TField*>(_ptr(_fieldHelper, std::move(object)));
         }
 
         /// @brief
-        /// @tparam TObject
         /// @param object
         /// @return
-        template<typename TObject>
-        std::any ReadField(const std::shared_ptr<TObject>& object) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            return _fieldReaderToPtr(_fieldHelper, object);
-        }
+        [[nodiscard]]
+        std::any GetPtr(std::any object) const;
 
-        template<typename TObject, typename TField>
-        void SetValue(TObject* object, TField&& value) const
-        {
-            if (!object)
-                throw std::invalid_argument("Object is null");
-            _fieldValueSetter(_fieldHelper, object, std::forward<TField>(value));
-        }
-
+        /// @brief
+        /// @tparam TField
+        /// @param object
+        /// @return
         template<typename TField>
-        void SetValue(std::any object, TField&& value) const
-        {
-            _fieldValueSetter(_fieldHelper, std::move(object), std::forward<TField>(value));
-        }
-
-        template<typename TObject, typename TField>
-        void SetValue(std::shared_ptr<TObject>& object, TField&& value) const
+        TField* GetPtr(std::shared_ptr<void>& object) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            _fieldValueSetterToPtr(_fieldHelper, object, std::forward<TField>(value));
+            return std::any_cast<TField*>(_ptrFromPtr(_fieldHelper, object));
         }
 
+        /// @brief
+        /// @param object
+        /// @return
+        [[nodiscard]]
+        std::any GetPtr(std::shared_ptr<void>& object) const;
+
+        /// @brief
+        /// @tparam TField
+        /// @param object
+        /// @return
         template<typename TField>
-        void SetValue(std::shared_ptr<void>& object, TField&& value) const
+        const TField* GetConstPtr(std::any object) const
+        {
+            return std::any_cast<const TField*>(_constPtr(_fieldHelper, std::move(object)));
+        }
+
+        /// @brief
+        /// @param object
+        /// @return
+        [[nodiscard]]
+        std::any GetConstPtr(std::any object) const;
+
+        /// @brief
+        /// @tparam TField
+        /// @param object
+        /// @return
+        template<typename TField>
+        const TField* GetConstPtr(const std::shared_ptr<void>& object) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            _fieldValueSetterToPtr(_fieldHelper, object, std::forward<TField>(value));
+            return std::any_cast<const TField*>(_constPtrFromPtr(_fieldHelper, object));
         }
+
+        /// @brief
+        /// @param object
+        /// @return
+        [[nodiscard]]
+        std::any GetConstPtr(const std::shared_ptr<void>& object) const;
+
+        /// @brief
+        /// @param object
+        /// @param value
+        void SetValue(std::any object, std::any value) const;
+
+        /// @brief
+        /// @param object
+        /// @param value
+        void SetValue(std::shared_ptr<void>& object, std::any value) const;
 
         /// @brief
         /// @return
@@ -417,23 +416,20 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @return
         [[nodiscard]]
-        virtual bool IsCollection() const noexcept
+        virtual bool IsCollection() const noexcept;
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TField
+        /// @param name
+        /// @param fieldPtr
+        /// @return
+        template<typename TObject, typename TField>
+        static std::shared_ptr<MemberInfo> Create(std::string&& name, TField TObject::*fieldPtr) noexcept
         {
-            return false;
+            return std::make_shared<FieldInfo>(std::move(name), typeid(TField), FieldInfo::Helper(fieldPtr));
         }
     };
-
-    /// @brief
-    /// @tparam TObject
-    /// @tparam TField
-    /// @param name
-    /// @param fieldPtr
-    /// @return
-    template<typename TObject, typename TField>
-    std::shared_ptr<MemberInfo> CreateFieldInfo(std::string&& name, TField TObject::*fieldPtr) noexcept
-    {
-        return std::make_shared<FieldInfo>(std::move(name), typeid(TField), FieldInfo::Helper(fieldPtr));
-    }
 }
 
 #endif

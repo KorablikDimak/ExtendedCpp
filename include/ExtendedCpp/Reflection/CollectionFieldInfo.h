@@ -2,9 +2,9 @@
 #define REFLECTION_COLLECTION_FIELD_INFO_H
 
 #include <any>
+#include <ranges>
 #include <string>
 #include <typeindex>
-#include <ranges>
 
 #include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/FieldInfo.h>
@@ -18,152 +18,343 @@ namespace ExtendedCpp::Reflection
     private:
         const std::type_index _valueTypeIndex;
 
-        std::any (*const _elementValueGetter)(const std::any& helper, std::any&& object, std::size_t position);
-        std::any (*const _elementGetter)(const std::any& helper, std::any&& object, std::size_t position);
-        std::any (*const _elementReader)(const std::any& helper, std::any&& object, std::size_t position);
-        void* (*const _elementPtrGetter)(const std::any& helper, std::any&& object, std::size_t position);
-        const void* (*const _elementPtrReader)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementValue)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementRef)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementConstRef)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementPtr)(const std::any& helper, std::any&& object, std::size_t position);
+        std::any (*const _elementConstPtr)(const std::any& helper, std::any&& object, std::size_t position);
+
+        std::any (*const _elementValueFromPtr)(const std::any& helper, const std::shared_ptr<void>& object, std::size_t position);
+        std::any (*const _elementRefFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::size_t position);
+        std::any (*const _elementConstRefFromPtr)(const std::any& helper, const std::shared_ptr<void>& object, std::size_t position);
+        std::any (*const _elementPtrFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::size_t position);
+        std::any (*const _elementConstPtrFromPtr)(const std::any& helper, const std::shared_ptr<void>& object, std::size_t position);
 
         void (*const _inserter)(const std::any& helper, std::any&& object, std::any&& element, std::size_t position);
         void (*const _frontInserter)(const std::any& helper, std::any&& object, std::any&& element);
         void (*const _backInserter)(const std::any& helper, std::any&& object, std::any&& element);
 
-        std::size_t (*const _sizeGetter)(const std::any& helper, std::any&& object);
+        void (*const _inserterFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& element, std::size_t position);
+        void (*const _frontInserterFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& element);
+        void (*const _backInserterFromPtr)(const std::any& helper, std::shared_ptr<void>& object, std::any&& element);
+
+        std::size_t (*const _size)(const std::any& helper, std::any&& object);
         void (*const _clear)(const std::any& helper, std::any&& object);
 
-    public:
-        /// @brief
-        /// @tparam TObject
-        /// @tparam TField
-        template<typename TObject, std::ranges::random_access_range TField>
+        std::size_t (*const _sizeFromPtr)(const std::any& helper, const std::shared_ptr<void>& object);
+        void (*const _clearFromPtr)(const std::any& helper, std::shared_ptr<void>& object);
+
+        template<typename TObject, typename TField>
+        requires std::ranges::random_access_range<TField> && std::ranges::sized_range<TField>
         struct Helper final
         {
         private:
-            TField TObject::*_fieldPtr;
+            TField TObject::*const _fieldPtr;
 
         public:
-            /// @brief
             using value_type = typename TField::value_type;
 
-            /// @brief
-            /// @param fieldPtr
-            explicit Helper(TField TObject::* fieldPtr) noexcept :
+            explicit Helper(TField TObject::*const fieldPtr) noexcept :
                 _fieldPtr(fieldPtr) {}
 
-            /// @brief
-            /// @param object
-            /// @return
-            [[nodiscard]]
-            TField GetValue(std::any&& object) const
-            {
-                return std::any_cast<const TObject*>(std::move(object))->*_fieldPtr;
-            }
-
-            /// @brief
-            /// @param object
-            /// @return
-            [[nodiscard]]
-            TField* GetField(std::any&& object) const
-            {
-                return &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
-            }
-
-            /// @brief
-            /// @param object
-            /// @return
-            [[nodiscard]]
-            const TField* ReadField(std::any&& object) const
-            {
-                return &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
-            }
-
-            /// @brief
-            /// @param object
-            /// @param value
-            void SetValue(std::any&& object, std::any&& value) const
-            {
-                std::any_cast<TObject*>(std::move(object))->*_fieldPtr =
-                    std::move(std::any_cast<TField>(std::move(value)));
-            }
-
-            /// @brief
-            /// @param object
-            /// @param position
-            /// @return
             [[nodiscard]]
             value_type Value(std::any&& object, const std::size_t position) const
             {
-                const TField* field = &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
-                return *(field->begin() + position);
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    const TField& field = ptr->*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                {
+                    const TField& field = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                throw std::invalid_argument("Invalid object type");
             }
 
-            /// @brief
-            /// @param object
-            /// @param position
-            /// @return
             [[nodiscard]]
-            value_type* Get(std::any&& object, const std::size_t position) const
+            value_type Value(const std::shared_ptr<void>& object, const std::size_t position) const
             {
-                TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
-                return &*(field->begin() + position);
+                const TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                if (position >= field.size())
+                    throw std::out_of_range("Position out of range");
+                return *(field.begin() + position);
             }
 
-            /// @brief
-            /// @param object
-            /// @param position
-            /// @return
             [[nodiscard]]
-            const value_type* Read(std::any&& object, const std::size_t position) const
+            value_type& Ref(std::any&& object, const std::size_t position) const
             {
-                const TField* field = &(std::any_cast<const TObject*>(std::move(object))->*_fieldPtr);
-                return &*(field->begin() + position);
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    TField& field = ptr->*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                {
+                    TField& field = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                throw std::invalid_argument("Invalid object type");
             }
 
-            /// @brief
-            /// @param object
-            /// @param element
-            /// @param position
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            [[nodiscard]]
+            value_type& Ref(std::shared_ptr<void>& object, const std::size_t position) const
+            {
+                TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                if (position >= field.size())
+                    throw std::out_of_range("Position out of range");
+                return *(field.begin() + position);
+            }
+
+            [[nodiscard]]
+            const value_type& ConstRef(std::any&& object, const std::size_t position) const
+            {
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    const TField& field = ptr->*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                {
+                    const TField& field = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return *(field.begin() + position);
+                }
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            [[nodiscard]]
+            const value_type& ConstRef(const std::shared_ptr<void>& object, const std::size_t position) const
+            {
+                const TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                if (position >= field.size())
+                    throw std::out_of_range("Position out of range");
+                return *(field.begin() + position);
+            }
+
+            [[nodiscard]]
+            value_type* Ptr(std::any&& object, const std::size_t position) const
+            {
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    TField& field = ptr->*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return &(*(field.begin() + position));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                {
+                    TField& field = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return &(*(field.begin() + position));
+                }
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            [[nodiscard]]
+            value_type* Ptr(std::shared_ptr<void>& object, const std::size_t position) const
+            {
+                TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                if (position >= field.size())
+                    throw std::out_of_range("Position out of range");
+                return &(*(field.begin() + position));
+            }
+
+            [[nodiscard]]
+            const value_type* ConstPtr(std::any&& object, const std::size_t position) const
+            {
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    const TField& field = ptr->*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return &(*(field.begin() + position));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                {
+                    const TField& field = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr;
+                    if (position >= field.size())
+                        throw std::out_of_range("Position out of range");
+                    return &(*(field.begin() + position));
+                }
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            [[nodiscard]]
+            const value_type& ConstPtr(const std::shared_ptr<void>& object, const std::size_t position) const
+            {
+                const TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                if (position >= field.size())
+                    throw std::out_of_range("Position out of range");
+                return &(*(field.begin() + position));
+            }
+
             void Insert(std::any&& object, std::any&& element, const std::size_t position) const
             {
-                TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
-                field->insert(field->begin() + position, std::any_cast<value_type>(std::move(element)));
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    TField& field = ptr->*_fieldPtr;
+                    field.insert(field->begin() + position, std::any_cast<value_type>(std::move(element)));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                {
+                    TField& field = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+                    field.insert(field->begin() + position, std::any_cast<value_type>(std::move(element)));
+                }
+
+                throw std::invalid_argument("Invalid object type");
             }
 
-            /// @brief
-            /// @param object
-            /// @param element
             void InsertFront(std::any&& object, std::any&& element) const
             {
-                TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    TField& field = ptr->*_fieldPtr;
+                    field->insert(field->begin(), std::any_cast<value_type>(std::move(element)));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                {
+                    TField& field = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+                    field->insert(field->begin(), std::any_cast<value_type>(std::move(element)));
+                }
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            void InsertBack(std::any&& object, std::any&& element) const
+            {
+                if (object.type() == typeid(TObject*))
+                {
+                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    TField& field = ptr->*_fieldPtr;
+                    field->insert(field->end(), std::any_cast<value_type>(std::move(element)));
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<TObject>))
+                {
+                    TField& field = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get().*_fieldPtr;
+                    field->insert(field->end(), std::any_cast<value_type>(std::move(element)));
+                }
+
+                throw std::invalid_argument("Invalid object type");
+            }
+
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            void Insert(std::shared_ptr<void>& object, std::any&& element, const std::size_t position) const noexcept
+            {
+                TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
+                field.insert(field->begin() + position, std::any_cast<value_type>(std::move(element)));
+            }
+
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            void InsertFront(std::shared_ptr<void>& object, std::any&& element) const noexcept
+            {
+                TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
                 field->insert(field->begin(), std::any_cast<value_type>(std::move(element)));
             }
 
-            /// @brief
-            /// @param object
-            /// @param element
-            void InsertBack(std::any&& object, std::any&& element) const
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            void InsertBack(std::shared_ptr<void>& object, std::any&& element) const noexcept
             {
-                TField* field = &(std::any_cast<TObject*>(std::move(object))->*_fieldPtr);
+                TField& field = std::static_pointer_cast<TObject>(object).get()->*_fieldPtr;
                 field->insert(field->end(), std::any_cast<value_type>(std::move(element)));
             }
 
-            /// @brief
-            /// @param object
-            /// @return
             [[nodiscard]]
             std::size_t Size(std::any&& object) const
             {
-                return (std::any_cast<const TObject*>(std::move(object))->*_fieldPtr).size();
+                if (object.type() == typeid(const TObject*))
+                {
+                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    if (!ptr)
+                        throw std::invalid_argument("Object is null");
+
+                    return (ptr->*_fieldPtr).size();
+                }
+
+                if (object.type() == typeid(std::reference_wrapper<const TObject>))
+                    return (std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get().*_fieldPtr).size();
+
+                throw std::invalid_argument("Invalid object type");
             }
 
-            /// @brief
-            /// @param object
             void Clear(std::any&& object) const
             {
                 (std::any_cast<TObject*>(std::move(object))->*_fieldPtr).clear();
             }
+
+            [[nodiscard]]
+            std::size_t Size(const std::shared_ptr<void>& object) const noexcept
+            {
+                return (std::static_pointer_cast<TObject>(object).get()->*_fieldPtr).size();
+            }
+
+            // ReSharper disable once CppParameterMayBeConstPtrOrRef
+            void Clear(std::shared_ptr<void>& object) const noexcept
+            {
+                (std::static_pointer_cast<TObject>(object).get()->*_fieldPtr).clear();
+            }
         };
 
+    public:
         /// @brief
         /// @tparam THelper
         /// @param fieldName
@@ -173,29 +364,47 @@ namespace ExtendedCpp::Reflection
         CollectionFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper) noexcept :
             FieldInfo(std::move(fieldName), std::move(typeIndex), std::forward<THelper>(fieldHelper)),
             _valueTypeIndex(typeid(typename THelper::value_type)),
-            _elementValueGetter([](const std::any& helper, std::any&& object, const std::size_t position)
+
+            _elementValue([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<const THelper&>(helper).Value(std::move(object), position)); }),
-            _elementGetter([](const std::any& helper, std::any&& object, const std::size_t position)
+            _elementRef([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
-            _elementReader([](const std::any& helper, std::any&& object, const std::size_t position)
+            _elementConstRef([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<const THelper&>(helper).Read(std::move(object), position)); }),
-            _elementPtrGetter([](const std::any& helper, std::any&& object, const std::size_t position)
-                { return static_cast<void*>(std::any_cast<const THelper&>(helper).Get(std::move(object), position)); }),
-            _elementPtrReader([](const std::any& helper, std::any&& object, const std::size_t position)
-                { return static_cast<const void*>(std::any_cast<const THelper&>(helper).Read(std::move(object), position)); }),
+
+            _elementValueGetterFromPtr([](const std::any& helper, const std::shared_ptr<void>& object, const std::size_t position)
+                { return std::any(std::any_cast<const THelper&>(helper).Value(object, position)); }),
+            _elementGetterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, const std::size_t position)
+                { return std::any(std::any_cast<const THelper&>(helper).Get(object, position)); }),
+            _elementReaderFromPtr([](const std::any& helper, const std::shared_ptr<void>& object, const std::size_t position)
+                { return std::any(std::any_cast<const THelper&>(helper).Read(object, position)); }),
+
             _inserter([](const std::any& helper, std::any&& object, std::any&& element, const std::size_t position)
                 { std::any_cast<const THelper&>(helper).Insert(std::move(object), std::move(element), position); }),
             _frontInserter([](const std::any& helper, std::any&& object, std::any&& element)
                 { std::any_cast<const THelper&>(helper).InsertFront(std::move(object), std::move(element)); }),
             _backInserter([](const std::any& helper, std::any&& object, std::any&& element)
                 { std::any_cast<const THelper&>(helper).InsertBack(std::move(object), std::move(element)); }),
+
+            //_inserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element, const std::size_t position)
+            //    { std::any_cast<const THelper&>(helper).Insert(object, std::move(element), position); }),
+            //_frontInserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element)
+            //    { std::any_cast<const THelper&>(helper).InsertFront(object, std::move(element)); }),
+            //_backInserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element)
+            //    { std::any_cast<const THelper&>(helper).InsertBack(object, std::move(element)); }),
+
             _sizeGetter([](const std::any& helper, std::any&& object)
                 { return std::any_cast<const THelper&>(helper).Size(std::move(object)); }),
             _clear([](const std::any& helper, std::any&& object)
                 { return std::any_cast<const THelper&>(helper).Clear(std::move(object)); }) {}
 
+            //_sizeGetterFromPtr([](const std::any& helper, const std::shared_ptr<void>& object)
+            //    { return std::any_cast<const THelper&>(helper).Size(object); }),
+            //_clearFromPtr([](const std::any& helper, std::shared_ptr<void>& object)
+            //    { return std::any_cast<const THelper&>(helper).Clear(object); }) {}
+
         /// @brief
-        ~CollectionFieldInfo() override = default;
+        ~CollectionFieldInfo() noexcept override = default;
 
         /// @brief
         /// @tparam TValueType
@@ -205,7 +414,7 @@ namespace ExtendedCpp::Reflection
         template<typename TValueType>
         TValueType GetElementValue(std::any object, const std::size_t position) const
         {
-            return std::any_cast<TValueType>(_elementValueGetter(_fieldHelper, std::move(object), position));
+            return std::any_cast<TValueType>(_elementValue(_fieldHelper, std::move(object), position));
         }
 
         /// @brief
@@ -248,9 +457,56 @@ namespace ExtendedCpp::Reflection
         /// @param position
         /// @return
         template<typename TValueType>
+        TValueType GetElementValue(const std::shared_ptr<void>& object, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return std::any_cast<TValueType>(_elementValueGetterFromPtr(_fieldHelper, object, position));
+        }
+
+        /// @brief
+        /// @param object
+        /// @param position
+        /// @return
+        [[nodiscard]]
+        std::any GetElementValue(const std::shared_ptr<void>& object, std::size_t position) const;
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType, typename TObject>
+        TValueType GetElementValue(const std::shared_ptr<TObject>& object, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return std::any_cast<TValueType>(_elementValueGetterFromPtr(_fieldHelper, object, position));
+        }
+
+        /// @brief
+        /// @tparam TObject
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TObject>
+        std::any GetElementValue(const std::shared_ptr<TObject>& object, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return _elementValueGetterFromPtr(_fieldHelper, object, position);
+        }
+
+        /// @brief
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType>
         TValueType* GetElement(std::any object, const std::size_t position) const
         {
-            return std::any_cast<TValueType*>(_elementGetter(_fieldHelper, std::move(object), position));
+            return std::any_cast<TValueType*>(_elementRef(_fieldHelper, std::move(object), position));
         }
 
         /// @brief
@@ -288,11 +544,36 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType>
+        TValueType* GetElement(std::shared_ptr<void> object, const std::size_t position) const
+        {
+            return std::any_cast<TValueType*>(_elementGetterFromPtr(_fieldHelper, object, position));
+        }
+
+        /// @brief
         /// @param object
         /// @param position
         /// @return
         [[nodiscard]]
-        void* GetElementPtr(std::any object, std::size_t position) const;
+        std::any GetElement(std::shared_ptr<void> object, std::size_t position) const;
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType, typename TObject>
+        TValueType* GetElement(std::shared_ptr<TObject>& object, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return std::any_cast<TValueType*>(_elementGetterFromPtr(_fieldHelper, object, position));
+        }
 
         /// @brief
         /// @tparam TObject
@@ -300,11 +581,11 @@ namespace ExtendedCpp::Reflection
         /// @param position
         /// @return
         template<typename TObject>
-        void* GetElementPtr(TObject* object, const std::size_t position) const
+        std::any GetElement(std::shared_ptr<TObject>& object, const std::size_t position) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            return _elementGetterPtr(_fieldHelper, object, position);
+            return _elementGetterFromPtr(_fieldHelper, object, position);
         }
 
         /// @brief
@@ -315,7 +596,7 @@ namespace ExtendedCpp::Reflection
         template<typename TValueType>
         const TValueType* ReadElement(std::any object, const std::size_t position) const
         {
-            return std::any_cast<const TValueType*>(_elementReader(_fieldHelper, std::move(object), position));
+            return std::any_cast<const TValueType*>(_elementConstRef(_fieldHelper, std::move(object), position));
         }
 
         /// @brief
@@ -353,11 +634,36 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType>
+        const TValueType* ReadElement(const std::shared_ptr<void>& object, const std::size_t position) const
+        {
+            return std::any_cast<const TValueType*>(_elementReaderFromPtr(_fieldHelper, object, position));
+        }
+
+        /// @brief
         /// @param object
         /// @param position
         /// @return
         [[nodiscard]]
-        const void* ReadElementPtr(std::any object, std::size_t position) const;
+        std::any ReadElement(const std::shared_ptr<void>& object, std::size_t position) const;
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TValueType
+        /// @param object
+        /// @param position
+        /// @return
+        template<typename TValueType, typename TObject>
+        const TValueType* ReadElement(const std::shared_ptr<TObject>& object, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            return std::any_cast<const TValueType*>(_elementReaderFromPtr(_fieldHelper, object, position));
+        }
 
         /// @brief
         /// @tparam TObject
@@ -365,11 +671,11 @@ namespace ExtendedCpp::Reflection
         /// @param position
         /// @return
         template<typename TObject>
-        const void* ReadElementPtr(const TObject* object, const std::size_t position) const
+        std::any ReadElement(const std::shared_ptr<TObject>& object, const std::size_t position) const
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
-            return _elementReaderPtr(_fieldHelper, object, position);
+            return _elementReaderFromPtr(_fieldHelper, object, position);
         }
 
         /// @brief
@@ -442,7 +748,78 @@ namespace ExtendedCpp::Reflection
                 throw std::invalid_argument("Object is null");
             _backInserter(_fieldHelper, object, std::forward<TElement>(element));
         }
+/*
+        /// @brief
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        /// @param position
+        template<typename TElement>
+        void Insert(std::any object, TElement&& element, const std::size_t position) const
+        {
+            _inserter(_fieldHelper, std::move(object), std::forward<TElement>(element), position);
+        }
 
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        /// @param position
+        template<typename TObject, typename TElement>
+        void Insert(TObject* object, TElement&& element, const std::size_t position) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _inserter(_fieldHelper, object, std::forward<TElement>(element), position);
+        }
+
+        /// @brief
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        template<typename TElement>
+        void InsertFront(std::any object, TElement&& element) const
+        {
+            _frontInserter(_fieldHelper, std::move(object), std::forward<TElement>(element));
+        }
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        template<typename TObject, typename TElement>
+        void InsertFront(TObject* object, TElement&& element) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _frontInserter(_fieldHelper, object, std::forward<TElement>(element));
+        }
+
+        /// @brief
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        template<typename TElement>
+        void InsertBack(std::any object, TElement&& element) const
+        {
+            _backInserter(_fieldHelper, std::move(object), std::forward<TElement>(element));
+        }
+
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TElement
+        /// @param object
+        /// @param element
+        template<typename TObject, typename TElement>
+        void InsertBack(TObject* object, TElement&& element) const
+        {
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _backInserter(_fieldHelper, object, std::forward<TElement>(element));
+        }
+*/
         /// @brief
         /// @param object
         /// @return
@@ -488,28 +865,28 @@ namespace ExtendedCpp::Reflection
         {
             return true;
         }
-    };
 
-    /// @brief
-    /// @tparam TObject
-    /// @tparam TField
-    /// @param name
-    /// @param fieldPtr
-    /// @return
-    template<typename TObject, typename TField>
-    std::shared_ptr<MemberInfo> CreateCollectionFieldInfo(std::string&& name, TField TObject::*fieldPtr) noexcept
-    {
-        return std::make_shared<CollectionFieldInfo>(std::move(name), typeid(TField), CollectionFieldInfo::Helper(fieldPtr));
-    }
+        /// @brief
+        /// @tparam TObject
+        /// @tparam TField
+        /// @param name
+        /// @param fieldPtr
+        /// @return
+        template<typename TObject, typename TField>
+        static std::shared_ptr<MemberInfo> Create(std::string&& name, TField TObject::*fieldPtr) noexcept
+        {
+            return std::make_shared<CollectionFieldInfo>(std::move(name), typeid(TField), CollectionFieldInfo::Helper(fieldPtr));
+        }
+    };
 }
 
 #define FIELD(name) \
 []() \
 { \
-    if constexpr (std::ranges::random_access_range<decltype(name)>) \
-        return ExtendedCpp::Reflection::CreateCollectionFieldInfo(#name, &ThisClassType::name); \
+    if constexpr (std::ranges::random_access_range<decltype(name)> && std::ranges::sized_range<decltype(name)>) \
+        return ExtendedCpp::Reflection::CollectionFieldInfo::Create(#name, &ThisClassType::name); \
     else \
-        return ExtendedCpp::Reflection::CreateFieldInfo(#name, &ThisClassType::name); \
+        return ExtendedCpp::Reflection::FieldInfo::Create(#name, &ThisClassType::name); \
 }()
 
 #endif

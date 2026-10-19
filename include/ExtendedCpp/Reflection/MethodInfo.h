@@ -142,7 +142,7 @@ namespace ExtendedCpp::Reflection
             _methodCvQualifier(methodCvQualifier) {}
 
         /// @brief
-        ~MethodInfo() override = default;
+        ~MethodInfo() noexcept override = default;
 
         /// @brief 
         /// @tparam TResult 

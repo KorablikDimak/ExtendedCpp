@@ -2,27 +2,38 @@
 
 std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementValue(std::any object, const std::size_t position) const
 {
-    return _elementValueGetter(_fieldHelper, std::move(object), position);
+    return _elementValue(_fieldHelper, std::move(object), position);
+}
+
+std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementValue(const std::shared_ptr<void>& object, const std::size_t position) const
+{
+    if (!object)
+        throw std::invalid_argument("Object is null");
+    return _elementValueGetterFromPtr(_fieldHelper, object, position);
 }
 
 std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElement(std::any object, const std::size_t position) const
 {
-    return _elementGetter(_fieldHelper, std::move(object), position);
+    return _elementRef(_fieldHelper, std::move(object), position);
 }
 
-void* ExtendedCpp::Reflection::CollectionFieldInfo::GetElementPtr(std::any object, const std::size_t position) const
+std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElement(std::shared_ptr<void> object, const std::size_t position) const
 {
-    return _elementPtrGetter(_fieldHelper, std::move(object), position);
+    if (!object)
+        throw std::invalid_argument("Object is null");
+    return _elementGetterFromPtr(_fieldHelper, object, position);
 }
 
 std::any ExtendedCpp::Reflection::CollectionFieldInfo::ReadElement(std::any object, const std::size_t position) const
 {
-    return _elementReader(_fieldHelper, std::move(object), position);
+    return _elementConstRef(_fieldHelper, std::move(object), position);
 }
 
-const void* ExtendedCpp::Reflection::CollectionFieldInfo::ReadElementPtr(std::any object, const std::size_t position) const
+std::any ExtendedCpp::Reflection::CollectionFieldInfo::ReadElement(const std::shared_ptr<void>& object, const std::size_t position) const
 {
-    return _elementPtrReader(_fieldHelper, std::move(object), position);
+    if (!object)
+        throw std::invalid_argument("Object is null");
+    return _elementConstRef(_fieldHelper, object, position);
 }
 
 std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(std::any object) const
@@ -39,11 +50,14 @@ std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(const std::shared
 
 void ExtendedCpp::Reflection::CollectionFieldInfo::Clear(std::any object) const
 {
+    _clear(_fieldHelper, std::move(object));
 }
 
 void ExtendedCpp::Reflection::CollectionFieldInfo::Clear(std::shared_ptr<void>& object) const
 {
-
+    if (!object)
+        throw std::invalid_argument("Object is null");
+    _clear(_fieldHelper, object);
 }
 
 std::type_index ExtendedCpp::Reflection::CollectionFieldInfo::ValueTypeIndex() const noexcept

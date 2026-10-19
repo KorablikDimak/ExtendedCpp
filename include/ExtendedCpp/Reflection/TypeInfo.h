@@ -28,6 +28,9 @@ namespace ExtendedCpp::Reflection
         /// @param members
         TypeInfo(std::string_view name, std::type_index typeIndex, std::initializer_list<std::shared_ptr<MemberInfo>> members) noexcept;
 
+        /// @brief
+        ~TypeInfo() noexcept = default;
+
         /// @brief 
         /// @return
         [[nodiscard]]
@@ -106,11 +109,15 @@ namespace ExtendedCpp::Reflection
 }
 
 #define META(className, ...) \
-using ThisClassType = className; \
-inline static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
+class MetaImpl final \
 { \
-    return ExtendedCpp::Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__}); \
-} \
-inline static const ExtendedCpp::Reflection::TypeInfo MetaInfo = GetMetaInfo();
+    using ThisClassType = className; \
+    inline static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
+    { \
+        return ExtendedCpp::Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__}); \
+    } \
+    friend className; \
+}; \
+inline static const ExtendedCpp::Reflection::TypeInfo MetaInfo = MetaImpl::GetMetaInfo();
 
 #endif

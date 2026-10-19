@@ -189,7 +189,7 @@ namespace ExtendedCpp::Reflection
 #endif
 
         /// @brief
-        ~ConstructorInfo() override = default;
+        ~ConstructorInfo() noexcept override = default;
 
         /// @brief 
         /// @tparam TTarget 

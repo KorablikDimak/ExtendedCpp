@@ -72,6 +72,9 @@ namespace ExtendedCpp::Reflection
             _fieldReaderPtr([](const std::any& helper)
                 { return static_cast<const void*>(std::any_cast<const THelper&>(helper).ReadField()); }) {}
 
+        /// @brief
+        ~StaticFieldInfo() noexcept override = default;
+
         /// @brief 
         /// @tparam TField 
         /// @return
