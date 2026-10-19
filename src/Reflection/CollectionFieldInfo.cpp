@@ -34,7 +34,16 @@ std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(const std::shared
 {
     if (!object)
         throw std::invalid_argument("Object is null");
-    return _sizeGetter(_fieldHelper, std::move(object));
+    return _sizeGetter(_fieldHelper, object);
+}
+
+void ExtendedCpp::Reflection::CollectionFieldInfo::Clear(std::any object) const
+{
+}
+
+void ExtendedCpp::Reflection::CollectionFieldInfo::Clear(std::shared_ptr<void>& object) const
+{
+
 }
 
 std::type_index ExtendedCpp::Reflection::CollectionFieldInfo::ValueTypeIndex() const noexcept

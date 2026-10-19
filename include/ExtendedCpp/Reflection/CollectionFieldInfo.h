@@ -4,7 +4,7 @@
 #include <any>
 #include <string>
 #include <typeindex>
-#include <xutility>
+#include <ranges>
 
 #include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/FieldInfo.h>
@@ -469,7 +469,9 @@ namespace ExtendedCpp::Reflection
         template<typename TObject>
         void Clear(TObject* object) const
         {
-
+            if (!object)
+                throw std::invalid_argument("Object is null");
+            _clear(_fieldHelper, object);
         }
 
         void Clear(std::shared_ptr<void>& object) const;
