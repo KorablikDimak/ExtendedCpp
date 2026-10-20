@@ -8,6 +8,7 @@
 
 #include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/MemberInfo.h>
+#include <ExtendedCpp/Reflection/TypeTraits.h>
 
 /// @brief
 namespace ExtendedCpp::Reflection
@@ -16,33 +17,26 @@ namespace ExtendedCpp::Reflection
     class ConstructorInfo final : public MemberInfo
     {
     private:
-        std::any _constructorHelper;
+        std::any (*const _constructor)(std::any&& args);
+        std::shared_ptr<void> (*const _constructorNew)(std::any&& args){};
 
-        std::any (*_constructor)(const std::any& helper, std::any&& args);
-        std::shared_ptr<void> (*_constructorNew)(const std::any& helper, std::any&& args){};
+        std::any (*const _fromAny)(const std::vector<std::any>& args){};
+        std::shared_ptr<void> (*const _fromAnyNew)(const std::vector<std::any>& args){};
 
-        std::any (*_fromAny)(const std::any& helper, const std::vector<std::any>& args){};
-        std::shared_ptr<void> (*_fromAnyNew)(const std::any& helper, const std::vector<std::any>& args){};
+        std::any (*const _fromPtr)(const std::vector<std::shared_ptr<void>>& args){};
+        std::shared_ptr<void> (*const _fromPtrNew)(const std::vector<std::shared_ptr<void>>& args){};
 
-        std::any (*_fromPtr)(const std::any& helper, const std::vector<std::shared_ptr<void>>& args){};
-        std::shared_ptr<void> (*_fromPtrNew)(const std::any& helper, const std::vector<std::shared_ptr<void>>& args){};
+        const std::vector<std::type_index> _parameters;
 
-        std::vector<std::type_index> _parameters;
-
-    public:
-        /// @brief 
-        /// @tparam TClass 
-        /// @tparam TArgs
         template<typename TClass, typename... TArgs>
         struct Helper final
         {
+        private:
             using TupleArgs = std::tuple<TArgs...>;
             static constexpr std::size_t SIZE = std::tuple_size_v<TupleArgs>;
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass Create(std::any&& args) const
+        public:
+            static TClass Create(std::any&& args)
             {
                 if constexpr (!SIZE)
                     return TClass();
@@ -51,10 +45,7 @@ namespace ExtendedCpp::Reflection
                         { return TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass* New(std::any&& args) const
+            static TClass* New(std::any&& args)
             {
                 if constexpr (!SIZE)
                     return new TClass();
@@ -63,10 +54,7 @@ namespace ExtendedCpp::Reflection
                         { return new TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass CreateFromAny(const std::vector<std::any>& args) const
+            static TClass CreateFromAny(const std::vector<std::any>& args)
             {
                 if constexpr (!SIZE)
                 {
@@ -84,10 +72,7 @@ namespace ExtendedCpp::Reflection
                 }
             }
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass CreateFromPtr(const std::vector<std::shared_ptr<void>>& args) const
+            static TClass CreateFromPtr(const std::vector<std::shared_ptr<void>>& args)
             {
                 if constexpr (!SIZE)
                 {
@@ -109,10 +94,7 @@ namespace ExtendedCpp::Reflection
                 }
             }
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass* NewFromAny(const std::vector<std::any>& args) const
+            static TClass* NewFromAny(const std::vector<std::any>& args)
             {
                 if constexpr (!SIZE)
                 {
@@ -130,10 +112,7 @@ namespace ExtendedCpp::Reflection
                 }
             }
 
-            /// @brief 
-            /// @param args 
-            /// @return
-            TClass* NewFromPtr(const std::vector<std::shared_ptr<void>>& args) const
+            static TClass* NewFromPtr(const std::vector<std::shared_ptr<void>>& args)
             {
                 if constexpr (!SIZE)
                 {
@@ -156,6 +135,8 @@ namespace ExtendedCpp::Reflection
             }
         };
 
+    public:
+
 #if defined(_MSC_VER) && !defined(__clang__)
     #pragma warning(push)
     #pragma warning(disable : 4702)
@@ -163,25 +144,23 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam THelper 
-        /// @param constructorName 
-        /// @param constructorHelper 
+        /// @param constructorName
         /// @param parameters
         template<typename THelper>
-        ConstructorInfo(std::string&& constructorName, THelper&& constructorHelper, std::vector<std::type_index>&& parameters) noexcept :
+        ConstructorInfo(std::string&& constructorName, THelper&&, std::vector<std::type_index>&& parameters) noexcept :
             MemberInfo(std::move(constructorName)),
-            _constructorHelper(std::forward<THelper>(constructorHelper)),
-            _constructor([](const std::any& helper, std::any&& args)
-                { return std::any(std::any_cast<const THelper&>(helper).Create(std::move(args))); }),
-            _constructorNew([](const std::any& helper, std::any&& args)
-                { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).New(std::move(args))); }),
-            _fromAny([](const std::any& helper, const std::vector<std::any>& args)
-                { return std::any(std::any_cast<const THelper&>(helper).CreateFromAny(args)); }),
-            _fromAnyNew([](const std::any& helper, const std::vector<std::any>& args)
-                { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromAny(args)); }),
-            _fromPtr([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
-                { return std::any(std::any_cast<const THelper&>(helper).CreateFromPtr(args)); }),
-            _fromPtrNew([](const std::any& helper, const std::vector<std::shared_ptr<void>>& args)
-                { return std::shared_ptr<void>(std::any_cast<const THelper&>(helper).NewFromPtr(args)); }),
+            _constructor([](std::any&& args)
+                { return std::any(std::remove_cvref_t<THelper>::Create(std::move(args))); }),
+            _constructorNew([](std::any&& args)
+                { return std::shared_ptr<void>(std::remove_cvref_t<THelper>::New(std::move(args))); }),
+            _fromAny([](const std::vector<std::any>& args)
+                { return std::any(std::remove_cvref_t<THelper>::CreateFromAny(args)); }),
+            _fromAnyNew([](const std::vector<std::any>& args)
+                { return std::shared_ptr<void>(std::remove_cvref_t<THelper>::NewFromAny(args)); }),
+            _fromPtr([](const std::vector<std::shared_ptr<void>>& args)
+                { return std::any(std::remove_cvref_t<THelper>::CreateFromPtr(args)); }),
+            _fromPtrNew([](const std::vector<std::shared_ptr<void>>& args)
+                { return std::shared_ptr<void>(std::remove_cvref_t<THelper>::NewFromPtr(args)); }),
             _parameters(std::move(parameters)) {}
 
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -200,8 +179,7 @@ namespace ExtendedCpp::Reflection
         requires (sizeof...(TArgs) == 0 || Concepts::ValidConstructorArgs<TArgs...>)
         TTarget Create(TArgs&&... args) const
         {
-            return std::any_cast<TTarget>
-                    (_constructor(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...)));
+            return std::any_cast<TTarget>(_constructor(std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         /// @brief 
@@ -212,7 +190,7 @@ namespace ExtendedCpp::Reflection
         requires (sizeof...(TArgs) == 0 || Concepts::ValidConstructorArgs<TArgs...>)
         std::any Create(TArgs&&... args) const
         {
-            return _constructor(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
+            return _constructor(std::make_tuple(std::forward<TArgs>(args)...));
         }
 
         /// @brief 
@@ -224,8 +202,7 @@ namespace ExtendedCpp::Reflection
         requires (sizeof...(TArgs) == 0 || Concepts::ValidConstructorArgs<TArgs...>)
         std::shared_ptr<TTarget> New(TArgs&&... args) const
         {
-            return std::static_pointer_cast<TTarget>
-                    (_constructorNew(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...)));
+            return std::static_pointer_cast<TTarget>(_constructorNew(std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         /// @brief 
@@ -236,7 +213,7 @@ namespace ExtendedCpp::Reflection
         requires (sizeof...(TArgs) == 0 || Concepts::ValidConstructorArgs<TArgs...>)
         std::shared_ptr<void> New(TArgs&&... args) const
         {
-            return _constructorNew(_constructorHelper, std::make_tuple(std::forward<TArgs>(args)...));
+            return _constructorNew(std::make_tuple(std::forward<TArgs>(args)...));
         }
 
         /// @brief 
@@ -246,8 +223,7 @@ namespace ExtendedCpp::Reflection
         template<typename TTarget>
         TTarget Create(const std::vector<std::any>& args) const
         {
-            return std::any_cast<TTarget>
-                    (_fromAny(_constructorHelper, args));
+            return std::any_cast<TTarget>(_fromAny(args));
         }
 
         /// @brief 
@@ -257,8 +233,7 @@ namespace ExtendedCpp::Reflection
         template<typename TTarget>
         std::shared_ptr<TTarget> New(const std::vector<std::any>& args) const
         {
-            return std::static_pointer_cast<TTarget>
-                    (_fromAnyNew(_constructorHelper, args));
+            return std::static_pointer_cast<TTarget>(_fromAnyNew(args));
         }
 
         /// @brief 
@@ -268,8 +243,7 @@ namespace ExtendedCpp::Reflection
         template<typename TTarget>
         TTarget Create(const std::vector<std::shared_ptr<void>>& args) const
         {
-            return std::any_cast<TTarget>
-                    (_fromPtr(_constructorHelper, args));
+            return std::any_cast<TTarget>(_fromPtr(args));
         }
 
         /// @brief 
@@ -279,8 +253,7 @@ namespace ExtendedCpp::Reflection
         template<typename TTarget>
         std::shared_ptr<TTarget> New(const std::vector<std::shared_ptr<void>>& args) const
         {
-            return std::static_pointer_cast<TTarget>
-                    (_fromPtrNew(_constructorHelper, args));
+            return std::static_pointer_cast<TTarget>(_fromPtrNew(args));
         }
 
         /// @brief 
@@ -316,15 +289,20 @@ namespace ExtendedCpp::Reflection
         /// @return
         [[nodiscard]]
         std::vector<std::type_index> Parameters() const noexcept;
+
+        /// @brief
+        /// @tparam TArgs
+        /// @param name
+        /// @return
+        template<typename TConstructable, typename... TArgs>
+        static std::shared_ptr<MemberInfo> Create(std::string&& name) noexcept
+        {
+            return std::make_shared<ConstructorInfo>(std::move(name), Helper<TConstructable, TArgs...>(), ToTypeIndexes<TArgs...>());
+        }
     };
 }
 
 #define CONSTRUCTOR(...) \
-[]()->std::shared_ptr<ExtendedCpp::Reflection::MemberInfo> \
-{ \
-    return std::make_shared<ExtendedCpp::Reflection::ConstructorInfo>(std::string(typeid(ThisClassType).name()), \
-        ExtendedCpp::Reflection::ConstructorInfo::Helper<ThisClassType __VA_OPT__(,) __VA_ARGS__>(), \
-        ExtendedCpp::Reflection::ToTypeIndexes<__VA_ARGS__>()); \
-}()
+ExtendedCpp::Reflection::ConstructorInfo::Create<ThisClassType __VA_OPT__(,) __VA_ARGS__>(std::string(typeid(ThisClassType).name()))
 
 #endif

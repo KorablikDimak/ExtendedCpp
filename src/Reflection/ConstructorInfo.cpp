@@ -2,22 +2,22 @@
 
 std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::any>& args) const
 {
-    return _fromAny(_constructorHelper, args);
+    return _fromAny(args);
 }
 
 std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::any>& args) const
 {
-    return _fromAnyNew(_constructorHelper, args);
+    return _fromAnyNew(args);
 }
 
 std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::shared_ptr<void>>& args) const
 {
-    return _fromPtr(_constructorHelper, args);
+    return _fromPtr(args);
 }
 
 std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::shared_ptr<void>>& args) const
 {
-    return _fromPtrNew(_constructorHelper, args);
+    return _fromPtrNew(args);
 }
 
 ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::GetMemberType() const noexcept

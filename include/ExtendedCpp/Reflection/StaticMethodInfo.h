@@ -16,33 +16,22 @@ namespace ExtendedCpp::Reflection
     class StaticMethodInfo final : public MemberInfo
     {
     private:
-        std::any _methodHelper;
-        std::any (*_method)(const std::any& helper, std::any&& args);
-        std::vector<std::type_index> _parameters;
+        const std::any _methodHelper;
+        std::any (*const _method)(const std::any& helper, std::any&& args);
+        const std::vector<std::type_index> _parameters;
 
-    public:
-        /// @brief 
-        /// @tparam TMethod 
-        /// @tparam TReturnType 
-        /// @tparam TArgs
         template<typename TMethod, typename TReturnType, typename... TArgs>
         struct Helper final
         {
         private:
-            TMethod _method;
+            const TMethod _method;
 
         public:
-            /// @brief
             using ReturnType = TReturnType;
 
-            /// @brief 
-            /// @param method
             explicit Helper(TMethod method) noexcept :
                 _method(std::forward<TMethod>(method)) {}
 
-            /// @brief 
-            /// @param args 
-            /// @return
             TReturnType Invoke(std::any&& args) const
             {
                 if constexpr (std::same_as<TReturnType, void>)
@@ -55,6 +44,7 @@ namespace ExtendedCpp::Reflection
             }
         };
 
+    public:
         /// @brief 
         /// @tparam THelper 
         /// @param methodName 
@@ -66,7 +56,7 @@ namespace ExtendedCpp::Reflection
             _methodHelper(std::forward<THelper>(methodHelper)),
             _method([](const std::any& helper, std::any&& args)
                 {
-                    if constexpr (std::same_as<void, typename THelper::ReturnType>)
+                    if constexpr (std::same_as<void, typename std::remove_cvref_t<THelper>::ReturnType>)
                     {
                         std::any_cast<const THelper&>(helper).Invoke(std::move(args));
                         return std::any();
@@ -115,22 +105,20 @@ namespace ExtendedCpp::Reflection
         /// @return
         [[nodiscard]]
         std::vector<std::type_index> Parameters() const noexcept;
-    };
 
-    /// @brief 
-    /// @tparam TReturnType 
-    /// @tparam TArgs
-    /// @param name 
-    /// @param methodPtr 
-    /// @return
-    template<typename TReturnType, typename... TArgs>
-    std::shared_ptr<MemberInfo> CreateStaticMethodInfo(std::string&& name,
-                                                       TReturnType(*methodPtr)(TArgs...)) noexcept
-    {
-        return std::make_shared<StaticMethodInfo>(std::move(name),
-            StaticMethodInfo::Helper<decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
-            ToTypeIndexes<TArgs...>());
-    }
+        /// @brief
+        /// @tparam TReturnType
+        /// @tparam TArgs
+        /// @param name
+        /// @param methodPtr
+        /// @return
+        template<typename TReturnType, typename... TArgs>
+        static std::shared_ptr<MemberInfo> Create(std::string&& name, TReturnType(*const methodPtr)(TArgs...)) noexcept
+        {
+            return std::make_shared<StaticMethodInfo>(std::move(name), Helper<decltype(methodPtr),
+                TReturnType, TArgs...>(methodPtr), ToTypeIndexes<TArgs...>());
+        }
+    };
 }
 
 #define STATIC_METHOD(methodName, ...) \
@@ -141,7 +129,7 @@ namespace ExtendedCpp::Reflection
     return []<std::size_t... Indexes>(std::index_sequence<Indexes...>) \
     { \
         using ReturnType = decltype(methodName(std::get<Indexes>(std::declval<TupleType>())...)); \
-        return ExtendedCpp::Reflection::CreateStaticMethodInfo<ReturnType __VA_OPT__(,) __VA_ARGS__>(#methodName, &methodName); \
+        return ExtendedCpp::Reflection::StaticMethodInfo::Create<ReturnType __VA_OPT__(,) __VA_ARGS__>(#methodName, &methodName); \
     }(std::make_index_sequence<vaSize>()); \
 }()
 

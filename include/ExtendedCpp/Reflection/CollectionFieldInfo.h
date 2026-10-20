@@ -102,6 +102,9 @@ namespace ExtendedCpp::Reflection
             }
 
         public:
+            using ObjectType = TObject;
+            using FieldType = TField;
+            static constexpr bool IS_CONST_FIELD = std::is_const_v<TField>;
             using value_type = typename TField::value_type;
 
             explicit Helper(TField TObject::*const fieldPtr) noexcept :
@@ -272,54 +275,142 @@ namespace ExtendedCpp::Reflection
         template<typename THelper, typename TCollectionHelper>
         CollectionFieldInfo(std::string&& fieldName, std::type_index typeIndex, THelper&& fieldHelper, TCollectionHelper&& collectionFieldHelper) noexcept :
             FieldInfo(std::move(fieldName), std::move(typeIndex), std::forward<THelper>(fieldHelper)),
-            _valueTypeIndex(typeid(typename std::decay_t<TCollectionHelper>::value_type)),
+            _valueTypeIndex(typeid(typename std::remove_cvref_t<TCollectionHelper>::value_type)),
             _collectionFieldHelper(std::forward<TCollectionHelper>(collectionFieldHelper)),
 
-            _elementValue([](const std::any& helper, std::any&& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Value(std::move(object), position)); }),
-            _elementRef([](const std::any& helper, std::any&& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Ref(std::move(object), position)); }),
+            _elementValue([](const std::any& helper, std::any&& object, const std::size_t position) -> std::any
+                {
+                    if constexpr (!std::copy_constructible<typename std::remove_cvref_t<TCollectionHelper>::value_type>)
+                        throw std::domain_error(std::format("You try get value, but value type {} of field {} of {} is not copy constructible.",
+                            typeid(typename std::remove_cvref_t<TCollectionHelper>::value_type).name(),
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(),
+                            typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Value(std::move(object), position));
+                }),
+            _elementRef([](const std::any& helper, std::any&& object, const std::size_t position) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const reference, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Ref(std::move(object), position));
+                }),
             _elementConstRef([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<TCollectionHelper>(helper).ConstRef(std::move(object), position)); }),
-            _elementPtr([](const std::any& helper, std::any&& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Ptr(std::move(object), position)); }),
+            _elementPtr([](const std::any& helper, std::any&& object, const std::size_t position) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const pointer, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Ptr(std::move(object), position));
+                }),
             _elementConstPtr([](const std::any& helper, std::any&& object, const std::size_t position)
                 { return std::any(std::any_cast<TCollectionHelper>(helper).ConstPtr(std::move(object), position)); }),
 
             _elementValueFromPtr([](const std::any& helper, const std::shared_ptr<void>& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Value(object, position)); }),
-            _elementRefFromPtr([](const std::any& helper, std::shared_ptr<void>& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Ref(object, position)); }),
+                {
+                    if constexpr (!std::copy_constructible<typename std::remove_cvref_t<TCollectionHelper>::value_type>)
+                        throw std::domain_error(std::format("You try get value, but value type {} of field {} of {} is not copy constructible.",
+                            typeid(typename std::remove_cvref_t<TCollectionHelper>::value_type).name(),
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(),
+                            typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Value(object, position));
+                }),
+            _elementRefFromPtr([](const std::any& helper, std::shared_ptr<void>& object, const std::size_t position) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const reference, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Ref(object, position));
+                }),
             _elementConstRefFromPtr([](const std::any& helper, const std::shared_ptr<void>& object, const std::size_t position)
                 { return std::any(std::any_cast<TCollectionHelper>(helper).ConstRef(object, position)); }),
-            _elementPtrFromPtr([](const std::any& helper, std::shared_ptr<void>& object, const std::size_t position)
-                { return std::any(std::any_cast<TCollectionHelper>(helper).Ptr(object, position)); }),
+            _elementPtrFromPtr([](const std::any& helper, std::shared_ptr<void>& object, const std::size_t position) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const pointer, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<TCollectionHelper>(helper).Ptr(object, position));
+                }),
             _elementConstPtrFromPtr([](const std::any& helper, const std::shared_ptr<void>& object, const std::size_t position)
                 { return std::any(std::any_cast<TCollectionHelper>(helper).ConstPtr(object, position)); }),
 
             _inserter([](const std::any& helper, std::any&& object, std::any&& element, const std::size_t position)
-                { std::any_cast<TCollectionHelper>(helper).Insert(std::move(object), std::move(element), position); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).Insert(std::move(object), std::move(element), position);
+                }),
             _frontInserter([](const std::any& helper, std::any&& object, std::any&& element)
-                { std::any_cast<TCollectionHelper>(helper).InsertFront(std::move(object), std::move(element)); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).InsertFront(std::move(object), std::move(element));
+                }),
             _backInserter([](const std::any& helper, std::any&& object, std::any&& element)
-                { std::any_cast<TCollectionHelper>(helper).InsertBack(std::move(object), std::move(element)); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).InsertBack(std::move(object), std::move(element));
+                }),
 
             _inserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element, const std::size_t position)
-                { std::any_cast<TCollectionHelper>(helper).Insert(object, std::move(element), position); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).Insert(object, std::move(element), position);
+                }),
             _frontInserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element)
-                { std::any_cast<TCollectionHelper>(helper).InsertFront(object, std::move(element)); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).InsertFront(object, std::move(element));
+                }),
             _backInserterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& element)
-                { std::any_cast<TCollectionHelper>(helper).InsertBack(object, std::move(element)); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try insert, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).InsertBack(object, std::move(element));
+                }),
 
             _size([](const std::any& helper, std::any&& object)
                 { return std::any_cast<TCollectionHelper>(helper).Size(std::move(object)); }),
             _clear([](const std::any& helper, std::any&& object)
-                { return std::any_cast<TCollectionHelper>(helper).Clear(std::move(object)); }),
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try clear, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).Clear(std::move(object));
+                }),
 
             _sizeFromPtr([](const std::any& helper, const std::shared_ptr<void>& object)
                 { return std::any_cast<TCollectionHelper>(helper).Size(object); }),
             _clearFromPtr([](const std::any& helper, std::shared_ptr<void>& object)
-                { return std::any_cast<TCollectionHelper>(helper).Clear(object); }) {}
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try clear, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        std::any_cast<TCollectionHelper>(helper).Clear(object);
+                }) {}
 
         /// @brief
         ~CollectionFieldInfo() noexcept override = default;

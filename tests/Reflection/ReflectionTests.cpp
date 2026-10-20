@@ -19,7 +19,7 @@ TEST(ReflectionTests, MetaFieldTest)
     *fieldPtr = 5;
 
     auto *const staticFieldPtr =
-            std::any_cast<double*>(TestStruct::MetaInfo.GetStaticField("StaticDoubleField")->GetField());
+            std::any_cast<double*>(TestStruct::MetaInfo.GetStaticField("StaticDoubleField")->GetPtr());
     *staticFieldPtr = 8;
 
     // Assert
@@ -99,7 +99,7 @@ TEST(ReflectionTests, GetTypeTest)
     const auto typeInfo2 = ExtendedCpp::Reflection::GetType(typeid(TestStruct));
 
     // Act
-    auto *const staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetField());
+    auto *const staticField1 = std::any_cast<double*>(typeInfo1.GetStaticFields()[0]->GetPtr());
     *staticField1 = 6;
 
     // Assert
@@ -107,7 +107,7 @@ TEST(ReflectionTests, GetTypeTest)
     ASSERT_TRUE(typeInfo2.has_value());
 
     // Act
-    auto *const staticField2 = typeInfo1.GetStaticFields()[0]->GetField<double>();
+    auto *const staticField2 = typeInfo1.GetStaticFields()[0]->GetPtr<double>();
     *staticField2 = 9;
 
     // Assert

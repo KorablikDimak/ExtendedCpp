@@ -27,7 +27,7 @@ namespace ExtendedCpp::Reflection
         std::any (*const _constPtr)(const std::any& helper, std::any&& object);
         void (*const _valueSetter)(const std::any& helper, std::any&& object, std::any&& value);
 
-        std::any (*const _valueFromPtr)(const std::any& helper, const std::shared_ptr<void>& object) noexcept;
+        std::any (*const _valueFromPtr)(const std::any& helper, const std::shared_ptr<void>& object);
         std::any (*const _refFromPtr)(const std::any& helper, std::shared_ptr<void>& object);
         std::any (*const _constRefFromPtr)(const std::any& helper, const std::shared_ptr<void>& object) noexcept;
         std::any (*const _ptrFromPtr)(const std::any& helper, std::shared_ptr<void>& object);
@@ -246,25 +246,31 @@ namespace ExtendedCpp::Reflection
             MemberInfo(std::move(fieldName)),
             _typeIndex(typeIndex),
             _fieldHelper(std::forward<THelper>(fieldHelper)),
-            _isConst(THelper::IS_CONST_FIELD),
+            _isConst(std::remove_cvref_t<THelper>::IS_CONST_FIELD),
 
-            _value([](const std::any& helper, std::any&& object)
-                { return std::any(std::any_cast<THelper>(helper).Value(std::move(object))); }),
-            _ref([](const std::any& helper, std::any&& object)
+            _value([](const std::any& helper, std::any&& object) -> std::any
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try get non const reference, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (!std::copy_constructible<typename std::remove_cvref_t<THelper>::FieldType>)
+                        throw std::domain_error(std::format("You try get value, but field {} of {} is not copy constructible.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<THelper>(helper).Value(std::move(object)));
+                }),
+            _ref([](const std::any& helper, std::any&& object) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const reference, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         return std::any(std::any_cast<THelper>(helper).Ref(std::move(object)));
                 }),
             _constRef([](const std::any& helper, std::any&& object)
                 { return std::any(std::any_cast<THelper>(helper).ConstRef(std::move(object))); }),
-            _ptr([](const std::any& helper, std::any&& object)
+            _ptr([](const std::any& helper, std::any&& object) -> std::any
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try get non const pointer, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const pointer, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         return std::any(std::any_cast<THelper>(helper).Ptr(std::move(object)));
                 }),
@@ -272,40 +278,46 @@ namespace ExtendedCpp::Reflection
                 { return std::any(std::any_cast<THelper>(helper).ConstPtr(std::move(object))); }),
             _valueSetter([](const std::any& helper, std::any&& object, std::any&& value)
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try set value, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try set value, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         std::any_cast<THelper>(helper).SetValue(std::move(object), std::move(value));
                 }),
 
-            _valueFromPtr([](const std::any& helper, const std::shared_ptr<void>& object) noexcept
-                { return std::any(std::any_cast<THelper>(helper).Value(object)); }),
-            _refFromPtr([](const std::any& helper, std::shared_ptr<void>& object) noexcept(!THelper::IS_CONST_FIELD)
+            _valueFromPtr([](const std::any& helper, const std::shared_ptr<void>& object) -> std::any
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try get non const reference, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (!std::copy_constructible<typename std::remove_cvref_t<THelper>::FieldType>)
+                        throw std::domain_error(std::format("You try get value, but field {} of {} is not copy constructible.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
+                    else
+                        return std::any(std::any_cast<THelper>(helper).Value(object));
+                }),
+            _refFromPtr([](const std::any& helper, std::shared_ptr<void>& object) -> std::any
+                {
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const reference, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         return std::any(std::any_cast<THelper>(helper).Ref(object));
                 }),
             _constRefFromPtr([](const std::any& helper, const std::shared_ptr<void>& object) noexcept
                 { return std::any(std::any_cast<THelper>(helper).ConstRef(object)); }),
-            _ptrFromPtr([](const std::any& helper, std::shared_ptr<void>& object) noexcept(!THelper::IS_CONST_FIELD)
+            _ptrFromPtr([](const std::any& helper, std::shared_ptr<void>& object) -> std::any
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try get non const pointer, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try get non const pointer, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         return std::any(std::any_cast<THelper>(helper).Ptr(object));
                 }),
             _constPtrFromPtr([](const std::any& helper, const std::shared_ptr<void>& object) noexcept
                 { return std::any(std::any_cast<THelper>(helper).ConstPtr(object)); }),
-            _valueSetterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& value) noexcept(!THelper::IS_CONST_FIELD)
+            _valueSetterFromPtr([](const std::any& helper, std::shared_ptr<void>& object, std::any&& value)
                 {
-                    if constexpr (THelper::IS_CONST_FIELD)
-                        throw std::domain_error(std::format("You try set value, but field {} of type {} is const.",
-                            typeid(typename THelper::FieldType).name(), typeid(typename THelper::ObjectType).name()));
+                    if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
+                        throw std::domain_error(std::format("You try set value, but field {} of {} is const.",
+                            typeid(typename std::remove_cvref_t<THelper>::FieldType).name(), typeid(typename std::remove_cvref_t<THelper>::ObjectType).name()));
                     else
                         std::any_cast<THelper>(helper).SetValue(object, std::move(value));
                 }) {}
@@ -317,7 +329,8 @@ namespace ExtendedCpp::Reflection
         /// @tparam TField
         /// @param object
         /// @return
-        template<typename TField>
+        template<std::copy_constructible TField>
+        [[nodiscard]]
         TField GetValue(std::any object) const
         {
             return std::any_cast<TField>(_value(_fieldHelper, std::move(object)));
@@ -333,7 +346,8 @@ namespace ExtendedCpp::Reflection
         /// @tparam TField
         /// @param object
         /// @return
-        template<typename TField>
+        template<std::copy_constructible TField>
+        [[nodiscard]]
         TField GetValue(const std::shared_ptr<void>& object) const
         {
             if (!object)
@@ -352,6 +366,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         TField& GetRef(std::any object) const
         {
             return std::any_cast<std::reference_wrapper<TField>>(_ref(_fieldHelper, std::move(object))).get();
@@ -368,6 +383,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         TField& GetRef(std::shared_ptr<void>& object) const
         {
             if (!object)
@@ -386,6 +402,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         const TField& GetConstRef(std::any object) const
         {
             return std::any_cast<std::reference_wrapper<const TField>>(_constRef(_fieldHelper, std::move(object))).get();
@@ -402,6 +419,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         const TField& GetConstRef(const std::shared_ptr<void>& object) const
         {
             if (!object)
@@ -420,6 +438,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         TField* GetPtr(std::any object) const
         {
             return std::any_cast<TField*>(_ptr(_fieldHelper, std::move(object)));
@@ -436,6 +455,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         TField* GetPtr(std::shared_ptr<void>& object) const
         {
             if (!object)
@@ -454,6 +474,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         const TField* GetConstPtr(std::any object) const
         {
             return std::any_cast<const TField*>(_constPtr(_fieldHelper, std::move(object)));
@@ -470,6 +491,7 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @return
         template<typename TField>
+        [[nodiscard]]
         const TField* GetConstPtr(const std::shared_ptr<void>& object) const
         {
             if (!object)
@@ -520,9 +542,10 @@ namespace ExtendedCpp::Reflection
         /// @param fieldPtr
         /// @return
         template<typename TObject, typename TField>
+        [[nodiscard]]
         static std::shared_ptr<MemberInfo> Create(std::string&& name, TField TObject::*const fieldPtr) noexcept
         {
-            return std::make_shared<FieldInfo>(std::move(name), typeid(TField), FieldInfo::Helper(fieldPtr));
+            return std::make_shared<FieldInfo>(std::move(name), typeid(TField), Helper(fieldPtr));
         }
     };
 }

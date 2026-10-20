@@ -284,8 +284,8 @@ namespace ExtendedCpp::Reflection
     /// @return
     template<typename TObject, typename TReturnType, typename TConstReturnType, typename... TArgs>
     std::shared_ptr<MemberInfo> CreateMethodInfo(std::string&& name,
-                                                 TReturnType(TObject::*methodPtr)(TArgs...),
-                                                 TConstReturnType(TObject::*constMethodPtr)(TArgs...) const) noexcept
+                                                 TReturnType(TObject::*const methodPtr)(TArgs...),
+                                                 TConstReturnType(TObject::*const constMethodPtr)(TArgs...) const) noexcept
     {
         return std::make_shared<MethodInfo>(std::move(name),
             MethodInfo::Helper<TObject, decltype(methodPtr), TReturnType, TArgs...>(methodPtr),
