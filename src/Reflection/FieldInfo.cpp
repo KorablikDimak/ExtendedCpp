@@ -75,6 +75,11 @@ bool ExtendedCpp::Reflection::FieldInfo::IsCollection() const noexcept
     return false;
 }
 
+bool ExtendedCpp::Reflection::FieldInfo::IsConst() const noexcept
+{
+    return _isConst;
+}
+
 void ExtendedCpp::Reflection::FieldInfo::SetValue(std::any object, std::any value) const
 {
     _valueSetter(_fieldHelper, std::move(object), std::move(value));

@@ -15,7 +15,7 @@ TEST(ReflectionTests, MetaFieldTest)
     TestStruct::StaticDoubleField = 0;
 
     auto *const fieldPtr =
-            std::any_cast<int*>(TestStruct::MetaInfo.GetField("IntField")->GetField(&testStruct));
+            std::any_cast<int*>(TestStruct::MetaInfo.GetField("IntField")->GetPtr(&testStruct));
     *fieldPtr = 5;
 
     auto *const staticFieldPtr =
