@@ -3,7 +3,7 @@
 
 #include <any>
 #include <memory>
-#include <vector>
+#include <span>
 
 /// @brief
 namespace ExtendedCpp::Reflection::Concepts
@@ -19,11 +19,11 @@ namespace ExtendedCpp::Reflection::Concepts
 
     template<typename T>
     concept IsArgumentCollection =
-        std::same_as<std::decay_t<T>, std::vector<std::any>> ||
-        std::same_as<std::decay_t<T>,std::vector<std::shared_ptr<void>>>;
+        std::convertible_to<std::decay_t<T>, std::span<const std::any>> ||
+        std::convertible_to<std::decay_t<T>, std::span<const std::shared_ptr<void>>>;
 
     template<typename... TArgs>
-    concept ValidConstructorArgs = sizeof...(TArgs) != 1 || (!IsArgumentCollection<TArgs> && ...);
+    concept ValidArgs = sizeof...(TArgs) != 1 || (!IsArgumentCollection<TArgs> && ...);
 }
 
 #endif

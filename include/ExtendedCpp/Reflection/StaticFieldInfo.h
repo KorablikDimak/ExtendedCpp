@@ -95,7 +95,7 @@ namespace ExtendedCpp::Reflection
                         throw std::domain_error(std::format("You try get value, but field {} is not copy constructible.",
                             typeid(typename std::remove_cvref_t<THelper>::FieldType).name()));
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Value());
+                        return std::any(std::any_cast<THelper>(helper).Value());
                 }),
             _ref([](const std::any& helper) -> std::any
                 {
@@ -103,27 +103,27 @@ namespace ExtendedCpp::Reflection
                         throw std::domain_error(std::format("You try get non const reference, but field {} is const.",
                             typeid(typename std::remove_cvref_t<THelper>::FieldType).name()));
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Ref());
+                        return std::any(std::any_cast<THelper>(helper).Ref());
                 }),
             _constRef([](const std::any& helper) noexcept
-                { return std::any(std::any_cast<const THelper&>(helper).ConstRef()); }),
+                { return std::any(std::any_cast<THelper>(helper).ConstRef()); }),
             _ptr([](const std::any& helper) -> std::any
                 {
                     if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
                         throw std::domain_error(std::format("You try get non const pointer, but field {} is const.",
                             typeid(typename std::remove_cvref_t<THelper>::FieldType).name()));
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Ptr());
+                        return std::any(std::any_cast<THelper>(helper).Ptr());
                 }),
             _constPtr([](const std::any& helper) noexcept
-                { return std::any(std::any_cast<const THelper&>(helper).ConstPtr()); }),
+                { return std::any(std::any_cast<THelper>(helper).ConstPtr()); }),
             _valueSetter([](const std::any& helper, std::any&& value)
                 {
                     if constexpr (std::remove_cvref_t<THelper>::IS_CONST_FIELD)
                         throw std::domain_error(std::format("You try set value, but field {} is const.",
                             typeid(typename std::remove_cvref_t<THelper>::FieldType).name()));
                     else
-                        std::any_cast<const THelper&>(helper).SetValue(std::move(value));
+                        std::any_cast<THelper>(helper).SetValue(std::move(value));
                 }) {}
 
         /// @brief

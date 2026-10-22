@@ -1,23 +1,23 @@
 #include <ExtendedCpp/Reflection/ConstructorInfo.h>
 
-std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::any>& args) const
+std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::span<const std::any> args) const
 {
-    return _fromAny(args);
+    return _createFromAny(args);
 }
 
-std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::any>& args) const
+std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::span<const std::shared_ptr<void>> args) const
 {
-    return _fromAnyNew(args);
+    return _createFromPtr(args);
 }
 
-std::any ExtendedCpp::Reflection::ConstructorInfo::Create(const std::vector<std::shared_ptr<void>>& args) const
+std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::span<const std::any> args) const
 {
-    return _fromPtr(args);
+    return _newFromAny(args);
 }
 
-std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::vector<std::shared_ptr<void>>& args) const
+std::shared_ptr<void> ExtendedCpp::Reflection::ConstructorInfo::New(const std::span<const std::shared_ptr<void>> args) const
 {
-    return _fromPtrNew(args);
+    return _newFromPtr(args);
 }
 
 ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::GetMemberType() const noexcept

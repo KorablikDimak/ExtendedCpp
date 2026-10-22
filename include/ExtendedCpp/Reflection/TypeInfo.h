@@ -114,7 +114,7 @@ class MetaImpl final \
     using ThisClassType = className; \
     inline static ExtendedCpp::Reflection::TypeInfo GetMetaInfo() \
     { \
-        return ExtendedCpp::Reflection::TypeInfo(#className, typeid(ThisClassType), {__VA_ARGS__}); \
+        return ExtendedCpp::Reflection::TypeInfo(#className, typeid(ThisClassType), { __VA_ARGS__ }); \
     } \
     friend className; \
 }; \

@@ -3,9 +3,11 @@
 
 #include <any>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
+#include <ExtendedCpp/Reflection/Concepts.h>
 #include <ExtendedCpp/Reflection/MemberInfo.h>
 #include <ExtendedCpp/Reflection/TypeTraits.h>
 
@@ -17,30 +19,69 @@ namespace ExtendedCpp::Reflection
     {
     private:
         const std::any _methodHelper;
-        std::any (*const _method)(const std::any& helper, std::any&& args);
         const std::vector<std::type_index> _parameters;
 
-        template<typename TMethod, typename TReturnType, typename... TArgs>
+        std::any (*const _method)(const std::any& helper, std::any&& args);
+        std::any (*const _methodWithAny)(const std::any& helper, std::span<const std::any> args);
+        std::any (*const _methodWithPtr)(const std::any& helper, std::span<const std::shared_ptr<void>> args);
+
+        template<typename TReturnType, typename... TArgs>
         struct Helper final
         {
         private:
-            const TMethod _method;
+            TReturnType (*const _methodPtr)(TArgs...);
+            using TupleArgs = std::tuple<TArgs...>;
+            static constexpr std::size_t SIZE = sizeof...(TArgs);
 
         public:
             using ReturnType = TReturnType;
 
-            explicit Helper(TMethod method) noexcept :
-                _method(std::forward<TMethod>(method)) {}
+            explicit Helper(TReturnType (*const methodPtr)(TArgs...)) noexcept :
+                _methodPtr(methodPtr) {}
 
             TReturnType Invoke(std::any&& args) const
             {
-                if constexpr (std::same_as<TReturnType, void>)
+                return _methodPtr(std::any_cast<TArgs>(std::move(args))...);
+            }
+
+            TReturnType Invoke(const std::span<const std::any> args) const
+            {
+                if constexpr (!SIZE)
                 {
-                    _method(std::any_cast<TArgs>(std::move(args))...);
-                    return;
+                    return _methodPtr();
                 }
                 else
-                    return _method(std::any_cast<TArgs>(std::move(args))...);
+                {
+                    if (args.size() != SIZE)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [this, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        return _methodPtr(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
+                }
+            }
+
+            TReturnType Invoke(const std::span<const std::shared_ptr<void>> args) const
+            {
+                if constexpr (!SIZE)
+                {
+                    return _methodPtr();
+                }
+                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                {
+                    throw std::runtime_error("Method can not invoke with shared_ptr args");
+                }
+                else
+                {
+                    if (args.size() != SIZE)
+                        throw std::range_error("Incorrect args size in constructor");
+
+                    return [this, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        return _methodPtr(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                    }(std::make_index_sequence<SIZE>());
+                }
             }
         };
 
@@ -54,17 +95,38 @@ namespace ExtendedCpp::Reflection
         StaticMethodInfo(std::string&& methodName, THelper&& methodHelper, std::vector<std::type_index>&& parameters) noexcept :
             MemberInfo(std::move(methodName)),
             _methodHelper(std::forward<THelper>(methodHelper)),
+            _parameters(std::move(parameters)),
+
             _method([](const std::any& helper, std::any&& args)
                 {
-                    if constexpr (std::same_as<void, typename std::remove_cvref_t<THelper>::ReturnType>)
+                    if constexpr (std::is_void_v<typename std::remove_cvref_t<THelper>::ReturnType>)
                     {
-                        std::any_cast<const THelper&>(helper).Invoke(std::move(args));
+                        std::any_cast<THelper>(helper).Invoke(std::move(args));
                         return std::any();
                     }
                     else
-                        return std::any(std::any_cast<const THelper&>(helper).Invoke(std::move(args)));
+                        return std::any(std::any_cast<THelper>(helper).Invoke(std::move(args)));
                 }),
-            _parameters(std::move(parameters)) {}
+            _methodWithAny([](const std::any& helper, const std::span<const std::any> args)
+                {
+                    if constexpr (std::is_void_v<typename std::remove_cvref_t<THelper>::ReturnType>)
+                    {
+                        std::any_cast<THelper>(helper).Invoke(args);
+                        return std::any();
+                    }
+                    else
+                        return std::any(std::any_cast<THelper>(helper).Invoke(args));
+                }),
+            _methodWithPtr([](const std::any& helper, const std::span<const std::shared_ptr<void>> args)
+                {
+                    if constexpr (std::is_void_v<typename std::remove_cvref_t<THelper>::ReturnType>)
+                    {
+                        std::any_cast<THelper>(helper).Invoke(args);
+                        return std::any();
+                    }
+                    else
+                        return std::any(std::any_cast<THelper>(helper).Invoke(args));
+                }) {}
 
         /// @brief
         ~StaticMethodInfo() noexcept override = default;
@@ -75,15 +137,10 @@ namespace ExtendedCpp::Reflection
         /// @param args
         /// @return
         template<typename TResult, typename... TArgs>
+        requires Concepts::ValidArgs<TArgs...>
         TResult Invoke(TArgs&&... args) const
         {
-            if constexpr (std::same_as<TResult, void>)
-            {
-                _method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...));
-                return;
-            }
-            else
-                return std::any_cast<TResult>(_method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...)));
+            return std::any_cast<TResult>(_method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...)));
         }
 
         /// @brief 
@@ -91,10 +148,44 @@ namespace ExtendedCpp::Reflection
         /// @param args
         /// @return
         template<typename... TArgs>
+        requires Concepts::ValidArgs<TArgs...>
+        [[nodiscard]]
         std::any Invoke(TArgs&&... args) const
         {
             return _method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...));
         }
+
+        /// @brief
+        /// @tparam TResult
+        /// @param args
+        /// @return
+        template<typename TResult>
+        TResult Invoke(const std::span<const std::any> args) const
+        {
+            return std::any_cast<TResult>(_methodWithAny(_methodHelper, args));
+        }
+
+        /// @brief
+        /// @param args
+        /// @return
+        [[nodiscard]]
+        std::any Invoke(std::span<const std::any> args) const;
+
+        /// @brief
+        /// @tparam TResult
+        /// @param args
+        /// @return
+        template<typename TResult>
+        TResult Invoke(const std::span<const std::shared_ptr<void>> args) const
+        {
+            return std::any_cast<TResult>(_methodWithPtr(_methodHelper, args));
+        }
+
+        /// @brief
+        /// @param args
+        /// @return
+        [[nodiscard]]
+        std::any Invoke(std::span<const std::shared_ptr<void>> args) const;
 
         /// @brief 
         /// @return
@@ -113,10 +204,10 @@ namespace ExtendedCpp::Reflection
         /// @param methodPtr
         /// @return
         template<typename TReturnType, typename... TArgs>
-        static std::shared_ptr<MemberInfo> Create(std::string&& name, TReturnType(*const methodPtr)(TArgs...)) noexcept
+        [[nodiscard]]
+        static std::shared_ptr<MemberInfo> Create(std::string&& name, TReturnType (*const methodPtr)(TArgs...)) noexcept
         {
-            return std::make_shared<StaticMethodInfo>(std::move(name), Helper<decltype(methodPtr),
-                TReturnType, TArgs...>(methodPtr), ToTypeIndexes<TArgs...>());
+            return std::make_shared<StaticMethodInfo>(std::move(name), Helper<TReturnType, TArgs...>(methodPtr), ToTypeIndexes<TArgs...>());
         }
     };
 }

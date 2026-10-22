@@ -122,8 +122,8 @@ TEST(ReflectionTests, ConstructorFromAnyTest)
     const auto constructors = typeInfo.GetConstructors();
 
     // Act
-    const auto testStruct1 = constructors[1]->Create({std::string("test")});
-    const auto testStruct2 = constructors[1]->New({std::string("test")});
+    const auto testStruct1 = constructors[1]->Create(std::string("test"));
+    const auto testStruct2 = constructors[1]->New(std::string("test"));
 
     // Assert
     ASSERT_TRUE(testStruct1.has_value());
