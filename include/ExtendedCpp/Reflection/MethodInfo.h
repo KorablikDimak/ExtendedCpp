@@ -4,8 +4,8 @@
 #include <any>
 #include <format>
 #include <memory>
-#include <stdexcept>
 #include <span>
+#include <stdexcept>
 #include <tuple>
 #include <vector>
 
@@ -47,16 +47,23 @@ namespace ExtendedCpp::Reflection
         struct Helper final
         {
         private:
-            TReturnType (TObject::*const _methodPtr)(TArgs...);
-            TConstReturnType (TObject::*const _constMethodPtr)(TArgs...) const;
+            using MethodType = TReturnType (TObject::*)(TArgs...);
+            using ConstMethodType = TConstReturnType (TObject::*)(TArgs...) const;
+
+            const MethodType _methodPtr;
+            const ConstMethodType _constMethodPtr;
 
             static constexpr std::size_t SIZE = sizeof...(TArgs);
             using TupleArgs = std::tuple<TArgs...>;
 
+            static constexpr bool HAS_NO_CONST_OVERLOAD = TQualifier == MethodCvQualifier::OnlyNoConst || TQualifier == MethodCvQualifier::ConstNoConst;
+            static constexpr bool HAS_CONST_OVERLOAD = TQualifier == MethodCvQualifier::OnlyConst || TQualifier == MethodCvQualifier::ConstNoConst;
+            static_assert(HAS_NO_CONST_OVERLOAD || HAS_CONST_OVERLOAD);
+
         public:
             using ReturnType = TReturnType;
 
-            explicit Helper(TReturnType (TObject::*const methodPtr)(TArgs...), TConstReturnType (TObject::*const constMethodPtr)(TArgs...) const) noexcept :
+            explicit Helper(const MethodType methodPtr, const ConstMethodType constMethodPtr) noexcept :
                 _methodPtr(methodPtr),
                 _constMethodPtr(constMethodPtr) {}
 
@@ -65,11 +72,11 @@ namespace ExtendedCpp::Reflection
             {
                 if (object.type() == typeid(TObject*))
                 {
-                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    TObject *const ptr = std::any_cast<TObject*>(std::move(object));
                     if (!ptr)
                         throw std::invalid_argument("Object is null");
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
@@ -79,8 +86,7 @@ namespace ExtendedCpp::Reflection
                         else
                             return std::any((ptr->*_methodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
@@ -90,15 +96,13 @@ namespace ExtendedCpp::Reflection
                         else
                             return std::any((ptr->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
                 if (object.type() == typeid(std::reference_wrapper<TObject>))
                 {
                     TObject& ref = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get();
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
@@ -108,8 +112,7 @@ namespace ExtendedCpp::Reflection
                         else
                             return std::any((ref.*_methodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
@@ -119,42 +122,37 @@ namespace ExtendedCpp::Reflection
                         else
                             return std::any((ref.*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
-                if (object.type() == typeid(const TObject*))
+                if constexpr (HAS_CONST_OVERLOAD)
                 {
-                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
-                    if (!ptr)
-                        throw std::invalid_argument("Object is null");
-
-                    if (!_constMethodPtr)
-                        throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
+                    if (object.type() == typeid(const TObject*))
                     {
-                        (ptr->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
-                        return {};
+                        const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                        if (!ptr)
+                            throw std::invalid_argument("Object is null");
+
+                        if constexpr (std::is_void_v<TConstReturnType>)
+                        {
+                            (ptr->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
+                            return {};
+                        }
+                        else
+                            return std::any((ptr->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-                    else
-                        return std::any((ptr->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
-                }
 
-                if (object.type() == typeid(std::reference_wrapper<const TObject>))
-                {
-                    const TObject& ref = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get();
-
-                    if (!_constMethodPtr)
-                        throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
+                    if (object.type() == typeid(std::reference_wrapper<const TObject>))
                     {
-                        (ref.*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
-                        return {};
+                        const TObject& ref = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get();
+
+                        if constexpr (std::is_void_v<TConstReturnType>)
+                        {
+                            (ref.*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
+                            return {};
+                        }
+                        else
+                            return std::any((ref.*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                     }
-                    else
-                        return std::any((ref.*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                 }
 
                 throw std::invalid_argument(std::format("Invalid object type which is {}, but expected {}, {}, {} or {}",
@@ -165,7 +163,7 @@ namespace ExtendedCpp::Reflection
             [[nodiscard]]
             std::any Invoke(std::shared_ptr<void>& object, std::any&& args) const
             {
-                if (_methodPtr)
+                if constexpr (HAS_NO_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TReturnType>)
                     {
@@ -175,8 +173,7 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any((std::static_pointer_cast<TObject>(object).get()->*_methodPtr)(std::any_cast<TArgs>(std::move(args))...));
                 }
-
-                if (_constMethodPtr)
+                else if constexpr (HAS_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TConstReturnType>)
                     {
@@ -186,23 +183,25 @@ namespace ExtendedCpp::Reflection
                     else
                         return std::any((std::static_pointer_cast<TObject>(object).get()->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
                 }
-
-                throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
+                else
+                    throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
             }
 
             [[nodiscard]]
             std::any Invoke(const std::shared_ptr<void>& object, std::any&& args) const
             {
-                if (!_constMethodPtr)
+                if constexpr (!HAS_CONST_OVERLOAD)
                     throw std::domain_error(std::format("Object {} is const, but has not const method.", typeid(TObject).name()));
-
-                if constexpr (std::is_void_v<TConstReturnType>)
-                {
-                    (std::static_pointer_cast<TObject>(object).get()->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
-                    return {};
-                }
                 else
-                    return std::any((std::static_pointer_cast<TObject>(object).get()->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
+                {
+                    if constexpr (std::is_void_v<TConstReturnType>)
+                    {
+                        (std::static_pointer_cast<TObject>(object).get()->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...);
+                        return {};
+                    }
+                    else
+                        return std::any((std::static_pointer_cast<TObject>(object).get()->*_constMethodPtr)(std::any_cast<TArgs>(std::move(args))...));
+                }
             }
 
             [[nodiscard]]
@@ -213,132 +212,130 @@ namespace ExtendedCpp::Reflection
 
                 if (object.type() == typeid(TObject*))
                 {
-                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    TObject *const ptr = std::any_cast<TObject*>(std::move(object));
                     if (!ptr)
                         throw std::invalid_argument("Object is null");
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
-                            [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
                 if (object.type() == typeid(std::reference_wrapper<TObject>))
                 {
                     TObject& ref = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get();
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
-                            [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [methodPtr = _methodPtr, args]<std::size_t... Index>(TObject& refInner, std::index_sequence<Index...>)
                             {
-                                return (ref.*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                            }(std::make_index_sequence<SIZE>());
+                                return (refInner.*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(ref, std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [methodPtr = _methodPtr, args]<std::size_t... Index>(TObject& refInner, std::index_sequence<Index...>)
                             {
-                                return (ref.*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                            }(std::make_index_sequence<SIZE>());
+                                return (refInner.*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(ref, std::make_index_sequence<SIZE>());
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ref.*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ref.*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ref.*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ref.*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
                 if (object.type() == typeid(const TObject*))
                 {
-                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    const TObject *const ptr = std::any_cast<const TObject*>(std::move(object));
                     if (!ptr)
                         throw std::invalid_argument("Object is null");
 
-                    if (!_constMethodPtr)
+                    if constexpr (!HAS_CONST_OVERLOAD)
                         throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
-                    {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                        {
-                            return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
-                        return {};
-                    }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
+                            [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                            return {};
+                        }
+                        else
+                            return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                    }
                 }
 
                 if (object.type() == typeid(std::reference_wrapper<const TObject>))
                 {
                     const TObject& ref = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get();
 
-                    if (!_constMethodPtr)
+                    if constexpr (!HAS_CONST_OVERLOAD)
                         throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
-                    {
-                        [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                        {
-                            return (ref.*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
-                        return {};
-                    }
                     else
-                        return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            return (ref.*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
+                            [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ref.*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                            return {};
+                        }
+                        else
+                            return [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ref.*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                    }
                 }
 
                 throw std::invalid_argument(std::format("Invalid object type which is {}, but expected {}, {}, {} or {}",
@@ -352,43 +349,42 @@ namespace ExtendedCpp::Reflection
                 if (args.size() != SIZE)
                     throw std::range_error("Incorrect args size in constructor");
 
-                TObject* ptr = std::static_pointer_cast<TObject>(object).get();
+                TObject *const ptr = std::static_pointer_cast<TObject>(object).get();
 
-                if (_methodPtr)
+                if constexpr (HAS_NO_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TReturnType>)
                     {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                         return {};
                     }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        return [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*methodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                 }
-
-                if (_constMethodPtr)
+                else if constexpr (HAS_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TConstReturnType>)
                     {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                         return {};
                     }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                 }
-
-                throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
+                else
+                    throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
             }
 
             [[nodiscard]]
@@ -397,160 +393,177 @@ namespace ExtendedCpp::Reflection
                 if (args.size() != SIZE)
                     throw std::range_error("Incorrect args size in constructor");
 
-                if (!_constMethodPtr)
+                if constexpr (!HAS_CONST_OVERLOAD)
                     throw std::domain_error(std::format("Object {} is const, but has not const method.", typeid(TObject).name()));
-
-                const TObject* ptr = std::static_pointer_cast<TObject>(object).get();
-
-                if constexpr (std::is_void_v<TConstReturnType>)
-                {
-                    [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                    {
-                        return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
-                    return {};
-                }
                 else
-                    return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                {
+                    const TObject *const ptr = std::static_pointer_cast<TObject>(object).get();
+
+                    if constexpr (std::is_void_v<TConstReturnType>)
                     {
-                        return (ptr->*_constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
+                        [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        {
+                            return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                        }(std::make_index_sequence<SIZE>());
+                        return {};
+                    }
+                    else
+                        return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        {
+                            return (ptr->*constMethodPtr)(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                        }(std::make_index_sequence<SIZE>());
+                }
+            }
+
+            // ReSharper disable once CppMemberFunctionMayBeStatic
+            [[nodiscard]]
+            std::any Invoke(std::any&&, const std::span<const std::shared_ptr<void>>) const
+            requires (!(Concepts::IsSharedPtr<TArgs> && ...))
+            {
+                if constexpr (HAS_NO_CONST_OVERLOAD && !HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(TObject).name()));
+                else if constexpr (!HAS_NO_CONST_OVERLOAD && HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(ConstMethodType).name(), typeid(TObject).name()));
+                else
+                    throw std::domain_error(std::format("Methods {} and {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(ConstMethodType).name(), typeid(TObject).name()));
             }
 
             [[nodiscard]]
             std::any Invoke(std::any&& object, const std::span<const std::shared_ptr<void>> args) const
+            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
                 if (args.size() != SIZE)
                     throw std::range_error("Incorrect args size in constructor");
 
                 if (object.type() == typeid(TObject*))
                 {
-                    TObject* ptr = std::any_cast<TObject*>(std::move(object));
+                    TObject *const ptr = std::any_cast<TObject*>(std::move(object));
                     if (!ptr)
                         throw std::invalid_argument("Object is null");
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
-                            [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
                 if (object.type() == typeid(std::reference_wrapper<TObject>))
                 {
                     TObject& ref = std::any_cast<std::reference_wrapper<TObject>>(std::move(object)).get();
 
-                    if (_methodPtr)
+                    if constexpr (HAS_NO_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TReturnType>)
                         {
-                            [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [methodPtr = _methodPtr, args]<std::size_t... Index>(TObject& refInner, std::index_sequence<Index...>)
                             {
-                                return (ref.*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                            }(std::make_index_sequence<SIZE>());
+                                return (refInner.*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(ref, std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [methodPtr = _methodPtr, args]<std::size_t... Index>(TObject& refInner, std::index_sequence<Index...>)
                             {
-                                return (ref.*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                            }(std::make_index_sequence<SIZE>());
+                                return (refInner.*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(ref, std::make_index_sequence<SIZE>());
                     }
-
-                    if (_constMethodPtr)
+                    else if constexpr (HAS_CONST_OVERLOAD)
                     {
                         if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ref.*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ref.*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                             return {};
                         }
                         else
-                            return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            return [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
                             {
-                                return (ref.*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                                return (ref.*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                             }(std::make_index_sequence<SIZE>());
                     }
-
-                    throw std::domain_error(std::format("Object {} has not methods.", object.type().name()));
                 }
 
                 if (object.type() == typeid(const TObject*))
                 {
-                    const TObject* ptr = std::any_cast<const TObject*>(std::move(object));
+                    const TObject *const ptr = std::any_cast<const TObject*>(std::move(object));
                     if (!ptr)
                         throw std::invalid_argument("Object is null");
 
-                    if (!_constMethodPtr)
+                    if constexpr (!HAS_CONST_OVERLOAD)
                         throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
-                    {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                        {
-                            return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
-                        return {};
-                    }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
+                            [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                            return {};
+                        }
+                        else
+                            return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                    }
                 }
 
                 if (object.type() == typeid(std::reference_wrapper<const TObject>))
                 {
                     const TObject& ref = std::any_cast<std::reference_wrapper<const TObject>>(std::move(object)).get();
 
-                    if (!_constMethodPtr)
+                    if constexpr (!HAS_CONST_OVERLOAD)
                         throw std::domain_error(std::format("Object {} is const, but has not const method.", object.type().name()));
-
-                    if constexpr (std::is_void_v<TConstReturnType>)
-                    {
-                        [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                        {
-                            return (ref.*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
-                        return {};
-                    }
                     else
-                        return [this, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                    {
+                        if constexpr (std::is_void_v<TConstReturnType>)
                         {
-                            return (ref.*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                        }(std::make_index_sequence<SIZE>());
+                            [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ref.*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                            return {};
+                        }
+                        else
+                            return [constMethodPtr = _constMethodPtr, ref, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                            {
+                                return (ref.*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            }(std::make_index_sequence<SIZE>());
+                    }
                 }
 
                 throw std::invalid_argument(std::format("Invalid object type which is {}, but expected {}, {}, {} or {}",
@@ -558,75 +571,110 @@ namespace ExtendedCpp::Reflection
                     typeid(std::reference_wrapper<TObject>).name(), typeid(std::reference_wrapper<const TObject>).name()));
             }
 
+            // ReSharper disable once CppMemberFunctionMayBeStatic
+            [[nodiscard]]
+            std::any Invoke(std::shared_ptr<void>&, const std::span<const std::shared_ptr<void>>) const
+            requires (!(Concepts::IsSharedPtr<TArgs> && ...))
+            {
+                if constexpr (HAS_NO_CONST_OVERLOAD && !HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(TObject).name()));
+                else if constexpr (!HAS_NO_CONST_OVERLOAD && HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(ConstMethodType).name(), typeid(TObject).name()));
+                else
+                    throw std::domain_error(std::format("Methods {} and {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(ConstMethodType).name(), typeid(TObject).name()));
+            }
+
             [[nodiscard]]
             std::any Invoke(std::shared_ptr<void>& object, const std::span<const std::shared_ptr<void>> args) const
+            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
                 if (args.size() != SIZE)
                     throw std::range_error("Incorrect args size in constructor");
 
-                TObject* ptr = std::static_pointer_cast<TObject>(object).get();
+                TObject *const ptr = std::static_pointer_cast<TObject>(object).get();
 
-                if (_methodPtr)
+                if constexpr (HAS_NO_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TReturnType>)
                     {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                         return {};
                     }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        return [methodPtr = _methodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*methodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                 }
-
-                if (_constMethodPtr)
+                else if constexpr (HAS_CONST_OVERLOAD)
                 {
                     if constexpr (std::is_void_v<TConstReturnType>)
                     {
-                        [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                         return {};
                     }
                     else
-                        return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
                         {
-                            return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                            return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
                         }(std::make_index_sequence<SIZE>());
                 }
+                else
+                    throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
+            }
 
-                throw std::domain_error(std::format("Object {} has not methods.", typeid(TObject).name()));
+            // ReSharper disable once CppMemberFunctionMayBeStatic
+            [[nodiscard]]
+            std::any Invoke(const std::shared_ptr<void>&, const std::span<const std::shared_ptr<void>>) const
+            requires (!(Concepts::IsSharedPtr<TArgs> && ...))
+            {
+                if constexpr (HAS_NO_CONST_OVERLOAD && !HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(TObject).name()));
+                else if constexpr (!HAS_NO_CONST_OVERLOAD && HAS_CONST_OVERLOAD)
+                    throw std::domain_error(std::format("Method {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(ConstMethodType).name(), typeid(TObject).name()));
+                else
+                    throw std::domain_error(std::format("Methods {} and {} of object {} can not be called with std::shared_ptr args.",
+                        typeid(MethodType).name(), typeid(ConstMethodType).name(), typeid(TObject).name()));
             }
 
             [[nodiscard]]
             std::any Invoke(const std::shared_ptr<void>& object, const std::span<const std::shared_ptr<void>> args) const
+            requires (Concepts::IsSharedPtr<TArgs> && ...)
             {
                 if (args.size() != SIZE)
                     throw std::range_error("Incorrect args size in constructor");
 
-                if (!_constMethodPtr)
+                if constexpr (!HAS_CONST_OVERLOAD)
                     throw std::domain_error(std::format("Object {} is const, but has not const method.", typeid(TObject).name()));
-
-                const TObject* ptr = std::static_pointer_cast<TObject>(object).get();
-
-                if constexpr (std::is_void_v<TConstReturnType>)
-                {
-                    [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                    {
-                        return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
-                    return {};
-                }
                 else
-                    return [this, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                {
+                    const TObject *const ptr = std::static_pointer_cast<TObject>(object).get();
+
+                    if constexpr (std::is_void_v<TConstReturnType>)
                     {
-                        return (ptr->*_constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
+                        [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        {
+                            return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                        }(std::make_index_sequence<SIZE>());
+                        return {};
+                    }
+                    else
+                        return [constMethodPtr = _constMethodPtr, ptr, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                        {
+                            return (ptr->*constMethodPtr)(std::static_pointer_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                        }(std::make_index_sequence<SIZE>());
+                }
             }
         };
 
@@ -1025,7 +1073,7 @@ namespace ExtendedCpp::Reflection
                                                   TConstReturnType (TObject::*const constMethodPtr)(TArgs...) const) noexcept
         {
             return std::make_shared<MethodInfo>(std::move(name),
-                MethodInfo::Helper<TObject, void, TConstReturnType, TArgs...>(nullptr, constMethodPtr),
+                MethodInfo::Helper<TObject, MethodCvQualifier::OnlyConst, void, TConstReturnType, TArgs...>(nullptr, constMethodPtr),
                 ToTypeIndexes<TArgs...>(), MethodCvQualifier::OnlyConst);
         }
 
@@ -1041,7 +1089,7 @@ namespace ExtendedCpp::Reflection
                                                   TReturnType (TObject::*const methodPtr)(TArgs...)) noexcept
         {
             return std::make_shared<MethodInfo>(std::move(name),
-                MethodInfo::Helper<TObject, TReturnType, void, TArgs...>(methodPtr, nullptr),
+                MethodInfo::Helper<TObject, MethodCvQualifier::OnlyNoConst, TReturnType, void, TArgs...>(methodPtr, nullptr),
                 ToTypeIndexes<TArgs...>(), MethodCvQualifier::OnlyNoConst);
         }
 
@@ -1060,7 +1108,7 @@ namespace ExtendedCpp::Reflection
                                                   TConstReturnType (TObject::*const constMethodPtr)(TArgs...) const) noexcept
         {
             return std::make_shared<MethodInfo>(std::move(name),
-                MethodInfo::Helper<TObject, TReturnType, TConstReturnType, TArgs...>(methodPtr, constMethodPtr),
+                MethodInfo::Helper<TObject, MethodCvQualifier::ConstNoConst, TReturnType, TConstReturnType, TArgs...>(methodPtr, constMethodPtr),
                 ToTypeIndexes<TArgs...>(), MethodCvQualifier::ConstNoConst);
         }
     };

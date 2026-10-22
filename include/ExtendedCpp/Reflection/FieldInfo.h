@@ -328,6 +328,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<std::copy_constructible TField>
         [[nodiscard]]
@@ -338,6 +340,9 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetValue(std::any object) const;
@@ -345,6 +350,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<std::copy_constructible TField>
         [[nodiscard]]
@@ -358,6 +365,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetValue(const std::shared_ptr<void>& object) const;
@@ -365,6 +374,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -375,6 +387,9 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetRef(std::any object) const;
@@ -382,6 +397,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -395,6 +413,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetRef(std::shared_ptr<void>& object) const;
@@ -402,6 +422,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -412,6 +434,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::any GetConstRef(std::any object) const;
@@ -419,6 +443,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -432,6 +458,7 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::any GetConstRef(const std::shared_ptr<void>& object) const;
@@ -439,6 +466,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -449,6 +479,9 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetPtr(std::any object) const;
@@ -456,6 +489,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -469,6 +505,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetPtr(std::shared_ptr<void>& object) const;
@@ -476,6 +514,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -486,6 +526,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::any GetConstPtr(std::any object) const;
@@ -493,6 +535,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TField
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -506,6 +550,7 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::any GetConstPtr(const std::shared_ptr<void>& object) const;
@@ -513,11 +558,17 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param value
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         void SetValue(std::any object, std::any value) const;
 
         /// @brief
         /// @param object
         /// @param value
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         void SetValue(std::shared_ptr<void>& object, std::any value) const;
 
         /// @brief

@@ -130,7 +130,8 @@ namespace ExtendedCpp::Reflection
         ~StaticFieldInfo() noexcept override = default;
 
         /// @brief 
-        /// @tparam TField 
+        /// @tparam TField
+        /// @throw std::bad_cast
         /// @return
         template<std::copy_constructible TField>
         [[nodiscard]]
@@ -140,12 +141,15 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetValue() const;
 
         /// @brief
         /// @tparam TField
+        /// @throw std::bad_cast
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -155,12 +159,14 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetRef() const;
 
         /// @brief
         /// @tparam TField
+        /// @throw std::bad_cast
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -175,7 +181,9 @@ namespace ExtendedCpp::Reflection
         std::any GetConstRef() const noexcept;
 
         /// @brief 
-        /// @tparam TField 
+        /// @tparam TField
+        /// @throw std::bad_cast
+        /// @throw std::domain_error
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -184,13 +192,15 @@ namespace ExtendedCpp::Reflection
             return std::any_cast<TField*>(_ptr(_fieldHelper));
         }
 
-        /// @brief 
+        /// @brief
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any GetPtr() const;
 
         /// @brief 
-        /// @tparam TField 
+        /// @tparam TField
+        /// @throw std::bad_cast
         /// @return
         template<typename TField>
         [[nodiscard]]
@@ -205,6 +215,8 @@ namespace ExtendedCpp::Reflection
         std::any GetConstPtr() const noexcept;
 
         /// @brief
+        /// @throw std::bad_cast
+        /// @throw std::domain_error
         /// @param value
         void SetValue(std::any value) const;
 

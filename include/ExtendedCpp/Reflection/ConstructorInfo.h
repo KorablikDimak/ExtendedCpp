@@ -73,9 +73,7 @@ namespace ExtendedCpp::Reflection
             static TClass Create(const std::span<const std::shared_ptr<void>> args)
             {
                 if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
-                {
-                    throw std::runtime_error("Class can not construct from shared_ptr");
-                }
+                    throw std::domain_error("Class can not construct from shared_ptr");
                 else
                 {
                     if (args.size() != SIZE)
@@ -91,9 +89,7 @@ namespace ExtendedCpp::Reflection
             static std::shared_ptr<void> New(const std::span<const std::shared_ptr<void>> args)
             {
                 if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
-                {
-                    throw std::runtime_error("Class can not construct from shared_ptr");
-                }
+                    throw std::domain_error("Class can not construct from shared_ptr");
                 else
                 {
                     if (args.size() != SIZE)
@@ -148,6 +144,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TTarget 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<typename TTarget, Concepts::ValidArgs... TArgs>
         std::shared_ptr<MemberInfo> Create(TArgs&&... args) const
@@ -158,6 +155,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<Concepts::ValidArgs... TArgs>
         std::any Create(TArgs&&... args) const
@@ -168,6 +166,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TTarget
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         template<typename TTarget>
         TTarget Create(const std::span<const std::any> args) const
@@ -178,6 +178,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TTarget
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         template<typename TTarget>
         TTarget Create(const std::span<const std::shared_ptr<void>> args) const
@@ -187,12 +190,17 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         [[nodiscard]]
         std::any Create(std::span<const std::any> args) const;
 
         /// @brief
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any Create(std::span<const std::shared_ptr<void>> args) const;
@@ -201,6 +209,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TTarget 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<typename TTarget, Concepts::ValidArgs... TArgs>
         std::shared_ptr<TTarget> New(TArgs&&... args) const
@@ -211,6 +220,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<Concepts::ValidArgs... TArgs>
         std::shared_ptr<void> New(TArgs&&... args) const
@@ -221,6 +231,8 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TTarget 
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         template<typename TTarget>
         std::shared_ptr<TTarget> New(const std::span<const std::any> args) const
@@ -230,7 +242,10 @@ namespace ExtendedCpp::Reflection
 
         /// @brief 
         /// @tparam TTarget 
-        /// @param args 
+        /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         template<typename TTarget>
         std::shared_ptr<TTarget> New(const std::span<const std::shared_ptr<void>> args) const
@@ -239,13 +254,18 @@ namespace ExtendedCpp::Reflection
         }
 
         /// @brief 
-        /// @param args 
+        /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         [[nodiscard]]
         std::shared_ptr<void> New(std::span<const std::any> args) const;
 
         /// @brief 
-        /// @param args 
+        /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::shared_ptr<void> New(std::span<const std::shared_ptr<void>> args) const;

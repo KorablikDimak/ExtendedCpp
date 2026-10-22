@@ -419,8 +419,11 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
-        template<typename TValueType>
+        template<std::copy_constructible TValueType>
         TValueType GetElementValue(std::any object, const std::size_t position) const
         {
             return std::any_cast<TValueType>(_elementValue(_collectionFieldHelper, std::move(object), position));
@@ -429,6 +432,10 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementValue(std::any object, std::size_t position) const;
@@ -437,8 +444,11 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
-        template<typename TValueType>
+        template<std::copy_constructible TValueType>
         TValueType GetElementValue(const std::shared_ptr<void>& object, const std::size_t position) const
         {
             if (!object)
@@ -450,6 +460,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementValue(const std::shared_ptr<void>& object, std::size_t position) const;
@@ -458,6 +471,10 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         TValueType& GetElementRef(std::any object, const std::size_t position) const
@@ -468,6 +485,10 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementRef(std::any object, std::size_t position) const;
@@ -476,6 +497,10 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         TValueType& GetElementRef(std::shared_ptr<void>& object, const std::size_t position) const
@@ -486,6 +511,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementRef(std::shared_ptr<void>& object, std::size_t position) const;
@@ -494,6 +522,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         const TValueType& GetElementConstRef(std::any object, const std::size_t position) const
@@ -504,6 +535,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementConstRef(std::any object, std::size_t position) const;
@@ -512,6 +546,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         const TValueType& GetElementConstRef(const std::shared_ptr<void>& object, const std::size_t position) const
@@ -522,6 +559,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementConstRef(const std::shared_ptr<void>& object, std::size_t position) const;
@@ -530,6 +569,10 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         TValueType* GetElementPtr(std::any object, const std::size_t position) const
@@ -540,6 +583,10 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementPtr(std::any object, std::size_t position) const;
@@ -548,6 +595,10 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         TValueType* GetElementPtr(std::shared_ptr<void>& object, const std::size_t position) const
@@ -558,6 +609,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementPtr(std::shared_ptr<void>& object, std::size_t position) const;
@@ -566,6 +620,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         const TValueType* GetElementConstPtr(std::any object, const std::size_t position) const
@@ -576,6 +633,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementConstPtr(std::any object, std::size_t position) const;
@@ -584,6 +644,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TValueType
         /// @param object
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         template<typename TValueType>
         const TValueType* GetElementConstPtr(const std::shared_ptr<void>& object, const std::size_t position) const
@@ -594,6 +657,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @param object
         /// @param position
+        /// @throw std::invalid_argument
+        /// @throw std::out_of_range
         /// @return
         [[nodiscard]]
         std::any GetElementConstPtr(const std::shared_ptr<void>& object, std::size_t position) const;
@@ -603,6 +668,10 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @param element
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         template<typename TElement>
         void Insert(std::any object, TElement&& element, const std::size_t position) const
         {
@@ -613,6 +682,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TElement
         /// @param object
         /// @param element
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         template<typename TElement>
         void InsertFront(std::any object, TElement&& element) const
         {
@@ -623,6 +695,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TElement
         /// @param object
         /// @param element
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         template<typename TElement>
         void InsertBack(std::any object, TElement&& element) const
         {
@@ -634,6 +709,10 @@ namespace ExtendedCpp::Reflection
         /// @param object
         /// @param element
         /// @param position
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
+        /// @throw std::out_of_range
         template<typename TElement>
         void Insert(std::shared_ptr<void>& object, TElement&& element, const std::size_t position) const
         {
@@ -644,6 +723,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TElement
         /// @param object
         /// @param element
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         template<typename TElement>
         void InsertFront(std::shared_ptr<void>& object, TElement&& element) const
         {
@@ -654,6 +736,9 @@ namespace ExtendedCpp::Reflection
         /// @tparam TElement
         /// @param object
         /// @param element
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         template<typename TElement>
         void InsertBack(std::shared_ptr<void>& object, TElement&& element) const
         {
@@ -662,22 +747,30 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::size_t Size(std::any object) const;
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
         /// @return
         [[nodiscard]]
         std::size_t Size(const std::shared_ptr<void>& object) const;
 
         /// @brief
         /// @param object
+        /// @throw std::bad_cast
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         void Clear(std::any object) const;
 
         /// @brief
         /// @param object
+        /// @throw std::invalid_argument
+        /// @throw std::domain_error
         void Clear(std::shared_ptr<void>& object) const;
 
         /// @brief

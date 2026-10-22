@@ -2,6 +2,7 @@
 #define REFLECTION_STATIC_METHOD_INFO_H
 
 #include <any>
+#include <format>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -58,9 +59,8 @@ namespace ExtendedCpp::Reflection
             TReturnType Invoke(const std::span<const std::shared_ptr<void>> args) const
             {
                 if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
-                {
-                    throw std::runtime_error("Method can not invoke with shared_ptr args");
-                }
+                    throw std::domain_error(std::format("Static method {} can not invoke with shared_ptr args",
+                        typeid(TReturnType (*)(TArgs...)).name()));
                 else
                 {
                     if (args.size() != SIZE)
@@ -124,6 +124,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TResult 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<typename TResult, Concepts::ValidArgs... TArgs>
         TResult Invoke(TArgs&&... args) const
@@ -134,6 +135,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @tparam TArgs
         /// @param args
+        /// @throw std::bad_cast
         /// @return
         template<Concepts::ValidArgs... TArgs>
         [[nodiscard]]
@@ -145,6 +147,8 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TResult
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         template<typename TResult>
         TResult Invoke(const std::span<const std::any> args) const
@@ -154,6 +158,8 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
         /// @return
         [[nodiscard]]
         std::any Invoke(std::span<const std::any> args) const;
@@ -161,6 +167,9 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @tparam TResult
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         template<typename TResult>
         TResult Invoke(const std::span<const std::shared_ptr<void>> args) const
@@ -170,6 +179,9 @@ namespace ExtendedCpp::Reflection
 
         /// @brief
         /// @param args
+        /// @throw std::bad_cast
+        /// @throw std::range_error
+        /// @throw std::domain_error
         /// @return
         [[nodiscard]]
         std::any Invoke(std::span<const std::shared_ptr<void>> args) const;
