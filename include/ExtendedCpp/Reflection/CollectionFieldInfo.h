@@ -443,6 +443,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<TValueType>(_elementValueFromPtr(_collectionFieldHelper, object, position));
         }
 
@@ -687,10 +688,7 @@ namespace ExtendedCpp::Reflection
         /// @brief
         /// @return
         [[nodiscard]]
-        bool IsCollection() const noexcept override
-        {
-            return true;
-        }
+        bool IsCollection() const noexcept override;
 
         /// @brief
         /// @tparam TObject

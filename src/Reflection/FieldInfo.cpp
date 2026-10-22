@@ -9,6 +9,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetValue(const std::shared_ptr<void
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _valueFromPtr(_fieldHelper, object);
 }
 
@@ -21,6 +22,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetRef(std::shared_ptr<void>& objec
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _refFromPtr(_fieldHelper, object);
 }
 
@@ -33,6 +35,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetConstRef(const std::shared_ptr<v
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _constRefFromPtr(_fieldHelper, object);
 }
 
@@ -45,6 +48,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetPtr(std::shared_ptr<void>& objec
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _ptrFromPtr(_fieldHelper, object);
 }
 
@@ -57,6 +61,7 @@ std::any ExtendedCpp::Reflection::FieldInfo::GetConstPtr(const std::shared_ptr<v
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _constPtrFromPtr(_fieldHelper, object);
 }
 

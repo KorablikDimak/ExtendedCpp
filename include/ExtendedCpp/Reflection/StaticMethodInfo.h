@@ -46,29 +46,18 @@ namespace ExtendedCpp::Reflection
 
             TReturnType Invoke(const std::span<const std::any> args) const
             {
-                if constexpr (!SIZE)
-                {
-                    return _methodPtr();
-                }
-                else
-                {
-                    if (args.size() != SIZE)
-                        throw std::range_error("Incorrect args size in constructor");
+                if (args.size() != SIZE)
+                    throw std::range_error("Incorrect args size in constructor");
 
-                    return [this, args]<std::size_t... Index>(std::index_sequence<Index...>)
-                    {
-                        return _methodPtr(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
-                }
+                return [this, args]<std::size_t... Index>(std::index_sequence<Index...>)
+                {
+                    return _methodPtr(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                }(std::make_index_sequence<SIZE>());
             }
 
             TReturnType Invoke(const std::span<const std::shared_ptr<void>> args) const
             {
-                if constexpr (!SIZE)
-                {
-                    return _methodPtr();
-                }
-                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
                 {
                     throw std::runtime_error("Method can not invoke with shared_ptr args");
                 }
@@ -136,8 +125,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename TResult, typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<typename TResult, Concepts::ValidArgs... TArgs>
         TResult Invoke(TArgs&&... args) const
         {
             return std::any_cast<TResult>(_method(_methodHelper, std::make_tuple(std::forward<TArgs>(args)...)));
@@ -147,8 +135,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<Concepts::ValidArgs... TArgs>
         [[nodiscard]]
         std::any Invoke(TArgs&&... args) const
         {
@@ -195,7 +182,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return
         [[nodiscard]]
-        std::vector<std::type_index> Parameters() const noexcept;
+        std::span<const std::type_index> Parameters() const noexcept;
 
         /// @brief
         /// @tparam TReturnType

@@ -38,65 +38,41 @@ namespace ExtendedCpp::Reflection
         public:
             static TClass Create(std::any&& args)
             {
-                if constexpr (!SIZE)
-                    return TClass();
-                else
-                    return std::apply([](TArgs&&... argsInner)
-                        { return TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
+                return std::apply([](TArgs&&... argsInner)
+                    { return TClass(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
             static std::shared_ptr<void> New(std::any&& args)
             {
-                if constexpr (!SIZE)
-                    return std::make_shared<TClass>();
-                else
-                    return std::apply([](TArgs&&... argsInner)
-                        { return std::make_shared<TClass>(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
+                return std::apply([](TArgs&&... argsInner)
+                    { return std::make_shared<TClass>(std::forward<TArgs>(argsInner)...); }, std::any_cast<TupleArgs>(std::move(args)));
             }
 
             static TClass Create(const std::span<const std::any> args)
             {
-                if constexpr (!SIZE)
-                {
-                    return TClass();
-                }
-                else
-                {
-                    if (args.size() != SIZE)
-                        throw std::range_error("Incorrect args size in constructor");
+                if (args.size() != SIZE)
+                    throw std::range_error("Incorrect args size in constructor");
 
-                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)
-                    {
-                        return TClass(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
-                }
+                return [args]<std::size_t... Index>(std::index_sequence<Index...>)
+                {
+                    return TClass(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                }(std::make_index_sequence<SIZE>());
             }
 
             static std::shared_ptr<void> New(const std::span<const std::any> args)
             {
-                if constexpr (!SIZE)
-                {
-                    return std::make_shared<TClass>();
-                }
-                else
-                {
-                    if (args.size() != SIZE)
-                        throw std::range_error("Incorrect args size in constructor");
+                if (args.size() != SIZE)
+                    throw std::range_error("Incorrect args size in constructor");
 
-                    return [args]<std::size_t... Index>(std::index_sequence<Index...>)
-                    {
-                        return std::make_shared<TClass>(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
-                    }(std::make_index_sequence<SIZE>());
-                }
+                return [args]<std::size_t... Index>(std::index_sequence<Index...>)
+                {
+                    return std::make_shared<TClass>(std::any_cast<std::tuple_element_t<Index, TupleArgs>>(args[Index])...);
+                }(std::make_index_sequence<SIZE>());
             }
 
             static TClass Create(const std::span<const std::shared_ptr<void>> args)
             {
-                if constexpr (!SIZE)
-                {
-                    return TClass();
-                }
-                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
                 {
                     throw std::runtime_error("Class can not construct from shared_ptr");
                 }
@@ -114,11 +90,7 @@ namespace ExtendedCpp::Reflection
 
             static std::shared_ptr<void> New(const std::span<const std::shared_ptr<void>> args)
             {
-                if constexpr (!SIZE)
-                {
-                    return std::make_shared<TClass>();
-                }
-                else if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
+                if constexpr (!(Concepts::IsSharedPtr<TArgs> && ...))
                 {
                     throw std::runtime_error("Class can not construct from shared_ptr");
                 }
@@ -177,8 +149,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename TTarget, typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<typename TTarget, Concepts::ValidArgs... TArgs>
         std::shared_ptr<MemberInfo> Create(TArgs&&... args) const
         {
             return std::any_cast<TTarget>(_create(std::make_tuple(std::forward<TArgs>(args)...)));
@@ -188,8 +159,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<Concepts::ValidArgs... TArgs>
         std::any Create(TArgs&&... args) const
         {
             return _create(std::make_tuple(std::forward<TArgs>(args)...));
@@ -232,8 +202,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename TTarget, typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<typename TTarget, Concepts::ValidArgs... TArgs>
         std::shared_ptr<TTarget> New(TArgs&&... args) const
         {
             return std::static_pointer_cast<TTarget>(_new(std::make_tuple(std::forward<TArgs>(args)...)));
@@ -243,8 +212,7 @@ namespace ExtendedCpp::Reflection
         /// @tparam TArgs
         /// @param args
         /// @return
-        template<typename... TArgs>
-        requires Concepts::ValidArgs<TArgs...>
+        template<Concepts::ValidArgs... TArgs>
         std::shared_ptr<void> New(TArgs&&... args) const
         {
             return _new(std::make_tuple(std::forward<TArgs>(args)...));
@@ -290,7 +258,7 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return
         [[nodiscard]]
-        std::vector<std::type_index> Parameters() const noexcept;
+        std::span<const std::type_index> Parameters() const noexcept;
 
         /// @brief
         /// @tparam TArgs

@@ -25,7 +25,7 @@ ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::ConstructorInfo::Ge
     return MemberType::Constructor;
 }
 
-std::vector<std::type_index> ExtendedCpp::Reflection::ConstructorInfo::Parameters() const noexcept
+std::span<const std::type_index> ExtendedCpp::Reflection::ConstructorInfo::Parameters() const noexcept
 {
     return _parameters;
 }

@@ -9,12 +9,11 @@ namespace ExtendedCpp::Reflection
     /// @brief
     enum class MemberType : std::uint8_t
     {
-        Unknown,
         Field,
+        StaticField,
         Method,
-        Constructor,
         StaticMethod,
-        StaticField
+        Constructor
     };
 }
 

@@ -15,7 +15,7 @@ ExtendedCpp::Reflection::MemberType ExtendedCpp::Reflection::StaticMethodInfo::G
     return MemberType::StaticMethod;
 }
 
-std::vector<std::type_index> ExtendedCpp::Reflection::StaticMethodInfo::Parameters() const noexcept
+std::span<const std::type_index> ExtendedCpp::Reflection::StaticMethodInfo::Parameters() const noexcept
 {
     return _parameters;
 }

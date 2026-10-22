@@ -352,6 +352,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<TField>(_valueFromPtr(_fieldHelper, object));
         }
 
@@ -388,6 +389,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<std::reference_wrapper<TField>>(_refFromPtr(_fieldHelper, object)).get();
         }
 
@@ -424,6 +426,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<std::reference_wrapper<const TField>>(_constRefFromPtr(_fieldHelper, object)).get();
         }
 
@@ -460,6 +463,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<TField*>(_ptrFromPtr(_fieldHelper, object));
         }
 
@@ -496,6 +500,7 @@ namespace ExtendedCpp::Reflection
         {
             if (!object)
                 throw std::invalid_argument("Object is null");
+
             return std::any_cast<const TField*>(_constPtrFromPtr(_fieldHelper, object));
         }
 

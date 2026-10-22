@@ -9,6 +9,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementValue(const std
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _elementValueFromPtr(_collectionFieldHelper, object, position);
 }
 
@@ -21,6 +22,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementRef(std::shared
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _elementRefFromPtr(_collectionFieldHelper, object, position);
 }
 
@@ -33,6 +35,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementConstRef(const 
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _elementConstRefFromPtr(_collectionFieldHelper, object, position);
 }
 
@@ -45,6 +48,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementPtr(std::shared
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _elementPtrFromPtr(_collectionFieldHelper, object, position);
 }
 
@@ -57,6 +61,7 @@ std::any ExtendedCpp::Reflection::CollectionFieldInfo::GetElementConstPtr(const 
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _elementConstRef(_collectionFieldHelper, object, position);
 }
 
@@ -69,6 +74,7 @@ std::size_t ExtendedCpp::Reflection::CollectionFieldInfo::Size(const std::shared
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     return _sizeFromPtr(_collectionFieldHelper, object);
 }
 
@@ -81,10 +87,16 @@ void ExtendedCpp::Reflection::CollectionFieldInfo::Clear(std::shared_ptr<void>& 
 {
     if (!object)
         throw std::invalid_argument("Object is null");
+
     _clearFromPtr(_collectionFieldHelper, object);
 }
 
 std::type_index ExtendedCpp::Reflection::CollectionFieldInfo::ValueTypeIndex() const noexcept
 {
     return _valueTypeIndex;
+}
+
+bool ExtendedCpp::Reflection::CollectionFieldInfo::IsCollection() const noexcept
+{
+    return true;
 }

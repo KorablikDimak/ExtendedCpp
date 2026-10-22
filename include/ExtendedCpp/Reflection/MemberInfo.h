@@ -11,8 +11,8 @@ namespace ExtendedCpp::Reflection
     /// @brief
     class MemberInfo
     {
-    protected:
-        std::string _name;
+    private:
+        const std::string _name;
 
     public:
         /// @brief 
@@ -25,12 +25,12 @@ namespace ExtendedCpp::Reflection
         /// @brief 
         /// @return
         [[nodiscard]]
-        virtual std::string Name() const noexcept;
+        std::string_view Name() const noexcept;
 
         /// @brief 
         /// @return
         [[nodiscard]]
-        virtual MemberType GetMemberType() const noexcept;
+        virtual MemberType GetMemberType() const noexcept = 0;
     };
 }
 
