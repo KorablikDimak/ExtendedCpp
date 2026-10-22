@@ -96,7 +96,7 @@ add_library(ExtendedCpp::Xml ALIAS Xml)
 set_interface_directories(Common DI Events Json LINQ)
 set_include_directories(Asio InfoLog Reflection Serialization_Json Xml)
 
-add_target_interface_sources(Common DI Events Json LINQ)
+add_target_interface_sources(DI Events Json LINQ)
 add_target_sources(Asio InfoLog Reflection Serialization_Json Xml)
 
 if (ExtendedCpp_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
