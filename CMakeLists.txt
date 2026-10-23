@@ -61,7 +61,8 @@ target_sources(Common INTERFACE FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR
         "include/ExtendedCpp/Concepts.h"
         "include/ExtendedCpp/Matrix.h"
         "include/ExtendedCpp/Random.h"
-        "include/ExtendedCpp/Task.h")
+        "include/ExtendedCpp/Task.h"
+        "include/ExtendedCpp/CRC.h")
 
 add_library(DI INTERFACE)
 add_library(ExtendedCpp::DI ALIAS DI)
