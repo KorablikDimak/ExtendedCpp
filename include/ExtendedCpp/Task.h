@@ -8,6 +8,7 @@
 #include <utility>
 
 // ReSharper disable CppMemberFunctionMayBeStatic
+// NOLINTBEGIN(*-convert-member-functions-to-static)
 
 /// @brief
 namespace ExtendedCpp
@@ -126,15 +127,13 @@ namespace ExtendedCpp
         }
 
         /// @brief
-        /// @tparam T
-        template<typename T>
         class FutureAwaiter
         {
         public:
             /// @brief
             /// @param future
-            explicit FutureAwaiter(std::future<T>&& future) noexcept :
-                _future(std::make_shared<std::future<T>>(std::move(future))) {}
+            explicit FutureAwaiter(std::future<TResult>&& future) noexcept :
+                _future(std::make_shared<std::future<TResult>>(std::move(future))) {}
 
             /// @brief
             /// @return
@@ -155,13 +154,13 @@ namespace ExtendedCpp
 
             /// @brief
             /// @return
-            T await_resume() const noexcept
+            TResult await_resume() const
             {
                 return _future->get();
             }
 
         private:
-            std::shared_ptr<std::future<T>> _future;
+            std::shared_ptr<std::future<TResult>> _future;
         };
 
         /// @brief
@@ -303,7 +302,7 @@ namespace ExtendedCpp
         {
             std::future<TResult> future =
                 std::async(std::launch::async, std::forward<TOperation>(operation), std::forward<Args>(args)...);
-            co_return co_await FutureAwaiter<TResult>(std::move(future));
+            co_return co_await FutureAwaiter(std::move(future));
         }
 
     private:
@@ -342,7 +341,7 @@ namespace ExtendedCpp
         {
             /// @brief
             /// @return
-            static bool await_ready() noexcept { return false; }
+            bool await_ready() noexcept { return false; }
 
             /// @brief
             /// @tparam TPromise
@@ -372,7 +371,7 @@ namespace ExtendedCpp
             }
 
             /// @brief
-            static void await_resume() noexcept {}
+            void await_resume() noexcept {}
         };
 
         /// @brief
@@ -446,7 +445,7 @@ namespace ExtendedCpp
 
             /// @brief
             /// @return
-            static bool await_ready() noexcept { return false; }
+            bool await_ready() noexcept { return false; }
 
             /// @brief
             /// @param handle
@@ -461,7 +460,7 @@ namespace ExtendedCpp
             }
 
             /// @brief
-            static void await_resume() noexcept {}
+            void await_resume() noexcept {}
 
         private:
             std::shared_ptr<std::future<void>> _future;
@@ -476,11 +475,11 @@ namespace ExtendedCpp
 
             /// @brief
             /// @return
-            static std::suspend_never initial_suspend() noexcept { return {}; }
+            std::suspend_never initial_suspend() noexcept { return {}; }
 
             /// @brief
             /// @return
-            static FinalAwaiter final_suspend() noexcept { return {}; }
+            FinalAwaiter final_suspend() noexcept { return {}; }
 
             /// @brief
             void return_void() const noexcept {}
@@ -598,5 +597,7 @@ namespace ExtendedCpp
         HandleType _handle;
     };
 }
+
+// NOLINTEND(*-convert-member-functions-to-static)
 
 #endif
