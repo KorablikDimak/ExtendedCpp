@@ -5,6 +5,7 @@
 #include <exception>
 #include <future>
 #include <mutex>
+#include <optional>
 #include <utility>
 
 // ReSharper disable CppMemberFunctionMayBeStatic
@@ -105,14 +106,14 @@ namespace ExtendedCpp
             /// @return
             TResult await_resume()
             {
-                const auto& promise = _handle.promise();
+                auto& promise = _handle.promise();
 
                 std::lock_guard _(promise._mutex);
 
                 if (promise._exception)
                     std::rethrow_exception(promise._exception);
 
-                return std::move(promise._result);
+                return std::move(promise._result.value());
             }
 
         private:
@@ -209,7 +210,7 @@ namespace ExtendedCpp
 
             std::coroutine_handle<> _continuation;
             bool _done = false;
-            TResult _result;
+            std::optional<TResult> _result;
             std::exception_ptr _exception;
         };
 
@@ -281,14 +282,14 @@ namespace ExtendedCpp
         {
             Wait();
 
-            const auto& promise = _handle.promise();
+            auto& promise = _handle.promise();
 
             std::lock_guard _(promise._mutex);
 
             if (promise._exception)
                 std::rethrow_exception(promise._exception);
 
-            return std::move(promise._result);
+            return std::move(promise._result.value());
         }
 
         /// @brief
